@@ -1,50 +1,5 @@
 [
    {
-      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool",
-      "IsSnapshot": false,
-      "Mountpoint": "/",
-      "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": ""
-   },
-   {
-      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT",
-      "IsSnapshot": false,
-      "Mountpoint": "/ROOT",
-      "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": ""
-   },
-   {
-      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT/ubuntu",
-      "IsSnapshot": false,
-      "Mountpoint": "/",
-      "CanMount": "on",
-      "BootFS": "yes",
-      "LastUsed": 1555555555,
-      "SystemDataset": ""
-   },
-   {
-      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT/ubuntu@snap_r2",
-      "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
-      "BootFS": "yes",
-      "LastUsed": 2000000000,
-      "SystemDataset": ""
-   },
-   {
-      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT/ubuntu@snap_r1",
-      "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
-      "BootFS": "yes",
-      "LastUsed": 2000000000,
-      "SystemDataset": ""
-   },
-   {
       "Name": "testscan_two_pools_n_datasets_n_snapshots-bpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
@@ -82,6 +37,51 @@
    },
    {
       "Name": "testscan_two_pools_n_datasets_n_snapshots-bpool/BOOT/boot@snap_b2",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT",
+      "IsSnapshot": false,
+      "Mountpoint": "/ROOT",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT/ubuntu",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT/ubuntu@snap_r1",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_two_pools_n_datasets_n_snapshots-rpool/ROOT/ubuntu@snap_r2",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",

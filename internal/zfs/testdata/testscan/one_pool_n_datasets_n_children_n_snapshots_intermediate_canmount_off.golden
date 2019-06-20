@@ -18,36 +18,18 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2",
-      "IsSnapshot": false,
-      "Mountpoint": "/",
-      "CanMount": "on",
-      "BootFS": "",
-      "LastUsed": 1544444444,
-      "SystemDataset": ""
-   },
-   {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2@snap_u1",
-      "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
-      "BootFS": "",
-      "LastUsed": 2000000000,
-      "SystemDataset": ""
-   },
-   {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2@snap_u2",
-      "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
-      "BootFS": "",
-      "LastUsed": 2000000000,
-      "SystemDataset": ""
-   },
-   {
       "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu",
       "IsSnapshot": false,
       "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu/opt",
+      "IsSnapshot": false,
+      "Mountpoint": "/opt",
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
@@ -81,12 +63,30 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu/opt",
+      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2",
       "IsSnapshot": false,
-      "Mountpoint": "/opt",
+      "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
-      "LastUsed": 1555555555,
+      "BootFS": "",
+      "LastUsed": 1544444444,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2@snap_u1",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2@snap_u2",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "",
+      "LastUsed": 2000000000,
       "SystemDataset": ""
    },
    {

@@ -18,15 +18,6 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children-rpool/ROOT/ubuntu2",
-      "IsSnapshot": false,
-      "Mountpoint": "/",
-      "CanMount": "on",
-      "BootFS": "",
-      "LastUsed": 1544444444,
-      "SystemDataset": ""
-   },
-   {
       "Name": "testscan_one_pool_n_datasets_n_children-rpool/ROOT/ubuntu",
       "IsSnapshot": false,
       "Mountpoint": "/",
@@ -60,6 +51,15 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_one_pool_n_datasets_n_children-rpool/ROOT/ubuntu2",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "",
+      "LastUsed": 1544444444,
       "SystemDataset": ""
    }
 ]
