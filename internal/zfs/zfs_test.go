@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/ubuntu/zsys/internal/config"
@@ -36,6 +37,8 @@ func TestScan(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			dir, cleanup := tempDir(t)
 			defer cleanup()
+
+			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir, strings.Replace(testNameToPath(t), "/", "_", -1))()
 
@@ -50,6 +53,16 @@ func TestScan(t *testing.T) {
 			if tc.wantErr {
 				t.Fatal("expected an error but got none")
 			}
+
+			var ds []*zfs.Dataset
+			for k := range got {
+				if !got[k].IsSnapshot {
+					continue
+				}
+				ds = append(ds, &got[k])
+			}
+
+			ta.assertAndReplaceCreationTimeInRange(t, ds)
 
 			var want []zfs.Dataset
 			loadFromGoldenFile(t, got, &want)
@@ -125,3 +138,23 @@ func testNameToPath(t *testing.T) string {
 	return strings.Join(elems, "/")
 }
 
+// timeAsserter ensures that dates will be between a start and end time
+type timeAsserter time.Time
+
+const currentMagicTime = 2000000000
+
+// assertAndReplaceCreationTimeInRange ensure that last-used is between starts and endtime.
+// It replaces those datasets last-used with the current fake "current time"
+func (ta timeAsserter) assertAndReplaceCreationTimeInRange(t *testing.T, ds []*zfs.Dataset) {
+	t.Helper()
+	curr := time.Now().Unix()
+	start := time.Time(ta).Unix()
+
+	for _, r := range ds {
+		if int64(r.LastUsed) < start || int64(r.LastUsed) > curr {
+			t.Errorf("expected snapshot time outside of range: %d", r.LastUsed)
+		} else {
+			r.LastUsed = currentMagicTime
+		}
+	}
+}
