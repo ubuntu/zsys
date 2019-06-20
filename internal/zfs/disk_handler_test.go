@@ -35,7 +35,6 @@ type fakePool struct {
 		SystemDataset string    `yaml:"system_dataset"`
 		Snapshots     []struct {
 			Name string
-			CreationDate time.Time `yaml:"creation_date"`
 		}
 	}
 }
@@ -175,23 +174,13 @@ func (fpools fakePools) create(path, testName string) func() {
 					}
 
 					for _, s := range dataset.Snapshots {
-						func() {
-							props := make(map[libzfs.Prop]libzfs.Property)
-							d, err := libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
-							if err != nil {
-								fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)
-								os.Exit(1)
-							}
-							defer d.Close()
-
-							// TODO: analyze this (no mock in binding)
-							// Convert time in current timezone for mock
-							location, err := time.LoadLocation("Local")
-							if err != nil {
-								fpools.Fatal("couldn't get current timezone", err)
-							}
-							d.SetUserProperty("org.zsys:creation.test", strconv.FormatInt(s.CreationDate.In(location).Unix(), 10))
-						}()
+						props := make(map[libzfs.Prop]libzfs.Property)
+						d, err := libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
+						if err != nil {
+							fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)
+							os.Exit(1)
+						}
+						d.Close()
 					}
 				}()
 			}
