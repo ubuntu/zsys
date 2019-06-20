@@ -37,7 +37,7 @@ func TestScan(t *testing.T) {
 			dir, cleanup := tempDir(t)
 			defer cleanup()
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
-			defer fPools.create(dir, strings.Replace(t.Name(), "/", "_", -1))()
+			defer fPools.create(dir, strings.Replace(testNameToPath(t), "/", "_", -1))()
 
 			z := zfs.New()
 			got, err := z.Scan()
@@ -87,11 +87,7 @@ func tempDir(t *testing.T) (string, func()) {
 func loadFromGoldenFile(t *testing.T, got interface{}, want interface{}) {
 	t.Helper()
 
-	testDirname := strings.ToLower(strings.Split(t.Name(), "/")[0])
-	nparts := strings.Split(t.Name(), "/")
-	n := nparts[len(nparts)-1]
-
-	goldenFile := filepath.Join("testdata", testDirname, n+".golden")
+	goldenFile := filepath.Join("testdata", testNameToPath(t)+".golden")
 	if *update {
 		b, err := json.MarshalIndent(got, "", "   ")
 		if err != nil {
@@ -110,3 +106,22 @@ func loadFromGoldenFile(t *testing.T, got interface{}, want interface{}) {
 		t.Fatal("couldn't convert golden file content to structure:", err)
 	}
 }
+
+func testNameToPath(t *testing.T) string {
+	t.Helper()
+
+	testDirname := strings.Split(t.Name(), "/")[0]
+	nparts := strings.Split(t.Name(), "/")
+	name := strings.ToLower(nparts[len(nparts)-1])
+
+	var elems []string
+	for _, e := range []string{testDirname, name} {
+		for _, k := range []string{"/", " ", ",", "="} {
+			e = strings.Replace(e, k, "_", -1)
+		}
+		elems = append(elems, strings.ToLower(strings.Replace(e, "__", "_", -1)))
+	}
+
+	return strings.Join(elems, "/")
+}
+
