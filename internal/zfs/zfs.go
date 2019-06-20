@@ -48,6 +48,8 @@ const (
 type Dataset struct {
 	// Name of the dataset.
 	Name string
+	// IsSnapshot tells if the dataset is a snapshot
+	IsSnapshot bool
 	// Mountpoint where the dataset will be mounted (without alt-root).
 	Mountpoint string
 	// CanMount state of the dataset.
