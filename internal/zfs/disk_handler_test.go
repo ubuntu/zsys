@@ -16,33 +16,33 @@ import (
 
 const mB = 1024 * 1024
 
-type FakePools struct {
-	Pools          []FakePool
+type fakePools struct {
+	Pools          []fakePool
 	t              *testing.T
 	tempPools      []string
 	tempMountpaths []string
 	tempFiles      []string
 }
 
-type FakePool struct {
+type fakePool struct {
 	Name     string
 	Datasets []struct {
 		Name          string
 		Mountpoint    string
 		CanMount      string
-		ZsysBootfs    bool      `yaml:"zsys_bootfs"`
+		ZsysBootfs    string    `yaml:"zsys_bootfs"`
 		LastUsed      time.Time `yaml:"last_used"`
 		SystemDataset string    `yaml:"system_dataset"`
 		Snapshots     []struct {
-			Name         string
+			Name string
 			CreationDate time.Time `yaml:"creation_date"`
 		}
 	}
 }
 
-// newFakePools returns a FakePools from a yaml file
-func newFakePools(t *testing.T, path string) FakePools {
-	pools := FakePools{t: t}
+// newFakePools returns a fakePools from a yaml file
+func newFakePools(t *testing.T, path string) fakePools {
+	pools := fakePools{t: t}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Fatal("couldn't read yaml definition file", err)
@@ -54,19 +54,19 @@ func newFakePools(t *testing.T, path string) FakePools {
 	return pools
 }
 
-func (fpools FakePools) Fatal(args ...interface{}) {
+func (fpools fakePools) Fatal(args ...interface{}) {
 	fpools.t.Helper()
 	fpools.cleanup()
 	fpools.t.Fatal(args...)
 }
 
-func (fpools FakePools) Fatalf(format string, args ...interface{}) {
+func (fpools fakePools) Fatalf(format string, args ...interface{}) {
 	fpools.t.Helper()
 	fpools.cleanup()
 	fpools.t.Fatalf(format, args...)
 }
 
-func (fpools FakePools) cleanup() {
+func (fpools fakePools) cleanup() {
 	for _, p := range fpools.tempPools {
 		pool, err := libzfs.PoolOpen(p)
 		if err != nil {
@@ -90,7 +90,7 @@ func (fpools FakePools) cleanup() {
 }
 
 // create on disk mock pools as files
-func (fpools FakePools) create(path, testName string) func() {
+func (fpools fakePools) create(path, testName string) func() {
 	for _, fpool := range fpools.Pools {
 		func() {
 			// Create device as file on disk
