@@ -163,8 +163,8 @@ func (fpools fakePools) create(path, testName string) func() {
 					}
 					d.SetProperty(libzfs.DatasetPropCanmount, dataset.CanMount)
 
-					if dataset.ZsysBootfs {
-						d.SetUserProperty(zfs.BootfsProp, "yes")
+					if dataset.ZsysBootfs != "" {
+						d.SetUserProperty(zfs.BootfsProp, dataset.ZsysBootfs)
 					}
 					if !dataset.LastUsed.IsZero() {
 						d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(dataset.LastUsed.Unix(), 10))
