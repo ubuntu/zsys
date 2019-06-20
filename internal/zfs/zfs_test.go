@@ -29,8 +29,20 @@ func TestScan(t *testing.T) {
 
 		wantErr bool
 	}{
-		"basic": {def: "basic.yaml"},
-		//		"basic2": {def: "basic.yaml"},
+		"One pool, N datasets, N children":                                         {def: "one_pool_n_datasets_n_children.yaml"},
+		"One pool, N datasets, N children, N snapshots":                            {def: "one_pool_n_datasets_n_children_n_snapshots.yaml"},
+		"One pool, N datasets, N children, N snapshots, intermediate canmount=off": {def: "one_pool_n_datasets_n_children_n_snapshots_canmount_off.yaml"},
+		"One pool, one dataset":                                                    {def: "one_pool_one_dataset.yaml"},
+		"One pool, one dataset, different mountpoints":                             {def: "one_pool_one_dataset_different_mountpoints.yaml"},
+		"One pool, one dataset, no property":                                       {def: "one_pool_one_dataset_no_property.yaml"},
+		"One pool, one dataset, with systemdataset property":                       {def: "one_pool_one_dataset_with_systemdataset.yaml"},
+		"One pool, N datasets":                                                     {def: "one_pool_n_datasets.yaml"},
+		"One pool, one dataset, one snapshot":                                      {def: "one_pool_one_dataset_one_snapshot.yaml"},
+		"One pool, one dataset, one snapshot, canmount=noauto":                     {def: "one_pool_one_dataset_canmount_noauto.yaml"},
+		"One pool, N datasets, one snapshot":                                       {def: "one_pool_n_datasets_one_snapshot.yaml"},
+		"One pool non-root mpoint, N datasets no mountpoint":                       {def: "one_pool_with_nonroot_mountpoint_n_datasets_no_mountpoint.yaml"},
+		"Two pools, N datasets":                                                    {def: "two_pools_n_datasets.yaml"},
+		"Two pools, N datasets, N snapshots":                                       {def: "two_pools_n_datasets_n_snapshots.yaml"},
 	}
 
 	for name, tc := range tests {

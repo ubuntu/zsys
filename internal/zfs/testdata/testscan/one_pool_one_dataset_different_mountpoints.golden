@@ -1,0 +1,11 @@
+[
+   {
+      "Name": "testscan_one_pool_one_dataset_different_mountpoints-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/boot",
+      "CanMount": "on",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   }
+]

@@ -1,0 +1,11 @@
+[
+   {
+      "Name": "testscan_one_pool_one_dataset_no_property-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   }
+]

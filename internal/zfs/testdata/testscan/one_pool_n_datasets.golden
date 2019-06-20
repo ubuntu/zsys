@@ -1,0 +1,29 @@
+[
+   {
+      "Name": "testscan_one_pool_n_datasets-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_one_pool_n_datasets-rpool/ROOT",
+      "IsSnapshot": false,
+      "Mountpoint": "/ROOT",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testscan_one_pool_n_datasets-rpool/ROOT/ubuntu",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   }
+]

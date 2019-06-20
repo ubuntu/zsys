@@ -1,0 +1,4 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .

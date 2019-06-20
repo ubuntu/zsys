@@ -1,0 +1,11 @@
+[
+   {
+      "Name": "testscan_one_pool_one_dataset_with_systemdataset_property-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/home/foo",
+      "CanMount": "on",
+      "BootFS": "",
+      "LastUsed": 1555555555,
+      "SystemDataset": "rpool/ROOT/ubuntu_42"
+   }
+]

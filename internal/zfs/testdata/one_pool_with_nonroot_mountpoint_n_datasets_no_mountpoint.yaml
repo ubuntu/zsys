@@ -1,0 +1,9 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .
+        mountpoint: /boot
+      - name: BOOT
+      - name: BOOT/ubuntu
+        last_used: 2019-04-18T02:45:55+00:00
+        canmount: on
