@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/ubuntu/zsys/internal/config"
+
 	libzfs "github.com/bicomsystems/go-libzfs"
 	"golang.org/x/xerrors"
 )
@@ -89,7 +91,7 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 
 	defer func() {
 		if err != nil {
-			log.Printf("couldn't load dataset: %v\n", err)
+			log.Printf("couldn't load dataset: "+config.ErrorFormat+"\n", err)
 		}
 	}()
 
@@ -100,39 +102,44 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 
 	name, err := d.Path()
 	if err != nil {
-		err = xerrors.Errorf("can't get dataset path: %v", err)
+		err = xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
 		return nil
 	}
 
-	mp, err := d.GetProperty(libzfs.DatasetPropMountpoint)
-	if err != nil {
-		err = xerrors.Errorf("can't get mountpoint for %q: %v", name, err)
-		return nil
-	}
-	p, err := d.Pool()
-	if err != nil {
-		err = xerrors.Errorf("can't get pool corresponding to %q: %v", name, err)
-		return nil
-	}
-	poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
-	if err != nil {
-		err = xerrors.Errorf("can't get altroot for pool corresponding to %q: %v", name, err)
-		return nil
-	}
-	mountpoint := strings.TrimPrefix(mp.Value, poolRoot.Value)
-	if mountpoint == "" {
-		mountpoint = "/"
-	}
+	var mountpoint, canMount string
+	if !d.IsSnapshot() {
+		mp, err := d.GetProperty(libzfs.DatasetPropMountpoint)
+		if err != nil {
+			err = xerrors.Errorf("can't get mountpoint for %q: "+config.ErrorFormat, name, err)
+			return nil
+		}
 
-	canMount, err := d.GetProperty(libzfs.DatasetPropCanmount)
-	if err != nil {
-		err = xerrors.Errorf("can't get canmount property for %q: %v", name, err)
-		return nil
+		p, err := d.Pool()
+		if err != nil {
+			err = xerrors.Errorf("can't get pool corresponding to %q: "+config.ErrorFormat, name, err)
+			return nil
+		}
+		poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
+		if err != nil {
+			err = xerrors.Errorf("can't get altroot for pool corresponding to %q: "+config.ErrorFormat, name, err)
+			return nil
+		}
+		mountpoint = strings.TrimPrefix(mp.Value, poolRoot.Value)
+		if mountpoint == "" {
+			mountpoint = "/"
+		}
+
+		cm, err := d.GetProperty(libzfs.DatasetPropCanmount)
+		if err != nil {
+			err = xerrors.Errorf("can't get canmount property for %q: "+config.ErrorFormat, name, err)
+			return nil
+		}
+		canMount = cm.Value
 	}
 
 	bfs, err := d.GetUserProperty(bootfsProp)
 	if err != nil {
-		err = xerrors.Errorf("can't get bootfs property for %q: %v", name, err)
+		err = xerrors.Errorf("can't get bootfs property for %q: "+config.ErrorFormat, name, err)
 		return nil
 	}
 	bootfs := bfs.Value
@@ -140,23 +147,39 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 		bootfs = ""
 	}
 
-	lu, err := d.GetUserProperty(lastUsedProp)
-	if err != nil {
-		err = xerrors.Errorf("can't get %q property for %q: %v", lastUsedProp, name, err)
-		return nil
+	var lu libzfs.Property
+	if !d.IsSnapshot() {
+		lu, err = d.GetUserProperty(lastUsedProp)
+		if err != nil {
+			err = xerrors.Errorf("can't get %q property for %q: "+config.ErrorFormat, lastUsedProp, name, err)
+			return nil
+		}
+
+	} else {
+		err := d.SetProperty(libzfs.DatasetPropCreation, "1555555555")
+		if err != nil {
+			fmt.Println(err)
+			return nil
+		}
+
+		lu, err = d.GetProperty(libzfs.DatasetPropCreation)
+		if err != nil {
+			err = xerrors.Errorf("can't get creation property for %q: "+config.ErrorFormat, name, err)
+			return nil
+		}
 	}
 	if lu.Value == "-" {
 		lu.Value = "0"
 	}
 	lastused, err := strconv.Atoi(lu.Value)
 	if err != nil {
-		err = xerrors.Errorf("%q property for %q isn't an int: %v", lastUsedProp, name, err)
+		err = xerrors.Errorf("%q property for %q isn't an int: "+config.ErrorFormat, lastUsedProp, name, err)
 		return nil
 	}
 
 	sDataset, err := d.GetUserProperty(systemDataProp)
 	if err != nil {
-		err = xerrors.Errorf("can't get %q property for %q: %v", systemDataProp, name, err)
+		err = xerrors.Errorf("can't get %q property for %q: "+config.ErrorFormat, systemDataProp, name, err)
 		return nil
 	}
 	systemDataset := sDataset.Value
@@ -167,8 +190,9 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 	results = append(results,
 		Dataset{
 			Name:          name,
+			IsSnapshot:    d.IsSnapshot(),
 			Mountpoint:    mountpoint,
-			CanMount:      canMount.Value,
+			CanMount:      canMount,
 			BootFS:        bootfs,
 			LastUsed:      lastused,
 			SystemDataset: systemDataset,
@@ -242,13 +266,13 @@ func (Zfs) Clone(snapshotName, suffix string, recursive bool) (err error) {
 	props := make(map[libzfs.Prop]libzfs.Property)
 	mountpoint, err := d.GetProperty(libzfs.DatasetPropMountpoint)
 	if err != nil {
-		return xerrors.Errorf("can't get mountpoint for %q: %v", name, err)
+		return xerrors.Errorf("can't get mountpoint for %q: "+config.ErrorFormat, name, err)
 	}
 	props[libzfs.DatasetPropMountpoint] = mountpoint
 
 	canMount, err := d.GetProperty(libzfs.DatasetPropCanmount)
 	if err != nil {
-		return xerrors.Errorf("can't get canmount property for %q: %v", name, err)
+		return xerrors.Errorf("can't get canmount property for %q: "+config.ErrorFormat, name, err)
 	}
 	canM := canMount.Value
 	if canM == "on" {
@@ -259,14 +283,13 @@ func (Zfs) Clone(snapshotName, suffix string, recursive bool) (err error) {
 
 	bootfs, err := d.GetUserProperty(bootfsProp)
 	if err != nil {
-		return xerrors.Errorf("can't get bootfs property for %q: %v", name, err)
+		return xerrors.Errorf("can't get bootfs property for %q: "+config.ErrorFormat, name, err)
 	}
 
 	creation, err := d.GetProperty(libzfs.DatasetPropCreation)
 	if err != nil {
-		return xerrors.Errorf("can't get creation property for %q: %v", name, err)
+		return xerrors.Errorf("can't get creation property for %q: "+config.ErrorFormat, name, err)
 	}
-	fmt.Println(creation.Value)
 
 	/*lastused, err := strconv.Atoi(lu.Value)
 	if err != nil {
@@ -275,25 +298,25 @@ func (Zfs) Clone(snapshotName, suffix string, recursive bool) (err error) {
 
 	systemDataset, err := d.GetUserProperty(systemDataProp)
 	if err != nil {
-		return xerrors.Errorf("can't get %q property for %q: %v", systemDataProp, name, err)
+		return xerrors.Errorf("can't get %q property for %q: "+config.ErrorFormat, systemDataProp, name, err)
 	}
 
 	// Clone now the dataset.
 	clonedDataset, err := d.Clone(name, props)
 	if err != nil {
-		return xerrors.Errorf("couldn't clone %q to %q: %v", snapshotName, name, err)
+		return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, snapshotName, name, err)
 	}
 	createdDatasets.d = append([]libzfs.Dataset{clonedDataset}, createdDatasets.d...)
 
 	// Set user properties that we couldn't set before creating the dataset.
 	if err := clonedDataset.SetUserProperty(bootfsProp, bootfs.Value); err != nil {
-		return xerrors.Errorf("couldn't set user property %q to %q: %v", bootfsProp, name, err)
+		return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, bootfsProp, name, err)
 	}
 	if err := clonedDataset.SetUserProperty(lastUsedProp, creation.Value); err != nil {
-		return xerrors.Errorf("couldn't set user property %q to %q: %v", lastUsedProp, name, err)
+		return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, lastUsedProp, name, err)
 	}
 	if err := clonedDataset.SetUserProperty(systemDataProp, systemDataset.Value); err != nil {
-		return xerrors.Errorf("couldn't set user property %q to %q: %v", systemDataset, name, err)
+		return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, systemDataset, name, err)
 	}
 
 	/*for _, cd := range d.Children {
