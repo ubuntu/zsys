@@ -10,12 +10,17 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 var (
 	update = flag.Bool("update", false, "update golden files")
 )
+
+func init() {
+	config.SetVerboseMode(true)
+}
 
 func TestScan(t *testing.T) {
 	tests := map[string]struct {
