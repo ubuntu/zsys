@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -75,6 +76,7 @@ func TestScan(t *testing.T) {
 			}
 
 			ta.assertAndReplaceCreationTimeInRange(t, ds)
+			sort.Sort(zfs.DatasetSlice(got))
 
 			var want []zfs.Dataset
 			loadFromGoldenFile(t, got, &want)
