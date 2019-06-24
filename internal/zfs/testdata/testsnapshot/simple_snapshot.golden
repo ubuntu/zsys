@@ -1,0 +1,20 @@
+[
+   {
+      "Name": "testsnapshot_simple_snapshot-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_simple_snapshot-rpool@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   }
+]

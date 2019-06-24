@@ -72,13 +72,54 @@ func TestScan(t *testing.T) {
 	}
 }
 
+func TestSnapshot(t *testing.T) {
+	tests := map[string]struct {
+		def          string
+		snapshotName string
+		datasetName  string
+		recursive    bool
 
-			var want []zfs.Dataset
-			loadFromGoldenFile(t, got, &want)
+		wantErr bool
+	}{
+		"Simple snapshot":                                       {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool"},
+		"Recursive snapshots":                                   {def: "layout1__one_pool_n_datasets.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
+		"Simple snapshot with children":                         {def: "layout1__one_pool_n_datasets.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234"},
+		"Dataset doesn't exist":                                 {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "doesntexit", wantErr: true},
+		"Invalid snapshot name":                                 {def: "one_pool_one_dataset.yaml", snapshotName: "", datasetName: "rpool", wantErr: true},
+		"Recursive snapshot on leaf dataset":                    {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool", recursive: true},
+		"Snapshot on dataset already exists":                    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234/opt", wantErr: true},
+		"Snapshot on subdataset already exists":                 {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT", recursive: true, wantErr: true},
+		"Simple snapshotn even if on subdataset already exists": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT"},
+		"Snapshot on dataset exists, but not on subdataset":     {def: "layout1_missing_intermediate_snapshot.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234", wantErr: true},
+	}
 
-			if diff := cmp.Diff(want, got); diff != "" {
-				t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			poolName := strings.Replace(testNameToPath(t), "/", "_", -1)
+			defer fPools.create(dir, poolName)()
+			z := zfs.New()
+			err := z.Snapshot(tc.snapshotName, poolName+"-"+tc.datasetName, tc.recursive)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				// we don't return because we want to check that on error, Snapshot() is a no-op
 			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			got, err := z.Scan()
+			if err != nil {
+				t.Fatalf("expected no error on scan but got: %v", err)
+			}
+
+			assertDatasetsToGolden(t, ta, got)
 		})
 	}
 }

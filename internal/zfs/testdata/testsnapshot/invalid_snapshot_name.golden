@@ -1,0 +1,11 @@
+[
+   {
+      "Name": "testsnapshot_invalid_snapshot_name-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   }
+]

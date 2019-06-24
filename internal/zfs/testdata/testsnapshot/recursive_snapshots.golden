@@ -1,0 +1,92 @@
+[
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT",
+      "IsSnapshot": false,
+      "Mountpoint": "/ROOT",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234/opt",
+      "IsSnapshot": false,
+      "Mountpoint": "/opt",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234/opt@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234/var",
+      "IsSnapshot": false,
+      "Mountpoint": "/var",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234/var/lib",
+      "IsSnapshot": false,
+      "Mountpoint": "/var/lib",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 1555555555,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234/var/lib@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234/var@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   },
+   {
+      "Name": "testsnapshot_recursive_snapshots-rpool/ROOT/ubuntu_1234@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "",
+      "CanMount": "",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": ""
+   }
+]
