@@ -67,16 +67,11 @@ func TestScan(t *testing.T) {
 				t.Fatal("expected an error but got none")
 			}
 
-			var ds []*zfs.Dataset
-			for k := range got {
-				if !got[k].IsSnapshot {
-					continue
-				}
-				ds = append(ds, &got[k])
-			}
+			assertDatasetsToGolden(t, ta, got)
+		})
+	}
+}
 
-			ta.assertAndReplaceCreationTimeInRange(t, ds)
-			sort.Sort(zfs.DatasetSlice(got))
 
 			var want []zfs.Dataset
 			loadFromGoldenFile(t, got, &want)
@@ -85,6 +80,30 @@ func TestScan(t *testing.T) {
 				t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+// assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
+// to a golden file.
+// It applies transformation to ensure that the comparison is reproducible.
+func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset) {
+	t.Helper()
+	var ds []*zfs.Dataset
+	for k := range got {
+		if !got[k].IsSnapshot {
+			continue
+		}
+		ds = append(ds, &got[k])
+	}
+
+	ta.assertAndReplaceCreationTimeInRange(t, ds)
+	sort.Sort(zfs.DatasetSlice(got))
+
+	var want []zfs.Dataset
+	loadFromGoldenFile(t, got, &want)
+
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
 	}
 }
 
