@@ -143,7 +143,7 @@ func testNameToPath(t *testing.T) string {
 
 	var elems []string
 	for _, e := range []string{testDirname, name} {
-		for _, k := range []string{"/", " ", ",", "="} {
+		for _, k := range []string{"/", " ", ",", "=", "'"} {
 			e = strings.Replace(e, k, "_", -1)
 		}
 		elems = append(elems, strings.ToLower(strings.Replace(e, "__", "_", -1)))
