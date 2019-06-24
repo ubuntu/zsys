@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testscan_one_pool_one_dataset_with_systemdataset_property-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/home/foo",
       "CanMount": "on",

@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testscan_one_pool_n_datasets-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "off",
@@ -9,7 +9,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets-rpool/ROOT",
+      "Name": "rpool/ROOT",
       "IsSnapshot": false,
       "Mountpoint": "/ROOT",
       "CanMount": "off",
@@ -18,7 +18,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets-rpool/ROOT/ubuntu",
+      "Name": "rpool/ROOT/ubuntu",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",

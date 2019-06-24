@@ -89,7 +89,7 @@ func (fpools fakePools) cleanup() {
 }
 
 // create on disk mock pools as files
-func (fpools fakePools) create(path, testName string) func() {
+func (fpools fakePools) create(path string) func() {
 	for _, fpool := range fpools.Pools {
 		func() {
 			// Create device as file on disk
@@ -111,11 +111,6 @@ func (fpools fakePools) create(path, testName string) func() {
 			}
 			fpools.tempMountpaths = append(fpools.tempMountpaths, poolMountpath)
 
-			// WORKAROUND: we need to use dirname of path as creating 2 consecutives pools with similar dataset name
-			// will make the second dataset from the second pool returning as parent pool the first one.
-			// Of course, the resulting mountpoint will be wrong.
-			poolName := testName + "-" + fpool.Name
-
 			vdev := libzfs.VDevTree{
 				Type:    libzfs.VDevTypeFile,
 				Path:    p,
@@ -130,19 +125,19 @@ func (fpools fakePools) create(path, testName string) func() {
 			fsprops[libzfs.DatasetPropMountpoint] = "/"
 			fsprops[libzfs.DatasetPropCanmount] = "off"
 
-			pool, err := libzfs.PoolCreate(poolName, vdev, features, props, fsprops)
+			pool, err := libzfs.PoolCreate(fpool.Name, vdev, features, props, fsprops)
 			if err != nil {
 				fpools.Fatalf("couldn't create pool %q: %v", fpool.Name, err)
 			}
-			fpools.tempPools = append(fpools.tempPools, poolName)
+			fpools.tempPools = append(fpools.tempPools, fpool.Name)
 			defer pool.Close()
 
 			for _, dataset := range fpool.Datasets {
 				func() {
-					datasetName := poolName + "/" + dataset.Name
+					datasetName := fpool.Name + "/" + dataset.Name
 					var d libzfs.Dataset
 					if dataset.Name == "." {
-						datasetName = poolName
+						datasetName = fpool.Name
 						d, err = libzfs.DatasetOpen(datasetName)
 						if err != nil {
 							fpools.Fatalf("couldn't open dataset %q: %v", datasetName, err)

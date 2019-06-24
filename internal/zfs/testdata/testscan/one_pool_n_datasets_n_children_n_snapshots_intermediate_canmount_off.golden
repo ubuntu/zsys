@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "off",
@@ -9,7 +9,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT",
+      "Name": "rpool/ROOT",
       "IsSnapshot": false,
       "Mountpoint": "/ROOT",
       "CanMount": "off",
@@ -18,7 +18,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu",
+      "Name": "rpool/ROOT/ubuntu",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
@@ -27,7 +27,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu/opt",
+      "Name": "rpool/ROOT/ubuntu/opt",
       "IsSnapshot": false,
       "Mountpoint": "/opt",
       "CanMount": "on",
@@ -36,7 +36,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu/var",
+      "Name": "rpool/ROOT/ubuntu/var",
       "IsSnapshot": false,
       "Mountpoint": "/var",
       "CanMount": "off",
@@ -45,7 +45,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu/var/lib",
+      "Name": "rpool/ROOT/ubuntu/var/lib",
       "IsSnapshot": false,
       "Mountpoint": "/var/lib",
       "CanMount": "on",
@@ -54,7 +54,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu/var@snap_v1",
+      "Name": "rpool/ROOT/ubuntu/var@snap_v1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -63,7 +63,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2",
+      "Name": "rpool/ROOT/ubuntu2",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
@@ -72,7 +72,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2@snap_u1",
+      "Name": "rpool/ROOT/ubuntu2@snap_u1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -81,7 +81,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu2@snap_u2",
+      "Name": "rpool/ROOT/ubuntu2@snap_u2",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -90,7 +90,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_n_datasets_n_children_n_snapshots_intermediate_canmount_off-rpool/ROOT/ubuntu@snap_r1",
+      "Name": "rpool/ROOT/ubuntu@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",

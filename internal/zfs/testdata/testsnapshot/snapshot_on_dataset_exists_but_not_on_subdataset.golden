@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "off",
@@ -9,7 +9,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT",
+      "Name": "rpool/ROOT",
       "IsSnapshot": false,
       "Mountpoint": "/ROOT",
       "CanMount": "off",
@@ -18,7 +18,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234",
+      "Name": "rpool/ROOT/ubuntu_1234",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
@@ -27,7 +27,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/opt",
+      "Name": "rpool/ROOT/ubuntu_1234/opt",
       "IsSnapshot": false,
       "Mountpoint": "/opt",
       "CanMount": "on",
@@ -36,7 +36,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/opt@snap_r1",
+      "Name": "rpool/ROOT/ubuntu_1234/opt@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -45,7 +45,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/opt@snap_r2",
+      "Name": "rpool/ROOT/ubuntu_1234/opt@snap_r2",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -54,7 +54,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/var",
+      "Name": "rpool/ROOT/ubuntu_1234/var",
       "IsSnapshot": false,
       "Mountpoint": "/var",
       "CanMount": "on",
@@ -63,7 +63,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/var/lib",
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib",
       "IsSnapshot": false,
       "Mountpoint": "/var/lib",
       "CanMount": "on",
@@ -72,7 +72,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/var/lib@snap_r1",
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -81,7 +81,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/var/lib@snap_r2",
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap_r2",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -90,7 +90,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234/var@snap_r2",
+      "Name": "rpool/ROOT/ubuntu_1234/var@snap_r2",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -99,7 +99,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234@snap_r1",
+      "Name": "rpool/ROOT/ubuntu_1234@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",
@@ -108,7 +108,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_snapshot_on_dataset_exists_but_not_on_subdataset-rpool/ROOT/ubuntu_1234@snap_r2",
+      "Name": "rpool/ROOT/ubuntu_1234@snap_r2",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",

@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testsnapshot_simple_snapshot_with_children-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "off",
@@ -9,7 +9,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_simple_snapshot_with_children-rpool/ROOT",
+      "Name": "rpool/ROOT",
       "IsSnapshot": false,
       "Mountpoint": "/ROOT",
       "CanMount": "off",
@@ -18,7 +18,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_simple_snapshot_with_children-rpool/ROOT/ubuntu_1234",
+      "Name": "rpool/ROOT/ubuntu_1234",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
@@ -27,7 +27,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_simple_snapshot_with_children-rpool/ROOT/ubuntu_1234/opt",
+      "Name": "rpool/ROOT/ubuntu_1234/opt",
       "IsSnapshot": false,
       "Mountpoint": "/opt",
       "CanMount": "on",
@@ -36,7 +36,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_simple_snapshot_with_children-rpool/ROOT/ubuntu_1234/var",
+      "Name": "rpool/ROOT/ubuntu_1234/var",
       "IsSnapshot": false,
       "Mountpoint": "/var",
       "CanMount": "on",
@@ -45,7 +45,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_simple_snapshot_with_children-rpool/ROOT/ubuntu_1234/var/lib",
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib",
       "IsSnapshot": false,
       "Mountpoint": "/var/lib",
       "CanMount": "on",
@@ -54,7 +54,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_simple_snapshot_with_children-rpool/ROOT/ubuntu_1234@snap1",
+      "Name": "rpool/ROOT/ubuntu_1234@snap1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",

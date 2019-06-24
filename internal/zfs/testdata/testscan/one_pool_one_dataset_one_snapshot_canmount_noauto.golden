@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testscan_one_pool_one_dataset_one_snapshot_canmount_noauto-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/home/foo",
       "CanMount": "noauto",

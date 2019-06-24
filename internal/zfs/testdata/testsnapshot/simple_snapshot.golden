@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testsnapshot_simple_snapshot-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
@@ -9,7 +9,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testsnapshot_simple_snapshot-rpool@snap1",
+      "Name": "rpool@snap1",
       "IsSnapshot": true,
       "Mountpoint": "",
       "CanMount": "",

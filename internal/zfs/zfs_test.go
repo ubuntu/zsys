@@ -53,7 +53,7 @@ func TestScan(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
-			defer fPools.create(dir, strings.Replace(testNameToPath(t), "/", "_", -1))()
+			defer fPools.create(dir)()
 
 			z := zfs.New()
 			got, err := z.Scan()
@@ -100,10 +100,9 @@ func TestSnapshot(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
-			poolName := strings.Replace(testNameToPath(t), "/", "_", -1)
-			defer fPools.create(dir, poolName)()
+			defer fPools.create(dir)()
 			z := zfs.New()
-			err := z.Snapshot(tc.snapshotName, poolName+"-"+tc.datasetName, tc.recursive)
+			err := z.Snapshot(tc.snapshotName, tc.datasetName, tc.recursive)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)

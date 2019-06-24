@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testscan_one_pool_non-root_mpoint_n_datasets_no_mountpoint-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/boot",
       "CanMount": "off",
@@ -9,7 +9,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_non-root_mpoint_n_datasets_no_mountpoint-rpool/BOOT",
+      "Name": "rpool/BOOT",
       "IsSnapshot": false,
       "Mountpoint": "/boot/BOOT",
       "CanMount": "off",
@@ -18,7 +18,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_one_pool_non-root_mpoint_n_datasets_no_mountpoint-rpool/BOOT/ubuntu",
+      "Name": "rpool/BOOT/ubuntu",
       "IsSnapshot": false,
       "Mountpoint": "/boot/BOOT/ubuntu",
       "CanMount": "on",

@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testscan_two_pools_n_datasets-bpool",
+      "Name": "bpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "off",
@@ -9,7 +9,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_two_pools_n_datasets-bpool/BOOT",
+      "Name": "bpool/BOOT",
       "IsSnapshot": false,
       "Mountpoint": "/BOOT",
       "CanMount": "off",
@@ -18,7 +18,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_two_pools_n_datasets-bpool/BOOT/boot",
+      "Name": "bpool/BOOT/boot",
       "IsSnapshot": false,
       "Mountpoint": "/boot",
       "CanMount": "on",
@@ -27,7 +27,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_two_pools_n_datasets-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "off",
@@ -36,7 +36,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_two_pools_n_datasets-rpool/ROOT",
+      "Name": "rpool/ROOT",
       "IsSnapshot": false,
       "Mountpoint": "/ROOT",
       "CanMount": "off",
@@ -45,7 +45,7 @@
       "SystemDataset": ""
    },
    {
-      "Name": "testscan_two_pools_n_datasets-rpool/ROOT/ubuntu",
+      "Name": "rpool/ROOT/ubuntu",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",

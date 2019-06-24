@@ -1,6 +1,6 @@
 [
    {
-      "Name": "testsnapshot_dataset_doesn_t_exist-rpool",
+      "Name": "rpool",
       "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
