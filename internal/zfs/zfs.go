@@ -215,8 +215,31 @@ func (Zfs) Snapshot(name, datasetName string, recursive bool) error {
 	}
 	defer d.Close()
 
+	// List all subdataset to ensure there is no snapshot named "name".
+	// libzfs.DatasetSnapshot already does this check. However, the error message doesn't tell which dataset
+	// has already a snapshot with the same name.
+	if recursive {
+		for _, dc := range d.Children {
+			n, err := dc.Path()
+			if err != nil {
+				return xerrors.Errorf("couldn't check children dataset %q: %v", n, err)
+			}
+			snapDatasetName := n + "@" + name
+			fmt.Println(snapDatasetName)
+			snapDataset, err := libzfs.DatasetOpen(snapDatasetName)
+			if err == nil {
+				snapDataset.Close()
+				return xerrors.Errorf("%q already exists", snapDatasetName)
+			}
+		}
+	}
+
 	props := make(map[libzfs.Prop]libzfs.Property)
-	libzfs.DatasetSnapshot(datasetName+"@"+name, recursive, props)
+	ds, err := libzfs.DatasetSnapshot(datasetName+"@"+name, recursive, props)
+	if err != nil {
+		return xerrors.Errorf("couldn't snapshot %q: %v", datasetName, err)
+	}
+	defer ds.Close()
 
 	return nil
 }
