@@ -91,15 +91,36 @@ func (Zfs) Scan() ([]Dataset, error) {
 }
 
 // getDatasetsProp returns all properties for a given dataset
-func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
-	var mountpoint, canMount string
+// if useParentForSnapshots is true and d is a snapshot, we'll take the parent dataset for
+// the mount properties.
+func getDatasetProp(d libzfs.Dataset, useParentForSnapshots bool) (*DatasetProp, error) {
+	var mountPropertiesDataset *libzfs.Dataset
+
+	name, err := d.Path()
+	if err != nil {
+		return nil, xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
+	}
+
 	if !d.IsSnapshot() {
-		mp, err := d.GetProperty(libzfs.DatasetPropMountpoint)
+		mountPropertiesDataset = &d
+	} else if d.IsSnapshot() && useParentForSnapshots {
+		parentName := name[:strings.LastIndex(name, "@")]
+		pd, err := libzfs.DatasetOpen(parentName)
+		if err != nil {
+			return nil, xerrors.Errorf("can't get parent dataset: "+config.ErrorFormat, err)
+		}
+		defer pd.Close()
+		mountPropertiesDataset = &pd
+	}
+
+	var mountpoint, canMount string
+	if mountPropertiesDataset != nil {
+		mp, err := mountPropertiesDataset.GetProperty(libzfs.DatasetPropMountpoint)
 		if err != nil {
 			return nil, xerrors.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
 		}
 
-		p, err := d.Pool()
+		p, err := mountPropertiesDataset.Pool()
 		if err != nil {
 			return nil, xerrors.Errorf("can't get associated pool: "+config.ErrorFormat, err)
 		}
@@ -188,7 +209,7 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 		return nil
 	}
 
-	props, err := getDatasetProp(d)
+	props, err := getDatasetProp(d, false)
 	if err != nil {
 		collectErr = xerrors.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, collectErr)
 		return nil
