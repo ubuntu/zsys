@@ -1,7 +1,6 @@
 package zfs
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -156,14 +155,7 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 			err = xerrors.Errorf("can't get %q property for %q: "+config.ErrorFormat, lastUsedProp, name, err)
 			return nil
 		}
-
 	} else {
-		err := d.SetProperty(libzfs.DatasetPropCreation, "1555555555")
-		if err != nil {
-			fmt.Println(err)
-			return nil
-		}
-
 		lu, err = d.GetProperty(libzfs.DatasetPropCreation)
 		if err != nil {
 			err = xerrors.Errorf("can't get creation property for %q: "+config.ErrorFormat, name, err)
@@ -225,7 +217,6 @@ func (Zfs) Snapshot(name, datasetName string, recursive bool) error {
 				return xerrors.Errorf("couldn't check children dataset %q: %v", n, err)
 			}
 			snapDatasetName := n + "@" + name
-			fmt.Println(snapDatasetName)
 			snapDataset, err := libzfs.DatasetOpen(snapDatasetName)
 			if err == nil {
 				snapDataset.Close()
@@ -247,10 +238,6 @@ func (Zfs) Snapshot(name, datasetName string, recursive bool) error {
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
 func (Zfs) Clone(snapshotName, suffix string, recursive bool) (err error) {
-	if !strings.Contains(snapshotName, "@") {
-		return xerrors.Errorf("%q isn't a snapshot name", snapshotName)
-	}
-
 	d, err := libzfs.DatasetOpen(snapshotName)
 	if err != nil {
 		return xerrors.Errorf("%q doesn't exist: %v", snapshotName, err)
@@ -269,6 +256,7 @@ func (Zfs) Clone(snapshotName, suffix string, recursive bool) (err error) {
 	}
 	name += "_" + suffix
 
+	// Cleanup newly created datasets if we return an error (like intermediate datasets have a snapshot)
 	createdDatasets := struct {
 		d []libzfs.Dataset
 	}{}
