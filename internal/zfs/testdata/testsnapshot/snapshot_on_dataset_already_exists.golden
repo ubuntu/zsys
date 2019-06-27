@@ -38,8 +38,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234/opt@snap_r1",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/opt",
+      "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
       "SystemDataset": ""
@@ -47,8 +47,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234/opt@snap_r2",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/opt",
+      "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
       "SystemDataset": ""
@@ -74,8 +74,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap_r1",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/var/lib",
+      "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 2000000000,
       "SystemDataset": ""
@@ -83,8 +83,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap_r2",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/var/lib",
+      "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 2000000000,
       "SystemDataset": ""
@@ -92,8 +92,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234/var@snap_r1",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/var",
+      "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
       "SystemDataset": ""
@@ -101,8 +101,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234/var@snap_r2",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/var",
+      "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
       "SystemDataset": ""
@@ -110,8 +110,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234@snap_r1",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/",
+      "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
       "SystemDataset": ""
@@ -119,8 +119,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234@snap_r2",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/",
+      "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
       "SystemDataset": ""

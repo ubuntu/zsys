@@ -56,8 +56,8 @@
    {
       "Name": "rpool/ROOT/ubuntu_1234@snap1",
       "IsSnapshot": true,
-      "Mountpoint": "",
-      "CanMount": "",
+      "Mountpoint": "/",
+      "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
       "SystemDataset": ""
