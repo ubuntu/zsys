@@ -52,7 +52,7 @@ type Dataset struct {
 	DatasetProp
 }
 
-// DatasetProp abstract all properties for a given dataset
+// DatasetProp abstracts some properties for a given dataset
 type DatasetProp struct {
 	// Mountpoint where the dataset will be mounted (without alt-root).
 	Mountpoint string
@@ -64,6 +64,15 @@ type DatasetProp struct {
 	LastUsed int
 	// SystemDataset is a user proper for user datasets, linking them to relevant system dataset.
 	SystemDataset string
+}
+
+// datasetSources list sources some properties for a given dataset
+type datasetSources struct {
+	mountpoint    string
+	canMount      string
+	bootFS        string
+	lastUsed      string
+	systemDataset string
 }
 
 // Zfs is a system handler talking to zfs linux module.
@@ -90,89 +99,90 @@ func (Zfs) Scan() ([]Dataset, error) {
 	return datasets, nil
 }
 
-// getDatasetsProp returns all properties for a given dataset
-// if useParentForSnapshots is true and d is a snapshot, we'll take the parent dataset for
-// the mount properties.
-func getDatasetProp(d libzfs.Dataset, useParentForSnapshots bool) (*DatasetProp, error) {
-	var mountPropertiesDataset *libzfs.Dataset
+// getDatasetsProp returns all properties for a given dataset and the source of them.
+// for snapshots, we'll take the parent dataset for the mount properties.
+func getDatasetProp(d libzfs.Dataset) (*DatasetProp, *datasetSources, error) {
+	sources := datasetSources{}
 
 	name, err := d.Path()
 	if err != nil {
-		return nil, xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
+		return nil, nil, xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
 	}
 
-	if !d.IsSnapshot() {
-		mountPropertiesDataset = &d
-	} else if d.IsSnapshot() && useParentForSnapshots {
+	var mountPropertiesDataset = &d
+	if d.IsSnapshot() {
 		parentName := name[:strings.LastIndex(name, "@")]
 		pd, err := libzfs.DatasetOpen(parentName)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get parent dataset: "+config.ErrorFormat, err)
+			return nil, nil, xerrors.Errorf("can't get parent dataset: "+config.ErrorFormat, err)
 		}
 		defer pd.Close()
 		mountPropertiesDataset = &pd
 	}
 
 	var mountpoint, canMount string
-	if mountPropertiesDataset != nil {
-		mp, err := mountPropertiesDataset.GetProperty(libzfs.DatasetPropMountpoint)
-		if err != nil {
-			return nil, xerrors.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
-		}
-
-		p, err := mountPropertiesDataset.Pool()
-		if err != nil {
-			return nil, xerrors.Errorf("can't get associated pool: "+config.ErrorFormat, err)
-		}
-		poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
-		if err != nil {
-			return nil, xerrors.Errorf("can't get altroot for associated pool: "+config.ErrorFormat, err)
-		}
-		mountpoint = strings.TrimPrefix(mp.Value, poolRoot.Value)
-		if mountpoint == "" {
-			mountpoint = "/"
-		}
-
-		cm, err := d.GetProperty(libzfs.DatasetPropCanmount)
-		if err != nil {
-			return nil, xerrors.Errorf("can't get canmount property: "+config.ErrorFormat, err)
-		}
-		canMount = cm.Value
+	mp, err := mountPropertiesDataset.GetProperty(libzfs.DatasetPropMountpoint)
+	if err != nil {
+		return nil, nil, xerrors.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
 	}
+	sources.mountpoint = mp.Source
+
+	p, err := mountPropertiesDataset.Pool()
+	if err != nil {
+		return nil, nil, xerrors.Errorf("can't get associated pool: "+config.ErrorFormat, err)
+	}
+	poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
+	if err != nil {
+		return nil, nil, xerrors.Errorf("can't get altroot for associated pool: "+config.ErrorFormat, err)
+	}
+	mountpoint = strings.TrimPrefix(mp.Value, poolRoot.Value)
+	if mountpoint == "" {
+		mountpoint = "/"
+	}
+
+	cm, err := mountPropertiesDataset.GetProperty(libzfs.DatasetPropCanmount)
+	if err != nil {
+		return nil, nil, xerrors.Errorf("can't get canmount property: "+config.ErrorFormat, err)
+	}
+	canMount = cm.Value
+	sources.canMount = cm.Source
 
 	bfs, err := d.GetUserProperty(bootfsProp)
 	if err != nil {
-		return nil, xerrors.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
+		return nil, nil, xerrors.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
 	}
 	bootfs := bfs.Value
 	if bootfs == "-" {
 		bootfs = ""
 	}
+	sources.bootFS = bfs.Source
 
 	var lu libzfs.Property
 	if !d.IsSnapshot() {
 		lu, err = d.GetUserProperty(lastUsedProp)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, lastUsedProp, err)
+			return nil, nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, lastUsedProp, err)
 		}
 	} else {
 		lu, err = d.GetProperty(libzfs.DatasetPropCreation)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get creation property: "+config.ErrorFormat, err)
+			return nil, nil, xerrors.Errorf("can't get creation property: "+config.ErrorFormat, err)
 		}
 	}
+	sources.lastUsed = lu.Source
 	if lu.Value == "-" {
 		lu.Value = "0"
 	}
 	lastused, err := strconv.Atoi(lu.Value)
 	if err != nil {
-		return nil, xerrors.Errorf("%q property isn't an int: "+config.ErrorFormat, lastUsedProp, err)
+		return nil, nil, xerrors.Errorf("%q property isn't an int: "+config.ErrorFormat, lastUsedProp, err)
 	}
 
 	sDataset, err := d.GetUserProperty(systemDataProp)
 	if err != nil {
-		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, systemDataProp, err)
+		return nil, nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, systemDataProp, err)
 	}
+	sources.systemDataset = sDataset.Source
 	systemDataset := sDataset.Value
 	if systemDataset == "-" {
 		systemDataset = ""
@@ -184,7 +194,7 @@ func getDatasetProp(d libzfs.Dataset, useParentForSnapshots bool) (*DatasetProp,
 		BootFS:        bootfs,
 		LastUsed:      lastused,
 		SystemDataset: systemDataset,
-	}, nil
+	}, &sources, nil
 }
 
 // collectDatasets returns a Dataset tuple of all its properties and children
@@ -209,7 +219,7 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 		return nil
 	}
 
-	props, err := getDatasetProp(d, false)
+	props, _, err := getDatasetProp(d)
 	if err != nil {
 		collectErr = xerrors.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, collectErr)
 		return nil
