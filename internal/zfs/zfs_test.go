@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -67,7 +68,7 @@ func TestScan(t *testing.T) {
 				t.Fatal("expected an error but got none")
 			}
 
-			assertDatasetsToGolden(t, ta, got)
+			assertDatasetsToGolden(t, ta, got, false)
 		})
 	}
 }
@@ -118,7 +119,7 @@ func TestSnapshot(t *testing.T) {
 				t.Fatalf("expected no error on scan but got: %v", err)
 			}
 
-			assertDatasetsToGolden(t, ta, got)
+			assertDatasetsToGolden(t, ta, got, true)
 		})
 	}
 }
@@ -126,8 +127,11 @@ func TestSnapshot(t *testing.T) {
 // assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
 // to a golden file.
 // It applies transformation to ensure that the comparison is reproducible.
-func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset) {
+// We can optionnally include private fields in the comparison and saving.
+func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) {
 	t.Helper()
+
+	// Ensure datasets were created at expected range time and replace them with magic time.
 	var ds []*zfs.Dataset
 	for k := range got {
 		if !got[k].IsSnapshot {
@@ -135,14 +139,24 @@ func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset) {
 		}
 		ds = append(ds, &got[k])
 	}
-
 	ta.assertAndReplaceCreationTimeInRange(t, ds)
-	sort.Sort(zfs.DatasetSlice(got))
 
-	var want []zfs.Dataset
-	loadFromGoldenFile(t, got, &want)
+	// Sort the golden file order to be reproducible.
+	gotForGolden := zfs.DatasetSlice{DS: got, IncludePrivate: includePrivate}
+	sort.Sort(gotForGolden)
+	got = gotForGolden.DS
 
-	if diff := cmp.Diff(want, got); diff != "" {
+	// Get expected dataset list from golden file, update as needed.
+	wantFromGolden := zfs.DatasetSlice{IncludePrivate: includePrivate}
+	loadFromGoldenFile(t, gotForGolden, &wantFromGolden)
+	want := []zfs.Dataset(wantFromGolden.DS)
+
+	// Actual diff assertion.
+	privateOpt := cmpopts.IgnoreUnexported(zfs.DatasetProp{})
+	if includePrivate {
+		privateOpt = cmp.AllowUnexported(zfs.DatasetProp{})
+	}
+	if diff := cmp.Diff(want, got, privateOpt); diff != "" {
 		t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
 	}
 }
@@ -169,7 +183,7 @@ func tempDir(t *testing.T) (string, func()) {
 }
 
 // loadFromGoldenFile loads expected content to "want", after optionally refreshing it
-// from "got" if udpate flag is passed
+// from "got" if udpate flag is passed.
 func loadFromGoldenFile(t *testing.T, got interface{}, want interface{}) {
 	t.Helper()
 
