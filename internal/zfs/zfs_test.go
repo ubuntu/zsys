@@ -88,6 +88,7 @@ func TestSnapshot(t *testing.T) {
 		"Dataset doesn't exist":                                {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "doesntexit", wantErr: true},
 		"Invalid snapshot name":                                {def: "one_pool_one_dataset.yaml", snapshotName: "", datasetName: "rpool", wantErr: true},
 		"Recursive snapshot on leaf dataset":                   {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool", recursive: true},
+		"Recursive snapshots alongside existing ones":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
 		"Snapshot on dataset already exists":                   {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234/opt", wantErr: true},
 		"Snapshot on subdataset already exists":                {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT", recursive: true, wantErr: true},
 		"Simple snapshot even if on subdataset already exists": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT"},
