@@ -106,7 +106,7 @@
       "Sources": {
          "Mountpoint": "local",
          "CanMount": "local",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "BootFS": "local",
          "LastUsed": "none",
          "SystemDataset": "none"
       }
