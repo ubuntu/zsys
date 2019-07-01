@@ -13,5 +13,7 @@ pools:
       - name: ROOT/ubuntu_1234/var/lib
         zsys_bootfs: no
         canmount: on
+      - name: ROOT/ubuntu_1234/var/lib/apt
+        canmount: on
       - name: ROOT/ubuntu_1234/opt
         canmount: on
