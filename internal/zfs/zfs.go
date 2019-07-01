@@ -187,11 +187,11 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, systemDataProp, err)
 	}
-	sources.SystemDataset = sDataset.Source
 	systemDataset := sDataset.Value
 	if systemDataset == "-" {
 		systemDataset = ""
 	}
+	sources.SystemDataset = sDataset.Source
 
 	return &DatasetProp{
 		Mountpoint:    mountpoint,
