@@ -2,6 +2,7 @@ package zfs
 
 import (
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -245,39 +246,90 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 }
 
 // Snapshot creates a new snapshot for dataset (and children if recursive is true) with the given name.
-func (Zfs) Snapshot(name, datasetName string, recursive bool) error {
+func (Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot error) {
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
 		return xerrors.Errorf("couldn't open %q: %v", datasetName, err)
 	}
 	defer d.Close()
 
-	// List all subdataset to ensure there is no snapshot named "name".
-	// libzfs.DatasetSnapshot already does this check. However, the error message doesn't tell which dataset
-	// has already a snapshot with the same name.
-	if recursive {
-		for _, dc := range d.Children {
-			n, err := dc.Path()
+	// We can't use the recursive version of snapshotting, as we want to track user properties and
+	// set them explicitely as needed
+
+	// Cleanup newly created snapshot datasets if we or a children returns an error (like intermediate datasets have a snapshot)
+	var snapshotDatasetNames []string
+	defer func() {
+		if snapshotDatasetNames == nil || errSnapshot == nil {
+			return
+		}
+		// start with leaves to undo clone creation
+		sort.Sort(sort.Reverse(sort.StringSlice(snapshotDatasetNames)))
+		for _, n := range snapshotDatasetNames {
+			d, err := libzfs.DatasetOpen(n)
 			if err != nil {
-				return xerrors.Errorf("couldn't check children dataset %q: %v", n, err)
+				log.Printf("couldn't open %q for cleanup: %v", n, err)
+				continue
 			}
-			snapDatasetName := n + "@" + name
-			snapDataset, err := libzfs.DatasetOpen(snapDatasetName)
-			if err == nil {
-				snapDataset.Close()
-				return xerrors.Errorf("%q already exists", snapDatasetName)
+			defer d.Close()
+			if err := d.Destroy(false); err != nil {
+				log.Printf("couldn't destroy %q for cleanup: %v", n, err)
 			}
 		}
+	}()
+
+	// recursively try snapshotting all children. If an error is returned, the closure will clean newly created dataset
+	var snapshotInternal func(libzfs.Dataset) error
+	snapshotInternal = func(d libzfs.Dataset) error {
+		datasetName, err := d.Path()
+		if err != nil {
+			return xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
+		}
+
+		// Get properties from parent snapshot.
+		srcProps, err := getDatasetProp(d)
+		if err != nil {
+			return xerrors.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, datasetName, err)
+		}
+
+		props := make(map[libzfs.Prop]libzfs.Property)
+		snapshotDatasetName := datasetName + "@" + snapName
+		ds, err := libzfs.DatasetSnapshot(snapshotDatasetName, false, props)
+		if err != nil {
+			return xerrors.Errorf("couldn't snapshot %q: %v", datasetName, err)
+		}
+		snapshotDatasetNames = append(snapshotDatasetNames, snapshotDatasetName)
+		defer ds.Close()
+
+		// Set user properties that we couldn't set before creating the snapshot dataset.
+		// We don't set LastUsed here as Creation time will be used.
+		if srcProps.sources.BootFS == "local" {
+			if err := ds.SetUserProperty(bootfsProp, srcProps.BootFS); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, bootfsProp, snapshotDatasetName, err)
+			}
+		}
+		if srcProps.sources.SystemDataset == "local" {
+			if err := ds.SetUserProperty(systemDataProp, srcProps.SystemDataset); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, systemDataProp, snapshotDatasetName, err)
+			}
+		}
+
+		if !recursive {
+			return nil
+		}
+
+		// Take snapshots on non snapshot dataset children
+		for _, cd := range d.Children {
+			if cd.IsSnapshot() {
+				continue
+			}
+			if err := snapshotInternal(cd); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 
-	props := make(map[libzfs.Prop]libzfs.Property)
-	ds, err := libzfs.DatasetSnapshot(datasetName+"@"+name, recursive, props)
-	if err != nil {
-		return xerrors.Errorf("couldn't snapshot %q: %v", datasetName, err)
-	}
-	defer ds.Close()
-
-	return nil
+	return snapshotInternal(d)
 }
 
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
