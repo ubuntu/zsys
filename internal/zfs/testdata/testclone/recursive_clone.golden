@@ -1,0 +1,354 @@
+[
+   {
+      "Name": "rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": "",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "none",
+         "LastUsed": "none",
+         "SystemDataset": "none"
+      }
+   },
+   {
+      "Name": "rpool/ROOT",
+      "IsSnapshot": false,
+      "Mountpoint": "/ROOT",
+      "CanMount": "off",
+      "BootFS": "",
+      "LastUsed": 0,
+      "SystemDataset": "",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "none",
+         "LastUsed": "none",
+         "SystemDataset": "none"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "local",
+         "SystemDataset": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/opt",
+      "IsSnapshot": false,
+      "Mountpoint": "/opt",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/opt@snap_r1",
+      "IsSnapshot": true,
+      "Mountpoint": "/opt",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/opt@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/opt",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var",
+      "IsSnapshot": false,
+      "Mountpoint": "/var",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib",
+      "IsSnapshot": false,
+      "Mountpoint": "/var/lib",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 1555555555,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+      "IsSnapshot": false,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 1555555555,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap_r1",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap_r1",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var@snap_r1",
+      "IsSnapshot": true,
+      "Mountpoint": "/var",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/var",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234@snap_r1",
+      "IsSnapshot": true,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "noauto",
+      "BootFS": "yes",
+      "LastUsed": 0,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "none",
+         "SystemDataset": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678/opt",
+      "IsSnapshot": false,
+      "Mountpoint": "/opt",
+      "CanMount": "noauto",
+      "BootFS": "yes",
+      "LastUsed": 0,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_5678",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_5678"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678/var",
+      "IsSnapshot": false,
+      "Mountpoint": "/var",
+      "CanMount": "noauto",
+      "BootFS": "yes",
+      "LastUsed": 0,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_5678",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_5678"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678/var/lib",
+      "IsSnapshot": false,
+      "Mountpoint": "/var/lib",
+      "CanMount": "noauto",
+      "BootFS": "no",
+      "LastUsed": 0,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_5678"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
+      "IsSnapshot": false,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "noauto",
+      "BootFS": "no",
+      "LastUsed": 0,
+      "SystemDataset": "rpool/path/to/dataset",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_5678/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "rpool/ROOT/ubuntu_5678"
+      }
+   }
+]
