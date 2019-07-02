@@ -1,0 +1,34 @@
+[
+   {
+      "Name": "rpool",
+      "IsSnapshot": false,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 1555555555,
+      "SystemDataset": "",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "local",
+         "SystemDataset": "none"
+      }
+   },
+   {
+      "Name": "rpool@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": "yes",
+      "LastUsed": 2000000000,
+      "SystemDataset": "SetProperty Value",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "rpool",
+         "LastUsed": "none",
+         "SystemDataset": "local"
+      }
+   }
+]

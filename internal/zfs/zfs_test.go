@@ -181,6 +181,65 @@ func TestClone(t *testing.T) {
 	}
 }
 
+func TestSetProperty(t *testing.T) {
+	tests := map[string]struct {
+		def           string
+		propertyName  string
+		propertyValue string
+		dataset       string
+		force         bool
+
+		wantErr bool
+	}{
+		"User property (local)":       {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"Authorized property (local)": {def: "one_pool_one_dataset.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
+		"User property (none)":        {def: "one_pool_one_dataset.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		// There is no authorized properties that can be "none" for now
+
+		"User property on snapshot (parent local)": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (parent none)":  {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+
+		"User property (inherit)":                               {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},
+		"User property on snapshot (parent inherit)":            {def: "one_pool_n_datasets_n_children_n_snapshots.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1"},
+		"User property (inherit but forced)":                    {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var", force: true},
+		"User property on snapshot (parent inherit but forced)": {def: "one_pool_n_datasets_n_children_n_snapshots.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", force: true},
+		// There is no authorized properties that can be inherited
+
+		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "mountpoint", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true},
+		"Dataset doesn't exists":                         {def: "one_pool_one_dataset.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true},
+		"Authorized property on snapshot doesn't exists": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.CanmountProp, propertyValue: "yes", dataset: "rpool@snap1", wantErr: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			defer fPools.create(dir)()
+			z := zfs.New()
+			err := z.SetProperty(tc.propertyName, tc.propertyValue, tc.dataset, tc.force)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				// we don't return because we want to check that on error, SetProperty() is a no-op
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			got, err := z.Scan()
+			if err != nil {
+				t.Fatalf("expected no error on scan but got: %v", err)
+			}
+
+			assertDatasetsToGolden(t, ta, got, true)
+		})
+	}
+}
+
 // assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
 // to a golden file.
 // It applies transformation to ensure that the comparison is reproducible.
