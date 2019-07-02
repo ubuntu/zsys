@@ -494,6 +494,57 @@ func (z Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 	return cloneInternal(d)
 }
 
+// SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.
+// force does it even if the property was inherited.
+// For zfs properties, only a fix set is supported. Right now: "canmount"
+func (Zfs) SetProperty(name, value, datasetName string, force bool) error {
+	d, err := libzfs.DatasetOpen(datasetName)
+	if err != nil {
+		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, datasetName, err)
+	}
+	defer d.Close()
+
+	var parentName string
+	if d.IsSnapshot() {
+		parentName = datasetName[:strings.LastIndex(datasetName, "@")]
+	}
+	var prop libzfs.Property
+	if !strings.Contains(name, ":") {
+		var propName libzfs.Prop
+		switch name {
+		case CanmountProp:
+			propName = libzfs.DatasetPropCanmount
+		default:
+			return xerrors.Errorf("can't set unsupported property %q for %q", name, datasetName)
+		}
+		prop, err = d.GetProperty(propName)
+		if err != nil {
+			return xerrors.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
+		}
+		if !force && prop.Source != "local" && prop.Source != "none" && prop.Source != parentName {
+			return nil
+		}
+		if err = d.SetProperty(propName, value); err != nil {
+			return xerrors.Errorf("can't set dataset property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
+		}
+		return nil
+	}
+
+	// User properties
+	prop, err = d.GetUserProperty(name)
+	if err != nil {
+		return xerrors.Errorf("can't get dataset user property %q for %q: "+config.ErrorFormat, name, datasetName, err)
+	}
+	if !force && prop.Source != "local" && prop.Source != "none" && prop.Source != parentName {
+		return nil
+	}
+	if err = d.SetUserProperty(name, value); err != nil {
+		return xerrors.Errorf("can't set dataset user property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
+	}
+
+	return nil
+}
+
 // getSnapName return base and trailing names
 func separateSnaphotName(name string) (string, string) {
 	i := strings.LastIndex(name, "@")
