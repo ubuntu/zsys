@@ -5,6 +5,7 @@ pools:
       - name: ROOT/ubuntu_1234
         zsys_bootfs: yes
         last_used: 2019-04-18T02:45:55+00:00
+        system_dataset: "rpool/path/to/dataset"
         mountpoint: /
         canmount: on
         snapshots:
