@@ -107,11 +107,7 @@ func (Zfs) Scan() ([]Dataset, error) {
 // for snapshots, we'll take the parent dataset for the mount properties.
 func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	sources := datasetSources{}
-
-	name, err := d.Path()
-	if err != nil {
-		return nil, xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
-	}
+	name := d.Properties[libzfs.DatasetPropName].Value
 
 	var mountPropertiesDataset = &d
 	if d.IsSnapshot() {
@@ -218,11 +214,7 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 		return nil
 	}
 
-	name, err := d.Path()
-	if err != nil {
-		collectErr = xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
-		return nil
-	}
+	name := d.Properties[libzfs.DatasetPropName].Value
 
 	props, err := getDatasetProp(d)
 	if err != nil {
@@ -276,13 +268,10 @@ func (Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot e
 		}
 	}()
 
-	// recursively try snapshotting all children. If an error is returned, the closure will clean newly created dataset
+	// recursively try snapshotting all children. If an error is returned, the closure will clean newly created datasets.
 	var snapshotInternal func(libzfs.Dataset) error
 	snapshotInternal = func(d libzfs.Dataset) error {
-		datasetName, err := d.Path()
-		if err != nil {
-			return xerrors.Errorf("can't get dataset path: "+config.ErrorFormat, err)
-		}
+		datasetName := d.Properties[libzfs.DatasetPropName].Value
 
 		// Get properties from parent snapshot.
 		srcProps, err := getDatasetProp(d)
