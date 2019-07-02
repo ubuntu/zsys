@@ -13,10 +13,15 @@ import (
 )
 
 const (
-	zsysPrefix     = "org.zsys:"
-	bootfsProp     = zsysPrefix + "bootfs"
-	lastUsedProp   = zsysPrefix + "last-used"
-	systemDataProp = zsysPrefix + "system-dataset"
+	zsysPrefix = "org.zsys:"
+	// BootfsProp string value
+	BootfsProp = zsysPrefix + "bootfs"
+	// LastUsedProp string value
+	LastUsedProp = zsysPrefix + "last-used"
+	// SystemDataProp string value
+	SystemDataProp = zsysPrefix + "system-dataset"
+	// CanmountProp string value
+	CanmountProp = "canmount"
 )
 
 /*
@@ -147,7 +152,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	canMount = cm.Value
 	sources.CanMount = cm.Source
 
-	bfs, err := d.GetUserProperty(bootfsProp)
+	bfs, err := d.GetUserProperty(BootfsProp)
 	if err != nil {
 		return nil, xerrors.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
 	}
@@ -159,9 +164,9 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 
 	var lu libzfs.Property
 	if !d.IsSnapshot() {
-		lu, err = d.GetUserProperty(lastUsedProp)
+		lu, err = d.GetUserProperty(LastUsedProp)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, lastUsedProp, err)
+			return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, LastUsedProp, err)
 		}
 	} else {
 		lu, err = d.GetProperty(libzfs.DatasetPropCreation)
@@ -175,12 +180,12 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	}
 	lastused, err := strconv.Atoi(lu.Value)
 	if err != nil {
-		return nil, xerrors.Errorf("%q property isn't an int: "+config.ErrorFormat, lastUsedProp, err)
+		return nil, xerrors.Errorf("%q property isn't an int: "+config.ErrorFormat, LastUsedProp, err)
 	}
 
-	sDataset, err := d.GetUserProperty(systemDataProp)
+	sDataset, err := d.GetUserProperty(SystemDataProp)
 	if err != nil {
-		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, systemDataProp, err)
+		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, SystemDataProp, err)
 	}
 	systemDataset := sDataset.Value
 	if systemDataset == "-" {
@@ -291,13 +296,13 @@ func (Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot e
 		// Set user properties that we couldn't set before creating the snapshot dataset.
 		// We don't set LastUsed here as Creation time will be used.
 		if srcProps.sources.BootFS == "local" {
-			if err := ds.SetUserProperty(bootfsProp, srcProps.BootFS); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, bootfsProp, snapshotDatasetName, err)
+			if err := ds.SetUserProperty(BootfsProp, srcProps.BootFS); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, snapshotDatasetName, err)
 			}
 		}
 		if srcProps.sources.SystemDataset == "local" {
-			if err := ds.SetUserProperty(systemDataProp, srcProps.SystemDataset); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, systemDataProp, snapshotDatasetName, err)
+			if err := ds.SetUserProperty(SystemDataProp, srcProps.SystemDataset); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, SystemDataProp, snapshotDatasetName, err)
 			}
 		}
 
@@ -410,13 +415,13 @@ func (z Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 		// or source == parentName (as it will be local)
 		parentName := name[:strings.LastIndex(name, "@")]
 		if srcProps.sources.BootFS == "local" || srcProps.sources.BootFS == parentName {
-			if err := cd.SetUserProperty(bootfsProp, srcProps.BootFS); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, bootfsProp, n, err)
+			if err := cd.SetUserProperty(BootfsProp, srcProps.BootFS); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
 			}
 		}
 		if srcProps.sources.SystemDataset == "local" || srcProps.sources.SystemDataset == parentName {
-			if err := cd.SetUserProperty(systemDataProp, srcProps.SystemDataset); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, systemDataProp, n, err)
+			if err := cd.SetUserProperty(SystemDataProp, srcProps.SystemDataset); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, SystemDataProp, n, err)
 			}
 		}
 		// We don't set LastUsed in purpose as the dataset isn't used yet

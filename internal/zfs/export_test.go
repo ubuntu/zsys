@@ -4,12 +4,6 @@ import (
 	"encoding/json"
 )
 
-const (
-	BootfsProp     = bootfsProp
-	LastUsedProp   = lastUsedProp
-	SystemDataProp = systemDataProp
-)
-
 // DatasetSlice enables sorting a slice of Dataset elements.
 // This is the element saved and compared against.
 type DatasetSlice struct {
