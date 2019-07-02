@@ -19,7 +19,12 @@ pools:
         zsys_bootfs: no
         canmount: on
         snapshots:
+        - name: snap_r1
         - name: snap_r2
+      - name: ROOT/ubuntu_1234/var/lib/apt
+        canmount: on
+        snapshots:
+          - name: snap_r2
       - name: ROOT/ubuntu_1234/opt
         canmount: on
         snapshots:

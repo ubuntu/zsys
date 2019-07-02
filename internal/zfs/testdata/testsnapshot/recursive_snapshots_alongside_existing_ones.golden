@@ -144,6 +144,70 @@
       }
    },
    {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+      "IsSnapshot": false,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 1555555555,
+      "SystemDataset": "",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "SystemDataset": "none"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": "",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "none"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap_r1",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": "",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "none"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "BootFS": "no",
+      "LastUsed": 2000000000,
+      "SystemDataset": "",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastUsed": "none",
+         "SystemDataset": "none"
+      }
+   },
+   {
       "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap1",
       "IsSnapshot": true,
       "Mountpoint": "/var/lib",
