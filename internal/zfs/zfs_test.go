@@ -291,6 +291,150 @@ func TestSetProperty(t *testing.T) {
 	}
 }
 
+func TestTransactions(t *testing.T) {
+	tests := map[string]struct {
+		def           string
+		doSnapshot    bool
+		doClone       bool
+		doSetProperty bool
+		shouldErr     bool
+		revert        bool
+	}{
+		"Snapshot only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true},
+		"Snapshot only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, revert: true},
+		"Snapshot only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true, revert: true},
+		"Snapshot only, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true}, // will issue a warning
+
+		"Clone only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doClone: true, revert: true},
+		"Clone only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doClone: true},
+		// We unfortunately can't do those because we can't fail in the middle of Clone(), after some modification were done
+		// The 2 failures are: either the dataset exists with suffix (won't clone anything) or missing intermediate snapshot
+		// (won't even start cloning).
+		// Avoid special casing the test code for no benefits.
+		//"Clone only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true, revert: true},
+		//"Clone only, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true}, // will issue a warning
+
+		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, revert: true},
+		"SetProperty only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
+		// We unfortunately can't do those because we can't fail in the middle of SetProperty(), after some modification were done
+
+		"Multiple steps transaction, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true},
+		"Multiple steps transaction, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true, revert: true},
+		"Multiple steps transaction, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true, shouldErr: true, revert: true},
+		"Multiple steps transaction, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true, shouldErr: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			defer fPools.create(dir)()
+			z := zfs.New(zfs.WithTransactions())
+			initState, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
+			state := initState
+
+			if tc.doSnapshot {
+				snapName := "snap1"
+				datasetName := "rpool/ROOT/ubuntu_1234"
+				if tc.shouldErr {
+					// an existing snapshot on var/lib exists and will make it fail
+					snapName = "snap_r1"
+					datasetName = "rpool/ROOT/ubuntu_1234/var"
+				}
+				err := z.Snapshot(snapName, datasetName, true)
+				if !tc.shouldErr && err != nil {
+					t.Fatalf("taking snapshot shouldn't have failed but it did: %v", err)
+				} else if tc.shouldErr && err == nil {
+					t.Fatal("taking snapshot should have returned an error but it didn't")
+				}
+				// We expect some modifications
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get state after snapshot: %v", err)
+				}
+				assertDatasetsNotEquals(t, ta, state, newState, true)
+				state = newState
+			}
+
+			if tc.doClone {
+				name := "rpool/ROOT/ubuntu_1234@snap_r2"
+				suffix := "5678"
+				if tc.shouldErr {
+					// rpool/ROOT/ubuntu_9999 exists
+					suffix = "9999"
+				}
+				err := z.Clone(name, suffix, true)
+				if !tc.shouldErr && err != nil {
+					t.Fatalf("cloning shouldn't have failed but it did: %v", err)
+				} else if tc.shouldErr && err == nil {
+					t.Fatal("cloning should have returned an error but it didn't")
+				}
+				// We can't expect some modifications (see above)
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get state after cloning: %v", err)
+				}
+				// bypass checks on error (things will be equal), as we can't have an error with changes see the test definition above
+				if !tc.shouldErr {
+					assertDatasetsNotEquals(t, ta, state, newState, true)
+				}
+				state = newState
+			}
+
+			if tc.doSetProperty {
+				propertyName := zfs.BootfsProp
+				if tc.shouldErr {
+					// this property isn't allowed
+					propertyName = "mountpoint"
+				}
+				err := z.SetProperty(propertyName, "no", "rpool/ROOT/ubuntu_1234", false)
+				if !tc.shouldErr && err != nil {
+					t.Fatalf("changing property shouldn't have failed but it did: %v", err)
+				} else if tc.shouldErr && err == nil {
+					t.Fatal("changing property should have returned an error but it didn't")
+				}
+				// We expect some modifications
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get state after snapshot: %v", err)
+				}
+				// bypass checks on error (things will be equal), as we can't have an error with changes see the test definition above
+				if !tc.shouldErr {
+					assertDatasetsNotEquals(t, ta, state, newState, true)
+				}
+				state = newState
+			}
+
+			// Final transaction states
+			if tc.revert {
+				// Revert: should get back to initial state
+				z.Cancel()
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+				assertDatasetsNotEquals(t, ta, state, newState, true)
+				assertDatasetsEquals(t, ta, initState, newState, true)
+			} else {
+				// Done: should commit the current state and be different from initial one
+				z.Done()
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+				assertDatasetsEquals(t, ta, state, newState, true)
+				assertDatasetsNotEquals(t, ta, initState, newState, true)
+			}
+		})
+	}
+}
+
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
 // DataSlices.
 func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) zfs.DatasetSlice {
