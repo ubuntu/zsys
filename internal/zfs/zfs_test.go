@@ -240,11 +240,9 @@ func TestSetProperty(t *testing.T) {
 	}
 }
 
-// assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
-// to a golden file.
-// It applies transformation to ensure that the comparison is reproducible.
-// We can optionnally include private fields in the comparison and saving.
-func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) {
+// transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
+// DataSlices.
+func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) zfs.DatasetSlice {
 	t.Helper()
 
 	// Ensure datasets were created at expected range time and replace them with magic time.
@@ -260,12 +258,12 @@ func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, in
 	// Sort the golden file order to be reproducible.
 	gotForGolden := zfs.DatasetSlice{DS: got, IncludePrivate: includePrivate}
 	sort.Sort(gotForGolden)
-	got = gotForGolden.DS
+	return gotForGolden
+}
 
-	// Get expected dataset list from golden file, update as needed.
-	wantFromGolden := zfs.DatasetSlice{IncludePrivate: includePrivate}
-	loadFromGoldenFile(t, gotForGolden, &wantFromGolden)
-	want := []zfs.Dataset(wantFromGolden.DS)
+// datasetsEquals prints a diff if datasets aren't equals and fails the test
+func datasetsEquals(t *testing.T, want, got []zfs.Dataset, includePrivate bool) {
+	t.Helper()
 
 	// Actual diff assertion.
 	privateOpt := cmpopts.IgnoreUnexported(zfs.DatasetProp{})
@@ -275,6 +273,23 @@ func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, in
 	if diff := cmp.Diff(want, got, privateOpt); diff != "" {
 		t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
 	}
+}
+
+// assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
+// to a golden file.
+// We can optionnally include private fields in the comparison and saving.
+func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) {
+	t.Helper()
+
+	gotForGolden := transformToReproducibleDatasetSlice(t, ta, got, includePrivate)
+	got = gotForGolden.DS
+
+	// Get expected dataset list from golden file, update as needed.
+	wantFromGolden := zfs.DatasetSlice{IncludePrivate: includePrivate}
+	loadFromGoldenFile(t, gotForGolden, &wantFromGolden)
+	want := []zfs.Dataset(wantFromGolden.DS)
+
+	datasetsEquals(t, want, got, includePrivate)
 }
 
 func tempDir(t *testing.T) (string, func()) {
