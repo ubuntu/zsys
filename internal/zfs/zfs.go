@@ -85,11 +85,24 @@ type datasetSources struct {
 }
 
 // Zfs is a system handler talking to zfs linux module.
-type Zfs struct{}
+// It can handle a single transaction if "WithTransaction()"" is passed to the New constructor.
+// An error won't then try to rollback the changes and Cancel() should be called.
+// If no error happened and we want to finish the transaction before starting a new one, call "Done()".
+// If no transaction support is used, any error in a method call will try to rollback changes automatically.
+type Zfs struct {
+	transactional  bool
+	reverts        []func() error
+	transactionErr bool
+}
 
 // New return a new zfs system handler.
-func New() *Zfs {
-	return &Zfs{}
+func New(options ...func(*Zfs)) *Zfs {
+	z := Zfs{}
+	for _, options := range options {
+		options(&z)
+	}
+
+	return &z
 }
 
 // Scan returns all datasets that are currently imported on the system.
