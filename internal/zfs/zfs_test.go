@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k0kubun/pp"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -325,6 +326,20 @@ func datasetsEquals(t *testing.T, want, got []zfs.Dataset, includePrivate bool) 
 	}
 }
 
+// datasetsNotEquals prints the struct if datasets are equals and fails the test
+func datasetsNotEquals(t *testing.T, want, got []zfs.Dataset, includePrivate bool) {
+	t.Helper()
+
+	// Actual diff assertion.
+	privateOpt := cmpopts.IgnoreUnexported(zfs.DatasetProp{})
+	if includePrivate {
+		privateOpt = cmp.AllowUnexported(zfs.DatasetProp{})
+	}
+	if diff := cmp.Diff(want, got, privateOpt); diff == "" {
+		t.Error("datasets are equals where we expected not to:", pp.Sprint(want))
+	}
+}
+
 // assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
 // to a golden file.
 // We can optionnally include private fields in the comparison and saving.
@@ -342,8 +357,8 @@ func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, in
 	datasetsEquals(t, want, got, includePrivate)
 }
 
-// assertDatasetsEquals compares 2 slices of datasets. After ensuring they can be reproducible.
-// We can optionnally include private fields in the comparison and saving.
+// assertDatasetsEquals compares 2 slices of datasets, after ensuring they can be reproducible.
+// We can optionnally include private fields in the comparison.
 func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset, includePrivate bool) {
 	t.Helper()
 
@@ -351,6 +366,17 @@ func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset
 	got = transformToReproducibleDatasetSlice(t, ta, got, includePrivate).DS
 
 	datasetsEquals(t, want, got, includePrivate)
+}
+
+// assertDatasetsNotEquals compares 2 slices of datasets, ater ensuring they can be reproducible.
+// We can optionnally include private fields in the comparison.
+func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset, includePrivate bool) {
+	t.Helper()
+
+	want = transformToReproducibleDatasetSlice(t, ta, want, includePrivate).DS
+	got = transformToReproducibleDatasetSlice(t, ta, got, includePrivate).DS
+
+	datasetsNotEquals(t, want, got, includePrivate)
 }
 
 func tempDir(t *testing.T) (string, func()) {
