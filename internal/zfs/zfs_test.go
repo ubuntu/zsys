@@ -292,6 +292,17 @@ func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, in
 	datasetsEquals(t, want, got, includePrivate)
 }
 
+// assertDatasetsEquals compares 2 slices of datasets. After ensuring they can be reproducible.
+// We can optionnally include private fields in the comparison and saving.
+func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset, includePrivate bool) {
+	t.Helper()
+
+	want = transformToReproducibleDatasetSlice(t, ta, want, includePrivate).DS
+	got = transformToReproducibleDatasetSlice(t, ta, got, includePrivate).DS
+
+	datasetsEquals(t, want, got, includePrivate)
+}
+
 func tempDir(t *testing.T) (string, func()) {
 	t.Helper()
 
