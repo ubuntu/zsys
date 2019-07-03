@@ -84,16 +84,18 @@ func TestSnapshot(t *testing.T) {
 		isNoOp  bool
 	}{
 		"Simple snapshot":                                      {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool"},
-		"Recursive snapshots":                                  {def: "layout1__one_pool_n_datasets.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
 		"Simple snapshot with children":                        {def: "layout1__one_pool_n_datasets.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234"},
-		"Dataset doesn't exist":                                {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "doesntexit", wantErr: true, isNoOp: true},
-		"Invalid snapshot name":                                {def: "one_pool_one_dataset.yaml", snapshotName: "", datasetName: "rpool", wantErr: true, isNoOp: true},
-		"Recursive snapshot on leaf dataset":                   {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool", recursive: true},
-		"Recursive snapshots alongside existing ones":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
-		"Snapshot on dataset already exists":                   {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234/opt", wantErr: true, isNoOp: true},
-		"Snapshot on subdataset already exists":                {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT", recursive: true, wantErr: true, isNoOp: true},
 		"Simple snapshot even if on subdataset already exists": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT"},
-		"Snapshot on dataset exists, but not on subdataset":    {def: "layout1_missing_intermediate_snapshot.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+
+		"Recursive snapshots":                         {def: "layout1__one_pool_n_datasets.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
+		"Recursive snapshot on leaf dataset":          {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool", recursive: true},
+		"Recursive snapshots alongside existing ones": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
+
+		"Dataset doesn't exist":                             {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "doesntexit", wantErr: true, isNoOp: true},
+		"Invalid snapshot name":                             {def: "one_pool_one_dataset.yaml", snapshotName: "", datasetName: "rpool", wantErr: true, isNoOp: true},
+		"Snapshot on dataset already exists":                {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234/opt", wantErr: true, isNoOp: true},
+		"Snapshot on subdataset already exists":             {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT", recursive: true, wantErr: true, isNoOp: true},
+		"Snapshot on dataset exists, but not on subdataset": {def: "layout1_missing_intermediate_snapshot.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
