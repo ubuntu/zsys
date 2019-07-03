@@ -81,18 +81,19 @@ func TestSnapshot(t *testing.T) {
 		recursive    bool
 
 		wantErr bool
+		isNoOp  bool
 	}{
 		"Simple snapshot":                                      {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool"},
 		"Recursive snapshots":                                  {def: "layout1__one_pool_n_datasets.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
 		"Simple snapshot with children":                        {def: "layout1__one_pool_n_datasets.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234"},
-		"Dataset doesn't exist":                                {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "doesntexit", wantErr: true},
-		"Invalid snapshot name":                                {def: "one_pool_one_dataset.yaml", snapshotName: "", datasetName: "rpool", wantErr: true},
+		"Dataset doesn't exist":                                {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "doesntexit", wantErr: true, isNoOp: true},
+		"Invalid snapshot name":                                {def: "one_pool_one_dataset.yaml", snapshotName: "", datasetName: "rpool", wantErr: true, isNoOp: true},
 		"Recursive snapshot on leaf dataset":                   {def: "one_pool_one_dataset.yaml", snapshotName: "snap1", datasetName: "rpool", recursive: true},
 		"Recursive snapshots alongside existing ones":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap1", datasetName: "rpool/ROOT/ubuntu_1234", recursive: true},
-		"Snapshot on dataset already exists":                   {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234/opt", wantErr: true},
-		"Snapshot on subdataset already exists":                {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT", recursive: true, wantErr: true},
+		"Snapshot on dataset already exists":                   {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234/opt", wantErr: true, isNoOp: true},
+		"Snapshot on subdataset already exists":                {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT", recursive: true, wantErr: true, isNoOp: true},
 		"Simple snapshot even if on subdataset already exists": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT"},
-		"Snapshot on dataset exists, but not on subdataset":    {def: "layout1_missing_intermediate_snapshot.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234", wantErr: true},
+		"Snapshot on dataset exists, but not on subdataset":    {def: "layout1_missing_intermediate_snapshot.yaml", snapshotName: "snap_r1", datasetName: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -104,7 +105,18 @@ func TestSnapshot(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New()
+			// Scan initial state for no-op
+			var initState []zfs.Dataset
+			if tc.isNoOp {
+				var err error
+				initState, err = z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+			}
+
 			err := z.Snapshot(tc.snapshotName, tc.datasetName, tc.recursive)
+
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -117,9 +129,13 @@ func TestSnapshot(t *testing.T) {
 
 			got, err := z.Scan()
 			if err != nil {
-				t.Fatalf("expected no error on scan but got: %v", err)
+				t.Fatalf("couldn't get final state: %v", err)
 			}
 
+			if tc.isNoOp {
+				assertDatasetsEquals(t, ta, initState, got, true)
+				return
+			}
 			assertDatasetsToGolden(t, ta, got, true)
 		})
 	}
@@ -133,6 +149,7 @@ func TestClone(t *testing.T) {
 		recursive bool
 
 		wantErr bool
+		isNoOp  bool
 	}{
 		// TODO: Test case with user properties changed between snapshot and parent (with children inheriting)
 		"Simple clone":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678"},
@@ -142,13 +159,13 @@ func TestClone(t *testing.T) {
 		"Recursive clone on dataset without suffix": {def: "layout1__one_pool_n_datasets_n_snapshots_without_suffix.yaml", dataset: "rpool/ROOT/ubuntu@snap_r1", suffix: "5678", recursive: true},
 
 		"Recursive missing some leaf snapshots":    {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
-		"Recursive missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true, wantErr: true},
+		"Recursive missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true, wantErr: true, isNoOp: true},
 
-		"Snapshot doesn't exists":         {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@doesntexists", suffix: "5678", wantErr: true},
-		"Dataset doesn't exists":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist@something", suffix: "5678", wantErr: true},
-		"No suffix provided":              {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true},
-		"Suffixed dataset already exists": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "1234", wantErr: true},
-		"Clone on root fails":             {def: "one_pool_one_dataset_one_snapshot.yaml", dataset: "rpool@snap1", suffix: "5678", wantErr: true},
+		"Snapshot doesn't exists":         {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@doesntexists", suffix: "5678", wantErr: true, isNoOp: true},
+		"Dataset doesn't exists":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist@something", suffix: "5678", wantErr: true, isNoOp: true},
+		"No suffix provided":              {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
+		"Suffixed dataset already exists": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "1234", wantErr: true, isNoOp: true},
+		"Clone on root fails":             {def: "one_pool_one_dataset_one_snapshot.yaml", dataset: "rpool@snap1", suffix: "5678", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -160,7 +177,18 @@ func TestClone(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New()
+			// Scan initial state for no-op
+			var initState []zfs.Dataset
+			if tc.isNoOp {
+				var err error
+				initState, err = z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+			}
+
 			err := z.Clone(tc.dataset, tc.suffix, tc.recursive)
+
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -173,9 +201,13 @@ func TestClone(t *testing.T) {
 
 			got, err := z.Scan()
 			if err != nil {
-				t.Fatalf("expected no error on scan but got: %v", err)
+				t.Fatalf("couldn't get final state: %v", err)
 			}
 
+			if tc.isNoOp {
+				assertDatasetsEquals(t, ta, initState, got, true)
+				return
+			}
 			assertDatasetsToGolden(t, ta, got, true)
 		})
 	}
@@ -190,6 +222,7 @@ func TestSetProperty(t *testing.T) {
 		force         bool
 
 		wantErr bool
+		isNoOp  bool
 	}{
 		"User property (local)":       {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		"Authorized property (local)": {def: "one_pool_one_dataset.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
@@ -205,9 +238,9 @@ func TestSetProperty(t *testing.T) {
 		"User property on snapshot (parent inherit but forced)": {def: "one_pool_n_datasets_n_children_n_snapshots.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", force: true},
 		// There is no authorized properties that can be inherited
 
-		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "mountpoint", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true},
-		"Dataset doesn't exists":                         {def: "one_pool_one_dataset.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true},
-		"Authorized property on snapshot doesn't exists": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.CanmountProp, propertyValue: "yes", dataset: "rpool@snap1", wantErr: true},
+		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "mountpoint", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true, isNoOp: true},
+		"Dataset doesn't exists":                         {def: "one_pool_one_dataset.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
+		"Authorized property on snapshot doesn't exists": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.CanmountProp, propertyValue: "yes", dataset: "rpool@snap1", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -219,7 +252,18 @@ func TestSetProperty(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New()
+			// Scan initial state for no-op
+			var initState []zfs.Dataset
+			if tc.isNoOp {
+				var err error
+				initState, err = z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+			}
+
 			err := z.SetProperty(tc.propertyName, tc.propertyValue, tc.dataset, tc.force)
+
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -232,9 +276,13 @@ func TestSetProperty(t *testing.T) {
 
 			got, err := z.Scan()
 			if err != nil {
-				t.Fatalf("expected no error on scan but got: %v", err)
+				t.Fatalf("couldn't get final state: %v", err)
 			}
 
+			if tc.isNoOp {
+				assertDatasetsEquals(t, ta, initState, got, true)
+				return
+			}
 			assertDatasetsToGolden(t, ta, got, true)
 		})
 	}
