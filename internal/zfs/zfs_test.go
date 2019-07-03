@@ -449,6 +449,11 @@ func (ta timeAsserter) assertAndReplaceCreationTimeInRange(t *testing.T, ds []*z
 	start := time.Time(ta).Unix()
 
 	for _, r := range ds {
+		// avoid transforming already set MagicTime
+		if r.LastUsed == currentMagicTime {
+			continue
+		}
+
 		if int64(r.LastUsed) < start || int64(r.LastUsed) > curr {
 			t.Errorf("expected snapshot time outside of range: %d", r.LastUsed)
 		} else {
