@@ -39,3 +39,15 @@ func (z *Zfs) Cancel() {
 func (z *Zfs) registerRevert(f func() error) {
 	z.reverts = append(z.reverts, f)
 }
+
+// saveOrRevert stores error in transaction if any or call Cancel in non transactional mode
+func (z *Zfs) saveOrRevert(err error) {
+	if err == nil {
+		return
+	}
+	if z.transactional {
+		z.transactionErr = true
+		return
+	}
+	z.Cancel()
+}

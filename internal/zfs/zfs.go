@@ -2,7 +2,6 @@ package zfs
 
 import (
 	"log"
-	"sort"
 	"strconv"
 	"strings"
 
@@ -255,36 +254,16 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 }
 
 // Snapshot creates a new snapshot for dataset (and children if recursive is true) with the given name.
-func (Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot error) {
+func (z *Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot error) {
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
 		return xerrors.Errorf("couldn't open %q: %v", datasetName, err)
 	}
 	defer d.Close()
+	defer func() { z.saveOrRevert(errSnapshot) }()
 
 	// We can't use the recursive version of snapshotting, as we want to track user properties and
 	// set them explicitely as needed
-
-	// Cleanup newly created snapshot datasets if we or a children returns an error (like intermediate datasets have a snapshot)
-	var snapshotDatasetNames []string
-	defer func() {
-		if snapshotDatasetNames == nil || errSnapshot == nil {
-			return
-		}
-		// start with leaves to undo clone creation
-		sort.Sort(sort.Reverse(sort.StringSlice(snapshotDatasetNames)))
-		for _, n := range snapshotDatasetNames {
-			d, err := libzfs.DatasetOpen(n)
-			if err != nil {
-				log.Printf("couldn't open %q for cleanup: %v", n, err)
-				continue
-			}
-			defer d.Close()
-			if err := d.Destroy(false); err != nil {
-				log.Printf("couldn't destroy %q for cleanup: %v", n, err)
-			}
-		}
-	}()
 
 	// recursively try snapshotting all children. If an error is returned, the closure will clean newly created datasets.
 	var snapshotInternal func(libzfs.Dataset) error
@@ -298,24 +277,34 @@ func (Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot e
 		}
 
 		props := make(map[libzfs.Prop]libzfs.Property)
-		snapshotDatasetName := datasetName + "@" + snapName
-		ds, err := libzfs.DatasetSnapshot(snapshotDatasetName, false, props)
+		n := datasetName + "@" + snapName
+		ds, err := libzfs.DatasetSnapshot(n, false, props)
 		if err != nil {
 			return xerrors.Errorf("couldn't snapshot %q: %v", datasetName, err)
 		}
-		snapshotDatasetNames = append(snapshotDatasetNames, snapshotDatasetName)
+		z.registerRevert(func() error {
+			d, err := libzfs.DatasetOpen(n)
+			if err != nil {
+				return xerrors.Errorf("couldn't open %q for cleanup: %v", n, err)
+			}
+			defer d.Close()
+			if err := d.Destroy(false); err != nil {
+				return xerrors.Errorf("couldn't destroy %q for cleanup: %v", n, err)
+			}
+			return nil
+		})
 		defer ds.Close()
 
 		// Set user properties that we couldn't set before creating the snapshot dataset.
 		// We don't set LastUsed here as Creation time will be used.
 		if srcProps.sources.BootFS == "local" {
 			if err := ds.SetUserProperty(BootfsProp, srcProps.BootFS); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, snapshotDatasetName, err)
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
 			}
 		}
 		if srcProps.sources.SystemDataset == "local" {
 			if err := ds.SetUserProperty(SystemDataProp, srcProps.SystemDataset); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, SystemDataProp, snapshotDatasetName, err)
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, SystemDataProp, n, err)
 			}
 		}
 
@@ -340,32 +329,10 @@ func (Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot e
 
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
-func (z Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
-
+func (z *Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 	if suffix == "" {
 		return xerrors.Errorf("no suffix was provided for cloning")
 	}
-
-	// Cleanup newly created datasets if we or a children returns an error (like intermediate datasets have a snapshot)
-	var clonedDatasetNames []string
-	defer func() {
-		if clonedDatasetNames == nil || errClone == nil {
-			return
-		}
-		// start with leaves to undo clone creation
-		sort.Sort(sort.Reverse(sort.StringSlice(clonedDatasetNames)))
-		for _, n := range clonedDatasetNames {
-			d, err := libzfs.DatasetOpen(n)
-			if err != nil {
-				log.Printf("couldn't open %q for cleanup: %v", n, err)
-				return
-			}
-			defer d.Close()
-			if err := d.Destroy(false); err != nil {
-				log.Printf("couldn't destroy %q for cleanup: %v", n, err)
-			}
-		}
-	}()
 
 	d, err := libzfs.DatasetOpen(name)
 	if err != nil {
@@ -376,6 +343,7 @@ func (z Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 	if !d.IsSnapshot() {
 		return xerrors.Errorf("%q isn't a snapshot", name)
 	}
+	defer func() { z.saveOrRevert(errClone) }()
 
 	rootName, snaphotName := separateSnaphotName(name)
 
@@ -422,7 +390,17 @@ func (z Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 		if err != nil {
 			return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, n, err)
 		}
-		clonedDatasetNames = append(clonedDatasetNames, n)
+		z.registerRevert(func() error {
+			d, err := libzfs.DatasetOpen(n)
+			if err != nil {
+				return xerrors.Errorf("couldn't open %q for cleanup: %v", n, err)
+			}
+			defer d.Close()
+			if err := d.Destroy(false); err != nil {
+				return xerrors.Errorf("couldn't destroy %q for cleanup: %v", n, err)
+			}
+			return nil
+		})
 
 		// Set user properties that we couldn't set before creating the dataset. Based this for local
 		// or source == parentName (as it will be local)
