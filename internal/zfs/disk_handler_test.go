@@ -1,6 +1,7 @@
 package zfs_test
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -39,6 +40,10 @@ type fakePool struct {
 	}
 }
 
+var (
+	keepPool = flag.Bool("keep-pool", false, "don't destroy pool and temporary folders for it. Don't run multiple tests with this flag.")
+)
+
 // newFakePools returns a fakePools from a yaml file
 func newFakePools(t *testing.T, path string) fakePools {
 	pools := fakePools{t: t}
@@ -66,6 +71,11 @@ func (fpools fakePools) Fatalf(format string, args ...interface{}) {
 }
 
 func (fpools fakePools) cleanup() {
+	if *keepPool {
+		fmt.Printf("Keep pool(s) as requesting for debug. Please zpool export them afterwards and remove %q\n", filepath.Dir(fpools.tempFiles[0]))
+		return
+	}
+
 	for _, p := range fpools.tempPools {
 		pool, err := libzfs.PoolOpen(p)
 		if err != nil {

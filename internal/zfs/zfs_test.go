@@ -289,13 +289,6 @@ func tempDir(t *testing.T) (string, func()) {
 			t.Error("can't clean temporary directory", err)
 		}
 	}
-
-	/*dir := "/tmp/zsystmp"
-	os.RemoveAll(dir)
-	os.Mkdir(dir, 0777)
-
-	return dir, func() {}*/
-
 }
 
 // loadFromGoldenFile loads expected content to "want", after optionally refreshing it
