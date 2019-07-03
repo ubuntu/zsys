@@ -488,12 +488,13 @@ func (z *Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 // SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
-func (Zfs) SetProperty(name, value, datasetName string, force bool) error {
+func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetProperty error) {
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
 		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, datasetName, err)
 	}
 	defer d.Close()
+	defer func() { z.saveOrRevert(errSetProperty) }()
 
 	var parentName string
 	if d.IsSnapshot() {
@@ -518,6 +519,7 @@ func (Zfs) SetProperty(name, value, datasetName string, force bool) error {
 		if err = d.SetProperty(propName, value); err != nil {
 			return xerrors.Errorf("can't set dataset property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
 		}
+		z.registerRevert(func() error { return z.SetProperty(name, prop.Value, datasetName, force) })
 		return nil
 	}
 
@@ -532,6 +534,7 @@ func (Zfs) SetProperty(name, value, datasetName string, force bool) error {
 	if err = d.SetUserProperty(name, value); err != nil {
 		return xerrors.Errorf("can't set dataset user property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
 	}
+	z.registerRevert(func() error { return z.SetProperty(name, prop.Value, datasetName, force) })
 
 	return nil
 }
