@@ -325,6 +325,71 @@ func (z *Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 	return cloneInternal(d)
 }
 
+// Promote recursively all children, including dataset named "name".
+func (z *Zfs) Promote(name string) (errPromote error) {
+	d, err := libzfs.DatasetOpen(name)
+	if err != nil {
+		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, name, err)
+	}
+	defer d.Close()
+
+	if d.IsSnapshot() {
+		return xerrors.Errorf("can't promote %q: it's a snapshot", name)
+	}
+	defer func() { z.saveOrRevert(errPromote) }()
+
+	var promoteInternal func(libzfs.Dataset) error
+	promoteInternal = func(d libzfs.Dataset) error {
+		name := d.Properties[libzfs.DatasetPropName].Value
+
+		origin, _ := separateSnaphotName(d.Properties[libzfs.DatasetPropOrigin].Value)
+		if len(origin) == 0 {
+			return xerrors.Errorf("%q should have been a clone to promote, but no origin was found", name)
+		}
+
+		if err := d.Promote(); err != nil {
+			return xerrors.Errorf("couldn't promote %q: "+config.ErrorFormat, name, err)
+		}
+		z.registerRevert(func() error {
+			origD, err := libzfs.DatasetOpen(origin)
+			if err != nil {
+				return xerrors.Errorf("couldn't open %q for cleanup: %v", origin, err)
+			}
+			defer origD.Close()
+			if err := origD.Promote(); err != nil {
+				return xerrors.Errorf("couldn't promote %q for cleanup: %v", origin, err)
+			}
+			return nil
+		})
+
+		for _, cd := range d.Children {
+			if cd.IsSnapshot() {
+				continue
+			}
+			if err := promoteInternal(cd); err != nil {
+				return err
+			}
+		}
+
+		return nil
+	}
+
+	originParent, snapshotName := separateSnaphotName(d.Properties[libzfs.DatasetPropOrigin].Value)
+	if len(originParent) == 0 {
+		return xerrors.Errorf("%q should have been a clone to promote, but no origin was found", name)
+	}
+	parent, err := libzfs.DatasetOpen(originParent)
+	if err != nil {
+		return xerrors.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
+	}
+	defer parent.Close()
+	if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
+		return xerrors.Errorf("integrity check failed: %v", err)
+	}
+
+	return promoteInternal(d)
+}
+
 // SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
