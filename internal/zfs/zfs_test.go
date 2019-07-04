@@ -367,6 +367,7 @@ func TestTransactions(t *testing.T) {
 		def           string
 		doSnapshot    bool
 		doClone       bool
+		doPromote     bool
 		doSetProperty bool
 		shouldErr     bool
 		revert        bool
@@ -385,14 +386,18 @@ func TestTransactions(t *testing.T) {
 		//"Clone only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true, revert: true},
 		//"Clone only, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true}, // will issue a warning
 
+		"Promote only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doPromote: true, revert: true},
+		"Promote only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doPromote: true},
+		// We unfortunately can't do those because we can't fail in the middle of Promote(), after some modification were done
+
 		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, revert: true},
 		"SetProperty only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
 		// We unfortunately can't do those because we can't fail in the middle of SetProperty(), after some modification were done
 
-		"Multiple steps transaction, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true},
-		"Multiple steps transaction, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true, revert: true},
-		"Multiple steps transaction, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true, shouldErr: true, revert: true},
-		"Multiple steps transaction, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doSetProperty: true, shouldErr: true},
+		"Multiple steps transaction, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true},
+		"Multiple steps transaction, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, revert: true},
+		"Multiple steps transaction, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true, revert: true},
+		"Multiple steps transaction, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true},
 	}
 
 	for name, tc := range tests {
@@ -450,6 +455,45 @@ func TestTransactions(t *testing.T) {
 				newState, err := z.Scan()
 				if err != nil {
 					t.Fatalf("couldn't get state after cloning: %v", err)
+				}
+				// bypass checks on error (things will be equal), as we can't have an error with changes see the test definition above
+				if !tc.shouldErr {
+					assertDatasetsNotEquals(t, ta, state, newState, true)
+				}
+				state = newState
+			}
+
+			if tc.doPromote {
+				name := "rpool/ROOT/ubuntu_5678"
+				if tc.shouldErr {
+					// rpool/ROOT/ubuntu_1111 doesn't exists
+					name = "rpool/ROOT/ubuntu_1111"
+				} else {
+					// Prepare cloning in its own transaction
+					if !tc.doClone {
+						z2 := zfs.New()
+						err := z2.Clone("rpool/ROOT/ubuntu_1234@snap_r2", "5678", true)
+						if err != nil {
+							t.Fatalf("couldnt clone to prepare dataset hierarchy: %v", err)
+						}
+						// Reset init state
+						initState, err = z.Scan()
+						if err != nil {
+							t.Fatalf("couldn't get initial state: %v", err)
+						}
+						state = initState
+					}
+				}
+				err := z.Promote(name)
+				if !tc.shouldErr && err != nil {
+					t.Fatalf("promoting shouldn't have failed but it did: %v", err)
+				} else if tc.shouldErr && err == nil {
+					t.Fatal("promoting should have returned an error but it didn't")
+				}
+				// We can't expect some modifications (see above)
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get state after promoting: %v", err)
 				}
 				// bypass checks on error (things will be equal), as we can't have an error with changes see the test definition above
 				if !tc.shouldErr {
