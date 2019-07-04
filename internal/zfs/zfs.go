@@ -316,8 +316,10 @@ func (z *Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 		return xerrors.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
 	}
 	defer parent.Close()
-	if err := checkSnapshotHierarchyIntegrity(parent, snaphotName, true); err != nil {
-		return xerrors.Errorf("integrity check failed: %v", err)
+	if recursive {
+		if err := checkSnapshotHierarchyIntegrity(parent, snaphotName, true); err != nil {
+			return xerrors.Errorf("integrity check failed: %v", err)
+		}
 	}
 
 	return cloneInternal(d)
