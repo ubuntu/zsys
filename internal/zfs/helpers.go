@@ -151,3 +151,31 @@ func separateSnaphotName(name string) (string, string) {
 	}
 	return name[:i], name[i+1:]
 }
+
+// checkSnapshotHierarchyIntegrity checks that the hierachy follow the correct rules.
+// There are multiple cases:
+// - All children datasets with a snapshot with the same name exists -> OK, nothing in particular to deal with
+// - One dataset doesn't have a snapshot with the same name:
+//   * If no of its children of this dataset has a snapshot with the same name:
+//     * the dataset (and its children) has been created after the snapshot was taken -> OK
+//     * the dataset snapshot (and all its children snapshots) have been removed entirely: no way to detect the difference from above -> consider OK
+//   * If one of its children has a snapshot with the same name: clearly a case where something went wrong during snapshot -> error OUT
+// Said differently:
+// if a dataset has a snapshot with a given, all its parents should have a snapshot with the same name (up to base snapshotName)
+func checkSnapshotHierarchyIntegrity(d libzfs.Dataset, snapshotName string, snapshotExpected bool) error {
+	found, _ := d.FindSnapshotName("@" + snapshotName)
+
+	// No more snapshot was expected for children (parent dataset didn't have a snapshot, so all children shouldn't have them)
+	if found && !snapshotExpected {
+		name := d.Properties[libzfs.DatasetPropName].Value
+		return xerrors.Errorf("parent of %q doesn't have a snapshot named %q. Every of its children shouldn't have a snapshot. However %q exists.",
+			name, snapshotName, name+"@"+snapshotName)
+	}
+
+	for _, cd := range d.Children {
+		if err := checkSnapshotHierarchyIntegrity(cd, snapshotName, found); err != nil {
+			return err
+		}
+	}
+	return nil
+}

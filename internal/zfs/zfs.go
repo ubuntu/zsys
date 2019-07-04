@@ -311,42 +311,15 @@ func (z *Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 		return nil
 	}
 
-	// Integrity checks, there are multiple cases:
-	// - All children datasets with a snapshot with the same name exists -> OK, nothing in particular to deal with
-	// - One dataset doesn't have a snapshot with the same name:
-	//   * If no of its children of this dataset has a snapshot with the same name:
-	//     * the dataset (and its children) has been created after the snapshot was taken -> OK
-	//     * the dataset snapshot (and all its children snapshots) have been removed entirely: no way to detect the difference from above -> consider OK
-	//   * If one of its children has a snapshot wi		h the same name: clearly a case where something went wrong during snapshot -> error OUT
-	// Said differently:
-	// if a dataset has a snapshot with a given, all its parents should have a snapshot with the same name (up to base snapshotName)
-	var checkElemAndChildren func(libzfs.Dataset, bool) error
-	checkElemAndChildren = func(d libzfs.Dataset, snapshotExpected bool) error {
-		found, _ := d.FindSnapshotName("@" + snaphotName)
-
-		// No more snapshot was expected for children (parent dataset didn't have a snapshot, so all children shouldn't have them)
-		if found && !snapshotExpected {
-			name := d.Properties[libzfs.DatasetPropName].Value
-			return xerrors.Errorf("parent of %q doesn't have a snapshot named %q. Every of its children shouldn't have a snapshot. However %q exists.",
-				name, snaphotName, name+"@"+snaphotName)
-		}
-
-		for _, cd := range d.Children {
-			if err := checkElemAndChildren(cd, found); err != nil {
-				return err
-			}
-		}
-		return nil
-	}
-
 	parent, err := libzfs.DatasetOpen(d.Properties[libzfs.DatasetPropName].Value[:strings.LastIndex(name, "@")])
 	if err != nil {
 		return xerrors.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
 	}
 	defer parent.Close()
-	if err := checkElemAndChildren(parent, true); err != nil {
+	if err := checkSnapshotHierarchyIntegrity(parent, snaphotName, true); err != nil {
 		return xerrors.Errorf("integrity check failed: %v", err)
 	}
+
 	return cloneInternal(d)
 }
 
