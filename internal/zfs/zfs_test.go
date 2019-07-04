@@ -217,6 +217,76 @@ func TestClone(t *testing.T) {
 	}
 }
 
+func TestPromote(t *testing.T) {
+	tests := map[string]struct {
+		def               string
+		dataset           string
+		originDatasetSnap string
+		cloneOnlyOne      bool // only clone one element to have misssing intermediate snapshots
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Promote with snapshots on origin":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1"},
+		"Promote missing some leaf snapshots": {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1"},
+
+		"Dataset doesn't exists":                            {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist", wantErr: true, isNoOp: true},
+		"Promote already promoted":                          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Promote a snapshot fails":                          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
+		"Can't promote when missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1", cloneOnlyOne: true, wantErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			defer fPools.create(dir)()
+			z := zfs.New()
+			if tc.originDatasetSnap != "" {
+				err := z.Clone(tc.originDatasetSnap, "5678", !tc.cloneOnlyOne)
+				if err != nil {
+					t.Fatalf("couldn't setup testbed when cloning: %v", err)
+				}
+			}
+			// Scan initial state for no-op
+			var initState []zfs.Dataset
+			if tc.isNoOp {
+				var err error
+				initState, err = z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+			}
+
+			err := z.Promote(tc.dataset)
+
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				// we don't return because we want to check that on error, Clone() is a no-op
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			got, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get final state: %v", err)
+			}
+
+			if tc.isNoOp {
+				assertDatasetsEquals(t, ta, initState, got, true)
+				return
+			}
+			assertDatasetsToGolden(t, ta, got, true)
+		})
+	}
+}
+
 func TestSetProperty(t *testing.T) {
 	tests := map[string]struct {
 		def           string
