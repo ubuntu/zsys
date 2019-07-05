@@ -21,30 +21,6 @@ const (
 	CanmountProp = "canmount"
 )
 
-/*
-destroy
-rename
-promote
-properties write:
-	- canmount (when changing current dataset)
-	- org.zsys:bootfs (when cloning)
-	- org.zsys:last-used (every boot)
-  - org.zsys:system-dataset
-
-*/
-
-/*// CanMountState represents the different state of CanMount that the dataset can have.
-type CanMountState int
-
-const (
-	// CanMountOff is canmount=off.
-	CanMountOff CanMountState = iota
-	// CanMountAuto is canmount=auto.
-	CanMountAuto
-	// CanMountOn is canmount=on.
-	CanMountOn
-)*/
-
 // Dataset is the abstraction of a physical dataset and exposes only properties that must are accessible by the user.
 type Dataset struct {
 	// Name of the dataset.
@@ -149,6 +125,7 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 	if err != nil {
 		return xerrors.Errorf("couldn't snapshot %q: %v", datasetName, err)
 	}
+	defer ds.Close()
 	z.registerRevert(func() error {
 		d, err := libzfs.DatasetOpen(n)
 		if err != nil {
@@ -160,7 +137,6 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 		}
 		return nil
 	})
-	defer ds.Close()
 
 	// Set user properties that we couldn't set before creating the snapshot dataset.
 	// We don't set LastUsed here as Creation time will be used.
@@ -268,6 +244,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 	if err != nil {
 		return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, n, err)
 	}
+	defer cd.Close()
 	z.registerRevert(func() error {
 		d, err := libzfs.DatasetOpen(n)
 		if err != nil {

@@ -219,25 +219,27 @@ func TestClone(t *testing.T) {
 
 func TestPromote(t *testing.T) {
 	tests := map[string]struct {
-		def               string
-		dataset           string
-		originDatasetSnap string
-		cloneOnlyOne      bool   // only clone one element to have misssing intermediate snapshots
-		alreadyPromoted   string // pre-promote a dataset
+		def     string
+		dataset string
+
+		// prepare cloning/promotion scenarios
+		cloneFrom       string
+		cloneOnlyOne    bool   // only clone root element to have misssing intermediate snapshots
+		alreadyPromoted string // pre-promote a dataset and its children
 
 		wantErr bool
 		isNoOp  bool
 	}{
-		"Promote with snapshots on origin":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1"},
-		"Promote missing some leaf snapshots": {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1"},
+		"Promote with snapshots on origin":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1"},
+		"Promote missing some leaf snapshots": {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1"},
 
 		"Promote already promoted hierarchy":  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", isNoOp: true},
-		"Root of hierarchy already promoted":  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678"},
-		"Child of hierarchy already promoted": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678/var"},
+		"Root of hierarchy already promoted":  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678"},
+		"Child of hierarchy already promoted": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678/var"},
 
 		"Dataset doesn't exists":                            {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist", wantErr: true, isNoOp: true},
 		"Promote a snapshot fails":                          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
-		"Can't promote when missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1", cloneOnlyOne: true, wantErr: true, isNoOp: true},
+		"Can't promote when missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", cloneOnlyOne: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -249,8 +251,8 @@ func TestPromote(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New()
-			if tc.originDatasetSnap != "" {
-				err := z.Clone(tc.originDatasetSnap, "5678", !tc.cloneOnlyOne)
+			if tc.cloneFrom != "" {
+				err := z.Clone(tc.cloneFrom, "5678", !tc.cloneOnlyOne)
 				if err != nil {
 					t.Fatalf("couldn't setup testbed when cloning: %v", err)
 				}
@@ -641,7 +643,7 @@ func TestTransactions(t *testing.T) {
 				z.Cancel()
 				newState, err := z.Scan()
 				if err != nil {
-					t.Fatalf("couldn't get initial state: %v", err)
+					t.Fatalf("couldn't get finale state: %v", err)
 				}
 				assertDatasetsNotEquals(t, ta, state, newState, true)
 				assertDatasetsEquals(t, ta, initState, newState, true)
@@ -650,7 +652,7 @@ func TestTransactions(t *testing.T) {
 				z.Done()
 				newState, err := z.Scan()
 				if err != nil {
-					t.Fatalf("couldn't get initial state: %v", err)
+					t.Fatalf("couldn't get finale state: %v", err)
 				}
 				assertDatasetsEquals(t, ta, state, newState, true)
 				assertDatasetsNotEquals(t, ta, initState, newState, true)
