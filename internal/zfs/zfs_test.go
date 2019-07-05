@@ -297,6 +297,89 @@ func TestPromote(t *testing.T) {
 	}
 }
 
+func TestDestroy(t *testing.T) {
+	tests := map[string]struct {
+		def     string
+		dataset string
+
+		// prepare cloning/promotion scenarios
+		cloneFrom       string
+		alreadyPromoted string // pre-promote a dataset and its children
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Leaf simple":                    {def: "layout1__one_pool_n_datasets.yaml", dataset: "rpool/ROOT/ubuntu_1234/var/lib/apt"},
+		"Hierarchy simple":               {def: "layout1__one_pool_n_datasets.yaml", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Hierarchy with snapshots":       {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Hierarchy with promoted clones": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678"},
+
+		"Leaf snapshot simple": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234/var/lib/apt@snap_r1"},
+		"Hierarchy snapshot":   {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1"},
+
+		"Dataset doesn't exists":           {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist", wantErr: true, isNoOp: true},
+		"Hierarchy with unpromoted clones": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
+		// TODO: fix (some part of the hierarchy could be removed before failing)
+		//"Hierarchy with unpromoted clones non root": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234/var@snap_r1", wantErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			defer fPools.create(dir)()
+			z := zfs.New()
+			if tc.cloneFrom != "" {
+				err := z.Clone(tc.cloneFrom, "5678", true)
+				if err != nil {
+					t.Fatalf("couldn't setup testbed when cloning: %v", err)
+				}
+			}
+			if tc.alreadyPromoted != "" {
+				err := z.Promote(tc.alreadyPromoted)
+				if err != nil {
+					t.Fatalf("couldn't setup testbed when prepromoting %q: %v", tc.alreadyPromoted, err)
+				}
+			}
+			// Scan initial state for no-op
+			var initState []zfs.Dataset
+			if tc.isNoOp {
+				var err error
+				initState, err = z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+			}
+
+			err := z.Destroy(tc.dataset)
+
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				// we don't return because we want to check that on error, Clone() is a no-op
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			got, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get final state: %v", err)
+			}
+
+			if tc.isNoOp {
+				assertDatasetsEquals(t, ta, initState, got, true)
+				return
+			}
+			assertDatasetsToGolden(t, ta, got, true)
+		})
+	}
+}
+
 func TestSetProperty(t *testing.T) {
 	tests := map[string]struct {
 		def           string
@@ -379,6 +462,7 @@ func TestTransactions(t *testing.T) {
 		doClone       bool
 		doPromote     bool
 		doSetProperty bool
+		doDestroy     bool
 		shouldErr     bool
 		revert        bool
 	}{
@@ -403,6 +487,9 @@ func TestTransactions(t *testing.T) {
 		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, revert: true},
 		"SetProperty only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
 		// We unfortunately can't do those because we can't fail in the middle of SetProperty(), after some modification were done
+
+		// Destroy can't be in transactions
+		"Destroy, failed before doing anything": {def: "layout1_for_transactions_tests.yaml", doDestroy: true},
 
 		"Multiple steps transaction, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true},
 		"Multiple steps transaction, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, revert: true},
@@ -510,6 +597,19 @@ func TestTransactions(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, newState, true)
 				}
 				state = newState
+			}
+
+			if tc.doDestroy {
+				if err := z.Destroy("rpool/ROOT/ubuntu_1234"); err == nil {
+					t.Fatalf("expected destroy to not work in transactions, but it returned no error")
+				}
+				// Expect no modifications
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get state after destruction: %v", err)
+				}
+				assertDatasetsEquals(t, ta, state, newState, true)
+				return
 			}
 
 			if tc.doSetProperty {
