@@ -222,7 +222,8 @@ func TestPromote(t *testing.T) {
 		def               string
 		dataset           string
 		originDatasetSnap string
-		cloneOnlyOne      bool // only clone one element to have misssing intermediate snapshots
+		cloneOnlyOne      bool   // only clone one element to have misssing intermediate snapshots
+		alreadyPromoted   string // pre-promote a dataset
 
 		wantErr bool
 		isNoOp  bool
@@ -230,8 +231,11 @@ func TestPromote(t *testing.T) {
 		"Promote with snapshots on origin":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1"},
 		"Promote missing some leaf snapshots": {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1"},
 
+		"Promote already promoted hierarchy":  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", isNoOp: true},
+		"Root of hierarchy already promoted":  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678"},
+		"Child of hierarchy already promoted": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678/var"},
+
 		"Dataset doesn't exists":                            {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist", wantErr: true, isNoOp: true},
-		"Promote already promoted":                          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
 		"Promote a snapshot fails":                          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
 		"Can't promote when missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", originDatasetSnap: "rpool/ROOT/ubuntu_1234@snap_r1", cloneOnlyOne: true, wantErr: true, isNoOp: true},
 	}
@@ -249,6 +253,12 @@ func TestPromote(t *testing.T) {
 				err := z.Clone(tc.originDatasetSnap, "5678", !tc.cloneOnlyOne)
 				if err != nil {
 					t.Fatalf("couldn't setup testbed when cloning: %v", err)
+				}
+			}
+			if tc.alreadyPromoted != "" {
+				err := z.Promote(tc.alreadyPromoted)
+				if err != nil {
+					t.Fatalf("couldn't setup testbed when prepromoting %q: %v", tc.alreadyPromoted, err)
 				}
 			}
 			// Scan initial state for no-op

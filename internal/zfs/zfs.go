@@ -324,6 +324,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 }
 
 // Promote recursively all children, including dataset named "name".
+// If the hierarchy is partially promoted, promote the missing one and be no-op for the rest.
 func (z *Zfs) Promote(name string) (errPromote error) {
 	d, err := libzfs.DatasetOpen(name)
 	if err != nil {
@@ -337,16 +338,17 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 	defer func() { z.saveOrRevert(errPromote) }()
 
 	originParent, snapshotName := separateSnaphotName(d.Properties[libzfs.DatasetPropOrigin].Value)
-	if len(originParent) == 0 {
-		return xerrors.Errorf("%q should have been a clone to promote, but no origin was found", name)
-	}
-	parent, err := libzfs.DatasetOpen(originParent)
-	if err != nil {
-		return xerrors.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
-	}
-	defer parent.Close()
-	if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
-		return xerrors.Errorf("integrity check failed: %v", err)
+	// Only check integrity for non promoted elements
+	// Otherwise, promoting is a no-op or will repromote children
+	if len(originParent) > 0 {
+		parent, err := libzfs.DatasetOpen(originParent)
+		if err != nil {
+			return xerrors.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
+		}
+		defer parent.Close()
+		if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
+			return xerrors.Errorf("integrity check failed: %v", err)
+		}
 	}
 
 	return z.promoteRecursive(d)
@@ -356,24 +358,23 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 	name := d.Properties[libzfs.DatasetPropName].Value
 
 	origin, _ := separateSnaphotName(d.Properties[libzfs.DatasetPropOrigin].Value)
-	if len(origin) == 0 {
-		return xerrors.Errorf("%q should have been a clone to promote, but no origin was found", name)
-	}
-
-	if err := d.Promote(); err != nil {
-		return xerrors.Errorf("couldn't promote %q: "+config.ErrorFormat, name, err)
-	}
-	z.registerRevert(func() error {
-		origD, err := libzfs.DatasetOpen(origin)
-		if err != nil {
-			return xerrors.Errorf("couldn't open %q for cleanup: %v", origin, err)
+	// Only promote if not promoted yet.
+	if len(origin) > 0 {
+		if err := d.Promote(); err != nil {
+			return xerrors.Errorf("couldn't promote %q: "+config.ErrorFormat, name, err)
 		}
-		defer origD.Close()
-		if err := origD.Promote(); err != nil {
-			return xerrors.Errorf("couldn't promote %q for cleanup: %v", origin, err)
-		}
-		return nil
-	})
+		z.registerRevert(func() error {
+			origD, err := libzfs.DatasetOpen(origin)
+			if err != nil {
+				return xerrors.Errorf("couldn't open %q for cleanup: %v", origin, err)
+			}
+			defer origD.Close()
+			if err := origD.Promote(); err != nil {
+				return xerrors.Errorf("couldn't promote %q for cleanup: %v", origin, err)
+			}
+			return nil
+		})
+	}
 
 	for _, cd := range d.Children {
 		if cd.IsSnapshot() {
