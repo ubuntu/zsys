@@ -401,18 +401,13 @@ func (z *Zfs) Destroy(name string) error {
 	if err != nil {
 		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, name, err)
 	}
-
-	if err = d.DestroyRecursive(); err != nil {
-		// There is no error that can be mapped by go-libzfs, had to rely on strings…
-		if err.Error() == "dataset already exists" {
-			return xerrors.Errorf("%q has one or more unpromoted clone", name)
-		}
-		return err
-	}
-	// Only close if DestroyRecursive was sucessful: dangling pointers in libzfs otherwise
 	defer d.Close()
 
-	return nil
+	if err := checkNoClone(&d); err != nil {
+		return xerrors.Errorf("couldn't destroy %q due to clones: %v", name, err)
+	}
+
+	return d.DestroyRecursive()
 }
 
 // SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.

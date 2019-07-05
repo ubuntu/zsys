@@ -179,3 +179,23 @@ func checkSnapshotHierarchyIntegrity(d libzfs.Dataset, snapshotName string, snap
 	}
 	return nil
 }
+
+// checkNoClone checks that the hierachy has no clone.
+func checkNoClone(d *libzfs.Dataset) error {
+	name := d.Properties[libzfs.DatasetPropName].Value
+
+	clones, err := d.Clones()
+	if err != nil {
+		return xerrors.Errorf("couldn't scan %q for clones", name)
+	}
+	if len(clones) > 0 {
+		return xerrors.Errorf("%q has some clones when it shouldn't", name)
+	}
+
+	for _, cd := range d.Children {
+		if err := checkNoClone(&cd); err != nil {
+			return err
+		}
+	}
+	return nil
+}
