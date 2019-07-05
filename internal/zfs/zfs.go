@@ -388,6 +388,33 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 	return nil
 }
 
+// Destroy recursively all children, including dataset named "name".
+// If the dataset is a snapshot, navigate through the hierachy to delete all dataset with the same snapshot name.
+// Note that destruction can't be rollbacked as filesystem content can't be recreated, so we don't accept them
+// in a transactional Zfs element.
+func (z *Zfs) Destroy(name string) error {
+	if z.transactional {
+		return xerrors.Errorf("couldn't call Destroy in a transactional context.")
+	}
+
+	d, err := libzfs.DatasetOpen(name)
+	if err != nil {
+		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, name, err)
+	}
+
+	if err = d.DestroyRecursive(); err != nil {
+		// There is no error that can be mapped by go-libzfs, had to rely on strings…
+		if err.Error() == "dataset already exists" {
+			return xerrors.Errorf("%q has one or more unpromoted clone", name)
+		}
+		return err
+	}
+	// Only close if DestroyRecursive was sucessful: dangling pointers in libzfs otherwise
+	defer d.Close()
+
+	return nil
+}
+
 // SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
