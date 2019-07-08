@@ -6,7 +6,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT",
@@ -15,7 +16,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu",
@@ -24,7 +26,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu/opt",
@@ -33,7 +36,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu/var",
@@ -42,7 +46,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu/var/lib",
@@ -51,7 +56,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu2",
@@ -60,6 +66,7 @@
       "CanMount": "on",
       "BootFS": "",
       "LastUsed": 1544444444,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    }
 ]

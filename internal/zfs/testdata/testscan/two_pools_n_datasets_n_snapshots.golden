@@ -6,7 +6,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "bpool/BOOT",
@@ -15,7 +16,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "bpool/BOOT/boot",
@@ -24,7 +26,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "bpool/BOOT/boot@snap_b1",
@@ -33,7 +36,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "bpool/BOOT/boot@snap_b2",
@@ -42,7 +46,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool",
@@ -51,7 +56,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT",
@@ -60,7 +66,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu",
@@ -69,7 +76,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu@snap_r1",
@@ -78,7 +86,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu@snap_r2",
@@ -87,6 +96,7 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    }
 ]

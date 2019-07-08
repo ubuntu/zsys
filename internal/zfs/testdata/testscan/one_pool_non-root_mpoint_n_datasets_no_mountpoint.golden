@@ -6,7 +6,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/BOOT",
@@ -15,7 +16,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/BOOT/ubuntu",
@@ -24,6 +26,7 @@
       "CanMount": "on",
       "BootFS": "",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    }
 ]

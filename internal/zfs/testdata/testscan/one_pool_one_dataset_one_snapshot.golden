@@ -6,7 +6,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool@snap1",
@@ -15,6 +16,7 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    }
 ]

@@ -6,6 +6,7 @@
       "CanMount": "on",
       "BootFS": "",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/ROOT/ubuntu_42"
+      "SystemDataset": "rpool/ROOT/ubuntu_42",
+      "Origin": ""
    }
 ]

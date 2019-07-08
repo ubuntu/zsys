@@ -6,7 +6,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT",
@@ -15,7 +16,8 @@
       "CanMount": "off",
       "BootFS": "",
       "LastUsed": 0,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu",
@@ -24,7 +26,8 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    },
    {
       "Name": "rpool/ROOT/ubuntu@snap1",
@@ -33,6 +36,7 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": ""
+      "SystemDataset": "",
+      "Origin": ""
    }
 ]
