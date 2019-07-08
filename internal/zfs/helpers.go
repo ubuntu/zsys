@@ -52,7 +52,6 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		return nil, xerrors.Errorf("can't get canmount property: "+config.ErrorFormat, err)
 	}
 	canMount = cm.Value
-	sources.CanMount = cm.Source
 
 	// libzfs is accessing the property itself like this. There are issues when we do the check regularly with "no error"
 	// returned, or dataset doesn't exists…

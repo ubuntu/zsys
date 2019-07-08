@@ -53,7 +53,6 @@ type DatasetProp struct {
 // datasetSources list sources some properties for a given dataset
 type datasetSources struct {
 	Mountpoint    string
-	CanMount      string
 	BootFS        string
 	LastUsed      string
 	SystemDataset string
@@ -229,15 +228,15 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 			Source: srcProps.sources.Mountpoint,
 		}
 	}
-	if srcProps.sources.CanMount == "local" {
-		if srcProps.CanMount == "on" {
-			// don't mount new cloned dataset on top of parent.
-			srcProps.CanMount = "noauto"
-		}
-		props[libzfs.DatasetPropCanmount] = libzfs.Property{
-			Value:  srcProps.CanMount,
-			Source: srcProps.sources.CanMount,
-		}
+
+	// CanMount is always local
+	if srcProps.CanMount == "on" {
+		// don't mount new cloned dataset on top of parent.
+		srcProps.CanMount = "noauto"
+	}
+	props[libzfs.DatasetPropCanmount] = libzfs.Property{
+		Value:  srcProps.CanMount,
+		Source: "local",
 	}
 
 	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snaphotName), rootName)
