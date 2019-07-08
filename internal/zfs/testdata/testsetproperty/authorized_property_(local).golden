@@ -10,7 +10,6 @@
       "Origin": "",
       "Sources": {
          "Mountpoint": "local",
-         "CanMount": "local",
          "BootFS": "local",
          "LastUsed": "local",
          "SystemDataset": "none"

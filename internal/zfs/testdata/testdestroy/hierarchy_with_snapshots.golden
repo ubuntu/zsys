@@ -10,7 +10,6 @@
       "Origin": "",
       "Sources": {
          "Mountpoint": "local",
-         "CanMount": "local",
          "BootFS": "none",
          "LastUsed": "none",
          "SystemDataset": "none"
@@ -27,7 +26,6 @@
       "Origin": "",
       "Sources": {
          "Mountpoint": "inherited",
-         "CanMount": "local",
          "BootFS": "none",
          "LastUsed": "none",
          "SystemDataset": "none"
