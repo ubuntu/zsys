@@ -42,6 +42,8 @@ type DatasetProp struct {
 	LastUsed int
 	// SystemDataset is a user proper for user datasets, linking them to relevant system dataset.
 	SystemDataset string
+	// Origin points to the dataset snapshot this one was clone from.
+	Origin string
 
 	// Here are the sources (not exposed to the public API) for each property
 	// Used mostly for tests
