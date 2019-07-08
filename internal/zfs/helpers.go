@@ -130,7 +130,7 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 
 	props, err := getDatasetProp(d)
 	if err != nil {
-		collectErr = xerrors.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, collectErr)
+		collectErr = xerrors.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, err)
 		return nil
 	}
 
