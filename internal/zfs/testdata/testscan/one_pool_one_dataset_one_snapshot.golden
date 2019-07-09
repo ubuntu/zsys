@@ -1,13 +1,10 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1555555555
    },
    {
       "Name": "rpool@snap1",
@@ -15,8 +12,6 @@
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 2000000000,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 2000000000
    }
 ]

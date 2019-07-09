@@ -1,12 +1,7 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/boot",
-      "CanMount": "on",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": "",
-      "Origin": ""
+      "CanMount": "on"
    }
 ]

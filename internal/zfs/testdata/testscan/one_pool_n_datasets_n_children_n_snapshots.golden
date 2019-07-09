@@ -1,63 +1,41 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/",
-      "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": "",
-      "Origin": ""
+      "CanMount": "off"
    },
    {
       "Name": "rpool/ROOT",
-      "IsSnapshot": false,
       "Mountpoint": "/ROOT",
-      "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": "",
-      "Origin": ""
+      "CanMount": "off"
    },
    {
       "Name": "rpool/ROOT/ubuntu",
-      "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1555555555
    },
    {
       "Name": "rpool/ROOT/ubuntu/opt",
-      "IsSnapshot": false,
       "Mountpoint": "/opt",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1555555555
    },
    {
       "Name": "rpool/ROOT/ubuntu/var",
-      "IsSnapshot": false,
       "Mountpoint": "/var",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1555555555
    },
    {
       "Name": "rpool/ROOT/ubuntu/var/lib",
-      "IsSnapshot": false,
       "Mountpoint": "/var/lib",
       "CanMount": "on",
       "BootFS": "no",
-      "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1555555555
    },
    {
       "Name": "rpool/ROOT/ubuntu/var@snap_v1",
@@ -65,39 +43,27 @@
       "Mountpoint": "/var",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 2000000000,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 2000000000
    },
    {
       "Name": "rpool/ROOT/ubuntu2",
-      "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "",
-      "LastUsed": 1544444444,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1544444444
    },
    {
       "Name": "rpool/ROOT/ubuntu2@snap_u1",
       "IsSnapshot": true,
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "",
-      "LastUsed": 2000000000,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 2000000000
    },
    {
       "Name": "rpool/ROOT/ubuntu2@snap_u2",
       "IsSnapshot": true,
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "",
-      "LastUsed": 2000000000,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 2000000000
    },
    {
       "Name": "rpool/ROOT/ubuntu@snap_r1",
@@ -105,8 +71,6 @@
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 2000000000,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 2000000000
    }
 ]

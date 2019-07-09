@@ -1,12 +1,9 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": "yes",
-      "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1555555555
    }
 ]

@@ -26,24 +26,24 @@ type Dataset struct {
 	// Name of the dataset.
 	Name string
 	// IsSnapshot tells if the dataset is a snapshot
-	IsSnapshot bool
+	IsSnapshot bool `json:",omitempty"`
 	DatasetProp
 }
 
 // DatasetProp abstracts some properties for a given dataset
 type DatasetProp struct {
 	// Mountpoint where the dataset will be mounted (without alt-root).
-	Mountpoint string
+	Mountpoint string `json:",omitempty"`
 	// CanMount state of the dataset.
-	CanMount string
+	CanMount string `json:",omitempty"`
 	// BootFS is a user property stating if the dataset should be mounted in the initramfs.
-	BootFS string
+	BootFS string `json:",omitempty"`
 	// LastUsed is a user property that store the last time a dataset was used.
-	LastUsed int
+	LastUsed int `json:",omitempty"`
 	// SystemDataset is a user proper for user datasets, linking them to relevant system dataset.
-	SystemDataset string
+	SystemDataset string `json:",omitempty"`
 	// Origin points to the dataset snapshot this one was clone from.
-	Origin string
+	Origin string `json:",omitempty"`
 
 	// Here are the sources (not exposed to the public API) for each property
 	// Used mostly for tests
@@ -52,10 +52,10 @@ type DatasetProp struct {
 
 // datasetSources list sources some properties for a given dataset
 type datasetSources struct {
-	Mountpoint    string
-	BootFS        string
-	LastUsed      string
-	SystemDataset string
+	Mountpoint    string `json:",omitempty"`
+	BootFS        string `json:",omitempty"`
+	LastUsed      string `json:",omitempty"`
+	SystemDataset string `json:",omitempty"`
 }
 
 // Zfs is a system handler talking to zfs linux module.

@@ -1,13 +1,10 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
@@ -22,8 +19,6 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": "",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",

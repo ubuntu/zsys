@@ -1,12 +1,9 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/home/foo",
       "CanMount": "on",
-      "BootFS": "",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/ROOT/ubuntu_42",
-      "Origin": ""
+      "SystemDataset": "rpool/ROOT/ubuntu_42"
    }
 ]

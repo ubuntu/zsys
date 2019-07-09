@@ -1,13 +1,8 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": "",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "none",
@@ -17,13 +12,8 @@
    },
    {
       "Name": "rpool/ROOT",
-      "IsSnapshot": false,
       "Mountpoint": "/ROOT",
       "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": "",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "none",
@@ -33,13 +23,11 @@
    },
    {
       "Name": "rpool/ROOT/ubuntu_1234",
-      "IsSnapshot": false,
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
       "SystemDataset": "rpool/path/to/dataset",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
@@ -49,13 +37,11 @@
    },
    {
       "Name": "rpool/ROOT/ubuntu_1234/opt",
-      "IsSnapshot": false,
       "Mountpoint": "/opt",
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
       "SystemDataset": "rpool/path/to/dataset",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
@@ -65,13 +51,11 @@
    },
    {
       "Name": "rpool/ROOT/ubuntu_1234/var",
-      "IsSnapshot": false,
       "Mountpoint": "/var",
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
       "SystemDataset": "rpool/path/to/dataset",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
@@ -81,13 +65,11 @@
    },
    {
       "Name": "rpool/ROOT/ubuntu_1234/var/lib",
-      "IsSnapshot": false,
       "Mountpoint": "/var/lib",
       "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 1555555555,
       "SystemDataset": "rpool/path/to/dataset",
-      "Origin": "",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",

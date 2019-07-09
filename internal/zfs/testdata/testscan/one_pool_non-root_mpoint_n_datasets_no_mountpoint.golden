@@ -1,32 +1,18 @@
 [
    {
       "Name": "rpool",
-      "IsSnapshot": false,
       "Mountpoint": "/boot",
-      "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": "",
-      "Origin": ""
+      "CanMount": "off"
    },
    {
       "Name": "rpool/BOOT",
-      "IsSnapshot": false,
       "Mountpoint": "/boot/BOOT",
-      "CanMount": "off",
-      "BootFS": "",
-      "LastUsed": 0,
-      "SystemDataset": "",
-      "Origin": ""
+      "CanMount": "off"
    },
    {
       "Name": "rpool/BOOT/ubuntu",
-      "IsSnapshot": false,
       "Mountpoint": "/boot/BOOT/ubuntu",
       "CanMount": "on",
-      "BootFS": "",
-      "LastUsed": 1555555555,
-      "SystemDataset": "",
-      "Origin": ""
+      "LastUsed": 1555555555
    }
 ]
