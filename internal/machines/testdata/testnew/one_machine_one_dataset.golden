@@ -1,0 +1,13 @@
+[
+   {
+      "ID": "rpool",
+      "CanBeEnabled": true,
+      "SystemDatasets": [
+         {
+            "Name": "rpool",
+            "Mountpoint": "/",
+            "CanMount": "on"
+         }
+      ]
+   }
+]
