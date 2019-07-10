@@ -226,23 +226,18 @@ nextDataset:
 		}
 		m.SystemDatasets = append(m.SystemDatasets, defaultBootsDataset...)
 
-		// Userdata datasets
-		var defaultUserDatasets, untaggedUserDatasets []zfs.Dataset
+		// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
+		// linked to multiple clones and systems).
+		var userDatasets []zfs.Dataset
 		for _, d := range userdatas {
-			// Store untagged user datas, but prefer specifically tagged ones if any
-			if d.SystemDataset == "" {
-				untaggedUserDatasets = append(untaggedUserDatasets, d)
-				continue
-			}
-			if d.SystemDataset == m.ID {
-				defaultUserDatasets = append(defaultUserDatasets, d)
-				continue
+			// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
+			for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
+				if bootfsDataset == m.ID || strings.HasPrefix(d.BootfsDatasets, m.ID+"/") {
+					userDatasets = append(userDatasets, d)
+				}
 			}
 		}
-		if defaultUserDatasets == nil {
-			defaultUserDatasets = untaggedUserDatasets
-		}
-		m.UserDatasets = append(defaultUserDatasets)
+		m.UserDatasets = append(m.UserDatasets, userDatasets...)
 
 		// Persistent datasets
 		m.PersistentDatasets = persistents
@@ -273,20 +268,25 @@ nextDataset:
 				h.SystemDatasets = append(h.SystemDatasets, defaultBootsDataset...)
 			}
 
-			// Userdata datasets
-			var userDataset []zfs.Dataset
+			// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
+			// linked to multiple clones and systems).
+			var userDatasets []zfs.Dataset
 			for _, d := range userdatas {
-				if strings.HasSuffix(d.Name, machineDatasetID) ||
-					(strings.Contains(d.Name, "/"+baseMachineDatasetID+"/") && strings.HasSuffix(d.Name, snapshot)) {
-					userDataset = append(userDataset, d)
+				if snapshot != "" {
+					if strings.HasSuffix(d.Name, "@"+snapshot) {
+						userDatasets = append(userDatasets, d)
+						continue
+					}
+				}
+				// For clones, proceed as with main system:
+				// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
+				for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
+					if bootfsDataset == h.ID || strings.HasPrefix(d.BootfsDatasets, h.ID+"/") {
+						userDatasets = append(userDatasets, d)
+					}
 				}
 			}
-			if userDataset != nil {
-				h.UserDatasets = append(h.UserDatasets, userDataset...)
-			} else {
-				// fallback to default main dataset
-				h.UserDatasets = append(h.UserDatasets, defaultUserDatasets...)
-			}
+			h.UserDatasets = append(h.UserDatasets, userDatasets...)
 
 			// Persistent datasets
 			h.PersistentDatasets = persistents
