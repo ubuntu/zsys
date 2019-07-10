@@ -15,8 +15,8 @@ const (
 	BootfsProp = zsysPrefix + "bootfs"
 	// LastUsedProp string value
 	LastUsedProp = zsysPrefix + "last-used"
-	// SystemDataProp string value
-	SystemDataProp = zsysPrefix + "system-dataset"
+	// BootfsDatasetsProp string value
+	BootfsDatasetsProp = zsysPrefix + "bootfs-datasets"
 	// CanmountProp string value
 	CanmountProp = "canmount"
 )
@@ -40,8 +40,8 @@ type DatasetProp struct {
 	BootFS string `json:",omitempty"`
 	// LastUsed is a user property that store the last time a dataset was used.
 	LastUsed int `json:",omitempty"`
-	// SystemDataset is a user proper for user datasets, linking them to relevant system dataset.
-	SystemDataset string `json:",omitempty"`
+	// BootfsDatasets is a user proper for user datasets, linking them to relevant system bootfs datasets.
+	BootfsDatasets string `json:",omitempty"`
 	// Origin points to the dataset snapshot this one was clone from.
 	Origin string `json:",omitempty"`
 
@@ -52,10 +52,10 @@ type DatasetProp struct {
 
 // datasetSources list sources some properties for a given dataset
 type datasetSources struct {
-	Mountpoint    string `json:",omitempty"`
-	BootFS        string `json:",omitempty"`
-	LastUsed      string `json:",omitempty"`
-	SystemDataset string `json:",omitempty"`
+	Mountpoint     string `json:",omitempty"`
+	BootFS         string `json:",omitempty"`
+	LastUsed       string `json:",omitempty"`
+	BootfsDatasets string `json:",omitempty"`
 }
 
 // Zfs is a system handler talking to zfs linux module.
@@ -146,9 +146,9 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
 		}
 	}
-	if srcProps.sources.SystemDataset == "local" {
-		if err := ds.SetUserProperty(SystemDataProp, srcProps.SystemDataset); err != nil {
-			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, SystemDataProp, n, err)
+	if srcProps.sources.BootfsDatasets == "local" {
+		if err := ds.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
+			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsDatasetsProp, n, err)
 		}
 	}
 
@@ -266,9 +266,9 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
 		}
 	}
-	if srcProps.sources.SystemDataset == "local" || srcProps.sources.SystemDataset == parentName {
-		if err := cd.SetUserProperty(SystemDataProp, srcProps.SystemDataset); err != nil {
-			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, SystemDataProp, n, err)
+	if srcProps.sources.BootfsDatasets == "local" || srcProps.sources.BootfsDatasets == parentName {
+		if err := cd.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
+			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsDatasetsProp, n, err)
 		}
 	}
 	// We don't set LastUsed in purpose as the dataset isn't used yet

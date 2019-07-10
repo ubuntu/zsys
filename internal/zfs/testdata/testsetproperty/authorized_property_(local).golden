@@ -9,7 +9,7 @@
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "local",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    }
 ]

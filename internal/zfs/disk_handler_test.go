@@ -28,13 +28,13 @@ type fakePools struct {
 type fakePool struct {
 	Name     string
 	Datasets []struct {
-		Name          string
-		Mountpoint    string
-		CanMount      string
-		ZsysBootfs    string    `yaml:"zsys_bootfs"`
-		LastUsed      time.Time `yaml:"last_used"`
-		SystemDataset string    `yaml:"system_dataset"`
-		Snapshots     []struct {
+		Name           string
+		Mountpoint     string
+		CanMount       string
+		ZsysBootfs     string    `yaml:"zsys_bootfs"`
+		LastUsed       time.Time `yaml:"last_used"`
+		BootfsDatasets string    `yaml:"bootfs_datasets"`
+		Snapshots      []struct {
 			Name string
 		}
 	}
@@ -174,8 +174,8 @@ func (fpools fakePools) create(path string) func() {
 					if !dataset.LastUsed.IsZero() {
 						d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(dataset.LastUsed.Unix(), 10))
 					}
-					if dataset.SystemDataset != "" {
-						d.SetUserProperty(zfs.SystemDataProp, dataset.SystemDataset)
+					if dataset.BootfsDatasets != "" {
+						d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
 					}
 
 					for _, s := range dataset.Snapshots {

@@ -5,12 +5,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": "SetProperty Value",
+      "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "local",
-         "SystemDataset": "local"
+         "BootfsDatasets": "local"
       }
    }
 ]

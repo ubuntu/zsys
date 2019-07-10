@@ -33,7 +33,7 @@ func TestScan(t *testing.T) {
 		"One pool, one dataset":                                                    {def: "one_pool_one_dataset.yaml"},
 		"One pool, one dataset, different mountpoints":                             {def: "one_pool_one_dataset_different_mountpoints.yaml"},
 		"One pool, one dataset, no property":                                       {def: "one_pool_one_dataset_no_property.yaml"},
-		"One pool, one dataset, with systemdataset property":                       {def: "one_pool_one_dataset_with_systemdataset.yaml"},
+		"One pool, one dataset, with bootfsdatasets property":                      {def: "one_pool_one_dataset_with_bootfsdatasets.yaml"},
 		"One pool, N datasets":                                                     {def: "one_pool_n_datasets.yaml"},
 		"One pool, one dataset, one snapshot":                                      {def: "one_pool_one_dataset_one_snapshot.yaml"},
 		"One pool, one dataset, one snapshot, canmount=noauto":                     {def: "one_pool_one_dataset_canmount_noauto.yaml"},
@@ -389,11 +389,11 @@ func TestSetProperty(t *testing.T) {
 	}{
 		"User property (local)":       {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		"Authorized property (local)": {def: "one_pool_one_dataset.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
-		"User property (none)":        {def: "one_pool_one_dataset.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"User property (none)":        {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		// There is no authorized properties that can be "none" for now
 
 		"User property on snapshot (parent local)": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
-		"User property on snapshot (parent none)":  {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (parent none)":  {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
 
 		"User property (inherit)":                               {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},
 		"User property on snapshot (parent inherit)":            {def: "one_pool_n_datasets_n_children_n_snapshots.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1"},
@@ -402,7 +402,7 @@ func TestSetProperty(t *testing.T) {
 		// There is no authorized properties that can be inherited
 
 		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "mountpoint", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true, isNoOp: true},
-		"Dataset doesn't exists":                         {def: "one_pool_one_dataset.yaml", propertyName: zfs.SystemDataProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
+		"Dataset doesn't exists":                         {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
 		"Authorized property on snapshot doesn't exists": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.CanmountProp, propertyValue: "yes", dataset: "rpool@snap1", wantErr: true, isNoOp: true},
 	}
 

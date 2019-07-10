@@ -7,7 +7,7 @@
          "Mountpoint": "local",
          "BootFS": "none",
          "LastUsed": "none",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -18,7 +18,7 @@
          "Mountpoint": "inherited",
          "BootFS": "none",
          "LastUsed": "none",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -27,12 +27,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "local",
-         "SystemDataset": "local"
+         "BootfsDatasets": "local"
       }
    },
    {
@@ -41,12 +41,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -56,12 +56,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -71,12 +71,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -85,12 +85,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -99,12 +99,12 @@
       "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -113,12 +113,12 @@
       "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -128,12 +128,12 @@
       "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -143,12 +143,12 @@
       "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -158,12 +158,12 @@
       "CanMount": "on",
       "BootFS": "no",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -173,12 +173,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -188,12 +188,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -203,12 +203,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -218,12 +218,12 @@
       "CanMount": "on",
       "BootFS": "yes",
       "LastUsed": 2000000000,
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_1234"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
    {
@@ -231,13 +231,13 @@
       "Mountpoint": "/",
       "CanMount": "noauto",
       "BootFS": "yes",
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Origin": "rpool/ROOT/ubuntu_1234@snap_r1",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "none",
-         "SystemDataset": "local"
+         "BootfsDatasets": "local"
       }
    },
    {
@@ -245,13 +245,13 @@
       "Mountpoint": "/opt",
       "CanMount": "noauto",
       "BootFS": "yes",
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Origin": "rpool/ROOT/ubuntu_1234/opt@snap_r1",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
       }
    },
    {
@@ -259,13 +259,13 @@
       "Mountpoint": "/var",
       "CanMount": "noauto",
       "BootFS": "yes",
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Origin": "rpool/ROOT/ubuntu_1234/var@snap_r1",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
       }
    },
    {
@@ -273,13 +273,13 @@
       "Mountpoint": "/var/lib",
       "CanMount": "noauto",
       "BootFS": "no",
-      "SystemDataset": "rpool/path/to/dataset",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Origin": "rpool/ROOT/ubuntu_1234/var/lib@snap_r1",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",
          "LastUsed": "none",
-         "SystemDataset": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
       }
    }
 ]

@@ -5,4 +5,4 @@ pools:
         last_used: 2019-04-18T02:45:55+00:00
         mountpoint: /home/foo
         canmount: on
-        system_dataset: rpool/ROOT/ubuntu_42
+        bootfs_datasets: rpool/ROOT/ubuntu_42

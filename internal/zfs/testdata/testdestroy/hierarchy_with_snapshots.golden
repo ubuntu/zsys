@@ -7,7 +7,7 @@
          "Mountpoint": "local",
          "BootFS": "none",
          "LastUsed": "none",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -18,7 +18,7 @@
          "Mountpoint": "inherited",
          "BootFS": "none",
          "LastUsed": "none",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    }
 ]

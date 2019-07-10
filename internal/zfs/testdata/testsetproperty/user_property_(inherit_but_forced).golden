@@ -7,7 +7,7 @@
          "Mountpoint": "local",
          "BootFS": "none",
          "LastUsed": "none",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -18,7 +18,7 @@
          "Mountpoint": "inherited",
          "BootFS": "none",
          "LastUsed": "none",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -31,7 +31,7 @@
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "local",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -44,7 +44,7 @@
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu",
          "LastUsed": "rpool/ROOT/ubuntu",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -57,7 +57,7 @@
          "Mountpoint": "inherited",
          "BootFS": "local",
          "LastUsed": "rpool/ROOT/ubuntu",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -70,7 +70,7 @@
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu/var",
          "LastUsed": "rpool/ROOT/ubuntu",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -82,7 +82,7 @@
          "Mountpoint": "local",
          "BootFS": "none",
          "LastUsed": "local",
-         "SystemDataset": "none"
+         "BootfsDatasets": "none"
       }
    }
 ]

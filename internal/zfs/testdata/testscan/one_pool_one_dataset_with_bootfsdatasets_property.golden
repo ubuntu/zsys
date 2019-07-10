@@ -4,6 +4,6 @@
       "Mountpoint": "/home/foo",
       "CanMount": "on",
       "LastUsed": 1555555555,
-      "SystemDataset": "rpool/ROOT/ubuntu_42"
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42"
    }
 ]

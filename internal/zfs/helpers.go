@@ -88,24 +88,24 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		return nil, xerrors.Errorf("%q property isn't an int: "+config.ErrorFormat, LastUsedProp, err)
 	}
 
-	sDataset, err := d.GetUserProperty(SystemDataProp)
+	sDataset, err := d.GetUserProperty(BootfsDatasetsProp)
 	if err != nil {
-		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, SystemDataProp, err)
+		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, BootfsDatasetsProp, err)
 	}
-	systemDataset := sDataset.Value
-	if systemDataset == "-" {
-		systemDataset = ""
+	BootfsDatasets := sDataset.Value
+	if BootfsDatasets == "-" {
+		BootfsDatasets = ""
 	}
-	sources.SystemDataset = sDataset.Source
+	sources.BootfsDatasets = sDataset.Source
 
 	return &DatasetProp{
-		Mountpoint:    mountpoint,
-		CanMount:      canMount,
-		BootFS:        bootfs,
-		LastUsed:      lastused,
-		SystemDataset: systemDataset,
-		Origin:        origin,
-		sources:       sources,
+		Mountpoint:     mountpoint,
+		CanMount:       canMount,
+		BootFS:         bootfs,
+		LastUsed:       lastused,
+		BootfsDatasets: BootfsDatasets,
+		Origin:         origin,
+		sources:        sources,
 	}, nil
 }
 
