@@ -4,8 +4,11 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ubuntu/zsys/internal/config"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"golang.org/x/xerrors"
 )
 
 // Machine is the machine element
@@ -52,27 +55,28 @@ func (s sortedDataset) Less(i, j int) bool { return s[i].Name < s[j].Name }
 func (s sortedDataset) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 // addIfChildren append dataset d (a copy) to a slice of datasets if its name is a children
-// of the given name.
-// return true if match, false otherwise
-func addIfChildren(name string, d zfs.Dataset, dest *[]zfs.Dataset) bool {
+// of the given name. Return true if match, false otherwise
+// an error will mean that the dataset name isn't what we expected it to be.
+func addIfChildren(name string, d zfs.Dataset, dest *[]zfs.Dataset) (bool, error) {
 	names := strings.Split(name, "@")
+	var err error
 	switch len(names) {
 	// direct system or clone child
 	case 1:
 		if strings.HasPrefix(d.Name, names[0]+"/") {
 			*dest = append(*dest, d)
-			return true
+			return true, nil
 		}
 	// snapshot child
 	case 2:
 		if strings.HasPrefix(d.Name, names[0]+"/") && strings.HasSuffix(d.Name, "@"+names[1]) {
 			*dest = append(*dest, d)
-			return true
+			return true, nil
 		}
 	default:
-		log.Warningf("unexpected number of @ in dataset name, ignoring %q", d.Name)
+		err = xerrors.Errorf("unexpected number of @ in dataset name %q", d.Name)
 	}
-	return false
+	return false, err
 }
 
 // resolveOrigin iterate over each datasets up to their true origin and replace them for / and /home* datasets
@@ -141,7 +145,10 @@ nextDataset:
 			m := &machines[i]
 
 			// Direct children
-			if addIfChildren(m.ID, d, &m.SystemDatasets) {
+			if isChildren, err := addIfChildren(m.ID, d, &m.SystemDatasets); err != nil {
+				log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+			} else if isChildren {
+				m.SystemDatasets = append(m.SystemDatasets, d)
 				continue nextDataset
 			}
 
@@ -167,7 +174,9 @@ nextDataset:
 			for lastused := range m.History {
 				// This is a map, and so, not addressable, have to reassign
 				h := m.History[lastused]
-				if addIfChildren(h.ID, d, &h.SystemDatasets) {
+				if isChildren, err := addIfChildren(m.ID, d, &m.SystemDatasets); err != nil {
+					log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+				} else if isChildren {
 					m.History[lastused] = h
 					continue nextDataset
 				}
