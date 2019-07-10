@@ -219,9 +219,9 @@ nextDataset:
 
 		// Boot datasets
 		var defaultBootsDataset []zfs.Dataset
-		for _, boot := range boots {
-			if strings.HasSuffix(boot.Name, "/"+machineDatasetID) || strings.Contains(boot.Name, "/"+machineDatasetID+"/") {
-				defaultBootsDataset = append(defaultBootsDataset, boot)
+		for _, d := range boots {
+			if strings.HasSuffix(d.Name, "/"+machineDatasetID) || strings.Contains(d.Name, "/"+machineDatasetID+"/") {
+				defaultBootsDataset = append(defaultBootsDataset, d)
 			}
 		}
 		m.SystemDatasets = append(m.SystemDatasets, defaultBootsDataset...)
@@ -229,7 +229,7 @@ nextDataset:
 		// Userdata datasets
 		var defaultUserDatasets, untaggedUserDatasets []zfs.Dataset
 		for _, d := range userdatas {
-			// If there is corresponding
+			// Store untagged user datas, but prefer specifically tagged ones if any
 			if d.SystemDataset == "" {
 				untaggedUserDatasets = append(untaggedUserDatasets, d)
 				continue
