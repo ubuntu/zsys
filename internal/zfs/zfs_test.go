@@ -1,13 +1,10 @@
 package zfs_test
 
 import (
-	"encoding/json"
-	"flag"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"testing"
 	"time"
 
@@ -15,14 +12,12 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k0kubun/pp"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
-var (
-	update = flag.Bool("update", false, "update golden files")
-)
-
 func init() {
+	testutils.InstallUpdateFlag()
 	config.SetVerboseMode(true)
 }
 
@@ -721,7 +716,7 @@ func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, in
 
 	// Get expected dataset list from golden file, update as needed.
 	wantFromGolden := zfs.DatasetSlice{IncludePrivate: includePrivate}
-	loadFromGoldenFile(t, gotForGolden, &wantFromGolden)
+	testutils.LoadFromGoldenFile(t, gotForGolden, &wantFromGolden)
 	want := []zfs.Dataset(wantFromGolden.DS)
 
 	datasetsEquals(t, want, got, includePrivate)
@@ -761,49 +756,6 @@ func tempDir(t *testing.T) (string, func()) {
 			t.Error("can't clean temporary directory", err)
 		}
 	}
-}
-
-// loadFromGoldenFile loads expected content to "want", after optionally refreshing it
-// from "got" if udpate flag is passed.
-func loadFromGoldenFile(t *testing.T, got interface{}, want interface{}) {
-	t.Helper()
-
-	goldenFile := filepath.Join("testdata", testNameToPath(t)+".golden")
-	if *update {
-		b, err := json.MarshalIndent(got, "", "   ")
-		if err != nil {
-			t.Fatal("couldn't convert to json:", err)
-		}
-		if err := ioutil.WriteFile(goldenFile, b, 0644); err != nil {
-			t.Fatal("couldn't save golden file:", err)
-		}
-	}
-	b, err := ioutil.ReadFile(goldenFile)
-	if err != nil {
-		t.Fatal("couldn't read golden file")
-	}
-
-	if err := json.Unmarshal(b, &want); err != nil {
-		t.Fatal("couldn't convert golden file content to structure:", err)
-	}
-}
-
-func testNameToPath(t *testing.T) string {
-	t.Helper()
-
-	testDirname := strings.Split(t.Name(), "/")[0]
-	nparts := strings.Split(t.Name(), "/")
-	name := strings.ToLower(nparts[len(nparts)-1])
-
-	var elems []string
-	for _, e := range []string{testDirname, name} {
-		for _, k := range []string{"/", " ", ",", "=", "'"} {
-			e = strings.Replace(e, k, "_", -1)
-		}
-		elems = append(elems, strings.ToLower(strings.Replace(e, "__", "_", -1)))
-	}
-
-	return strings.Join(elems, "/")
 }
 
 // timeAsserter ensures that dates will be between a start and end time
