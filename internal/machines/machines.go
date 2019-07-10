@@ -218,13 +218,14 @@ nextDataset:
 		machineDatasetID := e[len(e)-1]
 
 		// Boot datasets
-		var defaultBootsDataset []zfs.Dataset
+		var bootsDataset []zfs.Dataset
 		for _, d := range boots {
+			// Matching base dataset name or subdataset of it.
 			if strings.HasSuffix(d.Name, "/"+machineDatasetID) || strings.Contains(d.Name, "/"+machineDatasetID+"/") {
-				defaultBootsDataset = append(defaultBootsDataset, d)
+				bootsDataset = append(bootsDataset, d)
 			}
 		}
-		m.SystemDatasets = append(m.SystemDatasets, defaultBootsDataset...)
+		m.SystemDatasets = append(m.SystemDatasets, bootsDataset...)
 
 		// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
 		// linked to multiple clones and systems).
@@ -247,32 +248,36 @@ nextDataset:
 			e := strings.Split(h.ID, "/")
 			// machineDatasetID may contain @snapshot, which we need to strip to test the suffix
 			machineDatasetID := e[len(e)-1]
-			var baseMachineDatasetID, snapshot string
+			var snapshot string
 			if j := strings.LastIndex(machineDatasetID, "@"); j > 0 {
-				baseMachineDatasetID = machineDatasetID[:j]
 				snapshot = machineDatasetID[j+1:]
 			}
 
 			// Boot datasets
 			var bootsDataset []zfs.Dataset
 			for _, d := range boots {
-				if strings.HasSuffix(d.Name, machineDatasetID) ||
-					(strings.Contains(d.Name, "/"+baseMachineDatasetID+"/") && strings.HasSuffix(d.Name, snapshot)) {
+				if snapshot != "" {
+					// Snapshots are not necessarily with a dataset ID maching its parent of dataset promotions, just match
+					// its name.
+					if strings.HasSuffix(d.Name, "@"+snapshot) {
+						bootsDataset = append(bootsDataset, d)
+						continue
+					}
+				}
+				// For clones just match the base datasetname or its children.
+				if strings.HasSuffix(d.Name, machineDatasetID) || strings.Contains(d.Name, "/"+machineDatasetID+"/") {
 					bootsDataset = append(bootsDataset, d)
 				}
 			}
-			if bootsDataset != nil {
-				h.SystemDatasets = append(h.SystemDatasets, bootsDataset...)
-			} else {
-				// fallback to default main dataset
-				h.SystemDatasets = append(h.SystemDatasets, defaultBootsDataset...)
-			}
+			h.SystemDatasets = append(h.SystemDatasets, bootsDataset...)
 
 			// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
 			// linked to multiple clones and systems).
 			var userDatasets []zfs.Dataset
 			for _, d := range userdatas {
 				if snapshot != "" {
+					// Snapshots wo'nt match dataset ID maching its system dataset as multiple system datasets can link
+					// to the same user dataset. Use only snapshot name.
 					if strings.HasSuffix(d.Name, "@"+snapshot) {
 						userDatasets = append(userDatasets, d)
 						continue
