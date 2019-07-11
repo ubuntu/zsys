@@ -3,7 +3,7 @@
       "Name": "rpool",
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "Sources": {
          "Mountpoint": "local",
@@ -17,7 +17,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000,
       "BootfsDatasets": "SetProperty Value",
       "Sources": {

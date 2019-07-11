@@ -13,7 +13,7 @@
       "Name": "bpool/BOOT/boot",
       "Mountpoint": "/boot",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555
    },
    {
@@ -21,7 +21,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/boot",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000
    },
    {
@@ -29,7 +29,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/boot",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000
    },
    {
@@ -46,7 +46,7 @@
       "Name": "rpool/ROOT/ubuntu",
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555
    },
    {
@@ -54,7 +54,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000
    },
    {
@@ -62,7 +62,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000
    }
 ]

@@ -25,52 +25,56 @@
       "Name": "rpool/ROOT/ubuntu",
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "local",
-         "BootfsDatasets": "none"
+         "BootfsDatasets": "local"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu/opt",
       "Mountpoint": "/opt",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu",
          "LastUsed": "rpool/ROOT/ubuntu",
-         "BootfsDatasets": "none"
+         "BootfsDatasets": "rpool/ROOT/ubuntu"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu/var",
       "Mountpoint": "/var",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu",
          "LastUsed": "rpool/ROOT/ubuntu",
-         "BootfsDatasets": "none"
+         "BootfsDatasets": "rpool/ROOT/ubuntu"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu",
          "LastUsed": "rpool/ROOT/ubuntu",
-         "BootfsDatasets": "none"
+         "BootfsDatasets": "rpool/ROOT/ubuntu"
       }
    },
    {

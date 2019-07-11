@@ -25,7 +25,7 @@
       "Name": "rpool/ROOT/ubuntu_1234",
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
@@ -39,7 +39,7 @@
       "Name": "rpool/ROOT/ubuntu_1234/opt",
       "Mountpoint": "/opt",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
@@ -53,7 +53,7 @@
       "Name": "rpool/ROOT/ubuntu_1234/var",
       "Mountpoint": "/var",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
@@ -67,7 +67,6 @@
       "Name": "rpool/ROOT/ubuntu_1234/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "on",
-      "BootFS": "no",
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {

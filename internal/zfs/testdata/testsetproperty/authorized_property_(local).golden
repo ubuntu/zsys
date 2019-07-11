@@ -1,15 +1,15 @@
 [
    {
       "Name": "rpool",
-      "Mountpoint": "/",
+      "Mountpoint": "/home/foo",
       "CanMount": "noauto",
-      "BootFS": "yes",
       "LastUsed": 1555555555,
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "local",
+         "BootFS": "none",
          "LastUsed": "local",
-         "BootfsDatasets": "none"
+         "BootfsDatasets": "local"
       }
    }
 ]

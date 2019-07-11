@@ -3,13 +3,14 @@
       "Name": "rpool",
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555,
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "local",
-         "BootfsDatasets": "none"
+         "BootfsDatasets": "local"
       }
    },
    {
@@ -17,13 +18,14 @@
       "IsSnapshot": true,
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "SetProperty Value",
+      "BootFS": true,
       "LastUsed": 2000000000,
+      "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "local",
+         "BootFS": "rpool",
          "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "BootfsDatasets": "local"
       }
    }
 ]

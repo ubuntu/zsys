@@ -1,14 +1,13 @@
 [
    {
       "Name": "rpool",
-      "Mountpoint": "/",
+      "Mountpoint": "/home/foo",
       "CanMount": "on",
-      "BootFS": "yes",
       "LastUsed": 1555555555,
       "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "local",
+         "BootFS": "none",
          "LastUsed": "local",
          "BootfsDatasets": "local"
       }

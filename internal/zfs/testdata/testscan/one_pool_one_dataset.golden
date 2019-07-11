@@ -3,7 +3,7 @@
       "Name": "rpool",
       "Mountpoint": "/",
       "CanMount": "on",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 1555555555
    }
 ]

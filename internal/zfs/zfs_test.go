@@ -405,18 +405,18 @@ func TestSetProperty(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"User property (local)":       {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
-		"Authorized property (local)": {def: "one_pool_one_dataset.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
-		"User property (none)":        {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"User property (local)":       {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"Authorized property (local)": {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
+		"User property (none)":        {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		// There is no authorized properties that can be "none" for now
 
-		"User property on snapshot (parent local)": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (parent local)": {def: "one_pool_one_dataset_one_snapshot_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
 		"User property on snapshot (parent none)":  {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
 
-		"User property (inherit)":                               {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},
-		"User property on snapshot (parent inherit)":            {def: "one_pool_n_datasets_n_children_n_snapshots.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1"},
-		"User property (inherit but forced)":                    {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var", force: true},
-		"User property on snapshot (parent inherit but forced)": {def: "one_pool_n_datasets_n_children_n_snapshots.yaml", propertyName: zfs.BootfsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", force: true},
+		"User property (inherit)":                               {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},
+		"User property on snapshot (parent inherit)":            {def: "one_pool_n_datasets_n_children_n_snapshots_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1"},
+		"User property (inherit but forced)":                    {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var", force: true},
+		"User property on snapshot (parent inherit but forced)": {def: "one_pool_n_datasets_n_children_n_snapshots_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", force: true},
 		// There is no authorized properties that can be inherited
 
 		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "mountpoint", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true, isNoOp: true},

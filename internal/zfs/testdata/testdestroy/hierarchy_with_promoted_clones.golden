@@ -25,7 +25,7 @@
       "Name": "rpool/ROOT/ubuntu_5678",
       "Mountpoint": "/",
       "CanMount": "noauto",
-      "BootFS": "yes",
+      "BootFS": true,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
@@ -38,7 +38,7 @@
       "Name": "rpool/ROOT/ubuntu_5678/opt",
       "Mountpoint": "/opt",
       "CanMount": "noauto",
-      "BootFS": "yes",
+      "BootFS": true,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
@@ -52,7 +52,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/opt",
       "CanMount": "noauto",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
@@ -66,7 +66,7 @@
       "Name": "rpool/ROOT/ubuntu_5678/var",
       "Mountpoint": "/var",
       "CanMount": "noauto",
-      "BootFS": "yes",
+      "BootFS": true,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
@@ -79,7 +79,6 @@
       "Name": "rpool/ROOT/ubuntu_5678/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "noauto",
-      "BootFS": "no",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
@@ -92,7 +91,6 @@
       "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
       "Mountpoint": "/var/lib/apt",
       "CanMount": "noauto",
-      "BootFS": "no",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
@@ -106,7 +104,6 @@
       "IsSnapshot": true,
       "Mountpoint": "/var/lib/apt",
       "CanMount": "noauto",
-      "BootFS": "no",
       "LastUsed": 2000000000,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
@@ -121,7 +118,6 @@
       "IsSnapshot": true,
       "Mountpoint": "/var/lib",
       "CanMount": "noauto",
-      "BootFS": "no",
       "LastUsed": 2000000000,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
@@ -136,7 +132,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/var",
       "CanMount": "noauto",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
@@ -151,7 +147,7 @@
       "IsSnapshot": true,
       "Mountpoint": "/",
       "CanMount": "noauto",
-      "BootFS": "yes",
+      "BootFS": true,
       "LastUsed": 2000000000,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
