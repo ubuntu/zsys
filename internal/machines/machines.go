@@ -11,8 +11,13 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// Machines is the map of main root system dataset name to a given Machine
-type Machines map[string]*Machine
+// Machines hold a zfs system states, with a map of main root system dataset name to a given Machine,
+// current machine and nextState if an upgrade has been proceeded.
+type Machines struct {
+	all       map[string]*Machine
+	current   *Machine
+	nextState *State
+}
 
 // Machine is a group of Main and its History children statees
 type Machine struct {
@@ -36,11 +41,6 @@ type State struct {
 	// Those are common between all machines, as persistent (and detected without snapshot information)
 	PersistentDatasets []zfs.Dataset `json:",omitempty"`
 }
-
-var (
-	current *State
-	next    *State
-)
 
 // sortDataset enables sorting a slice of Dataset elements.
 type sortedDataset []zfs.Dataset
@@ -109,7 +109,9 @@ func resolveOrigin(sortedDataset *sortedDataset) {
 
 // New detects and generate machines elems
 func New(ds []zfs.Dataset) Machines {
-	machines := make(Machines)
+	machines := Machines{
+		all: make(map[string]*Machine),
+	}
 
 	// We are going to transform the origin of datasets, get a copy first
 	datasets := make([]zfs.Dataset, len(ds))
@@ -136,12 +138,12 @@ nextDataset:
 				},
 				History: make(map[string]*State),
 			}
-			machines[d.Name] = &m
+			machines.all[d.Name] = &m
 			continue
 		}
 
 		// Check for children, clones and snapshots
-		for _, m := range machines {
+		for _, m := range machines.all {
 			// Direct children
 			if ok, err := isChild(m.ID, d); err != nil {
 				log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
@@ -223,7 +225,7 @@ nextDataset:
 
 	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
 	// Same with children and history datasets.
-	for _, m := range machines {
+	for _, m := range machines.all {
 		e := strings.Split(m.ID, "/")
 		// machineDatasetID is the main State dataset ID.
 		machineDatasetID := e[len(e)-1]
