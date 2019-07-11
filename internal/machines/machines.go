@@ -11,6 +11,9 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// Machines is the map of main bootfs dataset name to Machine
+type Machines map[string]*Machine
+
 // Machine is the machine element
 type Machine struct {
 	// ID is the path to the root system dataset
@@ -21,7 +24,7 @@ type Machine struct {
 	CanBeEnabled bool `json:",omitempty"`
 	machineDatasets
 	// History is a map, by LastUsed of all other system datasets of this machine.
-	History map[int]HistoryMachine `json:",omitempty"`
+	History map[string]*HistoryMachine `json:",omitempty"`
 }
 
 // HistoryMachine is the different state of a machine
@@ -105,8 +108,8 @@ func resolveOrigin(sortedDataset *sortedDataset) {
 }
 
 // New detects and generate machines elems
-func New(ds []zfs.Dataset) []Machine {
-	var machines []Machine
+func New(ds []zfs.Dataset) Machines {
+	machines := make(Machines)
 
 	// We are going to transform the origin of datasets, get a copy first
 	datasets := make([]zfs.Dataset, len(ds))
@@ -131,16 +134,14 @@ nextDataset:
 				IsZsys:          d.BootFS == "yes",
 				CanBeEnabled:    d.CanMount != "off",
 				machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
-				History:         make(map[int]HistoryMachine),
+				History:         make(map[string]*HistoryMachine),
 			}
-			machines = append(machines, m)
+			machines[d.Name] = &m
 			continue
 		}
 
 		// Check for children, clones and snapshots
-		for i := range machines {
-			m := &machines[i]
-
+		for _, m := range machines {
 			// Direct children
 			if ok, err := isChild(m.ID, d); err != nil {
 				log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
@@ -151,7 +152,7 @@ nextDataset:
 
 			// Clones (origin has been modified to point to origin dataset)
 			if strings.HasPrefix(d.Origin, m.ID) {
-				m.History[d.LastUsed] = HistoryMachine{
+				m.History[d.Name] = &HistoryMachine{
 					ID:              d.Name,
 					machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
 				}
@@ -160,7 +161,7 @@ nextDataset:
 
 			// Snapshots or children snapshots of main dataset or clones
 			if strings.HasPrefix(d.Name, m.ID+"@") {
-				m.History[d.LastUsed] = HistoryMachine{
+				m.History[d.Name] = &HistoryMachine{
 					ID:              d.Name,
 					machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
 				}
@@ -207,8 +208,7 @@ nextDataset:
 
 	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
 	// Same with children and history datasets.
-	for i := range machines {
-		m := &machines[i]
+	for _, m := range machines {
 		e := strings.Split(m.ID, "/")
 		machineDatasetID := e[len(e)-1]
 
