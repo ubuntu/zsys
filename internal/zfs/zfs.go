@@ -39,7 +39,7 @@ type DatasetProp struct {
 	// Mounted report if dataset is mounted
 	Mounted bool `json:",omitempty"`
 	// BootFS is a user property stating if the dataset should be mounted in the initramfs.
-	BootFS string `json:",omitempty"`
+	BootFS bool `json:",omitempty"`
 	// LastUsed is a user property that store the last time a dataset was used.
 	LastUsed int `json:",omitempty"`
 	// BootfsDatasets is a user proper for user datasets, linking them to relevant system bootfs datasets.
@@ -144,7 +144,11 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 	// Set user properties that we couldn't set before creating the snapshot dataset.
 	// We don't set LastUsed here as Creation time will be used.
 	if srcProps.sources.BootFS == "local" {
-		if err := ds.SetUserProperty(BootfsProp, srcProps.BootFS); err != nil {
+		bootfsValue := "no"
+		if srcProps.BootFS {
+			bootfsValue = "yes"
+		}
+		if err := ds.SetUserProperty(BootfsProp, bootfsValue); err != nil {
 			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
 		}
 	}
@@ -244,7 +248,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 
 	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snaphotName), rootName)
 	n := newRootName + datasetRelPath
-	if (!skipBootfs && srcProps.BootFS == "yes") || srcProps.BootFS != "yes" {
+	if (!skipBootfs && srcProps.BootFS) || !srcProps.BootFS {
 		cd, err := d.Clone(n, props)
 		if err != nil {
 			return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, n, err)
@@ -265,7 +269,11 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 		// Set user properties that we couldn't set before creating the dataset. Based this for local
 		// or source == parentName (as it will be local)
 		if srcProps.sources.BootFS == "local" || srcProps.sources.BootFS == parentName {
-			if err := cd.SetUserProperty(BootfsProp, srcProps.BootFS); err != nil {
+			bootfsValue := "no"
+			if srcProps.BootFS {
+				bootfsValue = "yes"
+			}
+			if err := cd.SetUserProperty(BootfsProp, bootfsValue); err != nil {
 				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
 			}
 		}

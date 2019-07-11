@@ -73,9 +73,9 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
 	}
-	bootfs := bfs.Value
-	if bootfs == "-" {
-		bootfs = ""
+	var bootfs bool
+	if bfs.Value == "yes" {
+		bootfs = true
 	}
 	sources.BootFS = bfs.Source
 
