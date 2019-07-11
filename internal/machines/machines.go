@@ -20,8 +20,6 @@ type Machine struct {
 	ID string
 	// IsZsys states if we have a zsys system. The other datasets type will be empty otherwise.
 	IsZsys bool `json:",omitempty"`
-	// CanBeEnabled is for noauto or on dataset groups
-	CanBeEnabled bool `json:",omitempty"`
 	machineDatasets
 	// History is a map, by LastUsed of all other system datasets of this machine.
 	History map[string]*HistoryMachine `json:",omitempty"`
@@ -140,7 +138,6 @@ nextDataset:
 			m := Machine{
 				ID:              d.Name,
 				IsZsys:          d.BootFS == "yes",
-				CanBeEnabled:    d.CanMount != "off",
 				machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
 				History:         make(map[string]*HistoryMachine),
 			}
@@ -158,7 +155,7 @@ nextDataset:
 				continue nextDataset
 			}
 
-			// Clones (origin has been modified to point to origin dataset)
+			// Clones root dataset (origin has been modified to point to origin dataset)
 			if strings.HasPrefix(d.Origin, m.ID) {
 				m.History[d.Name] = &HistoryMachine{
 					ID:              d.Name,
