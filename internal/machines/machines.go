@@ -108,7 +108,7 @@ func resolveOrigin(sortedDataset *sortedDataset) {
 }
 
 // New detects and generate machines elems
-func New(ds []zfs.Dataset) Machines {
+func New(ds []zfs.Dataset, cmdline string) Machines {
 	machines := Machines{
 		all: make(map[string]*Machine),
 	}
@@ -311,6 +311,19 @@ nextDataset:
 
 			m.History[lu] = h
 		}
+	}
+
+	m, s := machines.findStateFromCmdline(cmdline)
+	machines.current = m
+	// If we were in a system with rolled back, switch states
+	if m != nil && s != nil && &m.State != s {
+		// switch between history state and main machine state dataset
+		m.History[m.ID] = &m.State
+		m.State = *s
+		delete(m.History, s.ID)
+		// switch now main index object, as main machine state dataset has changed
+		machines.all[s.ID] = m
+		delete(machines.all, m.ID)
 	}
 
 	return machines
