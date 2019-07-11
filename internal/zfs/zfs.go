@@ -36,6 +36,8 @@ type DatasetProp struct {
 	Mountpoint string `json:",omitempty"`
 	// CanMount state of the dataset.
 	CanMount string `json:",omitempty"`
+	// Mounted report if dataset is mounted
+	Mounted bool `json:",omitempty"`
 	// BootFS is a user property stating if the dataset should be mounted in the initramfs.
 	BootFS string `json:",omitempty"`
 	// LastUsed is a user property that store the last time a dataset was used.

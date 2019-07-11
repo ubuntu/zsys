@@ -17,7 +17,8 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	name := d.Properties[libzfs.DatasetPropName].Value
 
 	var mountPropertiesDataset = &d
-	if d.IsSnapshot() {
+	isSnapshot := d.IsSnapshot()
+	if isSnapshot {
 		parentName := name[:strings.LastIndex(name, "@")]
 		pd, err := libzfs.DatasetOpen(parentName)
 		if err != nil {
@@ -52,6 +53,17 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		return nil, xerrors.Errorf("can't get canmount property: "+config.ErrorFormat, err)
 	}
 	canMount = cm.Value
+
+	var mounted bool
+	if !isSnapshot {
+		mountedp, err := d.GetProperty(libzfs.DatasetPropMounted)
+		if err != nil {
+			return nil, xerrors.Errorf("can't get mounted: "+config.ErrorFormat, err)
+		}
+		if mountedp.Value == "yes" {
+			mounted = true
+		}
+	}
 
 	// libzfs is accessing the property itself like this. There are issues when we do the check regularly with "no error"
 	// returned, or dataset doesn't exists…
@@ -101,6 +113,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	return &DatasetProp{
 		Mountpoint:     mountpoint,
 		CanMount:       canMount,
+		Mounted:        mounted,
 		BootFS:         bootfs,
 		LastUsed:       lastused,
 		BootfsDatasets: BootfsDatasets,
