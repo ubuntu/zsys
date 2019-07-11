@@ -156,10 +156,11 @@ func TestSnapshot(t *testing.T) {
 
 func TestClone(t *testing.T) {
 	tests := map[string]struct {
-		def       string
-		dataset   string
-		suffix    string
-		recursive bool
+		def        string
+		dataset    string
+		suffix     string
+		skipBootfs bool
+		recursive  bool
 
 		wantErr bool
 		isNoOp  bool
@@ -175,10 +176,12 @@ func TestClone(t *testing.T) {
 		"Recursive missing some leaf snapshots":    {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
 		"Recursive missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true, wantErr: true, isNoOp: true},
 
+		"Allow cloning ignoring zsys bootfs": {def: "layout1_with_bootfs_already_cloned.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", skipBootfs: true, recursive: true},
+
 		"Snapshot doesn't exists":         {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@doesntexists", suffix: "5678", wantErr: true, isNoOp: true},
 		"Dataset doesn't exists":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist@something", suffix: "5678", wantErr: true, isNoOp: true},
 		"No suffix provided":              {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
-		"Suffixed dataset already exists": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "1234", wantErr: true, isNoOp: true},
+		"Suffixed dataset already exists": {def: "layout1_with_bootfs_already_cloned.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", wantErr: true, isNoOp: true},
 		"Clone on root fails":             {def: "one_pool_one_dataset_one_snapshot.yaml", dataset: "rpool@snap1", suffix: "5678", wantErr: true, isNoOp: true},
 	}
 
@@ -201,7 +204,7 @@ func TestClone(t *testing.T) {
 				}
 			}
 
-			err := z.Clone(tc.dataset, tc.suffix, tc.recursive)
+			err := z.Clone(tc.dataset, tc.suffix, tc.skipBootfs, tc.recursive)
 
 			if err != nil {
 				if !tc.wantErr {
@@ -262,7 +265,7 @@ func TestPromote(t *testing.T) {
 			defer fPools.create(dir)()
 			z := zfs.New()
 			if tc.cloneFrom != "" {
-				err := z.Clone(tc.cloneFrom, "5678", !tc.cloneOnlyOne)
+				err := z.Clone(tc.cloneFrom, "5678", false, !tc.cloneOnlyOne)
 				if err != nil {
 					t.Fatalf("couldn't setup testbed when cloning: %v", err)
 				}
@@ -344,7 +347,7 @@ func TestDestroy(t *testing.T) {
 			defer fPools.create(dir)()
 			z := zfs.New()
 			if tc.cloneFrom != "" {
-				err := z.Clone(tc.cloneFrom, "5678", true)
+				err := z.Clone(tc.cloneFrom, "5678", false, true)
 				if err != nil {
 					t.Fatalf("couldn't setup testbed when cloning: %v", err)
 				}
@@ -553,7 +556,7 @@ func TestTransactions(t *testing.T) {
 					// rpool/ROOT/ubuntu_9999 exists
 					suffix = "9999"
 				}
-				err := z.Clone(name, suffix, true)
+				err := z.Clone(name, suffix, false, true)
 				if !tc.shouldErr && err != nil {
 					t.Fatalf("cloning shouldn't have failed but it did: %v", err)
 				} else if tc.shouldErr && err == nil {
@@ -580,7 +583,7 @@ func TestTransactions(t *testing.T) {
 					// Prepare cloning in its own transaction
 					if !tc.doClone {
 						z2 := zfs.New()
-						err := z2.Clone("rpool/ROOT/ubuntu_1234@snap_r2", "5678", true)
+						err := z2.Clone("rpool/ROOT/ubuntu_1234@snap_r2", "5678", false, true)
 						if err != nil {
 							t.Fatalf("couldnt clone to prepare dataset hierarchy: %v", err)
 						}
