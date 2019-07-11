@@ -11,41 +11,35 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// Machines is the map of main bootfs dataset name to Machine
+// Machines is the map of main root system dataset name to a given Machine
 type Machines map[string]*Machine
 
-// Machine is the machine element
+// Machine is a group of Main and its History children statees
 type Machine struct {
-	// ID is the path to the root system dataset
+	// Main machine State
+	State
+	// History is a map or root system datasets to all its possible State
+	History map[string]*State `json:",omitempty"`
+}
+
+// State is a finite regroupement of multiple ID and elements corresponding to a bootable machine instance.
+type State struct {
+	// ID is the path to the root system dataset for this State.
 	ID string
 	// IsZsys states if we have a zsys system. The other datasets type will be empty otherwise.
 	IsZsys bool `json:",omitempty"`
-	machineDatasets
-	// History is a map, by LastUsed of all other system datasets of this machine.
-	History map[string]*HistoryMachine `json:",omitempty"`
-}
-
-// HistoryMachine is the different state of a machine
-type HistoryMachine struct {
-	// ID is the path to the root system dataset
-	ID string
-	machineDatasets
-}
-
-// machieInternal is the common implementation between Machine and HistoryMachine
-type machineDatasets struct {
-	// SystemDatasets are all datasets that constitues a machine (in <pool>/ROOT/ + <pool>/BOOT/)
+	// SystemDatasets are all datasets that constitues this State (in <pool>/ROOT/ + <pool>/BOOT/)
 	SystemDatasets []zfs.Dataset `json:",omitempty"`
-	// UserDatasets are all datasets that are attached to the given machine (in <pool>/USERDATA/)
+	// UserDatasets are all datasets that are attached to the given State (in <pool>/USERDATA/)
 	UserDatasets []zfs.Dataset `json:",omitempty"`
 	// PersistentDatasets are all datasets that are canmount=on and and not in ROOT, USERDATA or BOOT dataset containers.
-	// Those are common between machine and history, as persistent (and detected without snapshot information)
+	// Those are common between all machines, as persistent (and detected without snapshot information)
 	PersistentDatasets []zfs.Dataset `json:",omitempty"`
 }
 
 var (
-	current *Machine
-	next    *Machine
+	current *State
+	next    *State
 )
 
 // sortDataset enables sorting a slice of Dataset elements.
@@ -136,10 +130,12 @@ nextDataset:
 		if d.Mountpoint == "/" && d.Origin == "" {
 			// TODO: if canmount == off, we look at all children and don't add it if there is one with / mountpoint (it's only a container)
 			m := Machine{
-				ID:              d.Name,
-				IsZsys:          d.BootFS == "yes",
-				machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
-				History:         make(map[string]*HistoryMachine),
+				State: State{
+					ID:             d.Name,
+					IsZsys:         d.BootFS == "yes",
+					SystemDatasets: []zfs.Dataset{d},
+				},
+				History: make(map[string]*State),
 			}
 			machines[d.Name] = &m
 			continue
@@ -157,30 +153,32 @@ nextDataset:
 
 			// Clones root dataset (origin has been modified to point to origin dataset)
 			if strings.HasPrefix(d.Origin, m.ID) {
-				m.History[d.Name] = &HistoryMachine{
-					ID:              d.Name,
-					machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
+				m.History[d.Name] = &State{
+					ID:             d.Name,
+					SystemDatasets: []zfs.Dataset{d},
 				}
 				continue nextDataset
 			}
 
 			// Snapshots root dataset.
-			// This is possible because we ascii ordered the list of zfs datasets, and so main machine and clone root
+			// This is possible because we ascii ordered the list of zfs datasets, and so main State and clone root
 			// of a given snapshot will have been already treated.
-			// 1. test if snapshot of machine main root dataset. We would have encountered the active root machine dataset first.
+			// 1. test if snapshot of machine main State dataset. We would have encountered the machine main State dataset first.
 			if strings.HasPrefix(d.Name, m.ID+"@") {
-				m.History[d.Name] = &HistoryMachine{
-					ID:              d.Name,
-					machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
+				m.History[d.Name] = &State{
+					ID:             d.Name,
+					IsZsys:         d.BootFS == "yes",
+					SystemDatasets: []zfs.Dataset{d},
 				}
 				continue nextDataset
 			}
-			// 2. test if snapshot of any cloned root dataset. We would have encountered the clone first.
+			// 2. test if snapshot of any cloned root dataset. We would have encountered the main clone State dataset first.
 			for _, h := range m.History {
 				if strings.HasPrefix(d.Name, h.ID+"@") {
-					m.History[d.Name] = &HistoryMachine{
-						ID:              d.Name,
-						machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
+					m.History[d.Name] = &State{
+						ID:             d.Name,
+						IsZsys:         d.BootFS == "yes",
+						SystemDatasets: []zfs.Dataset{d},
 					}
 					continue nextDataset
 				}
@@ -228,6 +226,7 @@ nextDataset:
 	// Same with children and history datasets.
 	for _, m := range machines {
 		e := strings.Split(m.ID, "/")
+		// machineDatasetID is the main State dataset ID.
 		machineDatasetID := e[len(e)-1]
 
 		// Boot datasets
@@ -259,11 +258,11 @@ nextDataset:
 		// Handle history now
 		for lu, h := range m.History {
 			e := strings.Split(h.ID, "/")
-			// machineDatasetID may contain @snapshot, which we need to strip to test the suffix
-			machineDatasetID := e[len(e)-1]
+			// stateDatasetID may contain @snapshot, which we need to strip to test the suffix
+			stateDatasetID := e[len(e)-1]
 			var snapshot string
-			if j := strings.LastIndex(machineDatasetID, "@"); j > 0 {
-				snapshot = machineDatasetID[j+1:]
+			if j := strings.LastIndex(stateDatasetID, "@"); j > 0 {
+				snapshot = stateDatasetID[j+1:]
 			}
 
 			// Boot datasets
@@ -278,7 +277,7 @@ nextDataset:
 					}
 				}
 				// For clones just match the base datasetname or its children.
-				if strings.HasSuffix(d.Name, machineDatasetID) || strings.Contains(d.Name, "/"+machineDatasetID+"/") {
+				if strings.HasSuffix(d.Name, stateDatasetID) || strings.Contains(d.Name, "/"+stateDatasetID+"/") {
 					bootsDataset = append(bootsDataset, d)
 				}
 			}
