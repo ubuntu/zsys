@@ -172,7 +172,7 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
-func (z *Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
+func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
 	if suffix == "" {
 		return xerrors.Errorf("no suffix was provided for cloning")
 	}
@@ -209,13 +209,14 @@ func (z *Zfs) Clone(name, suffix string, recursive bool) (errClone error) {
 		}
 	}
 
-	return z.cloneRecursive(d, snaphotName, rootName, newRootName, recursive)
+	return z.cloneRecursive(d, snaphotName, rootName, newRootName, skipBootfs, recursive)
 }
 
-// snapshotRecursive recursively clones all children and store "revert" operations by cleaning newly
+// cloneRecursive recursively clones all children and store "revert" operations by cleaning newly
 // created datasets.
-func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootName string, recursive bool) error {
+func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootName string, skipBootfs, recursive bool) error {
 	name := d.Properties[libzfs.DatasetPropName].Value
+	parentName := name[:strings.LastIndex(name, "@")]
 
 	// Get properties from snapshot and parents.
 	srcProps, err := getDatasetProp(d)
@@ -243,37 +244,38 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 
 	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snaphotName), rootName)
 	n := newRootName + datasetRelPath
-	cd, err := d.Clone(n, props)
-	if err != nil {
-		return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, n, err)
-	}
-	defer cd.Close()
-	z.registerRevert(func() error {
-		d, err := libzfs.DatasetOpen(n)
+	if (!skipBootfs && srcProps.BootFS == "yes") || srcProps.BootFS != "yes" {
+		cd, err := d.Clone(n, props)
 		if err != nil {
-			return xerrors.Errorf("couldn't open %q for cleanup: %v", n, err)
+			return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, n, err)
 		}
-		defer d.Close()
-		if err := d.Destroy(false); err != nil {
-			return xerrors.Errorf("couldn't destroy %q for cleanup: %v", n, err)
-		}
-		return nil
-	})
+		defer cd.Close()
+		z.registerRevert(func() error {
+			d, err := libzfs.DatasetOpen(n)
+			if err != nil {
+				return xerrors.Errorf("couldn't open %q for cleanup: %v", n, err)
+			}
+			defer d.Close()
+			if err := d.Destroy(false); err != nil {
+				return xerrors.Errorf("couldn't destroy %q for cleanup: %v", n, err)
+			}
+			return nil
+		})
 
-	// Set user properties that we couldn't set before creating the dataset. Based this for local
-	// or source == parentName (as it will be local)
-	parentName := name[:strings.LastIndex(name, "@")]
-	if srcProps.sources.BootFS == "local" || srcProps.sources.BootFS == parentName {
-		if err := cd.SetUserProperty(BootfsProp, srcProps.BootFS); err != nil {
-			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
+		// Set user properties that we couldn't set before creating the dataset. Based this for local
+		// or source == parentName (as it will be local)
+		if srcProps.sources.BootFS == "local" || srcProps.sources.BootFS == parentName {
+			if err := cd.SetUserProperty(BootfsProp, srcProps.BootFS); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
+			}
 		}
-	}
-	if srcProps.sources.BootfsDatasets == "local" || srcProps.sources.BootfsDatasets == parentName {
-		if err := cd.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
-			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsDatasetsProp, n, err)
+		if srcProps.sources.BootfsDatasets == "local" || srcProps.sources.BootfsDatasets == parentName {
+			if err := cd.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
+				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsDatasetsProp, n, err)
+			}
 		}
+		// We don't set LastUsed in purpose as the dataset isn't used yet
 	}
-	// We don't set LastUsed in purpose as the dataset isn't used yet
 
 	if !recursive {
 		return nil
@@ -296,7 +298,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 			continue
 		}
 
-		if err := z.cloneRecursive(snapD, snaphotName, rootName, newRootName, recursive); err != nil {
+		if err := z.cloneRecursive(snapD, snaphotName, rootName, newRootName, skipBootfs, recursive); err != nil {
 			return err
 		}
 	}
