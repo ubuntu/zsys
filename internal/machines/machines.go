@@ -79,16 +79,24 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 	return false, err
 }
 
-// resolveOrigin iterate over each datasets up to their true origin and replace them for / and /home* datasets
+// resolveOrigin iterates over each datasets up to their true origin and replaces them.
+// This is only done for /, /boot* and /home* datasets for performance reasons.
 func resolveOrigin(sortedDataset *sortedDataset) {
 	for i := range *sortedDataset {
 		curDataset := &((*sortedDataset)[i])
-		if curDataset.Origin == "" || (curDataset.Mountpoint != "/" && !strings.HasPrefix(curDataset.Mountpoint, "/home")) {
+		if curDataset.Origin == "" ||
+			(curDataset.Mountpoint != "/" && !strings.HasPrefix(curDataset.Mountpoint, "/boot") &&
+				!strings.HasPrefix(curDataset.Mountpoint, "/home")) {
 			continue
 		}
 
 	nextOrigin:
 		for {
+			// origin for a clone points to a snapshot, points to the origin or clone
+			if j := strings.LastIndex(curDataset.Origin, "@"); j > 0 {
+				curDataset.Origin = curDataset.Origin[:j]
+			}
+
 			originStart := curDataset.Origin
 			for _, d := range *sortedDataset {
 				if curDataset.Origin != d.Name {
