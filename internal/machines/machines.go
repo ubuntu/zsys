@@ -167,13 +167,26 @@ nextDataset:
 				continue nextDataset
 			}
 
-			// Snapshots or children snapshots of main dataset or clones
+			// Snapshots root dataset.
+			// This is possible because we ascii ordered the list of zfs datasets, and so main machine and clone root
+			// of a given snapshot will have been already treated.
+			// 1. test if snapshot of machine main root dataset. We would have encountered the active root machine dataset first.
 			if strings.HasPrefix(d.Name, m.ID+"@") {
 				m.History[d.Name] = &HistoryMachine{
 					ID:              d.Name,
 					machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
 				}
 				continue nextDataset
+			}
+			// 2. test if snapshot of any cloned root dataset. We would have encountered the clone first.
+			for _, h := range m.History {
+				if strings.HasPrefix(d.Name, h.ID+"@") {
+					m.History[d.Name] = &HistoryMachine{
+						ID:              d.Name,
+						machineDatasets: machineDatasets{SystemDatasets: []zfs.Dataset{d}},
+					}
+					continue nextDataset
+				}
 			}
 
 			// Clones or snapshot children
