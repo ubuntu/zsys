@@ -127,8 +127,7 @@ func New(ds []zfs.Dataset) Machines {
 nextDataset:
 	for _, d := range sortedDataset {
 		// Register all zsys non cloned mountable / to a new machine
-		if d.Mountpoint == "/" && d.Origin == "" {
-			// TODO: if canmount == off, we look at all children and don't add it if there is one with / mountpoint (it's only a container)
+		if d.Mountpoint == "/" && d.Origin == "" && d.CanMount != "off" {
 			m := Machine{
 				State: State{
 					ID:             d.Name,
