@@ -54,23 +54,20 @@ func (s sortedDataset) Len() int           { return len(s) }
 func (s sortedDataset) Less(i, j int) bool { return s[i].Name < s[j].Name }
 func (s sortedDataset) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
-// addIfChildren append dataset d (a copy) to a slice of datasets if its name is a children
-// of the given name. Return true if match, false otherwise
-// an error will mean that the dataset name isn't what we expected it to be.
-func addIfChildren(name string, d zfs.Dataset, dest *[]zfs.Dataset) (bool, error) {
+// isChild returns if a dataset d is a child of name.
+// An error will mean that the dataset name isn't what we expected it to be.
+func isChild(name string, d zfs.Dataset) (bool, error) {
 	names := strings.Split(name, "@")
 	var err error
 	switch len(names) {
 	// direct system or clone child
 	case 1:
 		if strings.HasPrefix(d.Name, names[0]+"/") {
-			*dest = append(*dest, d)
 			return true, nil
 		}
 	// snapshot child
 	case 2:
 		if strings.HasPrefix(d.Name, names[0]+"/") && strings.HasSuffix(d.Name, "@"+names[1]) {
-			*dest = append(*dest, d)
 			return true, nil
 		}
 	default:
@@ -145,9 +142,9 @@ nextDataset:
 			m := &machines[i]
 
 			// Direct children
-			if isChildren, err := addIfChildren(m.ID, d, &m.SystemDatasets); err != nil {
+			if ok, err := isChild(m.ID, d); err != nil {
 				log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
-			} else if isChildren {
+			} else if ok {
 				m.SystemDatasets = append(m.SystemDatasets, d)
 				continue nextDataset
 			}
@@ -171,13 +168,11 @@ nextDataset:
 			}
 
 			// Clones or snapshot children
-			for lastused := range m.History {
-				// This is a map, and so, not addressable, have to reassign
-				h := m.History[lastused]
-				if isChildren, err := addIfChildren(m.ID, d, &m.SystemDatasets); err != nil {
+			for _, h := range m.History {
+				if ok, err := isChild(h.ID, d); err != nil {
 					log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
-				} else if isChildren {
-					m.History[lastused] = h
+				} else if ok {
+					h.SystemDatasets = append(h.SystemDatasets, d)
 					continue nextDataset
 				}
 			}
