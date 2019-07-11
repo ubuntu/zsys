@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"syscall"
 	"testing"
 	"time"
 
@@ -23,7 +24,8 @@ func init() {
 
 func TestScan(t *testing.T) {
 	tests := map[string]struct {
-		def string
+		def     string
+		mounted string
 
 		wantErr bool
 	}{
@@ -42,6 +44,7 @@ func TestScan(t *testing.T) {
 		"One pool non-root mpoint, N datasets no mountpoint":                       {def: "one_pool_with_nonroot_mountpoint_n_datasets_no_mountpoint.yaml"},
 		"Two pools, N datasets":                                                    {def: "two_pools_n_datasets.yaml"},
 		"Two pools, N datasets, N snapshots":                                       {def: "two_pools_n_datasets_n_snapshots.yaml"},
+		"One mounted dataset":                                                      {def: "one_pool_n_datasets_n_children.yaml", mounted: "rpool/ROOT/ubuntu"},
 	}
 
 	for name, tc := range tests {
@@ -52,6 +55,17 @@ func TestScan(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
+
+			if tc.mounted != "" {
+				temp := filepath.Join(dir, "tempmount")
+				if err := os.MkdirAll(temp, 0755); err != nil {
+					t.Fatalf("couldn't create temporary mount point directory %q: %v", temp, err)
+				}
+				// zfs will unmount it when exporting the pool
+				if err := syscall.Mount(tc.mounted, temp, "zfs", 0, "zfsutil"); err != nil {
+					t.Fatalf("couldn't prepare and mount %q: %v", tc.mounted, err)
+				}
+			}
 
 			z := zfs.New()
 			got, err := z.Scan()
