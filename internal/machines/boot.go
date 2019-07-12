@@ -2,6 +2,7 @@ package machines
 
 import (
 	"math/rand"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -16,6 +17,13 @@ import (
 // ZfsPropertyCloneScanner interface can clone, set dataset property and scan
 type ZfsPropertyCloneScanner interface {
 	Clone(name, suffix string, skipBootfs, recursive bool, options ...zfs.DatasetCloneOption) (errClone error)
+	Scan() ([]zfs.Dataset, error)
+	zfsPropertySetter
+}
+
+// ZfsPropertyPromoteScanner interface can promote, set dataset property and scan
+type ZfsPropertyPromoteScanner interface {
+	Promote(name string) (errPromote error)
 	Scan() ([]zfs.Dataset, error)
 	zfsPropertySetter
 }
@@ -143,6 +151,102 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 	if bootedOnSnapshot {
 		machines.ensureCurrentState(cmdline)
 	}
+
+	return nil
+}
+
+// Commit current state to be the active one by promoting its datasets if needed, set last used,
+// associate user datasets to it and rebuilding grub menu.
+// After this operation, every New() call will get the current and correct system state.
+// TODO: update-grub (in the caller)
+func (machines *Machines) Commit(cmdline string, z ZfsPropertyPromoteScanner) error {
+	root, revertUserData := parseCmdLine(cmdline)
+	m, bootedState := machines.findFromRoot(root)
+
+	// Get user datasets. As we didn't tag the user datasets and promote the system one, the machines doesn't correspond
+	// to the reality.
+
+	// We don't revert userdata, so we are using main state machine userdata to keep on the same track.
+	// It's a no-op if the active state was the main one already.
+	// In case of system revert (either from cloning or rebooting this older dataset without user data revert), the newly
+	// active state won't be the main one, and so, we only take its main state userdata.
+	if !revertUserData {
+		bootedState.UserDatasets = m.UserDatasets
+	} else {
+		// We reverted the user dataset.
+		// If we rebooted on an old clone that booted succesfully, all is fine, we have tags which attached the user datasets
+		// If we cloned but didn't boot successfully, the relationship is lost. This clone shouldn't be offered as a boot option and don't have a last used. (TODO)
+		// If we booted on a snapshot, we just cloned fresh user datasets which aren't available on a fresh Scan() as they are untagged. Check for mounted userdatasets and attach them
+		for _, d := range machines.allUsersDatasets {
+			if !d.Mounted {
+				continue
+			}
+			bootedState.UserDatasets = append(bootedState.UserDatasets, d)
+		}
+	}
+
+	// Untag non attached userdatasets
+	for _, d := range diffDatasets(machines.allUsersDatasets, bootedState.UserDatasets) {
+		var newTag string
+		// Multiple elements, strip current bootfs dataset name
+		if d.BootfsDatasets != "" && d.BootfsDatasets != bootedState.ID {
+			newTag = strings.Replace(d.BootfsDatasets, bootedState.ID+":", "", -1)
+			newTag = strings.TrimSuffix(newTag, ":"+bootedState.ID)
+		}
+		if newTag == d.BootfsDatasets {
+			continue
+		}
+		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+			return xerrors.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, bootedState.ID, d.Name, err)
+		}
+	}
+	// Tag userdatasets to associate with this successful boot state
+	for _, d := range bootedState.UserDatasets {
+		var newTag string
+		if d.BootfsDatasets == bootedState.ID ||
+			strings.Contains(d.BootfsDatasets, bootedState.ID+":") ||
+			strings.HasSuffix(d.BootfsDatasets, ":"+bootedState.ID) {
+			continue
+		}
+		if d.BootfsDatasets == "" {
+			newTag = bootedState.ID
+		} else {
+			newTag = d.BootfsDatasets + ":" + bootedState.ID
+		}
+		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+			return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
+		}
+	}
+
+	// System and users datasets: set lastUsed
+	currentTime := strconv.Itoa(int(time.Now().Unix()))
+	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
+		z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false)
+	}
+
+	// Promotion needed for system and user datasets
+	for _, d := range bootedState.UserDatasets {
+		if bootedState.SystemDatasets[0].Origin == "" {
+			continue
+		}
+		log.Debug("promoting user dataset: %q", d.Name)
+		if err := z.Promote(d.Name); err != nil {
+			return xerrors.Errorf("couldn't promote %q user dataset: "+config.ErrorFormat, d.Name, err)
+		}
+	}
+	if bootedState.SystemDatasets[0].Origin != "" {
+		log.Debug("promoting current new state system dataset: %q", bootedState.ID)
+		if err := z.Promote(bootedState.ID); err != nil {
+			return xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, bootedState.ID, err)
+		}
+	}
+
+	// Rescan datasets, with current lastUsed, and main state.
+	ds, err := z.Scan()
+	if err != nil {
+		return xerrors.Errorf("couldn't rescan after comitting boot: "+config.ErrorFormat, err)
+	}
+	*machines = New(ds, cmdline)
 
 	return nil
 }
