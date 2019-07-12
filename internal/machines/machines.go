@@ -14,9 +14,11 @@ import (
 // Machines hold a zfs system states, with a map of main root system dataset name to a given Machine,
 // current machine and nextState if an upgrade has been proceeded.
 type Machines struct {
-	all       map[string]*Machine
-	current   *Machine
-	nextState *State
+	all               map[string]*Machine
+	current           *Machine
+	nextState         *State
+	allSystemDatasets []zfs.Dataset
+	allUsersDatasets  []zfs.Dataset
 }
 
 // Machine is a group of Main and its History children statees
@@ -128,7 +130,7 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 	// Resolve out to its root origin for /, /boot* and user datasets
 	resolveOrigin(&sortedDataset)
 
-	var boots, userdatas, persistents []zfs.Dataset
+	var boots, persistents []zfs.Dataset
 	// First, handle system datasets (active for each machine and history)
 nextDataset:
 	for _, d := range sortedDataset {
@@ -212,7 +214,7 @@ nextDataset:
 		// Extract zsys user datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
 		if strings.Contains(strings.ToLower(d.Name), userdatasetsContainerName) {
-			userdatas = append(userdatas, d)
+			machines.allUsersDatasets = append(machines.allUsersDatasets, d)
 			continue
 		}
 
@@ -234,6 +236,8 @@ nextDataset:
 		// machineDatasetID is the main State dataset ID.
 		machineDatasetID := e[len(e)-1]
 
+		machines.allSystemDatasets = append(machines.allSystemDatasets, m.SystemDatasets...)
+
 		// Boot datasets
 		var bootsDataset []zfs.Dataset
 		for _, d := range boots {
@@ -247,7 +251,7 @@ nextDataset:
 		// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
 		// linked to multiple clones and systems).
 		var userDatasets []zfs.Dataset
-		for _, d := range userdatas {
+		for _, d := range machines.allUsersDatasets {
 			// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
 			for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
 				if bootfsDataset == m.ID || strings.HasPrefix(d.BootfsDatasets, m.ID+"/") {
@@ -270,6 +274,8 @@ nextDataset:
 				snapshot = stateDatasetID[j+1:]
 			}
 
+			machines.allSystemDatasets = append(machines.allSystemDatasets, h.SystemDatasets...)
+
 			// Boot datasets
 			var bootsDataset []zfs.Dataset
 			for _, d := range boots {
@@ -291,7 +297,7 @@ nextDataset:
 			// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
 			// linked to multiple clones and systems).
 			var userDatasets []zfs.Dataset
-			for _, d := range userdatas {
+			for _, d := range machines.allUsersDatasets {
 				if snapshot != "" {
 					// Snapshots wo'nt match dataset ID maching its system dataset as multiple system datasets can link
 					// to the same user dataset. Use only snapshot name.
