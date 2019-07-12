@@ -313,7 +313,8 @@ nextDataset:
 		}
 	}
 
-	m, s := machines.findStateFromCmdline(cmdline)
+	root, _ := parseCmdLine(cmdline)
+	m, _ := machines.findFromRoot(root)
 	machines.current = m
 	// If we were in a system with rolled back, switch states
 	if m != nil && s != nil && &m.State != s {
@@ -327,4 +328,43 @@ nextDataset:
 	}
 
 	return machines
+}
+
+// findFromRoot returns the active machine and state if any.
+// If rootName is a snapshot, it fallbacks to current mounted root dataset
+func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
+	// Not a zfs system
+	if rootName == "" {
+		return nil, nil
+	}
+
+	// Fast path: if rootName is already a main dataset state
+	if m, exists := machines.all[rootName]; exists {
+		return m, &m.State
+	}
+
+	var fromSnapshot bool
+	if strings.Contains(rootName, "@") {
+		fromSnapshot = true
+	}
+
+	// We know that our desired target is a history one
+	for _, m := range machines.all {
+		// Only match on names as we booted an existing clone directly.
+		if !fromSnapshot {
+			if h, ok := m.History[rootName]; ok {
+				return m, h
+			}
+			continue
+		}
+
+		// We have a snapshot, we need to find the corresponding mounted main dataset on /.
+		for _, h := range m.History {
+			if h.SystemDatasets[0].Mounted && h.SystemDatasets[0].Mountpoint == "/" {
+				return m, h
+			}
+		}
+	}
+
+	return nil, nil
 }
