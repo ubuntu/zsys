@@ -172,12 +172,11 @@
       "Mountpoint": "/",
       "CanMount": "noauto",
       "BootFS": true,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "none",
-         "BootfsDatasets": "local"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -185,12 +184,11 @@
       "Mountpoint": "/opt",
       "CanMount": "noauto",
       "BootFS": true,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -200,12 +198,11 @@
       "CanMount": "noauto",
       "BootFS": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -213,36 +210,33 @@
       "Mountpoint": "/var",
       "CanMount": "noauto",
       "BootFS": true,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "noauto",
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
       "Mountpoint": "/var/lib/apt",
       "CanMount": "noauto",
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678/var/lib",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -251,12 +245,11 @@
       "Mountpoint": "/var/lib/apt",
       "CanMount": "noauto",
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678/var/lib",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -265,12 +258,11 @@
       "Mountpoint": "/var/lib",
       "CanMount": "noauto",
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678/var/lib",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -280,12 +272,11 @@
       "CanMount": "noauto",
       "BootFS": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    },
    {
@@ -295,12 +286,11 @@
       "CanMount": "noauto",
       "BootFS": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "none",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "none"
       }
    }
 ]

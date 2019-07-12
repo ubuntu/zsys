@@ -240,13 +240,12 @@
       "Mountpoint": "/",
       "CanMount": "noauto",
       "BootFS": true,
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Origin": "rpool/ROOT/ubuntu@snap_r1",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "none",
-         "BootfsDatasets": "local"
+         "BootfsDatasets": "none"
       }
    }
 ]
