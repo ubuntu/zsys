@@ -316,16 +316,6 @@ nextDataset:
 	root, _ := parseCmdLine(cmdline)
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
-	// If we were in a system with rolled back, switch states
-	if m != nil && s != nil && &m.State != s {
-		// switch between history state and main machine state dataset
-		m.History[m.ID] = &m.State
-		m.State = *s
-		delete(m.History, s.ID)
-		// switch now main index object, as main machine state dataset has changed
-		machines.all[s.ID] = m
-		delete(machines.all, m.ID)
-	}
 
 	return machines
 }
