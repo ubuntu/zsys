@@ -42,6 +42,10 @@ type State struct {
 	PersistentDatasets []zfs.Dataset `json:",omitempty"`
 }
 
+const (
+	userdatasetsContainerName = "/userdata/"
+)
+
 // sortDataset enables sorting a slice of Dataset elements.
 type sortedDataset []zfs.Dataset
 
@@ -72,13 +76,13 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 }
 
 // resolveOrigin iterates over each datasets up to their true origin and replaces them.
-// This is only done for /, /boot* and /home* datasets for performance reasons.
+// This is only done for /, /boot* and user datasets for performance reasons.
 func resolveOrigin(sortedDataset *sortedDataset) {
 	for i := range *sortedDataset {
 		curDataset := &((*sortedDataset)[i])
 		if curDataset.Origin == "" ||
 			(curDataset.Mountpoint != "/" && !strings.HasPrefix(curDataset.Mountpoint, "/boot") &&
-				!strings.HasPrefix(curDataset.Mountpoint, "/home")) {
+				!strings.Contains(strings.ToLower(curDataset.Name), userdatasetsContainerName)) {
 			continue
 		}
 
@@ -121,7 +125,7 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 	sortedDataset := sortedDataset(datasets)
 	sort.Sort(sortedDataset)
 
-	// Resolve out to its root origin for / and /home datasets
+	// Resolve out to its root origin for /, /boot* and user datasets
 	resolveOrigin(&sortedDataset)
 
 	var boots, userdatas, persistents []zfs.Dataset
@@ -207,7 +211,7 @@ nextDataset:
 
 		// Extract zsys user datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
-		if strings.HasPrefix(d.Mountpoint, "/home") && strings.Contains(strings.ToLower(d.Name), "/userdata/") {
+		if strings.Contains(strings.ToLower(d.Name), userdatasetsContainerName) {
 			userdatas = append(userdatas, d)
 			continue
 		}
