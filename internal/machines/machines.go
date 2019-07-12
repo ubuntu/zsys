@@ -133,7 +133,7 @@ nextDataset:
 			m := Machine{
 				State: State{
 					ID:             d.Name,
-					IsZsys:         d.BootFS == "yes",
+					IsZsys:         d.BootFS,
 					SystemDatasets: []zfs.Dataset{d},
 				},
 				History: make(map[string]*State),
@@ -168,7 +168,7 @@ nextDataset:
 			if strings.HasPrefix(d.Name, m.ID+"@") {
 				m.History[d.Name] = &State{
 					ID:             d.Name,
-					IsZsys:         d.BootFS == "yes",
+					IsZsys:         d.BootFS,
 					SystemDatasets: []zfs.Dataset{d},
 				}
 				continue nextDataset
@@ -178,7 +178,7 @@ nextDataset:
 				if strings.HasPrefix(d.Name, h.ID+"@") {
 					m.History[d.Name] = &State{
 						ID:             d.Name,
-						IsZsys:         d.BootFS == "yes",
+						IsZsys:         d.BootFS,
 						SystemDatasets: []zfs.Dataset{d},
 					}
 					continue nextDataset
