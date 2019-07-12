@@ -192,7 +192,7 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 	}
 	defer func() { z.saveOrRevert(errClone) }()
 
-	rootName, snaphotName := separateSnaphotName(name)
+	rootName, snapshotName := separateSnapshotName(name)
 
 	// Reformat the name with the new uuid and clone now the dataset.
 	newRootName := rootName
@@ -208,17 +208,17 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 	}
 	defer parent.Close()
 	if recursive {
-		if err := checkSnapshotHierarchyIntegrity(parent, snaphotName, true); err != nil {
+		if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
 			return xerrors.Errorf("integrity check failed: %v", err)
 		}
 	}
 
-	return z.cloneRecursive(d, snaphotName, rootName, newRootName, skipBootfs, recursive)
+	return z.cloneRecursive(d, snapshotName, rootName, newRootName, skipBootfs, recursive)
 }
 
 // cloneRecursive recursively clones all children and store "revert" operations by cleaning newly
 // created datasets.
-func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootName string, skipBootfs, recursive bool) error {
+func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootName string, skipBootfs, recursive bool) error {
 	name := d.Properties[libzfs.DatasetPropName].Value
 	parentName := name[:strings.LastIndex(name, "@")]
 
@@ -246,7 +246,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 		Source: "local",
 	}
 
-	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snaphotName), rootName)
+	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snapshotName), rootName)
 	n := newRootName + datasetRelPath
 	if (!skipBootfs && srcProps.BootFS) || !srcProps.BootFS {
 		cd, err := d.Clone(n, props)
@@ -301,12 +301,12 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snaphotName, rootName, newRootNam
 			continue
 		}
 		// Look for childrens filesystem datasets having a corresponding snapshot
-		found, snapD := cd.FindSnapshotName("@" + snaphotName)
+		found, snapD := cd.FindSnapshotName("@" + snapshotName)
 		if !found {
 			continue
 		}
 
-		if err := z.cloneRecursive(snapD, snaphotName, rootName, newRootName, skipBootfs, recursive); err != nil {
+		if err := z.cloneRecursive(snapD, snapshotName, rootName, newRootName, skipBootfs, recursive); err != nil {
 			return err
 		}
 	}
@@ -327,7 +327,7 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 	}
 	defer func() { z.saveOrRevert(errPromote) }()
 
-	originParent, snapshotName := separateSnaphotName(d.Properties[libzfs.DatasetPropOrigin].Value)
+	originParent, snapshotName := separateSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
 	// Only check integrity for non promoted elements
 	// Otherwise, promoting is a no-op or will repromote children
 	if len(originParent) > 0 {
@@ -347,7 +347,7 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 	name := d.Properties[libzfs.DatasetPropName].Value
 
-	origin, _ := separateSnaphotName(d.Properties[libzfs.DatasetPropOrigin].Value)
+	origin, _ := separateSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
 	// Only promote if not promoted yet.
 	if len(origin) > 0 {
 		if err := d.Promote(); err != nil {
