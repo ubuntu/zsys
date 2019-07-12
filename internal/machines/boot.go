@@ -96,64 +96,38 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 		}
 	}
 
-	// 2 cases:
-	// * we asked to revert user datasets, and so, s.UserDatasets will be what we requested and should switch canmount=on -> do nothing thus.
-	// * if we keep current user datasets, take the main State UserDatasets from the current machine (which was the last successfully booted with ones)
-	// Save them for switching to noauto if needed
-	var bootedStateGeneratedUserDatasets []zfs.Dataset
+	// We don't revert userdata, so we are using main state machine userdata to keep on the same track.
+	// It's a no-op if the active state was the main one already.
+	// In case of system revert (either from cloning or rebooting this older dataset without user data revert), the newly
+	// active state won't be the main one, and so, we only take its main state userdata.
 	if !revertUserData {
-		bootedStateGeneratedUserDatasets = bootedState.UserDatasets
 		bootedState.UserDatasets = m.UserDatasets
 	}
 
 	var needRescan bool
-	// Start switching every non desired states to noauto
-	for _, m := range machines.all {
-		if m.ID != bootedState.ID {
-			modified, err := m.switchCanMount(z, "noauto")
-			if err != nil {
-				return err
-			}
-			if modified {
-				needRescan = modified
-			}
+	// Start switching every non desired system and user datasets to noauto
+	noAutoDatasets := diffDatasets(machines.allSystemDatasets, bootedState.SystemDatasets)
+	noAutoDatasets = append(noAutoDatasets, diffDatasets(machines.allUsersDatasets, bootedState.UserDatasets)...)
+	for _, d := range noAutoDatasets {
+		if d.CanMount != "on" {
+			continue
 		}
-		for _, h := range m.History {
-			// skipping current state
-			if h.ID == bootedState.ID {
-				continue
-			}
-			modified, err := h.switchCanMount(z, "noauto")
-			if err != nil {
-				return err
-			}
-			if modified {
-				needRescan = modified
-			}
+		if err := z.SetProperty(zfs.CanmountProp, "noauto", d.Name, false); err != nil {
+			return xerrors.Errorf("couldn't switch %q canmount property to noauto: "+config.ErrorFormat, d.Name, err)
 		}
-	}
-	// If we reverted usersdataset, the boot failed (but those user datasets have canmount=on),
-	// and then reboot on same dataset but without reverting userdataset, we need to disable the previously
-	// associated userdatasets.
-	if !revertUserData && bootedStateGeneratedUserDatasets != nil {
-		for _, d := range bootedStateGeneratedUserDatasets {
-			if d.CanMount == "noauto" {
-				continue
-			}
-			needRescan = true
-			if err := z.SetProperty(zfs.CanmountProp, "noauto", d.Name, false); err != nil {
-				return xerrors.Errorf("couldn't switch %q canmount property to noauto: "+config.ErrorFormat, d.Name, err)
-			}
-		}
+		needRescan = true
 	}
 
-	// Switch current machine to on (that way, overlapping userdataset will have the correct state)
-	modified, err := bootedState.switchCanMount(z, "on")
-	if err != nil {
-		return err
-	}
-	if modified {
-		needRescan = modified
+	// Switch current state system and user datasets to on
+	autoDatasets := append(bootedState.SystemDatasets, bootedState.UserDatasets...)
+	for _, d := range noAutoDatasets {
+		if d.CanMount != "noauto" {
+			continue
+		}
+		if err := z.SetProperty(zfs.CanmountProp, "on", d.Name, false); err != nil {
+			return xerrors.Errorf("couldn't switch %q canmount property to on: "+config.ErrorFormat, d.Name, err)
+		}
+		needRescan = true
 	}
 
 	// Rescan if we changed the dataset properties
@@ -188,19 +162,17 @@ func generateID(n int) string {
 	return string(b)
 }
 
-// switchCanMount switches for a given state all system and user datasets to canMount state.
-// It returns if we had to modify any dataset.
-func (s *State) switchCanMount(z zfsPropertySetter, canMount string) (bool, error) {
-	var modified bool
-	ds := append(s.SystemDatasets, s.UserDatasets...)
-	for _, d := range ds {
-		if d.CanMount == canMount {
-			continue
-		}
-		modified = true
-		if err := z.SetProperty(zfs.CanmountProp, canMount, d.Name, false); err != nil {
-			return modified, xerrors.Errorf("couldn't switch %q canmount property to %d: "+config.ErrorFormat, d.Name, canMount, err)
+// diffDatasets returns datasets in a that aren't in b
+func diffDatasets(a, b []zfs.Dataset) []zfs.Dataset {
+	mb := make(map[string]struct{}, len(b))
+	for _, x := range b {
+		mb[x.Name] = struct{}{}
+	}
+	var diff []zfs.Dataset
+	for _, x := range a {
+		if _, found := mb[x.Name]; !found {
+			diff = append(diff, x)
 		}
 	}
-	return modified, nil
+	return diff
 }
