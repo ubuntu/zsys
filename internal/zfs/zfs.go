@@ -277,9 +277,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
 			}
 		}
-		if srcProps.sources.BootfsDatasets == "local" || srcProps.sources.BootfsDatasets == parentName {
-			if err := cd.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsDatasetsProp, n, err)
+		// We don't set BootfsDatasets as this property can't be translated to new datasets
 			}
 		}
 		// We don't set LastUsed in purpose as the dataset isn't used yet
