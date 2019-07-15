@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -eu
+
+MODIFIED=`git status --porcelain go.sum go.mod`
+if [ -n "$MODIFIED" ]; then
+    echo "ERROR: go module files aren't up to date:"
+    git --no-pager diff go.mod go.sum
+    exit 1
+fi

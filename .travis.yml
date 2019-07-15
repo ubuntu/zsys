@@ -20,18 +20,18 @@ before_script:
   - sudo apt install libzfslinux-dev
 
 script:
-  - echo '############ Code quality ############'
+  - echo '============== Code quality =============='
   - go vet ./...
   - FMT=`go fmt ./...` && echo "$FMT" && [ -z "$FMT" ]
-  - echo '############ BUILD ############'
+  - echo '============== BUILD =============='
   - go build ./...
-  - echo '############ Tests ############'
-  - sudo go test -coverprofile=coverage.txt -covermode=atomic ./...
-  - sudo go test -race ./...
-  - echo '############ Assets generated ############'
-  - git update-index --assume-unchanged go.* && go generate ./... && MODIFIED=`git status --porcelain --untracked-files=no` && git update-index --no-assume-unchanged go.* && [ -z "$MODIFIED" ] && exit 0 || echo "go generate created modified files" && git --no-pager diff && exit 1
-  - echo '############ Modules updated ############'
-  - MODIFIED=`git status --porcelain go.sum go.mod` && [ -z "$MODIFIED" ] && exit 0 || echo "go module files aren't up to date" && git --no-pager diff go.mod go.sum && exit 1
+  - echo '============== Tests =============='
+  - sudo -E env "PATH=$PATH" go test -coverprofile=coverage.txt -covermode=atomic ./...
+  - sudo -E env "PATH=$PATH" go test -race ./...
+  - echo '============== Assets generated =============='
+  - ./ci/check-generate
+  - echo '============== Modules updated =============='
+  - ./ci/check-modules
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
