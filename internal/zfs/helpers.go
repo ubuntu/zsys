@@ -33,7 +33,9 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
 	}
-	sources.Mountpoint = mp.Source
+	if mp.Source != "none" {
+		sources.Mountpoint = mp.Source
+	}
 
 	p, err := mountPropertiesDataset.Pool()
 	if err != nil {
@@ -77,7 +79,9 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	if bfs.Value == "yes" {
 		bootfs = true
 	}
-	sources.BootFS = bfs.Source
+	if bfs.Source != "none" {
+		sources.BootFS = bfs.Source
+	}
 
 	var lu libzfs.Property
 	if !d.IsSnapshot() {
@@ -91,7 +95,9 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 			return nil, xerrors.Errorf("can't get creation property: "+config.ErrorFormat, err)
 		}
 	}
-	sources.LastUsed = lu.Source
+	if lu.Source != "none" {
+		sources.LastUsed = lu.Source
+	}
 	if lu.Value == "-" {
 		lu.Value = "0"
 	}
@@ -108,7 +114,9 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	if BootfsDatasets == "-" {
 		BootfsDatasets = ""
 	}
-	sources.BootfsDatasets = sDataset.Source
+	if sDataset.Source != "none" {
+		sources.BootfsDatasets = sDataset.Source
+	}
 
 	return &DatasetProp{
 		Mountpoint:     mountpoint,

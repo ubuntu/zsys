@@ -424,7 +424,7 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 		if err != nil {
 			return xerrors.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 		}
-		if !force && prop.Source != "local" && prop.Source != "none" && prop.Source != parentName {
+		if !force && prop.Source != "local" && prop.Source != "" && prop.Source != parentName {
 			return nil
 		}
 		if err = d.SetProperty(propName, value); err != nil {
@@ -439,7 +439,7 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 	if err != nil {
 		return xerrors.Errorf("can't get dataset user property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 	}
-	if !force && prop.Source != "local" && prop.Source != "none" && prop.Source != parentName {
+	if !force && prop.Source != "local" && prop.Source != "" && prop.Source != parentName {
 		return nil
 	}
 	if err = d.SetUserProperty(name, value); err != nil {
