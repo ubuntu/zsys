@@ -16,7 +16,7 @@ import (
 
 // ZfsPropertyCloneScanner interface can clone, set dataset property and scan
 type ZfsPropertyCloneScanner interface {
-	Clone(name, suffix string, skipBootfs, recursive bool, options ...zfs.DatasetCloneOption) (errClone error)
+	Clone(name, suffix string, skipBootfs, recursive bool) (errClone error)
 	Scan() ([]zfs.Dataset, error)
 	zfsPropertySetter
 }
