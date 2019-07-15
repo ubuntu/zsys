@@ -1,13 +1,21 @@
-[
-   {
-      "ID": "rpool",
-      "CanBeEnabled": true,
-      "SystemDatasets": [
-         {
-            "Name": "rpool",
-            "Mountpoint": "/",
-            "CanMount": "on"
-         }
-      ]
-   }
-]
+{
+   "All": {
+      "rpool": {
+         "ID": "rpool",
+         "SystemDatasets": [
+            {
+               "Name": "rpool",
+               "Mountpoint": "/",
+               "CanMount": "on"
+            }
+         ]
+      }
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "on"
+      }
+   ]
+}

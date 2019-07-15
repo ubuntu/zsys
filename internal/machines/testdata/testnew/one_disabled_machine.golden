@@ -1,12 +1,1 @@
-[
-   {
-      "ID": "rpool",
-      "SystemDatasets": [
-         {
-            "Name": "rpool",
-            "Mountpoint": "/",
-            "CanMount": "off"
-         }
-      ]
-   }
-]
+{}
