@@ -12,6 +12,9 @@ dist: bionic
 env:
   - GO111MODULE=on
 
+# disable install as we run everything ourselves
+install: true
+
 before_script:
   - sed -i s/bionic/eoan/g /etc/apt/sources.list && apt update && apt --yes full-upgrade
   - apt install libzfslinux-dev
