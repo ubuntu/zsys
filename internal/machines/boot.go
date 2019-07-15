@@ -58,7 +58,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 		if j := strings.LastIndex(bootedState.ID, "_"); j > 0 && !strings.HasSuffix(bootedState.ID, "_") {
 			suffix = bootedState.ID[j+1:]
 		} else {
-			return xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", s.ID)
+			return xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedState.ID)
 		}
 
 		if err := z.Clone(root, suffix, true, true); err != nil {
@@ -128,7 +128,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 
 	// Switch current state system and user datasets to on
 	autoDatasets := append(bootedState.SystemDatasets, bootedState.UserDatasets...)
-	for _, d := range noAutoDatasets {
+	for _, d := range autoDatasets {
 		if d.CanMount != "noauto" {
 			continue
 		}

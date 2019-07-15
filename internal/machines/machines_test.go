@@ -22,7 +22,8 @@ func init() {
 func TestNew(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def string
+		def     string
+		cmdline string
 	}{
 		"One machine, one dataset": {def: "d_one_machine_one_dataset.json"},
 		"One disabled machine":     {def: "d_one_disabled_machine.json"},
@@ -34,7 +35,7 @@ func TestNew(t *testing.T) {
 			t.Parallel()
 			ds := loadDatasets(t, tc.def)
 
-			got := machines.New(ds)
+			got := machines.New(ds, tc.cmdline)
 
 			assertMachinesToGolden(t, got)
 		})
@@ -42,7 +43,7 @@ func TestNew(t *testing.T) {
 }
 
 // assertMachinesToGolden compares got slice of machines to reference files, based on test name.
-func assertMachinesToGolden(t *testing.T, got []machines.Machine) {
+func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 	var want []machines.Machine
 	testutils.LoadFromGoldenFile(t, got, &want)
 
