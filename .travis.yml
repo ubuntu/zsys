@@ -16,8 +16,8 @@ env:
 install: true
 
 before_script:
-  - sed -i s/bionic/eoan/g /etc/apt/sources.list && apt update && apt --yes full-upgrade
-  - apt install libzfslinux-dev
+  - sudo sh -c "sed -i s/bionic/eoan/g /etc/apt/sources.list && apt update && apt --yes full-upgrade"
+  - sudo apt install libzfslinux-dev
 
 script:
   - echo '############ Code quality ############'
@@ -26,8 +26,8 @@ script:
   - echo '############ BUILD ############'
   - go build ./...
   - echo '############ Tests ############'
-  - go test -coverprofile=coverage.txt -covermode=atomic ./...
-  - go test -race ./...
+  - sudo go test -coverprofile=coverage.txt -covermode=atomic ./...
+  - sudo go test -race ./...
   - echo '############ Assets generated ############'
   - git update-index --assume-unchanged go.* && go generate ./... && MODIFIED=`git status --porcelain --untracked-files=no` && git update-index --no-assume-unchanged go.* && [ -z "$MODIFIED" ] && exit 0 || echo "go generate created modified files" && git --no-pager diff && exit 1
   - echo '############ Modules updated ############'
