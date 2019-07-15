@@ -4,10 +4,7 @@
       "Mountpoint": "/",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "local",
-         "BootFS": "none",
-         "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "Mountpoint": "local"
       }
    },
    {
@@ -15,10 +12,7 @@
       "Mountpoint": "/ROOT",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "inherited",
-         "BootFS": "none",
-         "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "Mountpoint": "inherited"
       }
    }
 ]

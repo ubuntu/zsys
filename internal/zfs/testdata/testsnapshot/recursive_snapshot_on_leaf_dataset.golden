@@ -8,8 +8,7 @@
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
-         "LastUsed": "local",
-         "BootfsDatasets": "none"
+         "LastUsed": "local"
       }
    },
    {
@@ -21,9 +20,7 @@
       "LastUsed": 2000000000,
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "local",
-         "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "BootFS": "local"
       }
    }
 ]

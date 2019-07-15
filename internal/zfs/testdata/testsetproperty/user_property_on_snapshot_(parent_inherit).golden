@@ -4,10 +4,7 @@
       "Mountpoint": "/",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "local",
-         "BootFS": "none",
-         "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "Mountpoint": "local"
       }
    },
    {
@@ -15,10 +12,7 @@
       "Mountpoint": "/ROOT",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "inherited",
-         "BootFS": "none",
-         "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "Mountpoint": "inherited"
       }
    },
    {
@@ -87,7 +81,6 @@
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu",
-         "LastUsed": "none",
          "BootfsDatasets": "rpool/ROOT/ubuntu"
       }
    },
@@ -98,9 +91,7 @@
       "LastUsed": 1544444444,
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "none",
-         "LastUsed": "local",
-         "BootfsDatasets": "none"
+         "LastUsed": "local"
       }
    },
    {
@@ -110,10 +101,7 @@
       "CanMount": "on",
       "LastUsed": 2000000000,
       "Sources": {
-         "Mountpoint": "local",
-         "BootFS": "none",
-         "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "Mountpoint": "local"
       }
    },
    {
@@ -123,10 +111,7 @@
       "CanMount": "on",
       "LastUsed": 2000000000,
       "Sources": {
-         "Mountpoint": "local",
-         "BootFS": "none",
-         "LastUsed": "none",
-         "BootfsDatasets": "none"
+         "Mountpoint": "local"
       }
    },
    {
@@ -140,7 +125,6 @@
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "rpool/ROOT/ubuntu",
-         "LastUsed": "none",
          "BootfsDatasets": "rpool/ROOT/ubuntu"
       }
    }

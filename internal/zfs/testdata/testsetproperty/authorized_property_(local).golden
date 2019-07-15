@@ -7,7 +7,6 @@
       "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "none",
          "LastUsed": "local",
          "BootfsDatasets": "local"
       }

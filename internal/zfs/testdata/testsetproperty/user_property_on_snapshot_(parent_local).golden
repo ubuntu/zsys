@@ -24,7 +24,6 @@
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "rpool",
-         "LastUsed": "none",
          "BootfsDatasets": "local"
       }
    }

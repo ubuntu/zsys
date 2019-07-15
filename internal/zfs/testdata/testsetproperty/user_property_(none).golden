@@ -7,7 +7,6 @@
       "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "none",
          "LastUsed": "local",
          "BootfsDatasets": "local"
       }
