@@ -13,3 +13,6 @@ require (
 	golang.org/x/xerrors v0.0.0-20190513163551-3ee3066db522
 	gopkg.in/yaml.v2 v2.2.2
 )
+
+// Check https://github.com/bicomsystems/go-libzfs/pull/20
+replace github.com/bicomsystems/go-libzfs => github.com/ubuntu/go-libzfs v0.2.2-0.20190715120733-dfe7058c3c21
