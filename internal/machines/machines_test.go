@@ -44,11 +44,11 @@ func TestNew(t *testing.T) {
 
 // assertMachinesToGolden compares got slice of machines to reference files, based on test name.
 func assertMachinesToGolden(t *testing.T, got machines.Machines) {
-	var want []machines.Machine
+	want := machines.Machines{}
 	testutils.LoadFromGoldenFile(t, got, &want)
 
 	if diff := cmp.Diff(want, got, cmpopts.EquateEmpty(),
-		cmp.AllowUnexported(machines.Machine{}, zfs.DatasetProp{})); diff != "" {
+		cmp.AllowUnexported(machines.Machines{}, zfs.DatasetProp{})); diff != "" {
 		t.Errorf("Machines mismatch (-want +got):\n%s", diff)
 	}
 }
