@@ -18,6 +18,7 @@ install: true
 before_script:
   - sudo sh -c "sed -i s/bionic/eoan/g /etc/apt/sources.list && apt update && apt --yes full-upgrade"
   - sudo apt install libzfslinux-dev
+  - sudo modprobe zfs
 
 script:
   - echo '============== Code quality =============='
