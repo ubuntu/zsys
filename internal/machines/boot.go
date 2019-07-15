@@ -229,13 +229,13 @@ func (machines *Machines) Commit(cmdline string, z ZfsPropertyPromoteScanner) er
 		if bootedState.SystemDatasets[0].Origin == "" {
 			continue
 		}
-		log.Debug("promoting user dataset: %q", d.Name)
+		log.Debugf("promoting user dataset: %q", d.Name)
 		if err := z.Promote(d.Name); err != nil {
 			return xerrors.Errorf("couldn't promote %q user dataset: "+config.ErrorFormat, d.Name, err)
 		}
 	}
 	if bootedState.SystemDatasets[0].Origin != "" {
-		log.Debug("promoting current new state system dataset: %q", bootedState.ID)
+		log.Debugf("promoting current new state system dataset: %q", bootedState.ID)
 		if err := z.Promote(bootedState.ID); err != nil {
 			return xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, bootedState.ID, err)
 		}
