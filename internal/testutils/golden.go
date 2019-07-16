@@ -6,14 +6,16 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 )
 
 var update *bool
+var updateFlagOnce = sync.Once{}
 
 // InstallUpdateFlag adds the update golden files flag
 func InstallUpdateFlag() {
-	update = flag.Bool("update", false, "update golden files")
+	updateFlagOnce.Do(func() { update = flag.Bool("update", false, "update golden files") })
 }
 
 // LoadFromGoldenFile loads expected content to "want", after optionally refreshing it
