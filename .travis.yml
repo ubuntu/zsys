@@ -21,17 +21,17 @@ before_script:
   - sudo modprobe zfs
 
 script:
-  - echo '============== Code quality =============='
+  - echo '============== Code quality ==============' >/dev/null
   - go vet ./...
   - FMT=`go fmt ./...` && echo "$FMT" && [ -z "$FMT" ]
-  - echo '============== BUILD =============='
+  - echo '============== BUILD ==============' >/dev/null
   - go build ./...
-  - echo '============== Tests =============='
+  - echo '============== Tests ==============' >/dev/null
   - sudo -E env "PATH=$PATH" go test -coverprofile=coverage.txt -covermode=atomic ./...
   - sudo -E env "PATH=$PATH" go test -race ./...
-  - echo '============== Assets generated =============='
+  - echo '============== Assets generated ==============' >/dev/null
   - ./ci/check-generate
-  - echo '============== Modules updated =============='
+  - echo '============== Modules updated ==============' >/dev/null
   - ./ci/check-modules
 
 after_success:
