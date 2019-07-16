@@ -51,9 +51,18 @@ const (
 // sortDataset enables sorting a slice of Dataset elements.
 type sortedDataset []zfs.Dataset
 
-func (s sortedDataset) Len() int           { return len(s) }
-func (s sortedDataset) Less(i, j int) bool { return s[i].Name < s[j].Name }
-func (s sortedDataset) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s sortedDataset) Len() int { return len(s) }
+func (s sortedDataset) Less(i, j int) bool {
+	// We need snapshots root datasets before snapshot children, count the number of / and order by this.
+	subDatasetsI := strings.Count(s[i].Name, "/")
+	subDatasetsJ := strings.Count(s[j].Name, "/")
+	if subDatasetsI != subDatasetsJ {
+		return subDatasetsI < subDatasetsJ
+	}
+
+	return s[i].Name < s[j].Name
+}
+func (s sortedDataset) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 // isChild returns if a dataset d is a child of name.
 // An error will mean that the dataset name isn't what we expected it to be.
