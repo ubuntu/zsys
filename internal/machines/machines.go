@@ -3,6 +3,7 @@ package machines
 import (
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/ubuntu/zsys/internal/config"
 
@@ -35,6 +36,8 @@ type State struct {
 	ID string
 	// IsZsys states if we have a zsys system. The other datasets type will be empty otherwise.
 	IsZsys bool `json:",omitempty"`
+	// LastUsed is the last time this state was used
+	LastUsed *time.Time `json:",omitempty"`
 	// SystemDatasets are all datasets that constitues this State (in <pool>/ROOT/ + <pool>/BOOT/)
 	SystemDatasets []zfs.Dataset `json:",omitempty"`
 	// UserDatasets are all datasets that are attached to the given State (in <pool>/USERDATA/)
@@ -159,10 +162,16 @@ nextDataset:
 	for _, d := range sortedDataset {
 		// Register all zsys non cloned mountable / to a new machine
 		if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == "" {
+			// We don't want lastused to be 1970 in our golden files
+			var lu *time.Time
+			if d.LastUsed != 0 {
+				*lu = time.Unix(int64(d.LastUsed), 0)
+			}
 			m := Machine{
 				State: State{
 					ID:             d.Name,
 					IsZsys:         d.BootFS,
+					LastUsed:       lu,
 					SystemDatasets: []zfs.Dataset{d},
 				},
 				History: make(map[string]*State),
@@ -183,9 +192,15 @@ nextDataset:
 
 			// Clones or snapshot root dataset (origins points to origin dataset)
 			if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == m.ID {
+				// We don't want lastused to be 1970 in our golden files
+				var lu *time.Time
+				if d.LastUsed != 0 {
+					*lu = time.Unix(int64(d.LastUsed), 0)
+				}
 				m.History[d.Name] = &State{
 					ID:             d.Name,
 					IsZsys:         d.BootFS,
+					LastUsed:       lu,
 					SystemDatasets: []zfs.Dataset{d},
 				}
 				continue nextDataset
@@ -268,8 +283,8 @@ nextDataset:
 
 		// Handle history now
 		// We want reproducibility, so iterate to attach datasets in a given order.
-		for _, lu := range sortedStateKeys(m.History) {
-			h := m.History[lu]
+		for _, k := range sortedStateKeys(m.History) {
+			h := m.History[k]
 			e := strings.Split(h.ID, "/")
 			// stateDatasetID may contain @snapshot, which we need to strip to test the suffix
 			stateDatasetID := e[len(e)-1]
@@ -322,8 +337,6 @@ nextDataset:
 
 			// Persistent datasets
 			h.PersistentDatasets = persistents
-
-			m.History[lu] = h
 		}
 	}
 
