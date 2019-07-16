@@ -1,9 +1,6 @@
 package machines_test
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"path/filepath"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -33,7 +30,7 @@ func TestNew(t *testing.T) {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			ds := loadDatasets(t, tc.def)
+			ds := machines.LoadDatasets(t, tc.def)
 
 			got := machines.New(ds, tc.cmdline)
 
@@ -51,20 +48,4 @@ func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 		cmp.AllowUnexported(machines.Machines{}, zfs.DatasetProp{})); diff != "" {
 		t.Errorf("Machines mismatch (-want +got):\n%s", diff)
 	}
-}
-
-// loadDatasets returns datasets from a def file path.
-func loadDatasets(t *testing.T, def string) (ds []zfs.Dataset) {
-	t.Helper()
-
-	p := filepath.Join("testdata", def)
-	b, err := ioutil.ReadFile(p)
-	if err != nil {
-		t.Fatalf("couldn't read definition file %q: %v", def, err)
-	}
-
-	if err := json.Unmarshal(b, &ds); err != nil {
-		t.Fatalf("couldn't convert definition file %q to slice of dataset: %v", def, err)
-	}
-	return ds
 }
