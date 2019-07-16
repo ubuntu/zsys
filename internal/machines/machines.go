@@ -231,7 +231,9 @@ nextDataset:
 
 	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
 	// Same with children and history datasets.
-	for _, m := range machines.all {
+	// We want reproducibility, so iterate to attach datasets in a given order.
+	for _, k := range sortedMachineKeys(machines.all) {
+		m := machines.all[k]
 		e := strings.Split(m.ID, "/")
 		// machineDatasetID is the main State dataset ID.
 		machineDatasetID := e[len(e)-1]
@@ -265,7 +267,9 @@ nextDataset:
 		m.PersistentDatasets = persistents
 
 		// Handle history now
-		for lu, h := range m.History {
+		// We want reproducibility, so iterate to attach datasets in a given order.
+		for _, lu := range sortedStateKeys(m.History) {
+			h := m.History[lu]
 			e := strings.Split(h.ID, "/")
 			// stateDatasetID may contain @snapshot, which we need to strip to test the suffix
 			stateDatasetID := e[len(e)-1]
@@ -367,4 +371,26 @@ func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
 	}
 
 	return nil, nil
+}
+
+func sortedMachineKeys(m map[string]*Machine) []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func sortedStateKeys(m map[string]*State) []string {
+	keys := make([]string, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
+	}
+	sort.Strings(keys)
+	return keys
 }
