@@ -162,19 +162,18 @@ nextDataset:
 	for _, d := range sortedDataset {
 		// Register all zsys non cloned mountable / to a new machine
 		if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == "" {
-			// We don't want lastused to be 1970 in our golden files
-			var lu *time.Time
-			if d.LastUsed != 0 {
-				*lu = time.Unix(int64(d.LastUsed), 0)
-			}
 			m := Machine{
 				State: State{
 					ID:             d.Name,
 					IsZsys:         d.BootFS,
-					LastUsed:       lu,
 					SystemDatasets: []zfs.Dataset{d},
 				},
 				History: make(map[string]*State),
+			}
+			// We don't want lastused to be 1970 in our golden files
+			if d.LastUsed != 0 {
+				lu := time.Unix(int64(d.LastUsed), 0)
+				m.State.LastUsed = &lu
 			}
 			machines.all[d.Name] = &m
 			continue
@@ -192,16 +191,15 @@ nextDataset:
 
 			// Clones or snapshot root dataset (origins points to origin dataset)
 			if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == m.ID {
-				// We don't want lastused to be 1970 in our golden files
-				var lu *time.Time
-				if d.LastUsed != 0 {
-					*lu = time.Unix(int64(d.LastUsed), 0)
-				}
 				m.History[d.Name] = &State{
 					ID:             d.Name,
 					IsZsys:         d.BootFS,
-					LastUsed:       lu,
 					SystemDatasets: []zfs.Dataset{d},
+				}
+				// We don't want lastused to be 1970 in our golden files
+				if d.LastUsed != 0 {
+					lu := time.Unix(int64(d.LastUsed), 0)
+					m.History[d.Name].LastUsed = &lu
 				}
 				continue nextDataset
 			}
