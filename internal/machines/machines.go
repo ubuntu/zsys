@@ -72,7 +72,7 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 	switch len(names) {
 	// direct system or clone child
 	case 1:
-		if strings.HasPrefix(d.Name, names[0]+"/") {
+		if strings.HasPrefix(d.Name, names[0]+"/") && !strings.Contains(d.Name, "@") {
 			return true, nil
 		}
 	// snapshot child
