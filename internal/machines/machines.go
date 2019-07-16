@@ -87,12 +87,11 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 }
 
 // resolveOrigin iterates over each datasets up to their true origin and replaces them.
-// This is only done for /, /boot* and user datasets for performance reasons.
+// This is only done for / as it's the deduplication we are interested in.
 func resolveOrigin(datasets []zfs.Dataset) map[string]*string {
 	r := make(map[string]*string)
 	for _, curDataset := range datasets {
-		if curDataset.Mountpoint != "/" && !strings.HasPrefix(curDataset.Mountpoint, "/boot") &&
-			!strings.Contains(strings.ToLower(curDataset.Name), userdatasetsContainerName) {
+		if curDataset.Mountpoint != "/" || curDataset.CanMount == "off" {
 			continue
 		}
 
@@ -159,7 +158,7 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 nextDataset:
 	for _, d := range sortedDataset {
 		// Register all zsys non cloned mountable / to a new machine
-		if d.Mountpoint == "/" && *origins[d.Name] == "" && d.CanMount != "off" {
+		if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == "" {
 			m := Machine{
 				State: State{
 					ID:             d.Name,
@@ -183,7 +182,7 @@ nextDataset:
 			}
 
 			// Clones or snapshot root dataset (origins points to origin dataset)
-			if d.Mountpoint == "/" && *origins[d.Name] == m.ID && d.CanMount != "off" {
+			if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == m.ID {
 				m.History[d.Name] = &State{
 					ID:             d.Name,
 					IsZsys:         d.BootFS,
