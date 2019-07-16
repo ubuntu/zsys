@@ -13,7 +13,7 @@ import (
 
 func init() {
 	testutils.InstallUpdateFlag()
-	config.SetVerboseMode(false)
+	config.SetVerboseMode(true)
 }
 
 func TestNew(t *testing.T) {

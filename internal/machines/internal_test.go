@@ -8,9 +8,15 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
+
+func init() {
+	testutils.InstallUpdateFlag()
+	config.SetVerboseMode(true)
+}
 
 func TestResolveOrigin(t *testing.T) {
 	t.Parallel()
