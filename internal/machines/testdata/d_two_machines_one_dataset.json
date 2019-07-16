@@ -1,0 +1,12 @@
+[
+    {
+        "Name": "rpool",
+        "Mountpoint": "/",
+        "CanMount": "on"
+    },
+    {
+        "Name": "rpool2",
+        "Mountpoint": "/",
+        "CanMount": "on"
+    }
+]

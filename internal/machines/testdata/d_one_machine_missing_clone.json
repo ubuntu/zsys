@@ -1,0 +1,17 @@
+[
+    {
+        "Name": "rpool",
+        "Mountpoint": "/",
+        "CanMount": "on"
+    },
+    {
+        "Name": "rpool_clone@snap1",
+        "IsSnapshot": true,
+        "Mountpoint": "/"
+    },
+    {
+        "Name": "rpool_clone2",
+        "Mountpoint": "/",
+        "Origin": "rpool_clone@snap1"
+    }
+]

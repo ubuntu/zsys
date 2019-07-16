@@ -1,0 +1,11 @@
+[
+    {
+        "Name": "rpool",
+        "Mountpoint": "/",
+        "CanMount": "on"
+    },
+    {
+        "Name": "rpool/opt",
+        "Mountpoint": "/opt"
+    }
+]
