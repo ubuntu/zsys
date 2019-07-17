@@ -254,6 +254,9 @@ nextDataset:
 		// Boot datasets
 		var bootsDataset []zfs.Dataset
 		for _, d := range boots {
+			if d.IsSnapshot {
+				continue
+			}
 			// Matching base dataset name or subdataset of it.
 			if strings.HasSuffix(d.Name, "/"+machineDatasetID) || strings.Contains(d.Name, "/"+machineDatasetID+"/") {
 				bootsDataset = append(bootsDataset, d)
@@ -267,6 +270,9 @@ nextDataset:
 		// linked to multiple clones and systems).
 		var userDatasets []zfs.Dataset
 		for _, d := range userdatas {
+			if d.IsSnapshot {
+				continue
+			}
 			// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
 			for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
 				if bootfsDataset == m.ID || strings.HasPrefix(d.BootfsDatasets, m.ID+"/") {
