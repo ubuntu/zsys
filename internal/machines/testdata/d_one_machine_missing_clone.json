@@ -1,16 +1,21 @@
 [
     {
         "Name": "rpool",
+        "Bootfs": true,
+        "LastUsed": 1599999999,
         "Mountpoint": "/",
         "CanMount": "on"
     },
     {
         "Name": "rpool_clone@snap1",
         "IsSnapshot": true,
+        "LastUsed": 1588888888,
         "Mountpoint": "/"
     },
     {
         "Name": "rpool_clone2",
+        "Bootfs": true,
+        "LastUsed": 1577777777,
         "Mountpoint": "/",
         "Origin": "rpool_clone@snap1"
     }

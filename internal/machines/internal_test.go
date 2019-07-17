@@ -23,13 +23,15 @@ func TestResolveOrigin(t *testing.T) {
 	tests := map[string]struct {
 		def string
 	}{
-		"one dataset": {"d_one_machine_one_dataset.json"},
-		"one machine with one snapshot and one clone":                                        {"d_one_machine_with_clone_dataset.json"},
+		"one dataset":                                 {"d_one_machine_one_dataset.json"},
+		"one machine with one snapshot":               {"d_one_machine_with_one_snapshot.json"},
+		"one machine with one snapshot and one clone": {"d_one_machine_with_clone_dataset.json"},
 		"one machine with multiple snapshots and clones, with chain of dependency":           {"d_one_machine_with_multiple_clones_recursive.json"},
 		"one machine with multiple snapshots and clones, with chain of unordered dependency": {"d_one_machine_with_multiple_clones_recursive_unordered.json"},
-		"one machine with children":                                                          {"d_one_machine_with_children.json"},
-		"two machines":                                                                       {"d_two_machines_one_dataset.json"},
+		"one machine with children": {"d_one_machine_with_children.json"},
+		"two machines":              {"d_two_machines_one_dataset.json"},
 
+		// Failing cases
 		"missing clone referenced by a snapshot clone (broken ZFS)": {"d_one_machine_missing_clone.json"},
 		"no dataset":                 {"d_no_dataset.json"},
 		"no interesting mountpoints": {"d_no_machine.json"},
@@ -46,7 +48,6 @@ func TestResolveOrigin(t *testing.T) {
 			assertDatasetsOrigin(t, got)
 		})
 	}
-
 }
 
 // LoadDatasets returns datasets from a def file path.

@@ -1,27 +1,37 @@
 [
     {
         "Name": "rpool",
+        "Bootfs": true,
+        "LastUsed": 1599999999,
         "Mountpoint": "/",
         "CanMount": "on"
     },
     {
         "Name": "rpool@snap1",
+        "Bootfs": true,
+        "LastUsed": 1588888888,
         "IsSnapshot": true,
         "Mountpoint": "/"
     },
     {
         "Name": "rpool_clone",
+        "Bootfs": true,
+        "LastUsed": 1577777777,
         "Mountpoint": "/",
         "CanMount": "noauto",
         "Origin": "rpool@snap1"
     },
     {
         "Name": "rpool_clone@snap2",
+        "Bootfs": true,
+        "LastUsed": 1566666666,
         "IsSnapshot": true,
         "Mountpoint": "/"
     },
     {
         "Name": "rpool_clone2",
+        "Bootfs": true,
+        "LastUsed": 1555555555,
         "Mountpoint": "/",
         "CanMount": "noauto",
         "Origin": "rpool_clone@snap2"
