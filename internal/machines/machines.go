@@ -345,6 +345,9 @@ nextDataset:
 		machines.allUsersDatasets = append(machines.allUsersDatasets, d)
 	}
 
+	// Append unlinked boot datasets to ensure we will switch to noauto everything
+	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
+
 	root, _ := parseCmdLine(cmdline)
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
@@ -389,6 +392,29 @@ func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
 	}
 
 	return nil, nil
+}
+
+// appendDatasetIfNotPresent will check that the dataset wasn't already added and will append it
+// excludeCanMountOff restricts (for unlinked datasets) the check on datasets that are canMount noauto or on
+func appendIfNotPresent(mainDatasets, newDatasets []zfs.Dataset, excludeCanMountOff bool) []zfs.Dataset {
+	for _, d := range newDatasets {
+		if excludeCanMountOff && d.CanMount == "off" {
+			continue
+		}
+
+		found := false
+		for _, mainD := range mainDatasets {
+			if mainD.Name == d.Name {
+				found = true
+				break
+			}
+		}
+		if found {
+			continue
+		}
+		mainDatasets = append(mainDatasets, d)
+	}
+	return mainDatasets
 }
 
 func sortedMachineKeys(m map[string]*Machine) []string {
