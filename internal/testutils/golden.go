@@ -3,6 +3,7 @@ package testutils
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -31,6 +32,9 @@ func LoadFromGoldenFile(t *testing.T, got interface{}, want interface{}) {
 		}
 		if err := ioutil.WriteFile(goldenFile, b, 0644); err != nil {
 			t.Fatal("couldn't save golden file:", err)
+		}
+		if p, err := filepath.Abs(goldenFile); err == nil {
+			fmt.Println("Updated", p)
 		}
 	}
 	b, err := ioutil.ReadFile(goldenFile)
