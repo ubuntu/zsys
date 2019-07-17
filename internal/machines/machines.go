@@ -338,7 +338,12 @@ nextDataset:
 		}
 	}
 
-	machines.allUsersDatasets = userdatas
+	for _, d := range userdatas {
+		if d.CanMount == "off" {
+			continue
+		}
+		machines.allUsersDatasets = append(machines.allUsersDatasets, d)
+	}
 
 	root, _ := parseCmdLine(cmdline)
 	m, _ := machines.findFromRoot(root)
