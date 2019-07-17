@@ -366,7 +366,7 @@ nextDataset:
 }
 
 // findFromRoot returns the active machine and state if any.
-// If rootName is a snapshot, it fallbacks to current mounted root dataset
+// If rootName is a snapshot, it fallbacks to current mounted root dataset. If no root dataset is mounted, s can be nil
 func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
 	// Not a zfs system
 	if rootName == "" {
@@ -385,20 +385,24 @@ func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
 
 	// We know that our desired target is a history one
 	for _, m := range machines.all {
-		// Only match on names as we booted an existing clone directly.
-		if !fromSnapshot {
-			if h, ok := m.History[rootName]; ok {
-				return m, h
-			}
+		h, ok := m.History[rootName]
+		if !ok {
 			continue
 		}
 
+		// Only match on names as we booted an existing clone directly.
+		if !fromSnapshot {
+			return m, h
+		}
+
 		// We have a snapshot, we need to find the corresponding mounted main dataset on /.
+		var s *State
 		for _, h := range m.History {
 			if h.SystemDatasets[0].Mounted && h.SystemDatasets[0].Mountpoint == "/" {
-				return m, h
+				s = h
 			}
 		}
+		return m, s
 	}
 
 	return nil, nil
