@@ -114,6 +114,8 @@ func TestNew(t *testing.T) {
 
 // assertMachinesToGolden compares got slice of machines to reference files, based on test name.
 func assertMachinesToGolden(t *testing.T, got machines.Machines) {
+	t.Helper()
+
 	want := machines.Machines{}
 	testutils.LoadFromGoldenFile(t, got, &want)
 
