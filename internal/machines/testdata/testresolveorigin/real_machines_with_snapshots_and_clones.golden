@@ -1,0 +1,9 @@
+{
+   "rpool/ROOT/ubuntu_1234": "",
+   "rpool/ROOT/ubuntu_1234@snap1": "rpool/ROOT/ubuntu_1234",
+   "rpool/ROOT/ubuntu_1234@snap2": "rpool/ROOT/ubuntu_1234",
+   "rpool/ROOT/ubuntu_5678": "rpool/ROOT/ubuntu_1234",
+   "rpool/ROOT/ubuntu_5678@snap3": "rpool/ROOT/ubuntu_1234",
+   "rpool/ROOT/ubuntu_9876": "rpool/ROOT/ubuntu_1234",
+   "rpool/ROOT/ubuntu_9999": ""
+}

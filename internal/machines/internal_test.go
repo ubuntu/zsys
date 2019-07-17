@@ -31,6 +31,10 @@ func TestResolveOrigin(t *testing.T) {
 		"one machine with children": {"d_one_machine_with_children.json"},
 		"two machines":              {"d_two_machines_one_dataset.json"},
 
+		// More real systems
+		"Real machine, no snapshot, no clone":     {"m_layout1_one_machine.json"},
+		"Real machines with snapshots and clones": {"m_layout1_machines_with_snapshots_clones.json"},
+
 		// Failing cases
 		"missing clone referenced by a snapshot clone (broken ZFS)": {"d_one_machine_missing_clone.json"},
 		"no dataset":                 {"d_no_dataset.json"},
