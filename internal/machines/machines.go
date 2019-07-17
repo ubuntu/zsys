@@ -156,7 +156,7 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 	// Resolve out to its root origin for /, /boot* and user datasets
 	origins := resolveOrigin([]zfs.Dataset(sortedDataset))
 
-	var boots, persistents []zfs.Dataset
+	var boots, userdatas, persistents []zfs.Dataset
 	// First, handle system datasets (active for each machine and history)
 nextDataset:
 	for _, d := range sortedDataset {
@@ -227,7 +227,7 @@ nextDataset:
 		// Extract zsys user datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
 		if strings.Contains(strings.ToLower(d.Name), userdatasetsContainerName) {
-			machines.allUsersDatasets = append(machines.allUsersDatasets, d)
+			userdatas = append(userdatas, d)
 			continue
 		}
 
@@ -266,7 +266,7 @@ nextDataset:
 		// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
 		// linked to multiple clones and systems).
 		var userDatasets []zfs.Dataset
-		for _, d := range machines.allUsersDatasets {
+		for _, d := range userdatas {
 			// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
 			for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
 				if bootfsDataset == m.ID || strings.HasPrefix(d.BootfsDatasets, m.ID+"/") {
@@ -314,7 +314,7 @@ nextDataset:
 			// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
 			// linked to multiple clones and systems).
 			var userDatasets []zfs.Dataset
-			for _, d := range machines.allUsersDatasets {
+			for _, d := range userdatas {
 				if snapshot != "" {
 					// Snapshots wo'nt match dataset ID maching its system dataset as multiple system datasets can link
 					// to the same user dataset. Use only snapshot name.
@@ -337,6 +337,8 @@ nextDataset:
 			h.PersistentDatasets = persistents
 		}
 	}
+
+	machines.allUsersDatasets = userdatas
 
 	root, _ := parseCmdLine(cmdline)
 	m, _ := machines.findFromRoot(root)
