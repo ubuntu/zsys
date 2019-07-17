@@ -1,0 +1,502 @@
+[
+	{
+		"Name": "rpool",
+		"Mountpoint": "/",
+		"CanMount": "off"
+	},
+	{
+		"Name": "rpool/ROOT",
+		"Mountpoint": "/",
+		"CanMount": "off"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234",
+		"Bootfs": true,
+		"LastUsed": 1599999999,
+		"Mountpoint": "/",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/srv",
+		"Mountpoint": "/srv",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var",
+		"Mountpoint": "/var",
+		"CanMount": "off"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var",
+		"Mountpoint": "/var",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var/games",
+		"Mountpoint": "/var/games",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var/lib",
+		"Mountpoint": "/var/lib",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib",
+		"Mountpoint": "/var/lib",
+		"CanMount": "off"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
+		"Mountpoint": "/var/lib/AccountServices",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+		"Mountpoint": "/var/lib/apt",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+		"Mountpoint": "/var/lib/aptitude",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+		"Mountpoint": "/var/lib/dpkg",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+		"Mountpoint": "/var/lib/NetworkManager",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var/log",
+		"Mountpoint": "/var/log",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var/mail",
+		"Mountpoint": "/var/mail",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var/snap",
+		"Mountpoint": "/var/snap",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var/spool",
+		"Mountpoint": "/var/spool",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/var/www",
+		"Mountpoint": "/var/www",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234@snap1",
+		"IsSnapshot": true,
+		"Bootfs": true,
+		"LastUsed": 1588888888,
+		"Mountpoint": "/",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/var",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/AccountServices",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/apt",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/aptitude",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/dpkg",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/NetworkManager",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234@snap2",
+		"IsSnapshot": true,
+		"Bootfs": true,
+		"LastUsed": 1577777777,
+		"Mountpoint": "/",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/var",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/AccountServices",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/apt",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/aptitude",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/dpkg",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/NetworkManager",
+		"CanMount": "on"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678",
+		"Bootfs": true,
+		"LastUsed": 1533333333,
+		"Mountpoint": "/",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var",
+		"Mountpoint": "/var",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234/var@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib",
+		"Mountpoint": "/var/lib",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234/var/lib@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices",
+		"Mountpoint": "/var/lib/AccountServices",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
+		"Mountpoint": "/var/lib/apt",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/aptitude",
+		"Mountpoint": "/var/lib/aptitude",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/dpkg",
+		"Mountpoint": "/var/lib/dpkg",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
+		"Mountpoint": "/var/lib/NetworkManager",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap2"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678@snap3",
+		"IsSnapshot": true,
+		"Bootfs": true,
+		"LastUsed": 1522222222,
+		"Mountpoint": "/",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/var",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/AccountServices",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/apt@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/apt",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/aptitude@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/aptitude",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/dpkg@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/dpkg",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/var/lib/NetworkManager",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876",
+		"Bootfs": true,
+		"LastUsed": 1511111111,
+		"Mountpoint": "/",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876/var",
+		"Mountpoint": "/var",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678/var@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876/var/lib",
+		"Mountpoint": "/var/lib",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountServices",
+		"Mountpoint": "/var/lib/AccountServices",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876/var/lib/apt",
+		"Mountpoint": "/var/lib/apt",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678/var/lib/apt@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude",
+		"Mountpoint": "/var/lib/aptitude",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678/var/lib/aptitude@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg",
+		"Mountpoint": "/var/lib/dpkg",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678/var/lib/dpkg@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
+		"Mountpoint": "/var/lib/NetworkManager",
+		"CanMount": "noauto",
+		"Origin": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager@snap3"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999",
+		"Bootfs": true,
+		"LastUsed": 1555555555,
+		"Mountpoint": "/",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999/var",
+		"Mountpoint": "/var",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999/var/lib",
+		"Mountpoint": "/var/lib",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountServices",
+		"Mountpoint": "/var/lib/AccountServices",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999/var/lib/apt",
+		"Mountpoint": "/var/lib/apt",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999/var/lib/aptitude",
+		"Mountpoint": "/var/lib/aptitude",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999/var/lib/dpkg",
+		"Mountpoint": "/var/lib/dpkg",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/ROOT/ubuntu_9999/var/lib/NetworkManager",
+		"Mountpoint": "/var/lib/NetworkManager",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "rpool/USERDATA/user1_abcd",
+		"Mountpoint": "/home/user1",
+		"CanMount": "on",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+		"LastUsed": 1544444444
+	},
+	{
+		"Name": "rpool/USERDATA/root_bcde",
+		"Mountpoint": "/root",
+		"CanMount": "on",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+		"LastUsed": 1533333333
+	},
+	{
+		"Name": "rpool/USERDATA/user1_abcd@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/home/user1",
+		"CanMount": "on",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+		"LastUsed": 1522222222
+	},
+	{
+		"Name": "rpool/USERDATA/root_bcde@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/root",
+		"CanMount": "on",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+		"LastUsed": 1522222222
+	},
+	{
+		"Name": "rpool/USERDATA/user1_efgh",
+		"Mountpoint": "/home/user1",
+		"CanMount": "noauto",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678",
+		"LastUsed": 1544444444,
+		"Origin": "rpool/USERDATA/user1_abcd@snap1"
+	},
+	{
+		"Name": "rpool/USERDATA/user1_efgh@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/home/user1",
+		"CanMount": "noauto",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678",
+		"LastUsed": 1544444444
+	},
+	{
+		"Name": "rpool/USERDATA/user1_efgh@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/home/user1",
+		"CanMount": "noauto",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678",
+		"LastUsed": 1544444444
+	},
+	{
+		"Name": "rpool/USERDATA/user2_aaaa",
+		"Mountpoint": "/home/user2",
+		"CanMount": "noauto",
+		"BootfsDatasets": "rpool/ROOT/ubuntu_9999",
+		"LastUsed": 1544444444
+	},
+	{
+		"Name": "bpool",
+		"Mountpoint": "/boot",
+		"CanMount": "off"
+	},
+	{
+		"Name": "bpool/BOOT",
+		"Mountpoint": "/boot",
+		"CanMount": "off"
+	},
+	{
+		"Name": "bpool/BOOT/ubuntu_1234",
+		"Mountpoint": "/boot",
+		"CanMount": "on"
+	},
+	{
+		"Name": "bpool/BOOT/ubuntu_1234@snap1",
+		"IsSnapshot": true,
+		"Mountpoint": "/boot",
+		"CanMount": "on"
+	},
+	{
+		"Name": "bpool/BOOT/ubuntu_1234@snap2",
+		"IsSnapshot": true,
+		"Mountpoint": "/boot",
+		"CanMount": "on"
+	},
+	{
+		"Name": "bpool/BOOT/ubuntu_5678",
+		"Mountpoint": "/boot",
+		"CanMount": "noauto",
+		"Origin": "bpool/BOOT/ubuntu_1234@snap2"
+	},
+	{
+		"Name": "bpool/BOOT/ubuntu_5678@snap3",
+		"IsSnapshot": true,
+		"Mountpoint": "/boot",
+		"CanMount": "noauto"
+	},
+	{
+		"Name": "bpool/BOOT/ubuntu_9876",
+		"Mountpoint": "/boot",
+		"CanMount": "noauto",
+		"Origin": "bpool/BOOT/ubuntu_5678@snap3"
+	},
+	{
+		"Name": "bpool/BOOT/ubuntu_9999",
+		"Mountpoint": "/boot",
+		"CanMount": "noauto"
+	}
+]
