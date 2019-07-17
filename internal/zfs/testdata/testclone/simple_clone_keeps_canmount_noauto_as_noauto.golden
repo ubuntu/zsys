@@ -1,0 +1,53 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT",
+      "Mountpoint": "/ROOT",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu",
+      "Mountpoint": "/",
+      "CanMount": "noauto",
+      "BootFS": true,
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "local",
+         "BootFS": "local",
+         "LastUsed": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "/",
+      "CanMount": "noauto",
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "local",
+         "BootFS": "rpool/ROOT/ubuntu"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678",
+      "Mountpoint": "/",
+      "CanMount": "noauto",
+      "BootFS": true,
+      "Origin": "rpool/ROOT/ubuntu@snap1",
+      "Sources": {
+         "Mountpoint": "local",
+         "BootFS": "local"
+      }
+   }
+]

@@ -170,6 +170,10 @@ func TestClone(t *testing.T) {
 		"Recursive clone": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
 		"Simple clone ignore missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678"},
 
+		"Simple clone keeps canmount off as off":       {def: "one_pool_n_datasets_one_snapshot_with_canmount_off.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+		"Simple clone keeps canmount noauto as noauto": {def: "one_pool_n_datasets_one_snapshot_with_canmount_noauto.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+		"Simple clone set canmount on to noauto":       {def: "one_pool_n_datasets_one_snapshot.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+
 		"Simple clone on dataset without suffix":    {def: "layout1__one_pool_n_datasets_n_snapshots_without_suffix.yaml", dataset: "rpool/ROOT/ubuntu@snap_r1", suffix: "5678"},
 		"Recursive clone on dataset without suffix": {def: "layout1__one_pool_n_datasets_n_snapshots_without_suffix.yaml", dataset: "rpool/ROOT/ubuntu@snap_r1", suffix: "5678", recursive: true},
 
