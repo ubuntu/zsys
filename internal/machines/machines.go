@@ -322,12 +322,16 @@ nextDataset:
 			var userDatasets []zfs.Dataset
 			for _, d := range userdatas {
 				if snapshot != "" {
-					// Snapshots wo'nt match dataset ID maching its system dataset as multiple system datasets can link
+					// Snapshots won't match dataset ID maching its system dataset as multiple system datasets can link
 					// to the same user dataset. Use only snapshot name.
 					if strings.HasSuffix(d.Name, "@"+snapshot) {
 						userDatasets = append(userDatasets, d)
 						continue
 					}
+				}
+
+				if d.IsSnapshot {
+					continue
 				}
 				// For clones, proceed as with main system:
 				// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
