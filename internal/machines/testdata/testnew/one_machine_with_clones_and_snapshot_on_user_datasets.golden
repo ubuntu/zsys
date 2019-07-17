@@ -1,0 +1,175 @@
+{
+   "All": {
+      "rpool": {
+         "ID": "rpool",
+         "IsZsys": true,
+         "LastUsed": "2020-09-13T14:26:39+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1599999999
+            }
+         ],
+         "UserDatasets": [
+            {
+               "Name": "rpool2/USERDATA/root_bcde",
+               "Mountpoint": "/root",
+               "CanMount": "on",
+               "LastUsed": 1533333333,
+               "BootfsDatasets": "rpool"
+            },
+            {
+               "Name": "rpool2/USERDATA/user1_abcd",
+               "Mountpoint": "/home/user1",
+               "CanMount": "on",
+               "LastUsed": 1544444444,
+               "BootfsDatasets": "rpool"
+            }
+         ],
+         "History": {
+            "rpool@snap1": {
+               "ID": "rpool@snap1",
+               "LastUsed": "2020-05-08T00:01:28+02:00",
+               "SystemDatasets": [
+                  {
+                     "Name": "rpool@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "LastUsed": 1588888888
+                  }
+               ],
+               "UserDatasets": [
+                  {
+                     "Name": "rpool2/USERDATA/user1_abcd@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool"
+                  }
+               ]
+            },
+            "rpool_clone": {
+               "ID": "rpool_clone",
+               "IsZsys": true,
+               "LastUsed": "2019-12-31T08:36:17+01:00",
+               "SystemDatasets": [
+                  {
+                     "Name": "rpool_clone",
+                     "Mountpoint": "/",
+                     "CanMount": "noauto",
+                     "BootFS": true,
+                     "LastUsed": 1577777777,
+                     "Origin": "rpool@snap1"
+                  }
+               ],
+               "UserDatasets": [
+                  {
+                     "Name": "rpool2/USERDATA/user1_efgh",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool_clone"
+                  }
+               ]
+            },
+            "rpool_clone@snap2": {
+               "ID": "rpool_clone@snap2",
+               "IsZsys": true,
+               "LastUsed": "2019-08-24T19:11:06+02:00",
+               "SystemDatasets": [
+                  {
+                     "Name": "rpool_clone@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "BootFS": true,
+                     "LastUsed": 1566666666
+                  }
+               ],
+               "UserDatasets": [
+                  {
+                     "Name": "rpool2/USERDATA/user1_efgh@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool_clone"
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1599999999
+      },
+      {
+         "Name": "rpool@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/",
+         "LastUsed": 1588888888
+      },
+      {
+         "Name": "rpool_clone",
+         "Mountpoint": "/",
+         "CanMount": "noauto",
+         "BootFS": true,
+         "LastUsed": 1577777777,
+         "Origin": "rpool@snap1"
+      },
+      {
+         "Name": "rpool_clone@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/",
+         "BootFS": true,
+         "LastUsed": 1566666666
+      }
+   ],
+   "AllUsersDatasets": [
+      {
+         "Name": "rpool2/USERDATA/root_bcde",
+         "Mountpoint": "/root",
+         "CanMount": "on",
+         "LastUsed": 1533333333,
+         "BootfsDatasets": "rpool"
+      },
+      {
+         "Name": "rpool2/USERDATA/user1_abcd",
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1544444444,
+         "BootfsDatasets": "rpool"
+      },
+      {
+         "Name": "rpool2/USERDATA/user1_abcd@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1522222222,
+         "BootfsDatasets": "rpool"
+      },
+      {
+         "Name": "rpool2/USERDATA/user1_efgh",
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1522222222,
+         "BootfsDatasets": "rpool_clone"
+      },
+      {
+         "Name": "rpool2/USERDATA/user1_efgh@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1522222222,
+         "BootfsDatasets": "rpool_clone"
+      }
+   ]
+}

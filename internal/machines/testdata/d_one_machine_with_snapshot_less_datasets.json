@@ -1,0 +1,20 @@
+[
+    {
+        "Name": "rpool",
+        "Bootfs": true,
+        "LastUsed": 1599999999,
+        "Mountpoint": "/",
+        "CanMount": "on"
+    },
+    {
+        "Name": "rpool/opt",
+        "Mountpoint": "/opt"
+    },
+    {
+        "Name": "rpool@snap1",
+        "Bootfs": true,
+        "LastUsed": 1588888888,
+        "IsSnapshot": true,
+        "Mountpoint": "/"
+    }
+]

@@ -11,6 +11,11 @@
                "CanMount": "on",
                "BootFS": true,
                "LastUsed": 1599999999
+            },
+            {
+               "Name": "rpool/opt",
+               "Mountpoint": "/opt",
+               "LastUsed": 1500000000
             }
          ]
       }
@@ -22,6 +27,11 @@
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1599999999
+      },
+      {
+         "Name": "rpool/opt",
+         "Mountpoint": "/opt",
+         "LastUsed": 1500000000
       }
    ]
 }

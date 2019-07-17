@@ -1,0 +1,209 @@
+{
+   "All": {
+      "rpool/ROOT/ubuntu_1234": {
+         "ID": "rpool/ROOT/ubuntu_1234",
+         "IsZsys": true,
+         "LastUsed": "2019-04-18T04:45:55+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool/ROOT/ubuntu_1234",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1555555555
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/srv",
+               "Mountpoint": "/srv",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var",
+               "Mountpoint": "/var",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/games",
+               "Mountpoint": "/var/games",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib",
+               "Mountpoint": "/var/lib",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/log",
+               "Mountpoint": "/var/log",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/mail",
+               "Mountpoint": "/var/mail",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/snap",
+               "Mountpoint": "/var/snap",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/spool",
+               "Mountpoint": "/var/spool",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/www",
+               "Mountpoint": "/var/www",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
+               "Mountpoint": "/var/lib/AccountServices",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+               "Mountpoint": "/var/lib/NetworkManager",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+               "Mountpoint": "/var/lib/apt",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+               "Mountpoint": "/var/lib/aptitude",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+               "Mountpoint": "/var/lib/dpkg",
+               "CanMount": "on"
+            },
+            {
+               "Name": "bpool/BOOT/ubuntu_1234",
+               "Mountpoint": "/boot",
+               "CanMount": "on"
+            }
+         ],
+         "UserDatasets": [
+            {
+               "Name": "rpool/USERDATA/root_bcde",
+               "Mountpoint": "/root",
+               "CanMount": "on",
+               "LastUsed": 1533333333,
+               "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+            },
+            {
+               "Name": "rpool/USERDATA/user1_abcd",
+               "Mountpoint": "/home/user1",
+               "CanMount": "on",
+               "LastUsed": 1544444444,
+               "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+            }
+         ]
+      }
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool/ROOT/ubuntu_1234",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1555555555
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/srv",
+         "Mountpoint": "/srv",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var",
+         "Mountpoint": "/var",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/games",
+         "Mountpoint": "/var/games",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib",
+         "Mountpoint": "/var/lib",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/log",
+         "Mountpoint": "/var/log",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/mail",
+         "Mountpoint": "/var/mail",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/snap",
+         "Mountpoint": "/var/snap",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/spool",
+         "Mountpoint": "/var/spool",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/www",
+         "Mountpoint": "/var/www",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
+         "Mountpoint": "/var/lib/AccountServices",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+         "Mountpoint": "/var/lib/NetworkManager",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+         "Mountpoint": "/var/lib/apt",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+         "Mountpoint": "/var/lib/aptitude",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+         "Mountpoint": "/var/lib/dpkg",
+         "CanMount": "on"
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_1234",
+         "Mountpoint": "/boot",
+         "CanMount": "on"
+      }
+   ],
+   "AllUsersDatasets": [
+      {
+         "Name": "rpool/USERDATA/root_bcde",
+         "Mountpoint": "/root",
+         "CanMount": "on",
+         "LastUsed": 1533333333,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+      },
+      {
+         "Name": "rpool/USERDATA/user1_abcd",
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1544444444,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+      }
+   ]
+}

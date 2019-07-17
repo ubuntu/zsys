@@ -1,0 +1,62 @@
+{
+   "All": {
+      "rpool": {
+         "ID": "rpool",
+         "IsZsys": true,
+         "LastUsed": "2020-09-13T14:26:39+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1599999999
+            }
+         ]
+      },
+      "rpool2": {
+         "ID": "rpool2",
+         "IsZsys": true,
+         "LastUsed": "2020-05-08T00:01:28+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool2",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1588888888
+            }
+         ]
+      }
+   },
+   "Current": {
+      "ID": "rpool2",
+      "IsZsys": true,
+      "LastUsed": "2020-05-08T00:01:28+02:00",
+      "SystemDatasets": [
+         {
+            "Name": "rpool2",
+            "Mountpoint": "/",
+            "CanMount": "on",
+            "BootFS": true,
+            "LastUsed": 1588888888
+         }
+      ]
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1599999999
+      },
+      {
+         "Name": "rpool2",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1588888888
+      }
+   ]
+}

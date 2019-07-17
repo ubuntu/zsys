@@ -1,0 +1,8 @@
+[
+    {
+        "Name": "rpool",
+        "Bootfs": true,
+        "Mountpoint": "/",
+        "CanMount": "on"
+    }
+]
