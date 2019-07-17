@@ -239,7 +239,7 @@ nextDataset:
 		}
 
 		// should be persistent datasets
-		persistents = append(persistents)
+		persistents = append(persistents, d)
 	}
 
 	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
@@ -251,8 +251,6 @@ nextDataset:
 		// machineDatasetID is the main State dataset ID.
 		machineDatasetID := e[len(e)-1]
 
-		machines.allSystemDatasets = append(machines.allSystemDatasets, m.SystemDatasets...)
-
 		// Boot datasets
 		var bootsDataset []zfs.Dataset
 		for _, d := range boots {
@@ -262,6 +260,8 @@ nextDataset:
 			}
 		}
 		m.SystemDatasets = append(m.SystemDatasets, bootsDataset...)
+
+		machines.allSystemDatasets = append(machines.allSystemDatasets, m.SystemDatasets...)
 
 		// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
 		// linked to multiple clones and systems).
