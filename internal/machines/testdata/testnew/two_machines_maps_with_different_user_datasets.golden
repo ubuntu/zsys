@@ -38,7 +38,7 @@
             {
                "Name": "rpool/ROOT/ubuntu_5678",
                "Mountpoint": "/",
-               "CanMount": "on",
+               "CanMount": "noauto",
                "BootFS": true,
                "LastUsed": 1444444444
             }
@@ -65,7 +65,7 @@
       {
          "Name": "rpool/ROOT/ubuntu_5678",
          "Mountpoint": "/",
-         "CanMount": "on",
+         "CanMount": "noauto",
          "BootFS": true,
          "LastUsed": 1444444444
       }

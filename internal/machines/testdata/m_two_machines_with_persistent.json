@@ -21,7 +21,7 @@
 		"Bootfs": true,
 		"LastUsed": 1444444444,
 		"Mountpoint": "/",
-		"CanMount": "on"
+		"CanMount": "noauto"
 	},
 	{
 		"Name": "rpool/opt",

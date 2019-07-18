@@ -21,7 +21,7 @@
 		"Bootfs": true,
 		"LastUsed": 1444444444,
 		"Mountpoint": "/",
-		"CanMount": "on"
+		"CanMount": "noauto"
 	},
 	{
 		"Name": "bpool",
@@ -41,6 +41,6 @@
 	{
 		"Name": "bpool/BOOT/ubuntu_5678",
 		"Mountpoint": "/boot",
-		"CanMount": "on"
+		"CanMount": "noauto"
 	}
 ]
