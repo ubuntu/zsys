@@ -192,7 +192,7 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 	}
 	defer func() { z.saveOrRevert(errClone) }()
 
-	rootName, snapshotName := separateSnapshotName(name)
+	rootName, snapshotName := splitSnapshotName(name)
 
 	// Reformat the name with the new uuid and clone now the dataset.
 	newRootName := rootName
@@ -323,7 +323,7 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 	}
 	defer func() { z.saveOrRevert(errPromote) }()
 
-	originParent, snapshotName := separateSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
+	originParent, snapshotName := splitSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
 	// Only check integrity for non promoted elements
 	// Otherwise, promoting is a no-op or will repromote children
 	if len(originParent) > 0 {
@@ -343,7 +343,7 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 	name := d.Properties[libzfs.DatasetPropName].Value
 
-	origin, _ := separateSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
+	origin, _ := splitSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
 	// Only promote if not promoted yet.
 	if len(origin) > 0 {
 		if err := d.Promote(); err != nil {

@@ -170,8 +170,8 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 	return results
 }
 
-// separateSnapshotName return base and trailing names
-func separateSnapshotName(name string) (string, string) {
+// splitSnapshotName return base and trailing names
+func splitSnapshotName(name string) (string, string) {
 	i := strings.LastIndex(name, "@")
 	if i < 0 {
 		return name, ""
