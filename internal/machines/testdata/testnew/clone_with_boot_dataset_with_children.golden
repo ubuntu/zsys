@@ -16,6 +16,11 @@
                "Name": "bpool/BOOT/ubuntu_1234",
                "Mountpoint": "/boot",
                "CanMount": "on"
+            },
+            {
+               "Name": "bpool/BOOT/ubuntu_1234/grub",
+               "Mountpoint": "/boot/grub",
+               "CanMount": "on"
             }
          ],
          "History": {
@@ -87,6 +92,11 @@
       {
          "Name": "bpool/BOOT/ubuntu_1234",
          "Mountpoint": "/boot",
+         "CanMount": "on"
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_1234/grub",
+         "Mountpoint": "/boot/grub",
          "CanMount": "on"
       },
       {

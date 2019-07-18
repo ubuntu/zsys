@@ -153,6 +153,11 @@
          "Origin": "rpool/USERDATA/user1_abcd@snap1"
       },
       {
+         "Name": "rpool/USERDATA/user1_abcd/tools",
+         "Mountpoint": "/home/user1/tools",
+         "CanMount": "on"
+      },
+      {
          "Name": "rpool/USERDATA/user1_abcd/tools@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/home/user1/tools",

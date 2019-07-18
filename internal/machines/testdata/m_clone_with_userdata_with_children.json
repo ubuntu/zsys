@@ -40,6 +40,11 @@
         "LastUsed": 1544444444
     },
     {
+        "Name": "rpool/USERDATA/user1_abcd/tools",
+        "Mountpoint": "/home/user1/tools",
+        "CanMount": "on"
+    },
+    {
         "Name": "rpool/USERDATA/root_bcde",
         "Mountpoint": "/root",
         "CanMount": "on",

@@ -49,6 +49,11 @@
         "CanMount": "on"
     },
     {
+        "Name": "bpool/BOOT/ubuntu_1234/grub",
+        "Mountpoint": "/boot/grub",
+        "CanMount": "on"
+    },
+    {
         "Name": "bpool/BOOT/ubuntu_1234/grub@snap1",
         "IsSnapshot": true,
         "Mountpoint": "/boot/grub",
