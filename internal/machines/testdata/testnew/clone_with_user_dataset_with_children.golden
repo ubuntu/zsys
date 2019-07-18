@@ -79,7 +79,7 @@
                   {
                      "Name": "rpool/USERDATA/user1_efgh",
                      "Mountpoint": "/home/user1",
-                     "CanMount": "on",
+                     "CanMount": "noauto",
                      "LastUsed": 15111111111,
                      "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
                      "Origin": "rpool/USERDATA/user1_abcd@snap1"
@@ -87,7 +87,7 @@
                   {
                      "Name": "rpool/USERDATA/user1_efgh/tools",
                      "Mountpoint": "/home/user1/tools",
-                     "CanMount": "on",
+                     "CanMount": "noauto",
                      "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
                      "Origin": "rpool/USERDATA/user1_abcd/tools@snap1"
                   }
@@ -147,7 +147,7 @@
       {
          "Name": "rpool/USERDATA/user1_efgh",
          "Mountpoint": "/home/user1",
-         "CanMount": "on",
+         "CanMount": "noauto",
          "LastUsed": 15111111111,
          "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
          "Origin": "rpool/USERDATA/user1_abcd@snap1"
@@ -161,7 +161,7 @@
       {
          "Name": "rpool/USERDATA/user1_efgh/tools",
          "Mountpoint": "/home/user1/tools",
-         "CanMount": "on",
+         "CanMount": "noauto",
          "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
          "Origin": "rpool/USERDATA/user1_abcd/tools@snap1"
       }
