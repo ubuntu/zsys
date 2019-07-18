@@ -158,11 +158,6 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 		*machines = New(ds, cmdline)
 	}
 
-	// Change the state to set current state as main machine state may have changed
-	if bootedOnSnapshot {
-		machines.ensureCurrentState(cmdline)
-	}
-
 	return nil
 }
 
