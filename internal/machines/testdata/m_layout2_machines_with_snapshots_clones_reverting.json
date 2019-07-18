@@ -509,6 +509,7 @@
 	{
 		"Name": "bpool/BOOT/ubuntu_4242",
 		"Mountpoint": "/boot",
-		"CanMount": "on"
+		"CanMount": "on",
+		"Origin": "bpool/BOOT/ubuntu_5678@snap3"
 	}
 ]

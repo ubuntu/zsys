@@ -14,7 +14,7 @@
 		"Bootfs": true,
 		"LastUsed": 1599999999,
 		"Mountpoint": "/",
-		"CanMount": "noauto"
+		"CanMount": "on"
 	},
 	{
 		"Name": "rpool/ROOT/ubuntu_1234/srv",
@@ -704,7 +704,7 @@
 	{
 		"Name": "bpool/BOOT/ubuntu_1234",
 		"Mountpoint": "/boot",
-		"CanMount": "noauto"
+		"CanMount": "on"
 	},
 	{
 		"Name": "bpool/BOOT/ubuntu_1234@snap1",
@@ -744,6 +744,7 @@
 	{
 		"Name": "bpool/BOOT/ubuntu_4242",
 		"Mountpoint": "/boot",
-		"CanMount": "on"
+		"CanMount": "on",
+		"Origin": "bpool/BOOT/ubuntu_5678@snap3"
 	}
 ]
