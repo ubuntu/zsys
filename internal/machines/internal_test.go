@@ -56,8 +56,13 @@ func TestResolveOrigin(t *testing.T) {
 	}
 }
 
+type FatalHelper interface {
+	Fatalf(format string, args ...interface{})
+	Helper()
+}
+
 // LoadDatasets returns datasets from a def file path.
-func LoadDatasets(t *testing.T, def string) (ds []zfs.Dataset) {
+func LoadDatasets(t FatalHelper, def string) (ds []zfs.Dataset) {
 	t.Helper()
 
 	p := filepath.Join("testdata", def)
