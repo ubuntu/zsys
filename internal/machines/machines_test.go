@@ -121,8 +121,9 @@ func TestIdempotentNew(t *testing.T) {
 	got1 := machines.New(ds, cmdLineLayout1And2)
 	got2 := machines.New(ds, cmdLineLayout1And2)
 
-	if diff := cmp.Diff(got1, got2, cmp.AllowUnexported(machines.Machines{}, zfs.DatasetProp{})); diff != "" {
-		t.Errorf("Run 1 and 2 gives different machines (-run1 +run2):\n%s", diff)
+	assertMachinesEquals(t, got1, got2)
+}
+
 	}
 }
 
@@ -151,7 +152,14 @@ func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 	want := machines.Machines{}
 	testutils.LoadFromGoldenFile(t, got, &want)
 
-	if diff := cmp.Diff(want, got, cmpopts.EquateEmpty(),
+	assertMachinesEquals(t, want, got)
+}
+
+// assertMachinesEquals compares two machines
+func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
+	t.Helper()
+
+	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}, zfs.DatasetProp{})); diff != "" {
 		t.Errorf("Machines mismatch (-want +got):\n%s", diff)
 	}
