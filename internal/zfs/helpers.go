@@ -18,8 +18,9 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 
 	var mountPropertiesDataset = &d
 	isSnapshot := d.IsSnapshot()
+	var parentName string
 	if isSnapshot {
-		parentName := name[:strings.LastIndex(name, "@")]
+		parentName = name[:strings.LastIndex(name, "@")]
 		pd, err := libzfs.DatasetOpen(parentName)
 		if err != nil {
 			return nil, xerrors.Errorf("can't get parent dataset: "+config.ErrorFormat, err)
@@ -76,10 +77,11 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		return nil, xerrors.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
 	}
 	var bootfs bool
-	if bfs.Value == "yes" {
-		bootfs = true
-	}
-	if bfs.Source != "none" {
+	// Only consider local, explicitely set bootfs as meaningful
+	if bfs.Source == "local" || (parentName != "" && parentName == bfs.Source) {
+		if bfs.Value == "yes" {
+			bootfs = true
+		}
 		sources.BootFS = bfs.Source
 	}
 

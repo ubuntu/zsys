@@ -20,14 +20,12 @@
       "Name": "rpool/ROOT/ubuntu/opt",
       "Mountpoint": "/opt",
       "CanMount": "on",
-      "BootFS": true,
       "LastUsed": 1555555555
    },
    {
       "Name": "rpool/ROOT/ubuntu/var",
       "Mountpoint": "/var",
       "CanMount": "on",
-      "BootFS": true,
       "LastUsed": 1555555555
    },
    {
@@ -41,7 +39,6 @@
       "IsSnapshot": true,
       "Mountpoint": "/var",
       "CanMount": "on",
-      "BootFS": true,
       "LastUsed": 2000000000
    },
    {

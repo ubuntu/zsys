@@ -33,12 +33,10 @@
       "Name": "rpool/ROOT/ubuntu_1234/opt",
       "Mountpoint": "/opt",
       "CanMount": "on",
-      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
@@ -48,12 +46,10 @@
       "IsSnapshot": true,
       "Mountpoint": "/opt",
       "CanMount": "on",
-      "BootFS": true,
       "LastUsed": 2000000000,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -61,12 +57,10 @@
       "Name": "rpool/ROOT/ubuntu_1234/var",
       "Mountpoint": "/var",
       "CanMount": "on",
-      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
@@ -92,7 +86,6 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
@@ -106,7 +99,6 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -128,12 +120,10 @@
       "IsSnapshot": true,
       "Mountpoint": "/var",
       "CanMount": "on",
-      "BootFS": true,
       "LastUsed": 2000000000,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
