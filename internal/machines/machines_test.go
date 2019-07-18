@@ -126,6 +126,24 @@ func TestIdempotentNew(t *testing.T) {
 	}
 }
 
+func BenchmarkNewDesktop(b *testing.B) {
+	ds := machines.LoadDatasets(b, "m_layout1_machines_with_snapshots_clones.json")
+	config.SetVerboseMode(false)
+	defer func() { config.SetVerboseMode(true) }()
+	for n := 0; n < b.N; n++ {
+		machines.New(ds, cmdLineLayout1And2)
+	}
+}
+
+func BenchmarkNewServer(b *testing.B) {
+	ds := machines.LoadDatasets(b, "m_layout2_machines_with_snapshots_clones.json")
+	config.SetVerboseMode(false)
+	defer func() { config.SetVerboseMode(true) }()
+	for n := 0; n < b.N; n++ {
+		machines.New(ds, cmdLineLayout1And2)
+	}
+}
+
 // assertMachinesToGolden compares got slice of machines to reference files, based on test name.
 func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 	t.Helper()
