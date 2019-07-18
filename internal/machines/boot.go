@@ -50,6 +50,10 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 	root, revertUserData := parseCmdLine(cmdline)
 	m, bootedState := machines.findFromRoot(root)
 
+	if bootedState == nil {
+		return xerrors.New("couldn't find any booted state for this machine")
+	}
+
 	bootedOnSnapshot := hasBootedOnSnapshot(cmdline)
 	// We are creating new clones (bootfs and optionnally, userdata)
 	if bootedOnSnapshot {
@@ -114,6 +118,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 			}
 			bootedState.UserDatasets = newUserDatasets
 		}
+		m, bootedState = machines.findFromRoot(root) // We did rescan, refresh pointers
 	}
 
 	// We don't revert userdata, so we are using main state machine userdata to keep on the same track.
