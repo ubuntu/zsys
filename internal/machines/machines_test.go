@@ -11,8 +11,6 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
-const cmdLineLayout1And2 = "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc"
-
 func init() {
 	testutils.InstallUpdateFlag()
 	config.SetVerboseMode(true)
@@ -92,13 +90,13 @@ func TestNew(t *testing.T) {
 		"zsys layout server with cloning in progress, multiple machines":   {def: "m_layout2_machines_with_snapshots_clones_reverting.json"},
 
 		// cmdline selection
-		"Select existing dataset machine":           {def: "d_one_machine_one_dataset.json", cmdline: "aaaaa bbbbb root=ZFS=rpool ccccc"},
-		"Select correct machine":                    {def: "d_two_machines_one_dataset.json", cmdline: "aaaaa bbbbb root=ZFS=rpool2 ccccc"},
-		"Select main machine with snapshots/clones": {def: "m_clone_with_persistent.json", cmdline: "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_1234 ccccc"},
-		"Select snapshot":                           {def: "m_clone_with_persistent.json", cmdline: "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_1234@snap1 ccccc"},
-		"Select clone":                              {def: "m_clone_with_persistent.json", cmdline: "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc"},
-		"Selected machine doesn't exist":            {def: "d_one_machine_one_dataset.json", cmdline: "aaaaa bbbbb root=ZFS=foo ccccc"},
-		"Select existing dataset but not a machine": {def: "m_with_persistent.json", cmdline: "aaaaa bbbbb root=ZFS=rpool/ROOT ccccc"},
+		"Select existing dataset machine":           {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpool")},
+		"Select correct machine":                    {def: "d_two_machines_one_dataset.json", cmdline: generateCmdLine("rpool2")},
+		"Select main machine with snapshots/clones": {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"Select snapshot":                           {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234@snap1")},
+		"Select clone":                              {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Selected machine doesn't exist":            {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("foo")},
+		"Select existing dataset but not a machine": {def: "m_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT")},
 	}
 
 	for name, tc := range tests {
@@ -118,8 +116,8 @@ func TestIdempotentNew(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones.json")
 
-	got1 := machines.New(ds, cmdLineLayout1And2)
-	got2 := machines.New(ds, cmdLineLayout1And2)
+	got1 := machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+	got2 := machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 
 	assertMachinesEquals(t, got1, got2)
 }
@@ -132,7 +130,7 @@ func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(false)
 	defer func() { config.SetVerboseMode(true) }()
 	for n := 0; n < b.N; n++ {
-		machines.New(ds, cmdLineLayout1And2)
+		machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 	}
 }
 
@@ -141,7 +139,7 @@ func BenchmarkNewServer(b *testing.B) {
 	config.SetVerboseMode(false)
 	defer func() { config.SetVerboseMode(true) }()
 	for n := 0; n < b.N; n++ {
-		machines.New(ds, cmdLineLayout1And2)
+		machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 	}
 }
 
@@ -163,4 +161,8 @@ func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 		cmp.AllowUnexported(machines.Machines{}, zfs.DatasetProp{})); diff != "" {
 		t.Errorf("Machines mismatch (-want +got):\n%s", diff)
 	}
+}
+
+func generateCmdLine(datasetName string) string {
+	return "aaaaa bbbbb root=ZFS=" + datasetName + " ccccc"
 }
