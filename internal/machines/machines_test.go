@@ -11,6 +11,8 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
+const cmdLineLayout1And2 = "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc"
+
 func init() {
 	testutils.InstallUpdateFlag()
 	config.SetVerboseMode(true)
@@ -109,6 +111,18 @@ func TestNew(t *testing.T) {
 
 			assertMachinesToGolden(t, got)
 		})
+	}
+}
+
+func TestIdempotentNew(t *testing.T) {
+	t.Parallel()
+	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones.json")
+
+	got1 := machines.New(ds, cmdLineLayout1And2)
+	got2 := machines.New(ds, cmdLineLayout1And2)
+
+	if diff := cmp.Diff(got1, got2, cmp.AllowUnexported(machines.Machines{}, zfs.DatasetProp{})); diff != "" {
+		t.Errorf("Run 1 and 2 gives different machines (-run1 +run2):\n%s", diff)
 	}
 }
 
