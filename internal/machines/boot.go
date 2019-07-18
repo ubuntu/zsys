@@ -126,7 +126,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 	noAutoDatasets := diffDatasets(machines.allSystemDatasets, bootedState.SystemDatasets)
 	noAutoDatasets = append(noAutoDatasets, diffDatasets(machines.allUsersDatasets, bootedState.UserDatasets)...)
 	for _, d := range noAutoDatasets {
-		if d.CanMount != "on" {
+		if d.CanMount != "on" || d.IsSnapshot {
 			continue
 		}
 		if err := z.SetProperty(zfs.CanmountProp, "noauto", d.Name, false); err != nil {
@@ -197,6 +197,9 @@ func (machines *Machines) Commit(cmdline string, z ZfsPropertyPromoteScanner) er
 
 	// Untag non attached userdatasets
 	for _, d := range diffDatasets(machines.allUsersDatasets, bootedState.UserDatasets) {
+		if d.IsSnapshot {
+			continue
+		}
 		var newTag string
 		// Multiple elements, strip current bootfs dataset name
 		if d.BootfsDatasets != "" && d.BootfsDatasets != bootedState.ID {
@@ -231,6 +234,9 @@ func (machines *Machines) Commit(cmdline string, z ZfsPropertyPromoteScanner) er
 	// System and users datasets: set lastUsed
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
 	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
+		if d.IsSnapshot {
+			continue
+		}
 		z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false)
 	}
 
