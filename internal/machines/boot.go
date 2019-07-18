@@ -39,7 +39,9 @@ type zfsPropertySetter interface {
 // were changed).
 // We ensure that we don't modify any existing tags (those will be done in commit()) so that failing boots didn't modify
 // the system, apart for canmount auto/on which are consolidated unconditionnally on each boot anyway.
-// Note that a rescan if performed if any modifications change the dataset layout.
+// Note that a rescan if performed if any modifications change the dataset layout. However, until ".Commit()" is called,
+// machine.current will return the correct machine, but the main dataset switch won't be done. This allows us here and
+// in .Commit()
 // TODO: propagate error to user
 func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) error {
 	if machines.current == nil || !machines.current.IsZsys {
