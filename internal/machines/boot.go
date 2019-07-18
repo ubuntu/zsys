@@ -42,7 +42,7 @@ type zfsPropertySetter interface {
 // Note that a rescan if performed if any modifications change the dataset layout.
 // TODO: propagate error to user
 func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) error {
-	if !machines.current.IsZsys {
+	if machines.current == nil || !machines.current.IsZsys {
 		log.Debugln("current machine isn't Zsys, nothing to do")
 		return nil
 	}
@@ -61,6 +61,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 			return xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedState.ID)
 		}
 
+		// Skip bootfs datasets in the cloning phase
 		if err := z.Clone(root, suffix, true, true); err != nil {
 			return xerrors.Errorf("couldn't create new subdatasets from %q: %v", root, err)
 		}
@@ -69,13 +70,24 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 		var userDataSuffix string
 		if revertUserData {
 			// Find user datasets attached to the snapshot and clone them
+			// Only root datasets are cloned
 			userDataSuffix = generateID(6)
 			snapshot := m.History[root]
+			var rootUserDatasets []zfs.Dataset
 			for _, d := range snapshot.UserDatasets {
-				// Don't do recursive cloning. The datasets are ordered, but not necessarily child of each other.
-				// We will tag them at the same time.
-				if err := z.Clone(d.Name, userDataSuffix, false, true); err != nil {
-					return xerrors.Errorf("couldn't create new user datasets from %q: %v", root, err)
+				parentFound := false
+				for _, r := range rootUserDatasets {
+					if base, _ := splitSnapshotName(r.Name); strings.Contains(d.Name, base+"/") {
+						parentFound = true
+						break
+					}
+				}
+				if !parentFound {
+					rootUserDatasets = append(rootUserDatasets, d)
+					// Recursively clones childrens, which shouldn't have bootfs elements.
+					if err := z.Clone(d.Name, userDataSuffix, false, true); err != nil {
+						return xerrors.Errorf("couldn't create new user datasets from %q: %v", root, err)
+					}
 				}
 			}
 		}
@@ -280,4 +292,13 @@ func diffDatasets(a, b []zfs.Dataset) []zfs.Dataset {
 		}
 	}
 	return diff
+}
+
+// splitSnapshotName return base and trailing names
+func splitSnapshotName(name string) (string, string) {
+	i := strings.LastIndex(name, "@")
+	if i < 0 {
+		return name, ""
+	}
+	return name[:i], name[i+1:]
 }
