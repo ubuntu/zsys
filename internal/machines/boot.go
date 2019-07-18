@@ -92,6 +92,14 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 					if err := z.Clone(d.Name, userDataSuffix, false, true); err != nil {
 						return xerrors.Errorf("couldn't create new user datasets from %q: %v", root, err)
 					}
+					// Associate this parent new user dataset to its parent system dataset
+					base, _ := splitSnapshotName(d.Name)
+					// Reformat the name with the new uuid and clone now the dataset.
+					suffixIndex := strings.LastIndex(base, "_")
+					userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
+					if err := z.SetProperty(zfs.BootfsDatasetsProp, bootedState.ID, userdatasetName, false); err != nil {
+						return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
+					}
 				}
 			}
 		}
@@ -102,22 +110,6 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 			return xerrors.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
 		}
 		*machines = New(ds, cmdline)
-
-		// reassociate newly cloned userdata to state (the userDatasets liste is empty as those were not tagged yet)
-		if revertUserData {
-			m, bootedState = machines.findFromRoot(root) // We did rescan, refresh pointers
-			var newUserDatasets []zfs.Dataset
-			for _, d := range ds {
-				if !strings.Contains(strings.ToLower(d.Name), userdatasetsContainerName) {
-					continue
-				}
-				if strings.HasSuffix(d.Name, "_"+userDataSuffix) || strings.Contains(d.Name, "_"+userDataSuffix+"/") {
-					newUserDatasets = append(newUserDatasets, d)
-					continue
-				}
-			}
-			bootedState.UserDatasets = newUserDatasets
-		}
 		m, bootedState = machines.findFromRoot(root) // We did rescan, refresh pointers
 	}
 
