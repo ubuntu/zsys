@@ -3,6 +3,7 @@ package zfs_test
 import (
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"sort"
 	"syscall"
@@ -23,6 +24,8 @@ func init() {
 }
 
 func TestScan(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
 	tests := map[string]struct {
 		def     string
 		mounted string
@@ -85,6 +88,8 @@ func TestScan(t *testing.T) {
 }
 
 func TestSnapshot(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
 	tests := map[string]struct {
 		def          string
 		snapshotName string
@@ -155,6 +160,8 @@ func TestSnapshot(t *testing.T) {
 }
 
 func TestClone(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
 	tests := map[string]struct {
 		def        string
 		dataset    string
@@ -236,6 +243,8 @@ func TestClone(t *testing.T) {
 }
 
 func TestPromote(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
 	tests := map[string]struct {
 		def     string
 		dataset string
@@ -318,6 +327,8 @@ func TestPromote(t *testing.T) {
 }
 
 func TestDestroy(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
 	tests := map[string]struct {
 		def     string
 		dataset string
@@ -400,6 +411,8 @@ func TestDestroy(t *testing.T) {
 }
 
 func TestSetProperty(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
 	tests := map[string]struct {
 		def           string
 		propertyName  string
@@ -475,6 +488,8 @@ func TestSetProperty(t *testing.T) {
 }
 
 func TestTransactions(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
 	tests := map[string]struct {
 		def           string
 		doSnapshot    bool
@@ -804,5 +819,20 @@ func (ta timeAsserter) assertAndReplaceCreationTimeInRange(t *testing.T, ds []*z
 		} else {
 			r.LastUsed = currentMagicTime
 		}
+	}
+}
+
+// skipOnZFSPermissionDenied skips the tests if the current user can't create zfs pools, datasets…
+func skipOnZFSPermissionDenied(t *testing.T) {
+	t.Helper()
+
+	u, err := user.Current()
+	if err != nil {
+		t.Fatal("can't get current user", err)
+	}
+
+	// in our default setup, only root users can interact with zfs kernel modules
+	if u.Uid != "0" {
+		t.Skip("skipping, you don't have permissions to interact with system zfs")
 	}
 }
