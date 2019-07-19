@@ -77,7 +77,7 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "BootFS": "local",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
@@ -103,7 +103,6 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
@@ -117,7 +116,6 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -130,7 +128,6 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -170,7 +167,7 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -184,7 +181,7 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
+         "BootFS": "rpool/ROOT/ubuntu_1234/var",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -240,10 +237,8 @@
       "Name": "rpool/ROOT/ubuntu_5678/var",
       "Mountpoint": "/var",
       "CanMount": "on",
-      "BootFS": true,
       "Sources": {
-         "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_5678"
+         "Mountpoint": "inherited"
       }
    },
    {
@@ -262,8 +257,7 @@
       "CanMount": "noauto",
       "Origin": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap_r1",
       "Sources": {
-         "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_5678/var/lib"
+         "Mountpoint": "inherited"
       }
    }
 ]

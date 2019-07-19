@@ -12,6 +12,7 @@ pools:
           - name: snap_r1
           - name: snap_r2
       - name: ROOT/ubuntu_1234/var
+        zsys_bootfs: yes
         canmount: on
         snapshots:
           - name: snap_r1
