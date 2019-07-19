@@ -1,0 +1,87 @@
+{
+   "All": {
+      "rpool/ROOT/ubuntu_1234": {
+         "ID": "rpool/ROOT/ubuntu_1234",
+         "IsZsys": true,
+         "LastUsed": "2019-04-18T04:45:55+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool/ROOT/ubuntu_1234",
+               "Mountpoint": "/",
+               "CanMount": "noauto",
+               "BootFS": true,
+               "LastUsed": 1555555555
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_1234/opt",
+               "Mountpoint": "/opt",
+               "CanMount": "noauto"
+            }
+         ]
+      },
+      "rpool/ROOT/ubuntu_5678": {
+         "ID": "rpool/ROOT/ubuntu_5678",
+         "IsZsys": true,
+         "LastUsed": "2015-10-10T04:34:04+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool/ROOT/ubuntu_5678",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1444444444
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_5678/opt",
+               "Mountpoint": "/opt",
+               "CanMount": "on"
+            }
+         ]
+      }
+   },
+   "Current": {
+      "ID": "rpool/ROOT/ubuntu_5678",
+      "IsZsys": true,
+      "LastUsed": "2015-10-10T04:34:04+02:00",
+      "SystemDatasets": [
+         {
+            "Name": "rpool/ROOT/ubuntu_5678",
+            "Mountpoint": "/",
+            "CanMount": "on",
+            "BootFS": true,
+            "LastUsed": 1444444444
+         },
+         {
+            "Name": "rpool/ROOT/ubuntu_5678/opt",
+            "Mountpoint": "/opt",
+            "CanMount": "on"
+         }
+      ]
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool/ROOT/ubuntu_1234",
+         "Mountpoint": "/",
+         "CanMount": "noauto",
+         "BootFS": true,
+         "LastUsed": 1555555555
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "noauto"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_5678",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1444444444
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_5678/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "on"
+      }
+   ]
+}
