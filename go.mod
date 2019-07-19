@@ -10,7 +10,7 @@ require (
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	golang.org/x/sys v0.0.0-20190606165138-5da285871e9c // indirect
-	golang.org/x/xerrors v0.0.0-20190513163551-3ee3066db522
+	golang.org/x/xerrors v0.0.0-20190717185122-a985d3407aa7
 	gopkg.in/yaml.v2 v2.2.2
 )
 
