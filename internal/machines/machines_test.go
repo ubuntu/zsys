@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k0kubun/pp"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/testutils"
@@ -163,7 +164,22 @@ func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 	}
 }
 
+// assertMachinesNotEquals ensure that two machines are differents
+func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
+	t.Helper()
+
+	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
+		cmp.AllowUnexported(machines.Machines{}, zfs.DatasetProp{})); diff == "" {
+		t.Errorf("Machines are equals where we expected not to:\n%+v", pp.Sprint(m1))
+	}
+}
+
 // generateCmdLine returns a command line with fake boot arguments
 func generateCmdLine(datasetName string) string {
 	return "aaaaa bbbbb root=ZFS=" + datasetName + " ccccc"
+}
+
+// generateCmdLineWithRevert returns a command line with fake boot and a revert user data argument
+func generateCmdLineWithRevert(datasetName string) string {
+	return generateCmdLine(datasetName) + " " + machines.RevertUserDataTag
 }

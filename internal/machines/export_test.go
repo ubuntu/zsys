@@ -6,6 +6,10 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
+const (
+	RevertUserDataTag = zfsRevertUserDataTag
+)
+
 type MachinesTest struct {
 	All               map[string]*Machine `json:",omitempty"`
 	Current           *Machine            `json:",omitempty"`
