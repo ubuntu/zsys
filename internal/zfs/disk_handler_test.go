@@ -131,7 +131,7 @@ func (fpools fakePools) create(path string) func() {
 			props := make(map[libzfs.Prop]string)
 			props[libzfs.PoolPropAltroot] = poolMountpath
 			fsprops := make(map[libzfs.Prop]string)
-			// Could be overriden with the "." dataset
+			// Could be overridden with the "." dataset
 			fsprops[libzfs.DatasetPropMountpoint] = "/"
 			fsprops[libzfs.DatasetPropCanmount] = "off"
 

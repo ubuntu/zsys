@@ -15,7 +15,7 @@ func WithTransactions() func(z *Zfs) {
 }
 
 // Done ends a transaction and is ready for a new one.
-// It will issue a warning if an error occured during the transaction
+// It will issue a warning if an error occurred during the transaction
 func (z *Zfs) Done() {
 	if z.transactionErr {
 		log.Printf(config.ErrorFormat+"\n", xerrors.New("WARNING: an error occurred during a Zfs transaction and Done() was called instead of Cancel()"))

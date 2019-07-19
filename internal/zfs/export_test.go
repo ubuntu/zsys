@@ -16,7 +16,7 @@ func (s DatasetSlice) Less(i, j int) bool { return s.DS[i].Name < s.DS[j].Name }
 func (s DatasetSlice) Swap(i, j int)      { s.DS[i], s.DS[j] = s.DS[j], s.DS[i] }
 
 // DatasetWithSource helps marshmalling and unmarshalling to golden json files,
-// exposing the "sources" elements temporarly from and to DatasetSlice
+// exposing the "sources" elements temporary from and to DatasetSlice
 type DatasetWithSource struct {
 	Dataset
 	Sources *datasetSources `json:",omitempty"`

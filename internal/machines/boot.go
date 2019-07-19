@@ -38,7 +38,7 @@ type zfsPropertySetter interface {
 // A transactional zfs element should be passed to optionally revert if an error is returned (only part of the datasets
 // were changed).
 // We ensure that we don't modify any existing tags (those will be done in commit()) so that failing boots didn't modify
-// the system, apart for canmount auto/on which are consolidated unconditionnally on each boot anyway.
+// the system, apart for canmount auto/on which are consolidated unconditionally on each boot anyway.
 // Note that a rescan if performed if any modifications change the dataset layout. However, until ".Commit()" is called,
 // machine.current will return the correct machine, but the main dataset switch won't be done. This allows us here and
 // in .Commit()
@@ -181,7 +181,7 @@ func (machines *Machines) Commit(cmdline string, z ZfsPropertyPromoteScanner) er
 		bootedState.UserDatasets = m.UserDatasets
 	} else {
 		// We reverted the user dataset.
-		// If we rebooted on an old clone that booted succesfully, all is fine, we have tags which attached the user datasets
+		// If we rebooted on an old clone that booted successfully, all is fine, we have tags which attached the user datasets
 		// If we cloned but didn't boot successfully, the relationship is lost. This clone shouldn't be offered as a boot option and don't have a last used. (TODO)
 		// If we booted on a snapshot, we just cloned fresh user datasets which aren't available on a fresh Scan() as they are untagged. Check for mounted userdatasets and attach them
 		for _, d := range machines.allUsersDatasets {
@@ -257,7 +257,7 @@ func (machines *Machines) Commit(cmdline string, z ZfsPropertyPromoteScanner) er
 	// Rescan datasets, with current lastUsed, and main state.
 	ds, err := z.Scan()
 	if err != nil {
-		return xerrors.Errorf("couldn't rescan after comitting boot: "+config.ErrorFormat, err)
+		return xerrors.Errorf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
 	}
 	*machines = New(ds, cmdline)
 

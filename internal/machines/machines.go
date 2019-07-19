@@ -38,7 +38,7 @@ type State struct {
 	IsZsys bool `json:",omitempty"`
 	// LastUsed is the last time this state was used
 	LastUsed *time.Time `json:",omitempty"`
-	// SystemDatasets are all datasets that constitues this State (in <pool>/ROOT/ + <pool>/BOOT/)
+	// SystemDatasets are all datasets that constitutes this State (in <pool>/ROOT/ + <pool>/BOOT/)
 	SystemDatasets []zfs.Dataset `json:",omitempty"`
 	// UserDatasets are all datasets that are attached to the given State (in <pool>/USERDATA/)
 	UserDatasets []zfs.Dataset `json:",omitempty"`
@@ -303,7 +303,7 @@ nextDataset:
 			var bootsDataset []zfs.Dataset
 			for _, d := range boots {
 				if snapshot != "" {
-					// Snapshots are not necessarily with a dataset ID maching its parent of dataset promotions, just match
+					// Snapshots are not necessarily with a dataset ID matching its parent of dataset promotions, just match
 					// its name.
 					if strings.HasSuffix(d.Name, "@"+snapshot) {
 						bootsDataset = append(bootsDataset, d)
@@ -322,7 +322,7 @@ nextDataset:
 			var userDatasets []zfs.Dataset
 			for _, d := range userdatas {
 				if snapshot != "" {
-					// Snapshots won't match dataset ID maching its system dataset as multiple system datasets can link
+					// Snapshots won't match dataset ID matching its system dataset as multiple system datasets can link
 					// to the same user dataset. Use only snapshot name.
 					if strings.HasSuffix(d.Name, "@"+snapshot) {
 						userDatasets = append(userDatasets, d)

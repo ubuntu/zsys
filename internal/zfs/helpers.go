@@ -77,7 +77,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		return nil, xerrors.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
 	}
 	var bootfs bool
-	// Only consider local, explicitely set bootfs as meaningful
+	// Only consider local, explicitly set bootfs as meaningful
 	if bfs.Source == "local" || (parentName != "" && parentName == bfs.Source) {
 		if bfs.Value == "yes" {
 			bootfs = true
@@ -179,7 +179,7 @@ func splitSnapshotName(name string) (string, string) {
 	return name[:i], name[i+1:]
 }
 
-// checkSnapshotHierarchyIntegrity checks that the hierachy follow the correct rules.
+// checkSnapshotHierarchyIntegrity checks that the hierarchy follow the correct rules.
 // There are multiple cases:
 // - All children datasets with a snapshot with the same name exists -> OK, nothing in particular to deal with
 // - One dataset doesn't have a snapshot with the same name:
@@ -207,7 +207,7 @@ func checkSnapshotHierarchyIntegrity(d libzfs.Dataset, snapshotName string, snap
 	return nil
 }
 
-// checkNoClone checks that the hierachy has no clone.
+// checkNoClone checks that the hierarchy has no clone.
 func checkNoClone(d *libzfs.Dataset) error {
 	name := d.Properties[libzfs.DatasetPropName].Value
 

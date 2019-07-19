@@ -107,7 +107,7 @@ func (z *Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapsho
 	defer func() { z.saveOrRevert(errSnapshot) }()
 
 	// We can't use the recursive version of snapshotting, as we want to track user properties and
-	// set them explicitely as needed
+	// set them explicitly as needed
 	return z.snapshotRecursive(d, snapName, recursive)
 }
 
@@ -375,7 +375,7 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 }
 
 // Destroy recursively all children, including dataset named "name".
-// If the dataset is a snapshot, navigate through the hierachy to delete all dataset with the same snapshot name.
+// If the dataset is a snapshot, navigate through the hierarchy to delete all dataset with the same snapshot name.
 // Note that destruction can't be rollbacked as filesystem content can't be recreated, so we don't accept them
 // in a transactional Zfs element.
 func (z *Zfs) Destroy(name string) error {
