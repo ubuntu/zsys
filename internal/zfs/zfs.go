@@ -278,7 +278,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 			}
 		}
 		// We don't set BootfsDatasets as this property can't be translated to new datasets
-		// We don't set LastUsed in purpose as the dataset isn't used yet
+		// We don't set LastUsed on purpose as the dataset isn't used yet
 	}
 
 	if !recursive {

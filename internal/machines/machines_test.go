@@ -163,6 +163,7 @@ func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 	}
 }
 
+// generateCmdLine returns a command line with fake boot arguments
 func generateCmdLine(datasetName string) string {
 	return "aaaaa bbbbb root=ZFS=" + datasetName + " ccccc"
 }

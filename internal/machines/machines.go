@@ -234,7 +234,7 @@ nextDataset:
 		// At this point, it's either non zfs system or persistent dataset. Filters out canmount != "on" as nothing
 		// will mount them.
 		if d.CanMount != "on" {
-			log.Debugf("ignoring %q: either an oprhan clone or not a boot, user or system datasets and canmount isn't on", d.Name)
+			log.Debugf("ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on", d.Name)
 			continue
 		}
 
