@@ -123,6 +123,109 @@ func TestIdempotentNew(t *testing.T) {
 	assertMachinesEquals(t, got1, got2)
 }
 
+func TestBoot(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def                  string
+		cmdline              string
+		mountedDataset       string
+		predictableSuffixFor string
+
+		cloneErr       bool
+		scanErr        bool
+		setPropertyErr bool
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"One machine one dataset zsys":      {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpool"), isNoOp: true},
+		"One machine one dataset non zsys":  {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true},
+		"One machine one dataset, no match": {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true},
+
+		// Two machines tests
+		"Two machines, keep active":                     {def: "m_two_machines_simple.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
+		"Two machines, simple switch":                   {def: "m_two_machines_simple.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Two machines, with children":                   {def: "m_two_machines_recursive.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Two machines, both canmount on, simple switch": {def: "m_two_machines_both_canmount_on.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Two machines, persistent":                      {def: "m_two_machines_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Two machines, separate user dataset":           {def: "m_two_machines_with_different_userdata.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Two machines, same user dataset":               {def: "m_two_machines_with_same_userdata.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Two machines, separate boot":                   {def: "m_two_machines_with_separate_boot.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+
+		// Clone switch
+		"Clone, keep main active":                                              {def: "m_clone_simple.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
+		"Clone, simple switch":                                                 {def: "m_clone_simple.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, with children":                                                 {def: "m_clone_with_children.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, both canmount on, simple switch":                               {def: "m_clone_both_canmount_on.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, persistent":                                                    {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate user dataset":                                         {def: "m_clone_with_userdata.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate user dataset with children":                           {def: "m_clone_with_userdata_with_children.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate user dataset with children manually created":          {def: "m_clone_with_userdata_with_children_manually_created.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate reverted user dataset":                                {def: "m_clone_with_userdata.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate reverted user dataset with children":                  {def: "m_clone_with_userdata_with_children.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate reverted user dataset with children manually created": {def: "m_clone_with_userdata_with_children_manually_created.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate boot":                                                 {def: "m_clone_with_separate_boot.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate boot with children":                                   {def: "m_clone_with_separate_boot_with_children.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Clone, separate boot with children manually created":                  {def: "m_clone_with_separate_boot_with_children_manually_created.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+
+		// Reverting userdata
+		"Reverting userdata, with children": {def: "m_clone_with_userdata_with_children_reverting.json",
+			cmdline:              generateCmdLineWithRevert("rpool/ROOT/ubuntu_1234@snap1"),
+			mountedDataset:       "rpool/ROOT/ubuntu_4242",
+			predictableSuffixFor: "rpool/USERDATA/user1"},
+
+		// Booting on snapshot on real machines
+		"Desktop revert on snapshot": {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242"},
+		"Desktop revert on snapshot with userdata revert": {def: "m_layout1_machines_with_snapshots_clones_reverting.json",
+			cmdline:              generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"),
+			mountedDataset:       "rpool/ROOT/ubuntu_4242",
+			predictableSuffixFor: "rpool/USERDATA/user1"},
+		"Server revert on snapshot": {def: "m_layout2_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242"},
+		"Server revert on snapshot with userdata revert": {def: "m_layout2_machines_with_snapshots_clones_reverting.json",
+			cmdline:              generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"),
+			mountedDataset:       "rpool/ROOT/ubuntu_4242",
+			predictableSuffixFor: "rpool/USERDATA/user1"},
+
+		// Error cases
+		"No booted state found":         {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), wantErr: true},
+		"Clone fails":                   {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", cloneErr: true, wantErr: true},
+		"SetProperty fails":             {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", setPropertyErr: true, wantErr: true},
+		"SetProperty fails with revert": {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", setPropertyErr: true, wantErr: true},
+		"Scan fails":                    {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", scanErr: true, wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			ds := machines.LoadDatasets(t, tc.def)
+			z := NewZfsMock(ds, tc.mountedDataset, tc.predictableSuffixFor, tc.cloneErr, tc.scanErr, tc.setPropertyErr)
+			// Reload datasets from zfs, as mountedDataset can change .Mounted property (reused on consecutive Scan())
+			var datasets []zfs.Dataset
+			for _, d := range z.d {
+				datasets = append(datasets, *d)
+			}
+			initMachines := machines.New(datasets, tc.cmdline)
+			ms := initMachines
+
+			err := ms.EnsureBoot(z, tc.cmdline)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			assertMachinesToGolden(t, ms)
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+		})
 	}
 }
 
