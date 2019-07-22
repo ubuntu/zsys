@@ -166,7 +166,12 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 // After this operation, every New() call will get the current and correct system state.
 // TODO: update-grub (in the caller)
 // TODO: check idempotent (probably just m.State != s + take revert userdata into account)
-func (machines *Machines) Commit(cmdline string, z ZfsPropertyPromoteScanner) error {
+func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) error {
+	if machines.current == nil || !machines.current.IsZsys {
+		log.Debugln("current machine isn't Zsys, nothing to do")
+		return nil
+	}
+
 	root, revertUserData := parseCmdLine(cmdline)
 	m, bootedState := machines.findFromRoot(root)
 
