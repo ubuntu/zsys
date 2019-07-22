@@ -39,6 +39,7 @@ func TestNew(t *testing.T) {
 
 		// Machine <-> clones interactions
 		"One machine with one clone":                                              {def: "d_one_machine_with_clone_dataset.json"},
+		"One machine with one clone named before":                                 {def: "d_one_machine_with_clone_named_before.json"},
 		"One machine with clones and snapshot on user datasets":                   {def: "m_with_clones_snapshots_userdata.json"},
 		"One machine with a missing clone results in ignored machine (ZFS error)": {def: "d_one_machine_missing_clone.json"},
 
