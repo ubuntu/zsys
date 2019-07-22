@@ -243,6 +243,11 @@ func recursiveOriginReverse(newOrig string, d *zfs.Dataset, ds map[string]*zfs.D
 	snapD.Name = d.Name + "@" + snapshot
 	ds[snapD.Name] = snapD
 	delete(ds, prevOrigin)
+	// update snapshot properties to reflect new parent
+	snapD.BootFS = d.BootFS
+	snapD.BootfsDatasets = d.BootfsDatasets
+	snapD.CanMount = d.CanMount
+	snapD.Mountpoint = d.Mountpoint
 
 	// Next origin will be this snapshot
 	newOrig = snapD.Name
