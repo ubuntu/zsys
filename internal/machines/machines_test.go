@@ -220,10 +220,10 @@ func TestBoot(t *testing.T) {
 				t.Fatal("expected an error but got none")
 			}
 
-			assertMachinesToGolden(t, ms)
 			if tc.isNoOp {
 				assertMachinesEquals(t, initMachines, ms)
 			} else {
+				assertMachinesToGolden(t, ms)
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
 		})
