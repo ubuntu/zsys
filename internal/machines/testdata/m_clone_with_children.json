@@ -45,7 +45,7 @@
     },
     {
         "Name": "rpool/ROOT/ubuntu_5678/opt",
-        "Mountpoint": "/",
+        "Mountpoint": "/opt",
         "CanMount": "noauto",
         "Origin": "rpool/ROOT/ubuntu_1234/opt@snap1"
     }
