@@ -18,11 +18,12 @@ type zfsMock struct {
 	cloneErr   bool
 	scanErr    bool
 	setPropErr bool
+	promoteErr bool
 }
 
 // NewZfsMock creates a new in memory with mock zfs datasets. We can simulate mounted dataset, and store predictableSuffixFor
 // to change every new created datasets names.
-func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, cloneErr, scanErr, setPropErr bool) (z *zfsMock) {
+func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, cloneErr, scanErr, setPropErr, promoteErr bool) (z *zfsMock) {
 	var datasets []*zfs.Dataset
 	for _, d := range ds {
 		// copy value to take address
@@ -38,6 +39,7 @@ func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, c
 		cloneErr:             cloneErr,
 		scanErr:              scanErr,
 		setPropErr:           setPropErr,
+		promoteErr:           promoteErr,
 	}
 }
 
@@ -190,6 +192,77 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 	z.nextD = datasets
 
 	return nil
+}
+
+// Promote behaves like zfs.Promote, but is a in memory version with mock zfs datasets
+// This isn't the exact same as promotion which will switch snapshots to opposite tree (if they were done
+// before the targeted clone time creation), but we don't really care of it in the mock version.
+func (z *zfsMock) Promote(name string) error {
+	if z.promoteErr {
+		return xerrors.New("Mock zfs raised an error on Promote")
+	}
+
+	datasets := z.nextD
+	if datasets == nil {
+		// Create a new independent baking array to not modify z.d
+		datasets = append([]*zfs.Dataset(nil), z.d...)
+	}
+
+	ds := make(map[string]*zfs.Dataset)
+	for _, d := range datasets {
+		ds[d.Name] = d
+	}
+
+	for _, d := range datasets {
+		// Do this for any datasets to promote (main + childrens)
+		if !(d.Name == name || (strings.HasPrefix(d.Name, name+"/") && !strings.Contains(d.Name, "@"))) {
+			continue
+		}
+
+		recursiveOriginReverse("", d, ds)
+	}
+
+	// Prepare nextD
+	datasets = nil
+	for _, d := range ds {
+		datasets = append(datasets, d)
+	}
+	z.nextD = datasets
+
+	return nil
+}
+
+// recursiveOriginReverse reverses order of origin for all datasets depending on each other recursively
+func recursiveOriginReverse(newOrig string, d *zfs.Dataset, ds map[string]*zfs.Dataset) {
+	// Set the origin of current dataset and prepare next one
+	prevOrigin := d.Origin
+	d.Origin = newOrig
+	if prevOrigin == "" {
+		return
+	}
+
+	// Rename and move the snapshot on the d dataset
+	snapD := ds[prevOrigin]
+	prevMasterDataset, snapshot := strings.Split(prevOrigin, "@")[0], strings.Split(prevOrigin, "@")[1]
+	snapD.Name = d.Name + "@" + snapshot
+	ds[snapD.Name] = snapD
+	delete(ds, prevOrigin)
+
+	// Next origin will be this snapshot
+	newOrig = snapD.Name
+
+	// Find all elements that were relying on this snapshot and do the same treatment recursively
+	for _, d := range ds {
+		// Change origin on any datasets pointing to previous origin
+		if d.Origin != prevOrigin {
+			continue
+		}
+		// Note: we should normally check for separator and exact match (not only substring), but for our test cases
+		// that is fine.
+		d.Origin = strings.Replace(d.Origin, prevOrigin, newOrig, -1)
+	}
+
+	recursiveOriginReverse(newOrig, ds[prevMasterDataset], ds)
 }
 
 // splitSnapshotName return base and trailing names

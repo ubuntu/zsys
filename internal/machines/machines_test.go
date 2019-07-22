@@ -200,7 +200,7 @@ func TestBoot(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ds := machines.LoadDatasets(t, tc.def)
-			z := NewZfsMock(ds, tc.mountedDataset, tc.predictableSuffixFor, tc.cloneErr, tc.scanErr, tc.setPropertyErr)
+			z := NewZfsMock(ds, tc.mountedDataset, tc.predictableSuffixFor, tc.cloneErr, tc.scanErr, tc.setPropertyErr, false)
 			// Reload datasets from zfs, as mountedDataset can change .Mounted property (reused on consecutive Scan())
 			var datasets []zfs.Dataset
 			for _, d := range z.d {
