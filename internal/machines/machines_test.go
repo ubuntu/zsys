@@ -226,12 +226,16 @@ func TestBoot(t *testing.T) {
 				assertMachinesToGolden(t, ms)
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
+
+			datasets, err = z.Scan()
+			if err != nil {
+				t.Fatal("couldn't rescan before checking final state:", err)
+			}
+			machinesAfterRescan := machines.New(datasets, tc.cmdline)
+			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
 }
-
-// TODO: TestBoot: New() after testboot and ensure return the same machines
-// TODO: TestCommit: New() after testcommit and ensure return the same machines
 
 func TestCommit(t *testing.T) {
 	t.Parallel()
@@ -307,6 +311,13 @@ func TestCommit(t *testing.T) {
 				assertMachinesToGolden(t, ms)
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
+
+			datasets, err = z.Scan()
+			if err != nil {
+				t.Fatal("couldn't rescan before checking final state:", err)
+			}
+			machinesAfterRescan := machines.New(datasets, tc.cmdline)
+			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
 }
