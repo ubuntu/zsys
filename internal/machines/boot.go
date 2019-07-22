@@ -184,17 +184,6 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) er
 	// active state won't be the main one, and so, we only take its main state userdata.
 	if !revertUserData {
 		bootedState.UserDatasets = m.UserDatasets
-	} else {
-		// We reverted the user dataset.
-		// If we rebooted on an old clone that booted successfully, all is fine, we have tags which attached the user datasets
-		// If we cloned but didn't boot successfully, the relationship is lost. This clone shouldn't be offered as a boot option and don't have a last used. (TODO)
-		// If we booted on a snapshot, we just cloned fresh user datasets which aren't available on a fresh Scan() as they are untagged. Check for mounted userdatasets and attach them
-		for _, d := range machines.allUsersDatasets {
-			if !d.Mounted {
-				continue
-			}
-			bootedState.UserDatasets = append(bootedState.UserDatasets, d)
-		}
 	}
 
 	// Untag non attached userdatasets
@@ -215,19 +204,15 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) er
 			return xerrors.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, bootedState.ID, d.Name, err)
 		}
 	}
-	// Tag userdatasets to associate with this successful boot state
+	// Tag userdatasets to associate with this successful boot state, if wasn't tagged already
+	// (case of no user data revert, associate with different previous main system)
 	for _, d := range bootedState.UserDatasets {
-		var newTag string
 		if d.BootfsDatasets == bootedState.ID ||
 			strings.Contains(d.BootfsDatasets, bootedState.ID+":") ||
 			strings.HasSuffix(d.BootfsDatasets, ":"+bootedState.ID) {
 			continue
 		}
-		if d.BootfsDatasets == "" {
-			newTag = bootedState.ID
-		} else {
-			newTag = d.BootfsDatasets + ":" + bootedState.ID
-		}
+		newTag := d.BootfsDatasets + ":" + bootedState.ID
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 			return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
 		}
@@ -236,9 +221,6 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) er
 	// System and users datasets: set lastUsed
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
 	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
-		if d.IsSnapshot {
-			continue
-		}
 		z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false)
 	}
 
