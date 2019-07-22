@@ -230,6 +230,87 @@ func TestBoot(t *testing.T) {
 	}
 }
 
+// TODO: TestBoot: New() after testboot and ensure return the same machines
+// TODO: TestCommit: New() after testcommit and ensure return the same machines
+
+func TestCommit(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def     string
+		cmdline string
+
+		scanErr        bool
+		setPropertyErr bool
+		promoteErr     bool
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"One machine, commit one clone": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool_clone")},
+		"One machine, commit current":   {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool")},
+		"One machine non zsys":          {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true},
+		"One machine no match":          {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true},
+
+		"One machine with children": {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+
+		"Separate user dataset, no user revert":                                {def: "m_clone_with_userdata_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children, no user revert":                  {def: "m_clone_with_userdata_with_children_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children manually created, no user revert": {def: "m_clone_with_userdata_with_children_manually_created_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset, user revert":                                   {def: "m_clone_with_userdata_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children, user revert":                     {def: "m_clone_with_userdata_with_children_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children manually created, user revert":    {def: "m_clone_with_userdata_with_children_manually_created_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+
+		"Separate boot":                                {def: "m_clone_with_separate_boot_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate boot with children":                  {def: "m_clone_with_separate_boot_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate boot with children manually created": {def: "m_clone_with_separate_boot_with_children_manually_created_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+
+		// Real machines
+		"Desktop without user revert": {def: "m_layout1_machines_with_snapshots_clones_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9876")},
+		"Desktop with user revert":    {def: "m_layout1_machines_with_snapshots_clones_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_9876")},
+		"Server without user revert":  {def: "m_layout2_machines_with_snapshots_clones_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9876")},
+		"Server with user revert":     {def: "m_layout2_machines_with_snapshots_clones_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_9876")},
+
+		// Error cases
+		"SetProperty fails":      {def: "m_clone_with_userdata_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678"), setPropertyErr: true, wantErr: true},
+		"Promote fails":          {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool_clone"), promoteErr: true, wantErr: true},
+		"Promote userdata fails": {def: "m_clone_with_userdata_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"), promoteErr: true, wantErr: true},
+		"Scan fails":             {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool"), scanErr: true, wantErr: true},
+	}
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			ds := machines.LoadDatasets(t, tc.def)
+			z := NewZfsMock(ds, "", "", false, tc.scanErr, tc.setPropertyErr, tc.promoteErr)
+			// Do the Scan() manually, as we don't wan't to suffer from scanErr
+			var datasets []zfs.Dataset
+			for _, d := range z.d {
+				datasets = append(datasets, *d)
+			}
+			initMachines := machines.New(datasets, tc.cmdline)
+			ms := initMachines
+
+			err := ms.Commit(z, tc.cmdline)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	ds := machines.LoadDatasets(b, "m_layout1_machines_with_snapshots_clones.json")
 	config.SetVerboseMode(false)
