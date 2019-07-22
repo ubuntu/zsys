@@ -226,7 +226,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) er
 
 	// Promotion needed for system and user datasets
 	for _, d := range bootedState.UserDatasets {
-		if bootedState.SystemDatasets[0].Origin == "" {
+		if d.Origin == "" {
 			continue
 		}
 		log.Debugf("promoting user dataset: %q", d.Name)
@@ -234,10 +234,14 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) er
 			return xerrors.Errorf("couldn't promote %q user dataset: "+config.ErrorFormat, d.Name, err)
 		}
 	}
-	if bootedState.SystemDatasets[0].Origin != "" {
-		log.Debugf("promoting current new state system dataset: %q", bootedState.ID)
-		if err := z.Promote(bootedState.ID); err != nil {
-			return xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, bootedState.ID, err)
+	for _, d := range bootedState.SystemDatasets {
+		if d.Origin == "" {
+			continue
+		}
+		log.Debugf("promoting current new state system dataset: %q", d.Name)
+
+		if err := z.Promote(d.Name); err != nil {
+			return xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, d.Name, err)
 		}
 	}
 
