@@ -156,10 +156,26 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 	// Resolve out to its root origin for /, /boot* and user datasets
 	origins := resolveOrigin([]zfs.Dataset(sortedDataset))
 
+	// First, set main datasets, then set clones
+	mainDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
+	cloneDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
+	otherDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
+	for _, d := range sortedDataset {
+		if origins[d.Name] == nil {
+			otherDatasets = append(otherDatasets, d)
+			continue
+		}
+		if *origins[d.Name] == "" {
+			mainDatasets = append(mainDatasets, d)
+		} else {
+			cloneDatasets = append(cloneDatasets, d)
+		}
+	}
+
 	var boots, userdatas, persistents []zfs.Dataset
 	// First, handle system datasets (active for each machine and history)
 nextDataset:
-	for _, d := range sortedDataset {
+	for _, d := range append(append(mainDatasets, cloneDatasets...), otherDatasets...) {
 		// Register all zsys non cloned mountable / to a new machine
 		if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == "" {
 			m := Machine{
