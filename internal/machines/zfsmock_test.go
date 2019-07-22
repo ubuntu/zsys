@@ -1,10 +1,8 @@
 package machines_test
 
 import (
-	"strconv"
 	"strings"
 
-	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
 	"golang.org/x/xerrors"
 )
@@ -176,15 +174,13 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 				}
 			}
 		case zfs.LastUsedProp:
-			lu, err := strconv.Atoi(value)
-			if err != nil {
-				return xerrors.Errorf("lastused value %q isn't an int: "+config.ErrorFormat, value, err)
-			}
-			d.LastUsed = lu
+			const currentMagicTime = 2000000000
+
+			d.LastUsed = currentMagicTime
 			// If we have any children for this dataset, applies it to them too
 			for _, dSnap := range datasets {
 				if strings.HasPrefix(dSnap.Name, d.Name+"/") {
-					dSnap.LastUsed = lu
+					dSnap.LastUsed = currentMagicTime
 				}
 			}
 		}
