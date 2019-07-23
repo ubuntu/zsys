@@ -244,6 +244,80 @@ func TestBoot(t *testing.T) {
 	}
 }
 
+func TestIdempotentBoot(t *testing.T) {
+	t.Parallel()
+	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
+	cmdline := generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")
+	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
+	datasets, err := z.Scan()
+	if err != nil {
+		t.Fatal("couldn't scan for initial state:", err)
+	}
+	ms1 := machines.New(datasets, cmdline)
+
+	if err = ms1.EnsureBoot(z, cmdline); err != nil {
+		t.Fatal("First EnsureBoot failed:", err)
+	}
+	ms2 := ms1
+	if err = ms2.EnsureBoot(z, cmdline); err != nil {
+		t.Fatal("Second EnsureBoot failed:", err)
+	}
+
+	assertMachinesEquals(t, ms1, ms2)
+}
+
+// TODO: not really idempotent, but should untag datasets that are tagged with destination datasets, maybe even destroy if it's the only one?
+// check what happens in case of daemon-reload… Maybe should be a no-op if mounted (and we should simulate here mounting user datasets)
+// Destroy if no LastUsed for user datasets?
+// Destroy system non boot dataset?
+func TestIdempotentBootSnapshotSuccess(t *testing.T) {
+	t.Parallel()
+	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
+	cmdline := generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3")
+	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
+	datasets, err := z.Scan()
+	if err != nil {
+		t.Fatal("couldn't scan for initial state:", err)
+	}
+	ms1 := machines.New(datasets, cmdline)
+
+	if err = ms1.EnsureBoot(z, cmdline); err != nil {
+		t.Fatal("First EnsureBoot failed:", err)
+	}
+	if err = ms1.Commit(z, cmdline); err != nil {
+		t.Fatal("Commit failed:", err)
+	}
+
+	ms2 := ms1
+	if err = ms2.EnsureBoot(z, cmdline); err != nil {
+		t.Fatal("Second EnsureBoot failed:", err)
+	}
+
+	assertMachinesEquals(t, ms1, ms2)
+}
+
+func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
+	t.Parallel()
+	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
+	cmdline := generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3")
+	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
+	datasets, err := z.Scan()
+	if err != nil {
+		t.Fatal("couldn't scan for initial state:", err)
+	}
+	ms1 := machines.New(datasets, cmdline)
+
+	if err = ms1.EnsureBoot(z, cmdline); err != nil {
+		t.Fatal("First EnsureBoot failed:", err)
+	}
+	ms2 := ms1
+	if err = ms2.EnsureBoot(z, cmdline); err != nil {
+		t.Fatal("Second EnsureBoot failed:", err)
+	}
+
+	assertMachinesEquals(t, ms1, ms2)
+}
+
 func TestCommit(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
