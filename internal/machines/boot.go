@@ -52,10 +52,6 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 	root, revertUserData := parseCmdLine(cmdline)
 	m, bootedState := machines.findFromRoot(root)
 
-	if bootedState == nil {
-		return xerrors.New("couldn't find any booted state for this machine")
-	}
-
 	bootedOnSnapshot := hasBootedOnSnapshot(cmdline)
 	// We are creating new clones (bootfs and optionnally, userdata) if wasn't promoted already
 	if bootedOnSnapshot && machines.current.ID != bootedState.ID {
