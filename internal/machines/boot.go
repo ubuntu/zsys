@@ -57,8 +57,8 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 	}
 
 	bootedOnSnapshot := hasBootedOnSnapshot(cmdline)
-	// We are creating new clones (bootfs and optionnally, userdata)
-	if bootedOnSnapshot {
+	// We are creating new clones (bootfs and optionnally, userdata) if wasn't promoted already
+	if bootedOnSnapshot && machines.current.ID != bootedState.ID {
 		// get current generated suffix by initramfs
 		var suffix string
 		if j := strings.LastIndex(bootedState.ID, "_"); j > 0 && !strings.HasSuffix(bootedState.ID, "_") {
