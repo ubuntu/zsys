@@ -381,51 +381,6 @@ nextDataset:
 	return machines
 }
 
-// findFromRoot returns the active machine and state if any.
-// If rootName is a snapshot, it fallbacks to current mounted root dataset. If no root dataset is mounted, s can be nil
-func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
-	// Not a zfs system
-	if rootName == "" {
-		return nil, nil
-	}
-
-	// Fast path: if rootName is already a main dataset state
-	if m, exists := machines.all[rootName]; exists {
-		return m, &m.State
-	}
-
-	var fromSnapshot bool
-	if strings.Contains(rootName, "@") {
-		fromSnapshot = true
-	}
-
-	// We know that our desired target is a history one
-	for _, m := range machines.all {
-		// Only match on names as we booted an existing clone directly.
-		if !fromSnapshot {
-			s, ok := m.History[rootName]
-			if !ok {
-				continue
-			}
-			return m, s
-		}
-
-		// We have a snapshot, we need to find the corresponding mounted main dataset on /.
-		// Look first on current machine
-		if m.SystemDatasets[0].Mounted && m.SystemDatasets[0].Mountpoint == "/" {
-			return m, &m.State
-		}
-		// Look now on History
-		for _, h := range m.History {
-			if h.SystemDatasets[0].Mounted && h.SystemDatasets[0].Mountpoint == "/" {
-				return m, h
-			}
-		}
-	}
-
-	return nil, nil
-}
-
 // appendDatasetIfNotPresent will check that the dataset wasn't already added and will append it
 // excludeCanMountOff restricts (for unlinked datasets) the check on datasets that are canMount noauto or on
 func appendIfNotPresent(mainDatasets, newDatasets []zfs.Dataset, excludeCanMountOff bool) []zfs.Dataset {
