@@ -41,11 +41,10 @@ func generateCommands() *cobra.Command {
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbosity, "verbose", "v", false, "Debug output")
 
 	bootCmd := &cobra.Command{
-		Use:    "boot prepare|commit",
-		Short:  "Ensure that the right datasets are ready to be mounted and commited during early boot",
-		Hidden: true,
-		Args:   cobra.ExactValidArgs(1),
-		//cobra.OnlyValidArgs,
+		Use:       "boot prepare|commit",
+		Short:     "Ensure that the right datasets are ready to be mounted and commited during early boot",
+		Hidden:    true,
+		Args:      cobra.ExactValidArgs(1),
 		ValidArgs: []string{"prepare", "commit"},
 		Run: func(cmd *cobra.Command, args []string) {
 			var err error
