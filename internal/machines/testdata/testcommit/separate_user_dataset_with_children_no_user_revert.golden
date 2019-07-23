@@ -103,7 +103,6 @@
                      "IsSnapshot": true,
                      "Mountpoint": "/home/user1/tools",
                      "CanMount": "on",
-                     "LastUsed": 2000000000,
                      "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
                   }
                ]
@@ -214,7 +213,6 @@
                   "IsSnapshot": true,
                   "Mountpoint": "/home/user1/tools",
                   "CanMount": "on",
-                  "LastUsed": 2000000000,
                   "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
                }
             ]
@@ -288,7 +286,6 @@
          "IsSnapshot": true,
          "Mountpoint": "/home/user1/tools",
          "CanMount": "on",
-         "LastUsed": 2000000000,
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
       },
       {

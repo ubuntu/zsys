@@ -161,26 +161,24 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 			}
 		case zfs.BootfsDatasetsProp:
 			d.BootfsDatasets = value
-			// If we have any snapshots for this dataset, applies it to them too
-			for _, dSnap := range datasets {
-				if strings.HasPrefix(dSnap.Name, d.Name+"@") {
-					dSnap.BootfsDatasets = value
-				}
-			}
-			// If we have any children for this dataset, applies it to them too
-			for _, dSnap := range datasets {
-				if strings.HasPrefix(dSnap.Name, d.Name+"/") {
-					dSnap.BootfsDatasets = value
+
+			// If we have any snapshots or children for this dataset, applies it to them too
+			for _, dc := range datasets {
+				if strings.HasPrefix(dc.Name, d.Name+"/") || strings.HasPrefix(dc.Name, d.Name+"@") {
+					dc.BootfsDatasets = value
 				}
 			}
 		case zfs.LastUsedProp:
 			const currentMagicTime = 2000000000
-
 			d.LastUsed = currentMagicTime
-			// If we have any children for this dataset, applies it to them too
-			for _, dSnap := range datasets {
-				if strings.HasPrefix(dSnap.Name, d.Name+"/") {
-					dSnap.LastUsed = currentMagicTime
+
+			// If we have any children for this dataset, applies it to them too (but not on snapshots)
+			for _, dc := range datasets {
+				if dc.IsSnapshot {
+					continue
+				}
+				if strings.HasPrefix(dc.Name, d.Name+"/") {
+					dc.LastUsed = currentMagicTime
 				}
 			}
 		}
