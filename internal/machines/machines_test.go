@@ -322,6 +322,27 @@ func TestCommit(t *testing.T) {
 	}
 }
 
+func TestIdempotentCommit(t *testing.T) {
+	t.Parallel()
+	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_no_user_revert.json")
+	z := NewZfsMock(ds, "", "", false, false, false, false)
+	datasets, err := z.Scan()
+	if err != nil {
+		t.Fatal("couldn't scan for initial state:", err)
+	}
+	ms1 := machines.New(datasets, generateCmdLine("rpool/ROOT/ubuntu_9876"))
+
+	if err = ms1.Commit(z, generateCmdLine("rpool/ROOT/ubuntu_9876")); err != nil {
+		t.Fatal("first commit failed:", err)
+	}
+	ms2 := ms1
+	if err = ms2.Commit(z, generateCmdLine("rpool/ROOT/ubuntu_9876")); err != nil {
+		t.Fatal("second commit failed:", err)
+	}
+
+	assertMachinesEquals(t, ms1, ms2)
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	ds := machines.LoadDatasets(b, "m_layout1_machines_with_snapshots_clones.json")
 	config.SetVerboseMode(false)
