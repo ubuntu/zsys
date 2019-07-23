@@ -196,7 +196,6 @@ func TestBoot(t *testing.T) {
 
 		// Error cases
 		"No booted state found does nothing":       {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), isNoOp: true},
-		"Clone fails":                              {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", cloneErr: true, wantErr: true},
 		"SetProperty fails":                        {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", setPropertyErr: true, wantErr: true},
 		"SetProperty fails with revert":            {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", setPropertyErr: true, wantErr: true},
 		"Scan fails":                               {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", scanErr: true, wantErr: true},
