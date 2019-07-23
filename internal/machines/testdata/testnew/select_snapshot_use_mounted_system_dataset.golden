@@ -9,6 +9,7 @@
                "Name": "rpool/ROOT/ubuntu_1234",
                "Mountpoint": "/",
                "CanMount": "on",
+               "Mounted": true,
                "BootFS": true,
                "LastUsed": 1555555555
             }
@@ -77,6 +78,7 @@
             "Name": "rpool/ROOT/ubuntu_1234",
             "Mountpoint": "/",
             "CanMount": "on",
+            "Mounted": true,
             "BootFS": true,
             "LastUsed": 1555555555
          }
@@ -140,6 +142,7 @@
          "Name": "rpool/ROOT/ubuntu_1234",
          "Mountpoint": "/",
          "CanMount": "on",
+         "Mounted": true,
          "BootFS": true,
          "LastUsed": 1555555555
       },

@@ -20,8 +20,9 @@ func init() {
 func TestNew(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def     string
-		cmdline string
+		def            string
+		cmdline        string
+		mountedDataset string
 	}{
 		"One machine, one dataset":            {def: "d_one_machine_one_dataset.json"},
 		"One disabled machine":                {def: "d_one_disabled_machine.json"},
@@ -92,13 +93,13 @@ func TestNew(t *testing.T) {
 		"zsys layout server with cloning in progress, multiple machines":   {def: "m_layout2_machines_with_snapshots_clones_reverting.json"},
 
 		// cmdline selection
-		"Select existing dataset machine":           {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpool")},
-		"Select correct machine":                    {def: "d_two_machines_one_dataset.json", cmdline: generateCmdLine("rpool2")},
-		"Select main machine with snapshots/clones": {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"Select snapshot":                           {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234@snap1")},
-		"Select clone":                              {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"Selected machine doesn't exist":            {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("foo")},
-		"Select existing dataset but not a machine": {def: "m_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT")},
+		"Select existing dataset machine":            {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpool")},
+		"Select correct machine":                     {def: "d_two_machines_one_dataset.json", cmdline: generateCmdLine("rpool2")},
+		"Select main machine with snapshots/clones":  {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"Select snapshot use mounted system dataset": {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234@snap1"), mountedDataset: "rpool/ROOT/ubuntu_1234"},
+		"Select clone":                               {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Selected machine doesn't exist":             {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("foo")},
+		"Select existing dataset but not a machine":  {def: "m_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT")},
 	}
 
 	for name, tc := range tests {
@@ -106,6 +107,11 @@ func TestNew(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ds := machines.LoadDatasets(t, tc.def)
+			for i := range ds {
+				if ds[i].Name == tc.mountedDataset {
+					ds[i].Mounted = true
+				}
+			}
 
 			got := machines.New(ds, tc.cmdline)
 
@@ -189,7 +195,7 @@ func TestBoot(t *testing.T) {
 			predictableSuffixFor: "rpool/USERDATA/user1"},
 
 		// Error cases
-		"No booted state found":                    {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), wantErr: true},
+		"No booted state found does nothing":       {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), isNoOp: true},
 		"Clone fails":                              {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", cloneErr: true, wantErr: true},
 		"SetProperty fails":                        {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", setPropertyErr: true, wantErr: true},
 		"SetProperty fails with revert":            {def: "m_layout1_machines_with_snapshots_clones_reverting.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242", setPropertyErr: true, wantErr: true},
