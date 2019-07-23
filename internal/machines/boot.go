@@ -42,7 +42,7 @@ type zfsPropertySetter interface {
 // Note that a rescan if performed if any modifications change the dataset layout. However, until ".Commit()" is called,
 // machine.current will return the correct machine, but the main dataset switch won't be done. This allows us here and
 // in .Commit()
-// TODO: propagate error to user
+// TODO: propagate error to user graphically
 func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) error {
 	if machines.current == nil || !machines.current.IsZsys {
 		log.Debugln("current machine isn't Zsys, nothing to do")
@@ -166,8 +166,6 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 // Commit current state to be the active one by promoting its datasets if needed, set last used,
 // associate user datasets to it and rebuilding grub menu.
 // After this operation, every New() call will get the current and correct system state.
-// TODO: update-grub (in the caller)
-// TODO: check idempotent (probably just m.State != s + take revert userdata into account)
 func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) error {
 	if machines.current == nil || !machines.current.IsZsys {
 		log.Debugln("current machine isn't Zsys, nothing to do")
