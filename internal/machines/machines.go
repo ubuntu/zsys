@@ -401,24 +401,26 @@ func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
 
 	// We know that our desired target is a history one
 	for _, m := range machines.all {
-		h, ok := m.History[rootName]
-		if !ok {
-			continue
-		}
-
 		// Only match on names as we booted an existing clone directly.
 		if !fromSnapshot {
-			return m, h
+			s, ok := m.History[rootName]
+			if !ok {
+				continue
+			}
+			return m, s
 		}
 
 		// We have a snapshot, we need to find the corresponding mounted main dataset on /.
-		var s *State
+		// Look first on current machine
+		if m.SystemDatasets[0].Mounted && m.SystemDatasets[0].Mountpoint == "/" {
+			return m, &m.State
+		}
+		// Look now on History
 		for _, h := range m.History {
 			if h.SystemDatasets[0].Mounted && h.SystemDatasets[0].Mountpoint == "/" {
-				s = h
+				return m, h
 			}
 		}
-		return m, s
 	}
 
 	return nil, nil
