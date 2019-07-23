@@ -216,7 +216,7 @@ func TestBoot(t *testing.T) {
 			initMachines := machines.New(datasets, tc.cmdline)
 			ms := initMachines
 
-			err := ms.EnsureBoot(z, tc.cmdline)
+			err := ms.EnsureBoot(z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -247,19 +247,18 @@ func TestBoot(t *testing.T) {
 func TestIdempotentBoot(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
-	cmdline := generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")
 	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
 	datasets, err := z.Scan()
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
 	}
-	ms1 := machines.New(datasets, cmdline)
+	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"))
 
-	if err = ms1.EnsureBoot(z, cmdline); err != nil {
+	if err = ms1.EnsureBoot(z); err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
 	ms2 := ms1
-	if err = ms2.EnsureBoot(z, cmdline); err != nil {
+	if err = ms2.EnsureBoot(z); err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
 
@@ -273,23 +272,22 @@ func TestIdempotentBoot(t *testing.T) {
 func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
-	cmdline := generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3")
 	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
 	datasets, err := z.Scan()
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
 	}
-	ms1 := machines.New(datasets, cmdline)
+	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	if err = ms1.EnsureBoot(z, cmdline); err != nil {
+	if err = ms1.EnsureBoot(z); err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
-	if err = ms1.Commit(z, cmdline); err != nil {
+	if err = ms1.Commit(z); err != nil {
 		t.Fatal("Commit failed:", err)
 	}
 
 	ms2 := ms1
-	if err = ms2.EnsureBoot(z, cmdline); err != nil {
+	if err = ms2.EnsureBoot(z); err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
 
@@ -299,19 +297,18 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
-	cmdline := generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3")
 	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
 	datasets, err := z.Scan()
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
 	}
-	ms1 := machines.New(datasets, cmdline)
+	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	if err = ms1.EnsureBoot(z, cmdline); err != nil {
+	if err = ms1.EnsureBoot(z); err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
 	ms2 := ms1
-	if err = ms2.EnsureBoot(z, cmdline); err != nil {
+	if err = ms2.EnsureBoot(z); err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
 
@@ -377,7 +374,7 @@ func TestCommit(t *testing.T) {
 			initMachines := machines.New(datasets, tc.cmdline)
 			ms := initMachines
 
-			err := ms.Commit(z, tc.cmdline)
+			err := ms.Commit(z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -415,11 +412,11 @@ func TestIdempotentCommit(t *testing.T) {
 	}
 	ms1 := machines.New(datasets, generateCmdLine("rpool/ROOT/ubuntu_9876"))
 
-	if err = ms1.Commit(z, generateCmdLine("rpool/ROOT/ubuntu_9876")); err != nil {
+	if err = ms1.Commit(z); err != nil {
 		t.Fatal("first commit failed:", err)
 	}
 	ms2 := ms1
-	if err = ms2.Commit(z, generateCmdLine("rpool/ROOT/ubuntu_9876")); err != nil {
+	if err = ms2.Commit(z); err != nil {
 		t.Fatal("second commit failed:", err)
 	}
 

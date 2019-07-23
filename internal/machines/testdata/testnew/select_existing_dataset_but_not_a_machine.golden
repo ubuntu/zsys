@@ -22,6 +22,7 @@
          ]
       }
    },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT ccccc",
    "AllSystemDatasets": [
       {
          "Name": "rpool/ROOT/ubuntu_1234",

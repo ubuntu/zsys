@@ -15,6 +15,7 @@
          ]
       }
    },
+   "Cmdline": "aaaaa bbbbb root=ZFS=foo ccccc",
    "AllSystemDatasets": [
       {
          "Name": "rpool",

@@ -16,6 +16,7 @@ import (
 // current machine and nextState if an upgrade has been proceeded.
 type Machines struct {
 	all               map[string]*Machine
+	cmdline           string
 	current           *Machine
 	nextState         *State
 	allSystemDatasets []zfs.Dataset
@@ -142,7 +143,8 @@ func resolveOrigin(datasets []zfs.Dataset) map[string]*string {
 // New detects and generate machines elems
 func New(ds []zfs.Dataset, cmdline string) Machines {
 	machines := Machines{
-		all: make(map[string]*Machine),
+		all:     make(map[string]*Machine),
+		cmdline: cmdline,
 	}
 
 	// We are going to transform the origin of datasets, get a copy first

@@ -29,6 +29,7 @@
          ]
       }
    },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool2 ccccc",
    "Current": {
       "ID": "rpool2",
       "IsZsys": true,

@@ -810,6 +810,7 @@
          ]
       }
    },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_9876 ccccc",
    "Current": {
       "ID": "rpool/ROOT/ubuntu_9876",
       "IsZsys": true,

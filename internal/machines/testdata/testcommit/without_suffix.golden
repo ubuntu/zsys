@@ -65,6 +65,7 @@
          }
       }
    },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu ccccc",
    "Current": {
       "ID": "rpool/ROOT/ubuntu",
       "IsZsys": true,

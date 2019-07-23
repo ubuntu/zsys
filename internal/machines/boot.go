@@ -43,16 +43,16 @@ type zfsPropertySetter interface {
 // machine.current will return the correct machine, but the main dataset switch won't be done. This allows us here and
 // in .Commit()
 // TODO: propagate error to user graphically
-func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) error {
+func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 	if machines.current == nil || !machines.current.IsZsys {
 		log.Debugln("current machine isn't Zsys, nothing to do")
 		return nil
 	}
 
-	root, revertUserData := parseCmdLine(cmdline)
+	root, revertUserData := parseCmdLine(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
 
-	bootedOnSnapshot := hasBootedOnSnapshot(cmdline)
+	bootedOnSnapshot := hasBootedOnSnapshot(machines.cmdline)
 	// We are creating new clones (bootfs and optionnally, userdata) if wasn't promoted already
 	if bootedOnSnapshot && machines.current.ID != bootedState.ID {
 		// get current generated suffix by initramfs
@@ -113,7 +113,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 		if err != nil {
 			return xerrors.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
 		}
-		*machines = New(ds, cmdline)
+		*machines = New(ds, machines.cmdline)
 		m, bootedState = machines.findFromRoot(root) // We did rescan, refresh pointers
 	}
 
@@ -157,7 +157,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 		if err != nil {
 			return xerrors.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
 		}
-		*machines = New(ds, cmdline)
+		*machines = New(ds, machines.cmdline)
 	}
 
 	return nil
@@ -166,13 +166,13 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner, cmdline string) 
 // Commit current state to be the active one by promoting its datasets if needed, set last used,
 // associate user datasets to it and rebuilding grub menu.
 // After this operation, every New() call will get the current and correct system state.
-func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) error {
+func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 	if machines.current == nil || !machines.current.IsZsys {
 		log.Debugln("current machine isn't Zsys, nothing to do")
 		return nil
 	}
 
-	root, revertUserData := parseCmdLine(cmdline)
+	root, revertUserData := parseCmdLine(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
 
 	// Get user datasets. As we didn't tag the user datasets and promote the system one, the machines doesn't correspond
@@ -250,7 +250,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner, cmdline string) er
 	if err != nil {
 		return xerrors.Errorf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
 	}
-	*machines = New(ds, cmdline)
+	*machines = New(ds, machines.cmdline)
 
 	return nil
 }

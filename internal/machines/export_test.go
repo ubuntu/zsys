@@ -12,6 +12,7 @@ const (
 
 type MachinesTest struct {
 	All               map[string]*Machine `json:",omitempty"`
+	Cmdline           string              `json:",omitempty"`
 	Current           *Machine            `json:",omitempty"`
 	NextState         *State              `json:",omitempty"`
 	AllSystemDatasets []zfs.Dataset       `json:",omitempty"`
@@ -23,6 +24,7 @@ func (m Machines) MarshalJSON() ([]byte, error) {
 	mt := MachinesTest{}
 
 	mt.All = m.all
+	mt.Cmdline = m.cmdline
 	mt.Current = m.current
 	mt.NextState = m.nextState
 	mt.AllSystemDatasets = m.allSystemDatasets
@@ -40,6 +42,7 @@ func (m *Machines) UnmarshalJSON(b []byte) error {
 	}
 
 	m.all = mt.All
+	m.cmdline = mt.Cmdline
 	m.current = mt.Current
 	m.nextState = mt.NextState
 	m.allSystemDatasets = mt.AllSystemDatasets

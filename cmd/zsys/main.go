@@ -93,7 +93,7 @@ func bootCmd() (err error) {
 	}
 	ms := machines.New(ds, cmdline)
 
-	return ms.EnsureBoot(z, cmdline)
+	return ms.EnsureBoot(z)
 }
 
 func commitCmd() (err error) {
@@ -118,7 +118,7 @@ func commitCmd() (err error) {
 	}
 	ms := machines.New(ds, cmdline)
 
-	if err := ms.Commit(z, cmdline); err != nil {
+	if err := ms.Commit(z); err != nil {
 		return err
 	}
 

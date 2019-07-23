@@ -47,6 +47,7 @@
          }
       }
    },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool_clone ccccc",
    "Current": {
       "ID": "rpool_clone",
       "IsZsys": true,
