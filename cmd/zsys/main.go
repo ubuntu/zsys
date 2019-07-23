@@ -41,32 +41,27 @@ func generateCommands() *cobra.Command {
 	rootCmd.PersistentFlags().BoolVarP(&flagVerbosity, "verbose", "v", false, "Debug output")
 
 	bootCmd := &cobra.Command{
-		Use:    "boot",
-		Short:  "Ensure that the right datasets are ready to be mounted during early boot",
+		Use:    "boot prepare|commit",
+		Short:  "Ensure that the right datasets are ready to be mounted and commited during early boot",
 		Hidden: true,
-		Args:   cobra.NoArgs,
+		Args:   cobra.ExactValidArgs(1),
+		//cobra.OnlyValidArgs,
+		ValidArgs: []string{"prepare", "commit"},
 		Run: func(cmd *cobra.Command, args []string) {
-			if err := bootCmd(); err != nil {
+			var err error
+			switch args[0] {
+			case "prepare":
+				err = bootCmd()
+			case "commit":
+				err = commitCmd()
+			}
+			if err != nil {
 				log.Error(err)
 				os.Exit(1)
 			}
 		},
 	}
 	rootCmd.AddCommand(bootCmd)
-
-	commitCmd := &cobra.Command{
-		Use:    "commit",
-		Short:  "Commit current state to be the active one",
-		Hidden: true,
-		Args:   cobra.NoArgs,
-		Run: func(cmd *cobra.Command, args []string) {
-			if err := commitCmd(); err != nil {
-				log.Error(err)
-				os.Exit(1)
-			}
-		},
-	}
-	rootCmd.AddCommand(commitCmd)
 
 	return rootCmd
 }
