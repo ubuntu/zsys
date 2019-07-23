@@ -78,6 +78,17 @@ func (z *zfsMock) Clone(name, suffix string, skipBootfs, recursive bool) (errClo
 		cloneName := newRootName + strings.TrimPrefix(d.Name, rootName)
 		cloneName = strings.TrimSuffix(cloneName, "@"+snapshot)
 
+		// If already exists, raise an error
+		var found bool
+		for _, dc := range datasets {
+			if dc.Name == cloneName {
+				found = true
+			}
+		}
+		if found {
+			return xerrors.Errorf("can't clone: %q already exists", d.Name)
+		}
+
 		cm := d.CanMount
 		if cm == "on" {
 			cm = "noauto"
