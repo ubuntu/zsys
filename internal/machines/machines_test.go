@@ -14,7 +14,7 @@ import (
 
 func init() {
 	testutils.InstallUpdateFlag()
-	config.SetVerboseMode(true)
+	config.SetVerboseMode(1)
 }
 
 func TestNew(t *testing.T) {
@@ -425,8 +425,8 @@ func TestIdempotentCommit(t *testing.T) {
 
 func BenchmarkNewDesktop(b *testing.B) {
 	ds := machines.LoadDatasets(b, "m_layout1_machines_with_snapshots_clones.json")
-	config.SetVerboseMode(false)
-	defer func() { config.SetVerboseMode(true) }()
+	config.SetVerboseMode(0)
+	defer func() { config.SetVerboseMode(1) }()
 	for n := 0; n < b.N; n++ {
 		machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 	}
@@ -434,8 +434,8 @@ func BenchmarkNewDesktop(b *testing.B) {
 
 func BenchmarkNewServer(b *testing.B) {
 	ds := machines.LoadDatasets(b, "m_layout2_machines_with_snapshots_clones.json")
-	config.SetVerboseMode(false)
-	defer func() { config.SetVerboseMode(true) }()
+	config.SetVerboseMode(0)
+	defer func() { config.SetVerboseMode(1) }()
 	for n := 0; n < b.N; n++ {
 		machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 	}

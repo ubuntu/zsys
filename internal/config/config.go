@@ -14,19 +14,25 @@ func init() {
 	pp.SetDefaultOutput(os.Stderr)
 }
 
-// SetVerboseMode change ErrorFormat and logs between verbose and non verbose mode
-func SetVerboseMode(verbose bool) {
-	if verbose {
-		ErrorFormat = "%+v"
-		log.SetFormatter(&log.TextFormatter{DisableLevelTruncation: true})
-		log.SetLevel(log.DebugLevel)
-		log.Debug("verbosity set to debug and will print stacktraces")
-	} else {
+// SetVerboseMode change ErrorFormat and logs between very, middly and non verbose
+func SetVerboseMode(level int) {
+	switch level {
+	case 0:
 		ErrorFormat = "%v"
 		log.SetFormatter(&log.TextFormatter{
 			DisableLevelTruncation: true,
 			DisableTimestamp:       true,
 		})
 		log.SetLevel(log.WarnLevel)
+	case 1:
+		ErrorFormat = "%+v"
+		log.SetFormatter(&log.TextFormatter{DisableLevelTruncation: true})
+		log.SetLevel(log.InfoLevel)
+		log.Debug("verbosity set to info and will print stacktraces")
+	case 2:
+		ErrorFormat = "%+v"
+		log.SetFormatter(&log.TextFormatter{DisableLevelTruncation: true})
+		log.SetLevel(log.DebugLevel)
+		log.Debug("verbosity set to debug and will print stacktraces")
 	}
 }

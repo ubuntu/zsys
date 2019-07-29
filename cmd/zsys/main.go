@@ -28,7 +28,7 @@ func main() {
 }
 
 func generateCommands() *cobra.Command {
-	var flagVerbosity bool
+	var flagVerbosity int
 
 	var rootCmd = &cobra.Command{
 		Use:   "zsys",
@@ -38,7 +38,7 @@ func generateCommands() *cobra.Command {
 			config.SetVerboseMode(flagVerbosity)
 		},
 	}
-	rootCmd.PersistentFlags().BoolVarP(&flagVerbosity, "verbose", "v", false, "Debug output")
+	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
 
 	bootCmd := &cobra.Command{
 		Use:       "boot prepare|commit",

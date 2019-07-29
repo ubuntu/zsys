@@ -15,7 +15,7 @@ import (
 
 func init() {
 	testutils.InstallUpdateFlag()
-	config.SetVerboseMode(true)
+	config.SetVerboseMode(1)
 }
 
 func TestResolveOrigin(t *testing.T) {
