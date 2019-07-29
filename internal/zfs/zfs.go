@@ -6,6 +6,7 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 
 	libzfs "github.com/bicomsystems/go-libzfs"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/xerrors"
 )
 
@@ -83,6 +84,7 @@ func New(options ...func(*Zfs)) *Zfs {
 
 // Scan returns all datasets that are currently imported on the system.
 func (Zfs) Scan() ([]Dataset, error) {
+	log.Debugln("ZFS: scan requested")
 	ds, err := libzfs.DatasetOpenAll()
 	if err != nil {
 		return nil, xerrors.Errorf("can't list datasets: %v", err)
@@ -99,6 +101,7 @@ func (Zfs) Scan() ([]Dataset, error) {
 
 // Snapshot creates a new snapshot for dataset (and children if recursive is true) with the given name.
 func (z *Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot error) {
+	log.Debugf("ZFS: trying to snapshot %q\n", datasetName)
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
 		return xerrors.Errorf("couldn't open %q: %v", datasetName, err)
@@ -177,6 +180,7 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
 func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
+	log.Debugf("ZFS: trying to clone %q\n", name)
 	if suffix == "" {
 		return xerrors.Errorf("no suffix was provided for cloning")
 	}
@@ -312,6 +316,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 // Promote recursively all children, including dataset named "name".
 // If the hierarchy is partially promoted, promote the missing one and be no-op for the rest.
 func (z *Zfs) Promote(name string) (errPromote error) {
+	log.Debugf("ZFS: trying to promote %q\n", name)
 	d, err := libzfs.DatasetOpen(name)
 	if err != nil {
 		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, name, err)
@@ -379,6 +384,7 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 // Note that destruction can't be rollbacked as filesystem content can't be recreated, so we don't accept them
 // in a transactional Zfs element.
 func (z *Zfs) Destroy(name string) error {
+	log.Debugf("ZFS: trying to destroy %q\n", name)
 	if z.transactional {
 		return xerrors.Errorf("couldn't call Destroy in a transactional context.")
 	}
@@ -400,6 +406,7 @@ func (z *Zfs) Destroy(name string) error {
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
 func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetProperty error) {
+	log.Debugf("ZFS: trying set %q=%q on %q\n", name, value, datasetName)
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
 		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, datasetName, err)
@@ -425,6 +432,7 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 			return xerrors.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 		}
 		if !force && prop.Source != "local" && prop.Source != "" && prop.Source != parentName {
+			log.Debugf("ZFS: Don't set property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
 			return nil
 		}
 		if err = d.SetProperty(propName, value); err != nil {
@@ -440,6 +448,7 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 		return xerrors.Errorf("can't get dataset user property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 	}
 	if !force && prop.Source != "local" && prop.Source != "" && prop.Source != parentName {
+		log.Debugf("ZFS: Don't set user property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
 		return nil
 	}
 	if err = d.SetUserProperty(name, value); err != nil {

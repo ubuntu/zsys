@@ -1,7 +1,7 @@
 package zfs
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/ubuntu/zsys/internal/config"
 	"golang.org/x/xerrors"
@@ -18,7 +18,7 @@ func WithTransactions() func(z *Zfs) {
 // It will issue a warning if an error occurred during the transaction
 func (z *Zfs) Done() {
 	if z.transactionErr {
-		log.Printf(config.ErrorFormat+"\n", xerrors.New("WARNING: an error occurred during a Zfs transaction and Done() was called instead of Cancel()"))
+		log.Warnf(config.ErrorFormat+"\n", xerrors.New("An error occurred during a Zfs transaction and Done() was called instead of Cancel()"))
 	}
 	z.transactionErr = false
 	z.reverts = nil
@@ -28,7 +28,7 @@ func (z *Zfs) Done() {
 func (z *Zfs) Cancel() {
 	for i := len(z.reverts) - 1; i >= 0; i-- {
 		if err := z.reverts[i](); err != nil {
-			log.Println(xerrors.Errorf("Warning: an error occurred when reverting a Zfs transaction: "+config.ErrorFormat, err))
+			log.Warnf(config.ErrorFormat+"\n", xerrors.Errorf("An error occurred when reverting a Zfs transaction: "+config.ErrorFormat, err))
 		}
 	}
 	z.transactionErr = false
@@ -50,6 +50,7 @@ func (z *Zfs) saveOrRevert(err error) {
 		return
 	}
 	if z.transactional {
+		log.Debugf("ZFS: An error occured and is saved in the zfs transaction: "+config.ErrorFormat+"\n", err)
 		z.transactionErr = true
 		return
 	}

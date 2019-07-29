@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/k0kubun/pp"
+
 	"github.com/ubuntu/zsys/internal/config"
 
 	log "github.com/sirupsen/logrus"
@@ -142,6 +144,7 @@ func resolveOrigin(datasets []zfs.Dataset) map[string]*string {
 
 // New detects and generate machines elems
 func New(ds []zfs.Dataset, cmdline string) Machines {
+	log.Infoln("building new machines list")
 	machines := Machines{
 		all:     make(map[string]*Machine),
 		cmdline: cmdline,
@@ -379,6 +382,11 @@ nextDataset:
 	root, _ := parseCmdLine(cmdline)
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
+
+	if log.GetLevel() == log.DebugLevel {
+		log.Debugln("current machines scanning layout:")
+		pp.Println(machines)
+	}
 
 	return machines
 }

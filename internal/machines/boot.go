@@ -45,16 +45,18 @@ type zfsPropertySetter interface {
 // TODO: propagate error to user graphically
 func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 	if machines.current == nil || !machines.current.IsZsys {
-		log.Debugln("current machine isn't Zsys, nothing to do")
+		log.Infoln("current machine isn't Zsys, nothing to do on boot")
 		return nil
 	}
 
 	root, revertUserData := parseCmdLine(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
+	log.Infof("ensure boot on %q\n", root)
 
 	bootedOnSnapshot := hasBootedOnSnapshot(machines.cmdline)
 	// We are creating new clones (bootfs and optionnally, userdata) if wasn't promoted already
 	if bootedOnSnapshot && machines.current.ID != bootedState.ID {
+		log.Infof("booting on snapshot: %q to %q\n", root, bootedState.ID)
 		// get current generated suffix by initramfs
 		var suffix string
 		if j := strings.LastIndex(bootedState.ID, "_"); j > 0 && !strings.HasSuffix(bootedState.ID, "_") {
@@ -77,6 +79,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		// the machine forever in case of a real issue.
 		var userDataSuffix string
 		if revertUserData && !(bootedOnSnapshot && len(bootedState.UserDatasets) > 0) {
+			log.Infoln("reverting user data")
 			// Find user datasets attached to the snapshot and clone them
 			// Only root datasets are cloned
 			userDataSuffix = generateID(6)
@@ -133,6 +136,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		if d.CanMount != "on" || d.IsSnapshot {
 			continue
 		}
+		log.Infof("switch dataset %q to mount noauto\n", d.Name)
 		if err := z.SetProperty(zfs.CanmountProp, "noauto", d.Name, false); err != nil {
 			return xerrors.Errorf("couldn't switch %q canmount property to noauto: "+config.ErrorFormat, d.Name, err)
 		}
@@ -145,6 +149,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		if d.CanMount != "noauto" {
 			continue
 		}
+		log.Infof("switch dataset %q to mount on\n", d.Name)
 		if err := z.SetProperty(zfs.CanmountProp, "on", d.Name, false); err != nil {
 			return xerrors.Errorf("couldn't switch %q canmount property to on: "+config.ErrorFormat, d.Name, err)
 		}
@@ -168,12 +173,13 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 // After this operation, every New() call will get the current and correct system state.
 func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 	if machines.current == nil || !machines.current.IsZsys {
-		log.Debugln("current machine isn't Zsys, nothing to do")
+		log.Infoln("current machine isn't Zsys, nothing to commit on boot")
 		return nil
 	}
 
 	root, revertUserData := parseCmdLine(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
+	log.Infof("committing boot for %q\n", root)
 
 	// Get user datasets. As we didn't tag the user datasets and promote the system one, the machines doesn't correspond
 	// to the reality.
@@ -200,6 +206,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		if newTag == d.BootfsDatasets {
 			continue
 		}
+		log.Infof("untagging user dataset: %q\n", d.Name)
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 			return xerrors.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, bootedState.ID, d.Name, err)
 		}
@@ -212,6 +219,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 			strings.HasSuffix(d.BootfsDatasets, ":"+bootedState.ID) {
 			continue
 		}
+		log.Infof("tag current user dataset: %q\n", d.Name)
 		newTag := d.BootfsDatasets + ":" + bootedState.ID
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 			return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
@@ -220,6 +228,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 
 	// System and users datasets: set lastUsed
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
+	log.Infof("set current time to %q\n", currentTime)
 	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
 		z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false)
 	}
@@ -229,7 +238,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		if d.Origin == "" {
 			continue
 		}
-		log.Debugf("promoting user dataset: %q", d.Name)
+		log.Infof("promoting user dataset: %q\n", d.Name)
 		if err := z.Promote(d.Name); err != nil {
 			return xerrors.Errorf("couldn't promote %q user dataset: "+config.ErrorFormat, d.Name, err)
 		}
@@ -238,7 +247,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		if d.Origin == "" {
 			continue
 		}
-		log.Debugf("promoting current new state system dataset: %q", d.Name)
+		log.Infof("promoting current state system dataset: %q\n", d.Name)
 
 		if err := z.Promote(d.Name); err != nil {
 			return xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, d.Name, err)
