@@ -65,12 +65,32 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 			return xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedState.ID)
 		}
 
+		// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
+		var datasetsToClone []string
+		for _, n := range m.History[root].SystemDatasets {
+			var found bool
+			for _, rootName := range datasetsToClone {
+				base, _ := splitSnapshotName(rootName)
+				if strings.HasPrefix(n.Name, base+"/") {
+					found = true
+				}
+			}
+			if found {
+				continue
+			}
+			datasetsToClone = append(datasetsToClone, n.Name)
+		}
+
 		// Skip bootfs datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
 		// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
 		// in case of a real issue.
 		// TODO: should test the clone return value (clone fails on system dataset already exists -> skip, other clone fails -> return error)
-		if err := z.Clone(root, suffix, true, true); err != nil {
-			log.Warnf("couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v", root, err)
+		for _, n := range datasetsToClone {
+			log.Infof("cloning %q", n)
+			if err := z.Clone(n, suffix, true, true); err != nil {
+				// TODO: transaction fix (as it's now set in error)
+				log.Warnf("couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v", n, err)
+			}
 		}
 
 		// Handle userdata by creating a new clone in case a revert was requested
