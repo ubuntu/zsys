@@ -414,10 +414,10 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 	defer d.Close()
 	defer func() { z.saveOrRevert(errSetProperty) }()
 
-	var parentName string
 	if d.IsSnapshot() {
-		parentName = datasetName[:strings.LastIndex(datasetName, "@")]
+		return xerrors.Errorf("can't set a property %q on %q: the dataset a snapshot", name, datasetName)
 	}
+
 	var prop libzfs.Property
 	if !strings.Contains(name, ":") {
 		var propName libzfs.Prop
@@ -431,7 +431,7 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 		if err != nil {
 			return xerrors.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 		}
-		if !force && prop.Source != "local" && prop.Source != "" && prop.Source != parentName {
+		if !force && prop.Source != "local" && prop.Source != "" {
 			log.Debugf("ZFS: Don't set property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
 			return nil
 		}
@@ -447,7 +447,7 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 	if err != nil {
 		return xerrors.Errorf("can't get dataset user property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 	}
-	if !force && prop.Source != "local" && prop.Source != "" && prop.Source != parentName {
+	if !force && prop.Source != "local" && prop.Source != "" {
 		log.Debugf("ZFS: Don't set user property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
 		return nil
 	}
