@@ -406,7 +406,7 @@ func (z *Zfs) Destroy(name string) error {
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
 func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetProperty error) {
-	log.Debugf("ZFS: trying set %q=%q on %q\n", name, value, datasetName)
+	log.Debugf("ZFS: trying to set %q=%q on %q\n", name, value, datasetName)
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
 		return xerrors.Errorf("can't get dataset %q: "+config.ErrorFormat, datasetName, err)
