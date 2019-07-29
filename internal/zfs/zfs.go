@@ -447,8 +447,9 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 	if err != nil {
 		return xerrors.Errorf("can't get dataset user property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 	}
-	if !force && prop.Source != "local" && prop.Source != "" {
-		log.Debugf("ZFS: Don't set user property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
+	// TODO: or use getDatasetProp() and cache on Scan() to always have "none" checked.
+	if !force && prop.Source != "local" && prop.Source != "none" && prop.Source != "" {
+		log.Debugf("ZFS: don't set user property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
 		return nil
 	}
 	if err = d.SetUserProperty(name, value); err != nil {
