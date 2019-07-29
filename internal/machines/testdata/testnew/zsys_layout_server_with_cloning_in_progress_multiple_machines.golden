@@ -360,12 +360,6 @@
                      "CanMount": "on",
                      "BootFS": true,
                      "Origin": "rpool/ROOT/ubuntu_5678@snap3"
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_4242",
-                     "Mountpoint": "/boot",
-                     "CanMount": "on",
-                     "Origin": "bpool/BOOT/ubuntu_5678@snap3"
                   }
                ],
                "PersistentDatasets": [
@@ -1227,12 +1221,6 @@
          "IsSnapshot": true,
          "Mountpoint": "/boot",
          "CanMount": "on"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_4242",
-         "Mountpoint": "/boot",
-         "CanMount": "on",
-         "Origin": "bpool/BOOT/ubuntu_5678@snap3"
       },
       {
          "Name": "bpool/BOOT/ubuntu_5678",
