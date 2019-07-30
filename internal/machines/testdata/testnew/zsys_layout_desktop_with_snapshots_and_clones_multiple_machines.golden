@@ -576,14 +576,12 @@
             "rpool/ROOT/ubuntu_9876": {
                "ID": "rpool/ROOT/ubuntu_9876",
                "IsZsys": true,
-               "LastUsed": "2017-11-19T18:05:11+01:00",
                "SystemDatasets": [
                   {
                      "Name": "rpool/ROOT/ubuntu_9876",
                      "Mountpoint": "/",
                      "CanMount": "noauto",
                      "BootFS": true,
-                     "LastUsed": 1511111111,
                      "Origin": "rpool/ROOT/ubuntu_5678@snap3"
                   },
                   {
@@ -1245,7 +1243,6 @@
          "Mountpoint": "/",
          "CanMount": "noauto",
          "BootFS": true,
-         "LastUsed": 1511111111,
          "Origin": "rpool/ROOT/ubuntu_5678@snap3"
       },
       {

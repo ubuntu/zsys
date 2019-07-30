@@ -272,7 +272,6 @@
          "Name": "rpool/USERDATA/user1_efgh",
          "Mountpoint": "/home/user1",
          "CanMount": "noauto",
-         "LastUsed": 15111111111,
          "Origin": "rpool/USERDATA/user1_abcd@snap1"
       },
       {

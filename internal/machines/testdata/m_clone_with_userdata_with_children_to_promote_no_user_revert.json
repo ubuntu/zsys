@@ -27,7 +27,6 @@
     {
         "Name": "rpool/ROOT/ubuntu_5678",
         "Bootfs": true,
-        "LastUsed": 1577777777,
         "Mountpoint": "/",
         "CanMount": "on",
         "Origin": "rpool/ROOT/ubuntu_1234@snap1"
@@ -70,7 +69,6 @@
         "Mountpoint": "/home/user1",
         "CanMount": "noauto",
         "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
-        "LastUsed": 15111111111,
         "Origin": "rpool/USERDATA/user1_abcd@snap1"
     },
     {

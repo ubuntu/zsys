@@ -12,7 +12,6 @@
     {
         "Name": "rpool/ROOT/ubuntu",
         "Bootfs": true,
-        "LastUsed": 1555555555,
         "Mountpoint": "/",
         "CanMount": "on",
         "Origin": "rpool/ROOT/ubuntu_5678@snap1"
