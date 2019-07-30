@@ -28,14 +28,19 @@ type fakePools struct {
 type fakePool struct {
 	Name     string
 	Datasets []struct {
-		Name           string
-		Mountpoint     string
-		CanMount       string
-		ZsysBootfs     string    `yaml:"zsys_bootfs"`
-		LastUsed       time.Time `yaml:"last_used"`
-		BootfsDatasets string    `yaml:"bootfs_datasets"`
-		Snapshots      []struct {
-			Name string
+		Name             string
+		Mountpoint       string
+		CanMount         string
+		ZsysBootfs       string    `yaml:"zsys_bootfs"`
+		LastUsed         time.Time `yaml:"last_used"`
+		LastBootedKernel string    `yaml:"last_booted_kernel"`
+		BootfsDatasets   string    `yaml:"bootfs_datasets"`
+		Snapshots        []struct {
+			Name             string
+			ZsysBootfs       string    `yaml:"zsys_bootfs"`
+			LastUsed         time.Time `yaml:"last_used"`
+			LastBootedKernel string    `yaml:"last_booted_kernel"`
+			BootfsDatasets   string    `yaml:"bootfs_datasets"`
 		}
 	}
 }
@@ -176,6 +181,9 @@ func (fpools fakePools) create(path string) func() {
 					if !dataset.LastUsed.IsZero() {
 						d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(dataset.LastUsed.Unix(), 10))
 					}
+					if dataset.LastBootedKernel != "" {
+						d.SetUserProperty(zfs.LastBootedKernelProp, dataset.LastBootedKernel)
+					}
 					if dataset.BootfsDatasets != "" {
 						d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
 					}
@@ -186,6 +194,18 @@ func (fpools fakePools) create(path string) func() {
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)
 							os.Exit(1)
+						}
+						if s.ZsysBootfs != "" {
+							d.SetUserProperty(zfs.BootfsProp, s.ZsysBootfs)
+						}
+						if !s.LastUsed.IsZero() {
+							d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(s.LastUsed.Unix(), 10))
+						}
+						if s.LastBootedKernel != "" {
+							d.SetUserProperty(zfs.LastBootedKernelProp, s.LastBootedKernel)
+						}
+						if s.BootfsDatasets != "" {
+							d.SetUserProperty(zfs.BootfsDatasetsProp, s.BootfsDatasets)
 						}
 						d.Close()
 					}
