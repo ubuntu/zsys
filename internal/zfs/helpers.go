@@ -108,6 +108,18 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		return nil, xerrors.Errorf("%q property isn't an int: "+config.ErrorFormat, LastUsedProp, err)
 	}
 
+	lbk, err := d.GetUserProperty(LastBootedKernelProp)
+	if err != nil {
+		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, LastBootedKernelProp, err)
+	}
+	lastBootedKernel := lbk.Value
+	if lastBootedKernel == "-" {
+		lastBootedKernel = ""
+	}
+	if lbk.Source != "none" {
+		sources.LastBootedKernel = lbk.Source
+	}
+
 	sDataset, err := d.GetUserProperty(BootfsDatasetsProp)
 	if err != nil {
 		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, BootfsDatasetsProp, err)
@@ -121,14 +133,15 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	}
 
 	return &DatasetProp{
-		Mountpoint:     mountpoint,
-		CanMount:       canMount,
-		Mounted:        mounted,
-		BootFS:         bootfs,
-		LastUsed:       lastused,
-		BootfsDatasets: BootfsDatasets,
-		Origin:         origin,
-		sources:        sources,
+		Mountpoint:       mountpoint,
+		CanMount:         canMount,
+		Mounted:          mounted,
+		BootFS:           bootfs,
+		LastUsed:         lastused,
+		LastBootedKernel: lastBootedKernel,
+		BootfsDatasets:   BootfsDatasets,
+		Origin:           origin,
+		sources:          sources,
 	}, nil
 }
 

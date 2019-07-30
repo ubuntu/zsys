@@ -18,6 +18,8 @@ const (
 	LastUsedProp = zsysPrefix + "last-used"
 	// BootfsDatasetsProp string value
 	BootfsDatasetsProp = zsysPrefix + "bootfs-datasets"
+	// LastBootedKernelProp string value
+	LastBootedKernelProp = zsysPrefix + "last-booted-kernel"
 	// CanmountProp string value
 	CanmountProp = "canmount"
 )
@@ -43,7 +45,9 @@ type DatasetProp struct {
 	BootFS bool `json:",omitempty"`
 	// LastUsed is a user property that store the last time a dataset was used.
 	LastUsed int `json:",omitempty"`
-	// BootfsDatasets is a user proper for user datasets, linking them to relevant system bootfs datasets.
+	// LastBootedKernel is a user property storing what latest kernel was a root dataset successfully boot with.
+	LastBootedKernel string `json:",omitempty"`
+	// BootfsDatasets is a user property for user datasets, linking them to relevant system bootfs datasets.
 	BootfsDatasets string `json:",omitempty"`
 	// Origin points to the dataset snapshot this one was clone from.
 	Origin string `json:",omitempty"`
@@ -55,10 +59,11 @@ type DatasetProp struct {
 
 // datasetSources list sources some properties for a given dataset
 type datasetSources struct {
-	Mountpoint     string `json:",omitempty"`
-	BootFS         string `json:",omitempty"`
-	LastUsed       string `json:",omitempty"`
-	BootfsDatasets string `json:",omitempty"`
+	Mountpoint       string `json:",omitempty"`
+	BootFS           string `json:",omitempty"`
+	LastUsed         string `json:",omitempty"`
+	LastBootedKernel string `json:",omitempty"`
+	BootfsDatasets   string `json:",omitempty"`
 }
 
 // Zfs is a system handler talking to zfs linux module.
@@ -158,6 +163,11 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 	if srcProps.sources.BootfsDatasets == "local" {
 		if err := ds.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
 			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsDatasetsProp, n, err)
+		}
+	}
+	if srcProps.sources.LastBootedKernel == "local" {
+		if err := ds.SetUserProperty(LastBootedKernelProp, srcProps.LastBootedKernel); err != nil {
+			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, LastBootedKernelProp, n, err)
 		}
 	}
 
