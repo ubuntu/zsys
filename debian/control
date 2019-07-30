@@ -1,0 +1,23 @@
+Source: zsys
+Section: admin
+Priority: optional
+Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Build-Depends: debhelper (>= 11),
+               dh-golang,
+               golang-go (>= 2:1.11~),
+               libzfslinux-dev,
+               zfsutils-linux,
+Standards-Version: 4.1.3
+XS-Go-Import-Path: github.com/ubuntu/zsys
+Homepage: https://github.com/ubuntu/zsys
+
+Package: zsys
+Architecture: any
+Built-Using: ${misc:Built-Using},
+Depends: ${shlibs:Depends},
+         ${misc:Depends},
+         zfsutils-linux,
+Description: ZFS SYStem integration
+ ZSYS is a Zfs SYStem tool targetting a better ZOL integration.
+ It allows running multiple ZFS system in parallel, automated
+ snapshot, managing complex zfs dataset layout and garbage collection.

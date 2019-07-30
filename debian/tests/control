@@ -1,0 +1,3 @@
+Test-Command: sudo go test -v -mod=vendor ./...
+Restrictions: needs-root, allow-stderr
+Depends: @builddeps@

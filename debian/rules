@@ -1,0 +1,18 @@
+#!/usr/bin/make -f
+#export DH_VERBOSE = 1
+
+export GOCACHE=$(shell mktemp -d /tmp/gocache-XXXX)
+export GOFLAGS=-mod=vendor
+
+%:
+	dh $@ --buildsystem=golang --with=golang
+
+override_dh_auto_clean:
+	dh_auto_clean
+	# create the vendor directory when building the source package
+	[ -d vendor/ ] || go mod vendor
+
+override_dh_auto_install:
+	dh_auto_install -- --no-source
+	mv debian/zsys/usr/bin/ debian/zsys/sbin
+	rmdir debian/zsys/usr/
