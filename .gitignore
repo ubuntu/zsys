@@ -9,3 +9,7 @@ cmd/zsys/zsys
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 coverage/
+
+# Package artefacts
+obj-x86_64-linux-gnu/
+vendor/
