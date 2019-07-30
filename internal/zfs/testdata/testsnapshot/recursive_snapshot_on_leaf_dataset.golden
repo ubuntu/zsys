@@ -5,10 +5,12 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
-         "LastUsed": "local"
+         "LastUsed": "local",
+         "LastBootedKernel": "local"
       }
    },
    {
@@ -18,9 +20,11 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "local"
+         "BootFS": "local",
+         "LastBootedKernel": "local"
       }
    }
 ]

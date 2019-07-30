@@ -21,11 +21,13 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
          "LastUsed": "local",
+         "LastBootedKernel": "local",
          "BootfsDatasets": "local"
       }
    },
@@ -34,10 +36,12 @@
       "Mountpoint": "/opt",
       "CanMount": "on",
       "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -47,9 +51,11 @@
       "Mountpoint": "/opt",
       "CanMount": "on",
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -58,10 +64,12 @@
       "Mountpoint": "/var",
       "CanMount": "on",
       "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -70,11 +78,13 @@
       "Mountpoint": "/var/lib",
       "CanMount": "on",
       "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -83,10 +93,12 @@
       "Mountpoint": "/var/lib/apt",
       "CanMount": "on",
       "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "LastUsed": "rpool/ROOT/ubuntu_1234",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -96,9 +108,11 @@
       "Mountpoint": "/var/lib/apt",
       "CanMount": "on",
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -108,10 +122,12 @@
       "Mountpoint": "/var/lib",
       "CanMount": "on",
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -121,9 +137,11 @@
       "Mountpoint": "/var",
       "CanMount": "on",
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    },
@@ -134,10 +152,12 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "rpool/ROOT/ubuntu_1234",
+         "LastBootedKernel": "rpool/ROOT/ubuntu_1234",
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       }
    }
