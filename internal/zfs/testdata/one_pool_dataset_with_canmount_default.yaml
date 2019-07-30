@@ -1,0 +1,5 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: ubuntu
+        canmount: '-'

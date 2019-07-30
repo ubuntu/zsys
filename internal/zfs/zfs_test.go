@@ -423,9 +423,10 @@ func TestSetProperty(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"User property (local)":       {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
-		"Authorized property (local)": {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
-		"User property (none)":        {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"User property (local)":         {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"Authorized property (local)":   {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
+		"Authorized property (default)": {def: "one_pool_dataset_with_canmount_default.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool/ubuntu"},
+		"User property (none)":          {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		// There is no authorized properties that can be "none" for now
 
 		"User property (inherit)":            {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},

@@ -166,7 +166,9 @@ func (fpools fakePools) create(path string) func() {
 					if dataset.CanMount == "" {
 						dataset.CanMount = "off"
 					}
-					d.SetProperty(libzfs.DatasetPropCanmount, dataset.CanMount)
+					if dataset.CanMount != "-" {
+						d.SetProperty(libzfs.DatasetPropCanmount, dataset.CanMount)
+					}
 
 					if dataset.ZsysBootfs != "" {
 						d.SetUserProperty(zfs.BootfsProp, dataset.ZsysBootfs)

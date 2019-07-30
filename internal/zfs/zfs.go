@@ -431,8 +431,8 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 		if err != nil {
 			return xerrors.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 		}
-		if !force && prop.Source != "local" && prop.Source != "" {
-			log.Debugf("ZFS: Don't set property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
+		if !force && prop.Source != "local" && prop.Source != "default" && prop.Source != "" {
+			log.Debugf("ZFS: can't set property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
 			return nil
 		}
 		if err = d.SetProperty(propName, value); err != nil {
