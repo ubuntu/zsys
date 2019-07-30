@@ -1,0 +1,12 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/",
+      "CanMount": "off"
+   },
+   {
+      "Name": "rpool/ubuntu",
+      "Mountpoint": "/ubuntu",
+      "CanMount": "on"
+   }
+]

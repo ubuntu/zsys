@@ -40,6 +40,7 @@ func TestScan(t *testing.T) {
 		"One pool, one dataset, no property":                                       {def: "one_pool_one_dataset_no_property.yaml"},
 		"One pool, one dataset, with bootfsdatasets property":                      {def: "one_pool_one_dataset_with_bootfsdatasets.yaml"},
 		"One pool, one dataset, with bootfsdatasets property, multiple elems":      {def: "one_pool_one_dataset_with_bootfsdatasets_multiple.yaml"},
+		"One pool, with canmount as default":                                       {def: "one_pool_dataset_with_canmount_default.yaml"},
 		"One pool, N datasets":                                                     {def: "one_pool_n_datasets.yaml"},
 		"One pool, one dataset, one snapshot":                                      {def: "one_pool_one_dataset_one_snapshot.yaml"},
 		"One pool, one dataset, canmount=noauto":                                   {def: "one_pool_one_dataset_canmount_noauto.yaml"},
