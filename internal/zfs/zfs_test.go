@@ -40,6 +40,8 @@ func TestScan(t *testing.T) {
 		"One pool, one dataset, no property":                                       {def: "one_pool_one_dataset_no_property.yaml"},
 		"One pool, one dataset, with bootfsdatasets property":                      {def: "one_pool_one_dataset_with_bootfsdatasets.yaml"},
 		"One pool, one dataset, with bootfsdatasets property, multiple elems":      {def: "one_pool_one_dataset_with_bootfsdatasets_multiple.yaml"},
+		"One pool, one dataset, with lastused property":                            {def: "one_pool_one_dataset_with_lastused.yaml"},
+		"One pool, one dataset, with lastbootedkernel property":                    {def: "one_pool_one_dataset_with_lastbootedkernel.yaml"},
 		"One pool, with canmount as default":                                       {def: "one_pool_dataset_with_canmount_default.yaml"},
 		"One pool, N datasets":                                                     {def: "one_pool_n_datasets.yaml"},
 		"One pool, one dataset, one snapshot":                                      {def: "one_pool_one_dataset_one_snapshot.yaml"},
@@ -49,6 +51,8 @@ func TestScan(t *testing.T) {
 		"Two pools, N datasets":                                                    {def: "two_pools_n_datasets.yaml"},
 		"Two pools, N datasets, N snapshots":                                       {def: "two_pools_n_datasets_n_snapshots.yaml"},
 		"One mounted dataset":                                                      {def: "one_pool_n_datasets_n_children.yaml", mounted: "rpool/ROOT/ubuntu"},
+		"Snapshot user properties differs from parent dataset":                     {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml"},
+		"Snapshot with unset user properties inherits from parent dataset":         {def: "one_pool_n_datasets_n_children_n_snapshots_with_unset_user_properties.yaml"},
 	}
 
 	for name, tc := range tests {

@@ -1,0 +1,27 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: ROOT
+      - name: ROOT/ubuntu
+        zsys_bootfs: no
+        last_used: 2019-04-18T02:45:55+00:00
+        last_booted_kernel: vmlinuz-5.2.0-8-generic
+        bootfs_datasets: "something"
+        mountpoint: /
+        canmount: on
+        snapshots:
+          - name: snap_r1
+            zsys_bootfs: yes
+            last_used: 2017-11-19T17:05:11+00:00
+            last_booted_kernel: vmlinuz-5.0.0-0-generic
+            bootfs_datasets: "something else"
+      - name: ROOT/ubuntu/inherit
+        snapshots:
+          - name: snap_r1
+      - name: ROOT/ubuntu/overriden
+        zsys_bootfs: yes
+        last_used: 2018-12-10T12:20:44+00:00
+        last_booted_kernel: vmlinuz-4.0.0-0-generic
+        bootfs_datasets: "something else on dataset"
+        snapshots:
+          - name: snap_r1
