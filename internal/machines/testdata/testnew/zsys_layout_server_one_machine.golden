@@ -10,7 +10,8 @@
                "Mountpoint": "/",
                "CanMount": "on",
                "BootFS": true,
-               "LastUsed": 1555555555
+               "LastUsed": 1555555555,
+               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
             },
             {
                "Name": "rpool/ROOT/ubuntu_1234/var",
@@ -119,7 +120,8 @@
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
-         "LastUsed": 1555555555
+         "LastUsed": 1555555555,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
       },
       {
          "Name": "rpool/ROOT/ubuntu_1234/var",

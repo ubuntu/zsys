@@ -13,6 +13,7 @@
         "Name": "rpool/ROOT/ubuntu_1234",
         "Bootfs": true,
         "LastUsed": 1555555555,
+        "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
         "Mountpoint": "/",
         "CanMount": "noauto"
     },
@@ -25,6 +26,7 @@
         "Name": "rpool/ROOT/ubuntu_1234@snap1",
         "Bootfs": true,
         "LastUsed": 1444444444,
+        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
         "IsSnapshot": true,
         "Mountpoint": "/",
         "CanMount": "noauto"

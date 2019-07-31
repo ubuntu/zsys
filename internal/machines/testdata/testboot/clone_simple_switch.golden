@@ -10,7 +10,8 @@
                "Mountpoint": "/",
                "CanMount": "noauto",
                "BootFS": true,
-               "LastUsed": 1555555555
+               "LastUsed": 1555555555,
+               "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
             }
          ],
          "History": {
@@ -25,7 +26,8 @@
                      "Mountpoint": "/",
                      "CanMount": "noauto",
                      "BootFS": true,
-                     "LastUsed": 1444444444
+                     "LastUsed": 1444444444,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic"
                   }
                ]
             },
@@ -40,6 +42,7 @@
                      "CanMount": "on",
                      "BootFS": true,
                      "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.1.1-1-generic",
                      "Origin": "rpool/ROOT/ubuntu_1234@snap1"
                   }
                ]
@@ -58,7 +61,8 @@
             "Mountpoint": "/",
             "CanMount": "noauto",
             "BootFS": true,
-            "LastUsed": 1555555555
+            "LastUsed": 1555555555,
+            "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
          }
       ],
       "History": {
@@ -73,7 +77,8 @@
                   "Mountpoint": "/",
                   "CanMount": "noauto",
                   "BootFS": true,
-                  "LastUsed": 1444444444
+                  "LastUsed": 1444444444,
+                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic"
                }
             ]
          },
@@ -88,6 +93,7 @@
                   "CanMount": "on",
                   "BootFS": true,
                   "LastUsed": 1577777777,
+                  "LastBootedKernel": "vmlinuz-5.1.1-1-generic",
                   "Origin": "rpool/ROOT/ubuntu_1234@snap1"
                }
             ]
@@ -100,7 +106,8 @@
          "Mountpoint": "/",
          "CanMount": "noauto",
          "BootFS": true,
-         "LastUsed": 1555555555
+         "LastUsed": 1555555555,
+         "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
       },
       {
          "Name": "rpool/ROOT/ubuntu_1234@snap1",
@@ -108,7 +115,8 @@
          "Mountpoint": "/",
          "CanMount": "noauto",
          "BootFS": true,
-         "LastUsed": 1444444444
+         "LastUsed": 1444444444,
+         "LastBootedKernel": "vmlinuz-5.0.0-0-generic"
       },
       {
          "Name": "rpool/ROOT/ubuntu_5678",
@@ -116,6 +124,7 @@
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.1.1-1-generic",
          "Origin": "rpool/ROOT/ubuntu_1234@snap1"
       }
    ]
