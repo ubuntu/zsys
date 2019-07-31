@@ -11,8 +11,8 @@ const (
 	zfsRevertUserDataTag = "zsys-revert=userdata"
 )
 
-// parseCmdLine returns the rootDataset name and revertuserData state if we are in a revert case
-func parseCmdLine(cmdline string) (rootDataset string, revertuserData bool) {
+// bootParametersFromCmdline returns the rootDataset name and revertuserData state if we are in a revert case
+func bootParametersFromCmdline(cmdline string) (rootDataset string, revertuserData bool) {
 	for _, entry := range strings.Fields(cmdline) {
 		e := strings.TrimPrefix(entry, zfsRootPrefix)
 		if entry != e {
@@ -86,6 +86,6 @@ func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
 }
 
 func hasBootedOnSnapshot(cmdline string) bool {
-	root, _ := parseCmdLine(cmdline)
+	root, _ := bootParametersFromCmdline(cmdline)
 	return strings.Contains(root, "@")
 }

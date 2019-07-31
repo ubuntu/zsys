@@ -49,7 +49,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		return nil
 	}
 
-	root, revertUserData := parseCmdLine(machines.cmdline)
+	root, revertUserData := bootParametersFromCmdline(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
 	log.Infof("ensure boot on %q\n", root)
 
@@ -197,7 +197,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		return nil
 	}
 
-	root, revertUserData := parseCmdLine(machines.cmdline)
+	root, revertUserData := bootParametersFromCmdline(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
 	log.Infof("committing boot for %q\n", root)
 

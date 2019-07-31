@@ -379,7 +379,7 @@ nextDataset:
 	// Append unlinked boot datasets to ensure we will switch to noauto everything
 	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
 
-	root, _ := parseCmdLine(cmdline)
+	root, _ := bootParametersFromCmdline(cmdline)
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
 
