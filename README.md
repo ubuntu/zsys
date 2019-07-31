@@ -8,4 +8,4 @@ zsys daemon and client for zfs systems
 
 ZSYS is a Zfs SYStem tool targetting an enhanced ZOL experience.
 
-It allows running multiple ZFS system in parallels on the same machine, get automated snapshots, managing complex zfs dataset layouts separating user data from system and persistent data, and more.
+It allows running multiple ZFS systems in parallel on the same machine, get automated snapshots, managing complex zfs dataset layouts separating user data from system and persistent data, and more.
