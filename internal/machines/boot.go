@@ -253,6 +253,12 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false)
 	}
 
+	kernel := kernelFromCmdline(machines.cmdline)
+	log.Infof("set latest booted kernel to %q\n", kernel)
+	if err := z.SetProperty(zfs.LastBootedKernelProp, kernel, bootedState.SystemDatasets[0].Name, false); err != nil {
+		return xerrors.Errorf("couldn't set last booted kernel to %q "+config.ErrorFormat, kernel, err)
+	}
+
 	// Promotion needed for system and user datasets
 	for _, d := range bootedState.UserDatasets {
 		if d.Origin == "" {

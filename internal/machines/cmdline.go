@@ -1,8 +1,12 @@
 package machines
 
-import "strings"
+import (
+	"path/filepath"
+	"strings"
+)
 
 const (
+	kernelPrefix         = "BOOT_IMAGE="
 	zfsRootPrefix        = "root=ZFS="
 	zfsRevertUserDataTag = "zsys-revert=userdata"
 )
@@ -21,6 +25,19 @@ func parseCmdLine(cmdline string) (rootDataset string, revertuserData bool) {
 	}
 
 	return rootDataset, revertuserData
+}
+
+// kernelFromCmdline returns the used kernel name in cmdline
+func kernelFromCmdline(cmdline string) (kernel string) {
+	for _, entry := range strings.Fields(cmdline) {
+		e := strings.TrimPrefix(entry, kernelPrefix)
+		if e == entry {
+			continue
+		}
+		return filepath.Base(e)
+	}
+
+	return ""
 }
 
 // findFromRoot returns the active machine and state if any.
