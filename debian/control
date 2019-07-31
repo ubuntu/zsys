@@ -18,6 +18,7 @@ Depends: ${shlibs:Depends},
          ${misc:Depends},
          zfsutils-linux,
 Description: ZFS SYStem integration
- ZSYS is a Zfs SYStem tool targetting a better ZOL integration.
- It allows running multiple ZFS system in parallel, automated
- snapshot, managing complex zfs dataset layout and garbage collection.
+ ZSYS is a Zfs SYStem tool targetting an enhanced ZOL experience.
+ It allows running multiple ZFS system in parallels on the same machine,
+ get automated snapshots, managing complex zfs dataset layouts separating
+ user data from system and persistent data, and more.

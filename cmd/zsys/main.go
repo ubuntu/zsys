@@ -32,8 +32,11 @@ func generateCommands() *cobra.Command {
 
 	var rootCmd = &cobra.Command{
 		Use:   "zsys",
-		Short: "Command line interface to control zsys ",
-		Long:  `This tool controls zsys`,
+		Short: "ZFS SYStem integration control zsys ",
+		Long: `Zfs SYStem tool targetting an enhanced ZOL experience.
+ It allows running multiple ZFS system in parallels on the same machine,
+ get automated snapshots, managing complex zfs dataset layouts separating
+ user data from system and persistent data, and more.`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.SetVerboseMode(flagVerbosity)
 		},
