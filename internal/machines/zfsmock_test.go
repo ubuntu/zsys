@@ -201,6 +201,8 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 					dc.LastBootedKernel = value
 				}
 			}
+		default:
+			return xerrors.Errorf("trying to set invalid property in zfs mock: %q", name)
 		}
 	}
 	z.nextD = datasets

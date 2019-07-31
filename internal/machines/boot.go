@@ -250,7 +250,9 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
 	log.Infof("set current time to %q\n", currentTime)
 	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
-		z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false)
+		if err := z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false); err != nil {
+			return xerrors.Errorf("couldn't set last used time to %q: "+config.ErrorFormat, currentTime, err)
+		}
 	}
 
 	kernel := kernelFromCmdline(machines.cmdline)
