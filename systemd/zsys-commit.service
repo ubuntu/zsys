@@ -1,0 +1,12 @@
+[Unit]
+Description=Mark current ZSYS boot as successful
+After=default.target
+Requires=default.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/zsys boot commit
+
+[Install]
+WantedBy=default.target
