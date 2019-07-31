@@ -192,6 +192,15 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 					dc.LastUsed = currentMagicTime
 				}
 			}
+		case zfs.LastBootedKernelProp:
+			d.LastBootedKernel = value
+
+			// If we have any children for this dataset, applies it to them too to simulate inheriting
+			for _, dc := range datasets {
+				if strings.HasPrefix(dc.Name, d.Name+"/") {
+					dc.LastBootedKernel = value
+				}
+			}
 		}
 	}
 	z.nextD = datasets

@@ -1,0 +1,117 @@
+{
+   "All": {
+      "rpool": {
+         "ID": "rpool",
+         "IsZsys": true,
+         "LastUsed": "2033-05-18T05:33:20+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 2000000000,
+               "LastBootedKernel": "vmlinuz-9.9.9-9-generic"
+            }
+         ],
+         "History": {
+            "rpool@snap1": {
+               "ID": "rpool@snap1",
+               "LastUsed": "2020-05-08T00:01:28+02:00",
+               "SystemDatasets": [
+                  {
+                     "Name": "rpool@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "LastUsed": 1588888888
+                  }
+               ]
+            },
+            "rpool_clone": {
+               "ID": "rpool_clone",
+               "IsZsys": true,
+               "LastUsed": "2019-12-31T08:36:17+01:00",
+               "SystemDatasets": [
+                  {
+                     "Name": "rpool_clone",
+                     "Mountpoint": "/",
+                     "CanMount": "noauto",
+                     "BootFS": true,
+                     "LastUsed": 1577777777,
+                     "Origin": "rpool@snap1"
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic ccccc",
+   "Current": {
+      "ID": "rpool",
+      "IsZsys": true,
+      "LastUsed": "2033-05-18T05:33:20+02:00",
+      "SystemDatasets": [
+         {
+            "Name": "rpool",
+            "Mountpoint": "/",
+            "CanMount": "on",
+            "BootFS": true,
+            "LastUsed": 2000000000,
+            "LastBootedKernel": "vmlinuz-9.9.9-9-generic"
+         }
+      ],
+      "History": {
+         "rpool@snap1": {
+            "ID": "rpool@snap1",
+            "LastUsed": "2020-05-08T00:01:28+02:00",
+            "SystemDatasets": [
+               {
+                  "Name": "rpool@snap1",
+                  "IsSnapshot": true,
+                  "Mountpoint": "/",
+                  "LastUsed": 1588888888
+               }
+            ]
+         },
+         "rpool_clone": {
+            "ID": "rpool_clone",
+            "IsZsys": true,
+            "LastUsed": "2019-12-31T08:36:17+01:00",
+            "SystemDatasets": [
+               {
+                  "Name": "rpool_clone",
+                  "Mountpoint": "/",
+                  "CanMount": "noauto",
+                  "BootFS": true,
+                  "LastUsed": 1577777777,
+                  "Origin": "rpool@snap1"
+               }
+            ]
+         }
+      }
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000,
+         "LastBootedKernel": "vmlinuz-9.9.9-9-generic"
+      },
+      {
+         "Name": "rpool@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/",
+         "LastUsed": 1588888888
+      },
+      {
+         "Name": "rpool_clone",
+         "Mountpoint": "/",
+         "CanMount": "noauto",
+         "BootFS": true,
+         "LastUsed": 1577777777,
+         "Origin": "rpool@snap1"
+      }
+   ]
+}

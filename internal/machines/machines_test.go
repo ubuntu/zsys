@@ -328,13 +328,17 @@ func TestCommit(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"One machine, commit one clone": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool_clone")},
-		"One machine, commit current":   {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool")},
-		"One machine non zsys":          {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true},
-		"One machine no match":          {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true},
+		"One machine, commit one clone":                      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool_clone")},
+		"One machine, commit current":                        {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool")},
+		"One machine, update LastUsed and Kernel":            {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
+		"One machine, set LastUsed and Kernel basename":      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
+		"One machine, Kernel basename with already basename": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
+		"One machine non zsys":                               {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true},
+		"One machine no match":                               {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true},
 
-		"One machine with children": {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"Without suffix":            {def: "m_main_dataset_without_suffix_and_clone_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu")},
+		"One machine with children":                                       {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"One machine with children, LastUsed and kernel basename on root": {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678 BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
+		"Without suffix": {def: "m_main_dataset_without_suffix_and_clone_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu")},
 
 		"Separate user dataset, no user revert":                                {def: "m_clone_with_userdata_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
 		"Separate user dataset with children, no user revert":                  {def: "m_clone_with_userdata_with_children_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
@@ -472,11 +476,11 @@ func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
 }
 
 // generateCmdLine returns a command line with fake boot arguments
-func generateCmdLine(datasetName string) string {
-	return "aaaaa bbbbb root=ZFS=" + datasetName + " ccccc"
+func generateCmdLine(datasetAndBoot string) string {
+	return "aaaaa bbbbb root=ZFS=" + datasetAndBoot + " ccccc"
 }
 
 // generateCmdLineWithRevert returns a command line with fake boot and a revert user data argument
-func generateCmdLineWithRevert(datasetName string) string {
-	return generateCmdLine(datasetName) + " " + machines.RevertUserDataTag
+func generateCmdLineWithRevert(datasetAndBoot string) string {
+	return generateCmdLine(datasetAndBoot) + " " + machines.RevertUserDataTag
 }
