@@ -119,6 +119,7 @@ func commitCmd() (err error) {
 		return err
 	}
 
+	// TODO: only run if changes
 	cmd := exec.Command(updateGrubCmd)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

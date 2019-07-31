@@ -183,7 +183,7 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 			const currentMagicTime = 2000000000
 			d.LastUsed = currentMagicTime
 
-			// If we have any children for this dataset, applies it to them too (but not on snapshots)
+			// If we have any children for this dataset, applies it to them too to simulate inheriting (but not on snapshots)
 			for _, dc := range datasets {
 				if dc.IsSnapshot {
 					continue
