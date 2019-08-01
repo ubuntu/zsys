@@ -70,7 +70,7 @@
         "Mountpoint": "/home/user1",
         "CanMount": "noauto",
         "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
-        "LastUsed": 15111111111,
+        "LastUsed": 1511111111,
         "Origin": "rpool/USERDATA/user1_abcd@snap1"
     },
     {

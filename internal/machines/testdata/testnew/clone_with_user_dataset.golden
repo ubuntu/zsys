@@ -80,7 +80,7 @@
                      "Name": "rpool/USERDATA/user1_efgh",
                      "Mountpoint": "/home/user1",
                      "CanMount": "noauto",
-                     "LastUsed": 15111111111,
+                     "LastUsed": 1511111111,
                      "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
                      "Origin": "rpool/USERDATA/user1_abcd@snap1"
                   }
@@ -141,7 +141,7 @@
          "Name": "rpool/USERDATA/user1_efgh",
          "Mountpoint": "/home/user1",
          "CanMount": "noauto",
-         "LastUsed": 15111111111,
+         "LastUsed": 1511111111,
          "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
          "Origin": "rpool/USERDATA/user1_abcd@snap1"
       },
