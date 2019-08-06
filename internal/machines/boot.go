@@ -42,11 +42,12 @@ type zfsPropertySetter interface {
 // Note that a rescan if performed if any modifications change the dataset layout. However, until ".Commit()" is called,
 // machine.current will return the correct machine, but the main dataset switch won't be done. This allows us here and
 // in .Commit()
+// Return if any dataset / machine changed has been done during boot and an error if any encountered.
 // TODO: propagate error to user graphically
-func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
+func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) (bool, error) {
 	if machines.current == nil || !machines.current.IsZsys {
 		log.Infoln("current machine isn't Zsys, nothing to do on boot")
-		return nil
+		return false, nil
 	}
 
 	root, revertUserData := bootParametersFromCmdline(machines.cmdline)
@@ -62,7 +63,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		if j := strings.LastIndex(bootedState.ID, "_"); j > 0 && !strings.HasSuffix(bootedState.ID, "_") {
 			suffix = bootedState.ID[j+1:]
 		} else {
-			return xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedState.ID)
+			return false, xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedState.ID)
 		}
 
 		// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
@@ -117,7 +118,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 					rootUserDatasets = append(rootUserDatasets, d)
 					// Recursively clones childrens, which shouldn't have bootfs elements.
 					if err := z.Clone(d.Name, userDataSuffix, false, true); err != nil {
-						return xerrors.Errorf("couldn't create new user datasets from %q: %v", root, err)
+						return false, xerrors.Errorf("couldn't create new user datasets from %q: %v", root, err)
 					}
 					// Associate this parent new user dataset to its parent system dataset
 					base, _ := splitSnapshotName(d.Name)
@@ -125,7 +126,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 					suffixIndex := strings.LastIndex(base, "_")
 					userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
 					if err := z.SetProperty(zfs.BootfsDatasetsProp, bootedState.ID, userdatasetName, false); err != nil {
-						return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
+						return false, xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
 					}
 				}
 			}
@@ -134,7 +135,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		// Rescan here for getting accessing to new cloned datasets
 		ds, err := z.Scan()
 		if err != nil {
-			return xerrors.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
+			return false, xerrors.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
 		}
 		*machines = New(ds, machines.cmdline)
 		m, bootedState = machines.findFromRoot(root) // We did rescan, refresh pointers
@@ -158,7 +159,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		}
 		log.Infof("switch dataset %q to mount noauto\n", d.Name)
 		if err := z.SetProperty(zfs.CanmountProp, "noauto", d.Name, false); err != nil {
-			return xerrors.Errorf("couldn't switch %q canmount property to noauto: "+config.ErrorFormat, d.Name, err)
+			return false, xerrors.Errorf("couldn't switch %q canmount property to noauto: "+config.ErrorFormat, d.Name, err)
 		}
 		needRescan = true
 	}
@@ -171,7 +172,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 		}
 		log.Infof("switch dataset %q to mount on\n", d.Name)
 		if err := z.SetProperty(zfs.CanmountProp, "on", d.Name, false); err != nil {
-			return xerrors.Errorf("couldn't switch %q canmount property to on: "+config.ErrorFormat, d.Name, err)
+			return false, xerrors.Errorf("couldn't switch %q canmount property to on: "+config.ErrorFormat, d.Name, err)
 		}
 		needRescan = true
 	}
@@ -180,21 +181,22 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) error {
 	if needRescan {
 		ds, err := z.Scan()
 		if err != nil {
-			return xerrors.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
+			return false, xerrors.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
 		}
 		*machines = New(ds, machines.cmdline)
 	}
 
-	return nil
+	return needRescan, nil
 }
 
 // Commit current state to be the active one by promoting its datasets if needed, set last used,
 // associate user datasets to it and rebuilding grub menu.
 // After this operation, every New() call will get the current and correct system state.
-func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
+// Return if any dataset / machine changed has been done during boot commit and an error if any encountered.
+func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) (bool, error) {
 	if machines.current == nil || !machines.current.IsZsys {
 		log.Infoln("current machine isn't Zsys, nothing to commit on boot")
-		return nil
+		return false, nil
 	}
 
 	root, revertUserData := bootParametersFromCmdline(machines.cmdline)
@@ -228,7 +230,7 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		}
 		log.Infof("untagging user dataset: %q\n", d.Name)
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-			return xerrors.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, bootedState.ID, d.Name, err)
+			return false, xerrors.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, bootedState.ID, d.Name, err)
 		}
 	}
 	// Tag userdatasets to associate with this successful boot state, if wasn't tagged already
@@ -242,18 +244,22 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		log.Infof("tag current user dataset: %q\n", d.Name)
 		newTag := d.BootfsDatasets + ":" + bootedState.ID
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-			return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
+			return false, xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
 		}
 	}
 
 	// System and users datasets: set lastUsed
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
+	// Last used is not a relevant change for signalling a change and justify bootloader rebuild: last-used is not
+	// displayed for current system dataset.
 	log.Infof("set current time to %q\n", currentTime)
 	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
 		if err := z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false); err != nil {
-			return xerrors.Errorf("couldn't set last used time to %q: "+config.ErrorFormat, currentTime, err)
+			return false, xerrors.Errorf("couldn't set last used time to %q: "+config.ErrorFormat, currentTime, err)
 		}
 	}
+
+	var changed bool
 
 	kernel := kernelFromCmdline(machines.cmdline)
 	log.Infof("set latest booted kernel to %q\n", kernel)
@@ -266,30 +272,32 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) error {
 		if d.Origin == "" {
 			continue
 		}
+		changed = true
 		log.Infof("promoting user dataset: %q\n", d.Name)
 		if err := z.Promote(d.Name); err != nil {
-			return xerrors.Errorf("couldn't promote %q user dataset: "+config.ErrorFormat, d.Name, err)
+			return false, xerrors.Errorf("couldn't promote %q user dataset: "+config.ErrorFormat, d.Name, err)
 		}
 	}
 	for _, d := range bootedState.SystemDatasets {
 		if d.Origin == "" {
 			continue
 		}
+		changed = true
 		log.Infof("promoting current state system dataset: %q\n", d.Name)
 
 		if err := z.Promote(d.Name); err != nil {
-			return xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, d.Name, err)
+			return false, xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, d.Name, err)
 		}
 	}
 
 	// Rescan datasets, with current lastUsed, and main state.
 	ds, err := z.Scan()
 	if err != nil {
-		return xerrors.Errorf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
+		return false, xerrors.Errorf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
 	}
 	*machines = New(ds, machines.cmdline)
 
-	return nil
+	return changed, nil
 }
 
 var seedOnce = sync.Once{}
