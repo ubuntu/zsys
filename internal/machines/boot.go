@@ -263,8 +263,13 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) (bool, error) {
 
 	kernel := kernelFromCmdline(machines.cmdline)
 	log.Infof("set latest booted kernel to %q\n", kernel)
-	if err := z.SetProperty(zfs.LastBootedKernelProp, kernel, bootedState.SystemDatasets[0].Name, false); err != nil {
-		return xerrors.Errorf("couldn't set last booted kernel to %q "+config.ErrorFormat, kernel, err)
+	if bootedState.SystemDatasets[0].LastBootedKernel != kernel {
+		// Signal last booted kernel changes.
+		// This will help the bootloader, like grub, to rebuild and adjust the marker for last successfully booted kernel in advanced options.
+		changed = true
+		if err := z.SetProperty(zfs.LastBootedKernelProp, kernel, bootedState.SystemDatasets[0].Name, false); err != nil {
+			return false, xerrors.Errorf("couldn't set last booted kernel to %q "+config.ErrorFormat, kernel, err)
+		}
 	}
 
 	// Promotion needed for system and user datasets

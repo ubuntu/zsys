@@ -366,10 +366,10 @@ func TestCommit(t *testing.T) {
 		isNoOp             bool
 	}{
 		"One machine, commit one clone":                      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool_clone")},
-		"One machine, commit current":                        {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool"), wantSignalNoChange: true},
-		"One machine, update LastUsed and Kernel":            {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic"), wantSignalNoChange: true},
-		"One machine, set LastUsed and Kernel basename":      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic"), wantSignalNoChange: true},
-		"One machine, Kernel basename with already basename": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic"), wantSignalNoChange: true},
+		"One machine, commit current":                        {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool")},
+		"One machine, update LastUsed and Kernel":            {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
+		"One machine, set LastUsed and Kernel basename":      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
+		"One machine, Kernel basename with already basename": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
 		"One machine non zsys":                               {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true, wantSignalNoChange: true},
 		"One machine no match":                               {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true, wantSignalNoChange: true},
 
