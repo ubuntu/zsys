@@ -216,7 +216,7 @@ func TestBoot(t *testing.T) {
 			initMachines := machines.New(datasets, tc.cmdline)
 			ms := initMachines
 
-			err := ms.EnsureBoot(z)
+			hasChanged, err := ms.EnsureBoot(z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -228,8 +228,14 @@ func TestBoot(t *testing.T) {
 			}
 
 			if tc.isNoOp {
+				if hasChanged {
+					t.Error("expected signalling no changed in commit but had some")
+				}
 				assertMachinesEquals(t, initMachines, ms)
 			} else {
+				if !hasChanged {
+					t.Error("expected signalling changed in commit but told none")
+				}
 				assertMachinesToGolden(t, ms)
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
@@ -254,12 +260,21 @@ func TestIdempotentBoot(t *testing.T) {
 	}
 	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"))
 
-	if err = ms1.EnsureBoot(z); err != nil {
+	changed, err := ms1.EnsureBoot(z)
+	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
+	if !changed {
+		t.Fatal("expected first boot to signal a changed, but got false")
+	}
 	ms2 := ms1
-	if err = ms2.EnsureBoot(z); err != nil {
+
+	changed, err = ms2.EnsureBoot(z)
+	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
+	}
+	if changed {
+		t.Fatal("expected second boot to signal no change, but got true")
 	}
 
 	assertMachinesEquals(t, ms1, ms2)
@@ -279,16 +294,28 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	}
 	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	if err = ms1.EnsureBoot(z); err != nil {
+	changed, err := ms1.EnsureBoot(z)
+	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
-	if err = ms1.Commit(z); err != nil {
+	if !changed {
+		t.Fatal("expected first boot to signal a changed, but got false")
+	}
+	changed, err = ms1.Commit(z)
+	if err != nil {
 		t.Fatal("Commit failed:", err)
 	}
-
+	if !changed {
+		t.Fatal("expected first commit to signal a changed, but got false")
+	}
 	ms2 := ms1
-	if err = ms2.EnsureBoot(z); err != nil {
+
+	changed, err = ms2.EnsureBoot(z)
+	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
+	}
+	if changed {
+		t.Fatal("expected second commit to signal no change, but got true")
 	}
 
 	assertMachinesEquals(t, ms1, ms2)
@@ -304,12 +331,21 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	}
 	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	if err = ms1.EnsureBoot(z); err != nil {
+	changed, err := ms1.EnsureBoot(z)
+	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
+	if !changed {
+		t.Fatal("expected first boot to signal a changed, but got false")
+	}
 	ms2 := ms1
-	if err = ms2.EnsureBoot(z); err != nil {
+
+	changed, err = ms2.EnsureBoot(z)
+	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
+	}
+	if changed {
+		t.Fatal("expected second boot to signal no change, but got true")
 	}
 
 	assertMachinesEquals(t, ms1, ms2)
@@ -325,16 +361,17 @@ func TestCommit(t *testing.T) {
 		setPropertyErr bool
 		promoteErr     bool
 
-		wantErr bool
-		isNoOp  bool
+		wantSignalNoChange bool
+		wantErr            bool
+		isNoOp             bool
 	}{
 		"One machine, commit one clone":                      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool_clone")},
-		"One machine, commit current":                        {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool")},
-		"One machine, update LastUsed and Kernel":            {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
-		"One machine, set LastUsed and Kernel basename":      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
-		"One machine, Kernel basename with already basename": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
-		"One machine non zsys":                               {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true},
-		"One machine no match":                               {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true},
+		"One machine, commit current":                        {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool"), wantSignalNoChange: true},
+		"One machine, update LastUsed and Kernel":            {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic"), wantSignalNoChange: true},
+		"One machine, set LastUsed and Kernel basename":      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic"), wantSignalNoChange: true},
+		"One machine, Kernel basename with already basename": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic"), wantSignalNoChange: true},
+		"One machine non zsys":                               {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true, wantSignalNoChange: true},
+		"One machine no match":                               {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true, wantSignalNoChange: true},
 
 		"One machine with children":                                       {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
 		"One machine with children, LastUsed and kernel basename on root": {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678 BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
@@ -378,7 +415,7 @@ func TestCommit(t *testing.T) {
 			initMachines := machines.New(datasets, tc.cmdline)
 			ms := initMachines
 
-			err := ms.Commit(z)
+			hasChanged, err := ms.Commit(z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -389,6 +426,9 @@ func TestCommit(t *testing.T) {
 				t.Fatal("expected an error but got none")
 			}
 
+			if tc.wantSignalNoChange != !hasChanged {
+				t.Errorf("expected signalling change=%v, but got: %v", !tc.wantSignalNoChange, hasChanged)
+			}
 			if tc.isNoOp {
 				assertMachinesEquals(t, initMachines, ms)
 			} else {
@@ -416,12 +456,21 @@ func TestIdempotentCommit(t *testing.T) {
 	}
 	ms1 := machines.New(datasets, generateCmdLine("rpool/ROOT/ubuntu_9876"))
 
-	if err = ms1.Commit(z); err != nil {
+	changed, err := ms1.Commit(z)
+	if err != nil {
 		t.Fatal("first commit failed:", err)
 	}
+	if !changed {
+		t.Fatal("expected first commit to signal a changed, but got false")
+	}
 	ms2 := ms1
-	if err = ms2.Commit(z); err != nil {
+
+	changed, err = ms2.Commit(z)
+	if err != nil {
 		t.Fatal("second commit failed:", err)
+	}
+	if changed {
+		t.Fatal("expected second commit to signal no change, but got true")
 	}
 
 	assertMachinesEquals(t, ms1, ms2)
