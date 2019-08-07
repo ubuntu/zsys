@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -15,7 +16,9 @@ import (
 )
 
 const (
-	updateGrubCmd = "update-grub"
+	updateGrubCmd  = "update-grub"
+	modifiedBoot   = "zsys-meta:modified-boot"
+	noModifiedBoot = "zsys-meta:no-modified-boot"
 )
 
 func main() {
@@ -43,6 +46,7 @@ func generateCommands() *cobra.Command {
 	}
 	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
 
+	var printModifiedBoot bool
 	bootCmd := &cobra.Command{
 		Use:       "boot prepare|commit",
 		Short:     "Ensure that the right datasets are ready to be mounted and commited during early boot",
@@ -53,9 +57,9 @@ func generateCommands() *cobra.Command {
 			var err error
 			switch args[0] {
 			case "prepare":
-				err = bootCmd()
+				err = bootCmd(printModifiedBoot)
 			case "commit":
-				err = commitCmd()
+				err = commitCmd(printModifiedBoot)
 			}
 			if err != nil {
 				log.Error(err)
@@ -63,12 +67,13 @@ func generateCommands() *cobra.Command {
 			}
 		},
 	}
+	bootCmd.Flags().BoolVarP(&printModifiedBoot, "print-changes", "p", false, "Display if any zfs datasets have been modified to boot")
 	rootCmd.AddCommand(bootCmd)
 
 	return rootCmd
 }
 
-func bootCmd() (err error) {
+func bootCmd(printModifiedBoot bool) (err error) {
 	z := zfs.New(zfs.WithTransactions())
 
 	defer func() {
@@ -90,10 +95,20 @@ func bootCmd() (err error) {
 	}
 	ms := machines.New(ds, cmdline)
 
-	return ms.EnsureBoot(z)
+	changed, err := ms.EnsureBoot(z)
+	if err != nil {
+		return err
+	}
+	if printModifiedBoot && changed {
+		fmt.Println(modifiedBoot)
+	} else if printModifiedBoot && !changed {
+		fmt.Println(noModifiedBoot)
+	}
+
+	return nil
 }
 
-func commitCmd() (err error) {
+func commitCmd(printModifiedBoot bool) (err error) {
 	z := zfs.New(zfs.WithTransactions())
 
 	defer func() {
@@ -115,17 +130,25 @@ func commitCmd() (err error) {
 	}
 	ms := machines.New(ds, cmdline)
 
-	if err := ms.Commit(z); err != nil {
+	changed, err := ms.Commit(z)
+	if err != nil {
 		return err
 	}
-
-	// TODO: only run if changes
-	cmd := exec.Command(updateGrubCmd)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		return xerrors.Errorf("%q returns an error:"+config.ErrorFormat, updateGrubCmd, err)
+	if printModifiedBoot && changed {
+		fmt.Println(modifiedBoot)
+	} else if printModifiedBoot && !changed {
+		fmt.Println(noModifiedBoot)
 	}
+
+	if changed {
+		cmd := exec.Command(updateGrubCmd)
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		if err := cmd.Run(); err != nil {
+			return xerrors.Errorf("%q returns an error:"+config.ErrorFormat, updateGrubCmd, err)
+		}
+	}
+
 	return nil
 }
 
