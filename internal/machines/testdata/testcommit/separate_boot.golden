@@ -153,18 +153,18 @@
          "Origin": "rpool/ROOT/ubuntu_5678@snap1"
       },
       {
+         "Name": "bpool/BOOT/ubuntu_1234",
+         "Mountpoint": "/boot",
+         "CanMount": "noauto",
+         "Origin": "bpool/BOOT/ubuntu_5678@snap1"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_5678@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1444444444
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234",
-         "Mountpoint": "/boot",
-         "CanMount": "noauto",
-         "Origin": "bpool/BOOT/ubuntu_5678@snap1"
       },
       {
          "Name": "bpool/BOOT/ubuntu_5678@snap1",

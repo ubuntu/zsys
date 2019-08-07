@@ -108,6 +108,18 @@
          "LastUsed": 1444444444
       },
       {
+         "Name": "bpool/BOOT/ubuntu_1234@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
+         "CanMount": "on"
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_1234/grub@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot/grub",
+         "CanMount": "on"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_5678",
          "Mountpoint": "/",
          "CanMount": "noauto",
@@ -116,22 +128,10 @@
          "Origin": "rpool/ROOT/ubuntu_1234@snap1"
       },
       {
-         "Name": "bpool/BOOT/ubuntu_1234@snap1",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "on"
-      },
-      {
          "Name": "bpool/BOOT/ubuntu_5678",
          "Mountpoint": "/boot",
          "CanMount": "on",
          "Origin": "bpool/BOOT/ubuntu_1234@snap1"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234/grub@snap1",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot/grub",
-         "CanMount": "on"
       },
       {
          "Name": "bpool/BOOT/ubuntu_5678/grub",

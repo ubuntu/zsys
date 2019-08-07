@@ -984,6 +984,12 @@
          "CanMount": "on"
       },
       {
+         "Name": "bpool/BOOT/ubuntu_1234@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
+         "CanMount": "on"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234@snap2",
          "IsSnapshot": true,
          "Mountpoint": "/",
@@ -1074,6 +1080,12 @@
          "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap2",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/dpkg",
+         "CanMount": "on"
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_1234@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
          "CanMount": "on"
       },
       {
@@ -1177,6 +1189,12 @@
          "Origin": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap2"
       },
       {
+         "Name": "bpool/BOOT/ubuntu_5678",
+         "Mountpoint": "/boot",
+         "CanMount": "noauto",
+         "Origin": "bpool/BOOT/ubuntu_1234@snap2"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_5678@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/",
@@ -1267,6 +1285,12 @@
          "Name": "rpool/ROOT/ubuntu_5678/var/lib/dpkg@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/dpkg",
+         "CanMount": "noauto"
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_5678@snap3",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
          "CanMount": "noauto"
       },
       {
@@ -1361,6 +1385,12 @@
          "Origin": "rpool/ROOT/ubuntu_5678/var/lib/dpkg@snap3"
       },
       {
+         "Name": "bpool/BOOT/ubuntu_9876",
+         "Mountpoint": "/boot",
+         "CanMount": "noauto",
+         "Origin": "bpool/BOOT/ubuntu_5678@snap3"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_9999",
          "Mountpoint": "/",
          "CanMount": "noauto",
@@ -1442,36 +1472,6 @@
          "Name": "bpool/BOOT/ubuntu_9999",
          "Mountpoint": "/boot",
          "CanMount": "noauto"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234@snap1",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "on"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "on"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_5678",
-         "Mountpoint": "/boot",
-         "CanMount": "noauto",
-         "Origin": "bpool/BOOT/ubuntu_1234@snap2"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_5678@snap3",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "noauto"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_9876",
-         "Mountpoint": "/boot",
-         "CanMount": "noauto",
-         "Origin": "bpool/BOOT/ubuntu_5678@snap3"
       }
    ],
    "AllUsersDatasets": [

@@ -177,63 +177,59 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 		}
 	}
 
-	var boots, userdatas, persistents []zfs.Dataset
-	// First, handle system datasets (active for each machine and history)
-nextDataset:
-	for _, d := range append(append(mainDatasets, cloneDatasets...), otherDatasets...) {
-		// Register all zsys non cloned mountable / to a new machine
-		if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == "" {
-			m := Machine{
-				State: State{
-					ID:             d.Name,
-					IsZsys:         d.BootFS,
-					SystemDatasets: []zfs.Dataset{d},
-				},
-				History: make(map[string]*State),
-			}
-			// We don't want lastused to be 1970 in our golden files
-			if d.LastUsed != 0 {
-				lu := time.Unix(int64(d.LastUsed), 0)
-				m.State.LastUsed = &lu
-			}
-			machines.all[d.Name] = &m
+	// First, handle system datasets (active for each machine and history) and return remaining ones.
+	boots, userdatas, persistents := machines.triageDatasets(append(append(mainDatasets, cloneDatasets...), otherDatasets...), origins)
+
+	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
+	// Same with children and history datasets.
+	// We want reproducibility, so iterate to attach datasets in a given order.
+	for _, k := range sortedMachineKeys(machines.all) {
+		m := machines.all[k]
+		m.attachRemainingDatasets(boots, userdatas, persistents)
+
+		// attach to global list all system datasets of this machine
+		machines.allSystemDatasets = append(machines.allSystemDatasets, m.SystemDatasets...)
+		for _, k := range sortedStateKeys(m.History) {
+			h := m.History[k]
+			machines.allSystemDatasets = append(machines.allSystemDatasets, h.SystemDatasets...)
+		}
+	}
+
+	for _, d := range userdatas {
+		if d.CanMount == "off" {
+			continue
+		}
+		machines.allUsersDatasets = append(machines.allUsersDatasets, d)
+	}
+
+	// Append unlinked boot datasets to ensure we will switch to noauto everything
+	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
+
+	root, _ := bootParametersFromCmdline(cmdline)
+	m, _ := machines.findFromRoot(root)
+	machines.current = m
+
+	if log.GetLevel() == log.DebugLevel {
+		log.Debugln("current machines scanning layout:")
+		pp.Println(machines)
+	}
+
+	return machines
+}
+
+// triageDatasets attach main system datasets to machines and returns other types of datasets for later triage/attachment.
+func (machines *Machines) triageDatasets(allDatasets []zfs.Dataset, origins map[string]*string) (boots, userdatas, persistents []zfs.Dataset) {
+	for _, d := range allDatasets {
+		// Main active system dataset building up a machine
+		m := newMachineFromDataset(d, origins[d.Name])
+		if m != nil {
+			machines.all[d.Name] = m
 			continue
 		}
 
 		// Check for children, clones and snapshots
-		for _, m := range machines.all {
-			// Direct main machine state children
-			if ok, err := isChild(m.ID, d); err != nil {
-				log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
-			} else if ok {
-				m.SystemDatasets = append(m.SystemDatasets, d)
-				continue nextDataset
-			}
-
-			// Clones or snapshot root dataset (origins points to origin dataset)
-			if d.Mountpoint == "/" && d.CanMount != "off" && origins[d.Name] != nil && *origins[d.Name] == m.ID {
-				m.History[d.Name] = &State{
-					ID:             d.Name,
-					IsZsys:         d.BootFS,
-					SystemDatasets: []zfs.Dataset{d},
-				}
-				// We don't want lastused to be 1970 in our golden files
-				if d.LastUsed != 0 {
-					lu := time.Unix(int64(d.LastUsed), 0)
-					m.History[d.Name].LastUsed = &lu
-				}
-				continue nextDataset
-			}
-
-			// Clones or snapshot children
-			for _, h := range m.History {
-				if ok, err := isChild(h.ID, d); err != nil {
-					log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
-				} else if ok {
-					h.SystemDatasets = append(h.SystemDatasets, d)
-					continue nextDataset
-				}
-			}
+		if machines.attachSystemAndHistory(d, origins[d.Name]) {
+			continue
 		}
 
 		// Starting from now, there is no children of system datasets
@@ -263,132 +259,177 @@ nextDataset:
 		persistents = append(persistents, d)
 	}
 
-	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
-	// Same with children and history datasets.
-	// We want reproducibility, so iterate to attach datasets in a given order.
-	for _, k := range sortedMachineKeys(machines.all) {
-		m := machines.all[k]
-		e := strings.Split(m.ID, "/")
-		// machineDatasetID is the main State dataset ID.
-		machineDatasetID := e[len(e)-1]
+	return boots, userdatas, persistents
+}
 
-		// Boot datasets
-		var bootsDataset []zfs.Dataset
-		for _, d := range boots {
-			if d.IsSnapshot {
-				continue
-			}
-			// Matching base dataset name or subdataset of it.
-			if strings.HasSuffix(d.Name, "/"+machineDatasetID) || strings.Contains(d.Name, "/"+machineDatasetID+"/") {
-				bootsDataset = append(bootsDataset, d)
-			}
+// newMachineFromDataset returns a new machine if the given dataset is a main system one.
+func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
+	// Register all zsys non cloned mountable / to a new machine
+	if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == "" {
+		m := Machine{
+			State: State{
+				ID:             d.Name,
+				IsZsys:         d.BootFS,
+				SystemDatasets: []zfs.Dataset{d},
+			},
+			History: make(map[string]*State),
 		}
-		m.SystemDatasets = append(m.SystemDatasets, bootsDataset...)
-
-		machines.allSystemDatasets = append(machines.allSystemDatasets, m.SystemDatasets...)
-
-		// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
-		// linked to multiple clones and systems).
-		var userDatasets []zfs.Dataset
-		for _, d := range userdatas {
-			if d.IsSnapshot {
-				continue
-			}
-			// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
-			for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
-				if bootfsDataset == m.ID || strings.HasPrefix(d.BootfsDatasets, m.ID+"/") {
-					userDatasets = append(userDatasets, d)
-				}
-			}
+		// We don't want lastused to be 1970 in our golden files
+		if d.LastUsed != 0 {
+			lu := time.Unix(int64(d.LastUsed), 0)
+			m.State.LastUsed = &lu
 		}
-		m.UserDatasets = append(m.UserDatasets, userDatasets...)
+		return &m
+	}
+	return nil
+}
 
-		// Persistent datasets
-		m.PersistentDatasets = persistents
+// attachSystemAndHistory identified if the given dataset is a system dataset (children of root one) or a history
+// one. It creates and attach the states as needed.
+// It returns ok if the dataset matches any machine and is attached.
+func (machines *Machines) attachSystemAndHistory(d zfs.Dataset, origin *string) (ok bool) {
+	for _, m := range machines.all {
 
-		// Handle history now
-		// We want reproducibility, so iterate to attach datasets in a given order.
-		for _, k := range sortedStateKeys(m.History) {
-			h := m.History[k]
-			e := strings.Split(h.ID, "/")
-			// stateDatasetID may contain @snapshot, which we need to strip to test the suffix
-			stateDatasetID := e[len(e)-1]
-			var snapshot string
-			if j := strings.LastIndex(stateDatasetID, "@"); j > 0 {
-				snapshot = stateDatasetID[j+1:]
+		// Direct main machine state children
+		if ok, err := isChild(m.ID, d); err != nil {
+			log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+		} else if ok {
+			m.SystemDatasets = append(m.SystemDatasets, d)
+			return true
+		}
+
+		// Clones or snapshot root dataset (origins points to origin dataset)
+		if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == m.ID {
+			m.History[d.Name] = &State{
+				ID:             d.Name,
+				IsZsys:         d.BootFS,
+				SystemDatasets: []zfs.Dataset{d},
 			}
-
-			machines.allSystemDatasets = append(machines.allSystemDatasets, h.SystemDatasets...)
-
-			// Boot datasets
-			var bootsDataset []zfs.Dataset
-			for _, d := range boots {
-				if snapshot != "" {
-					// Snapshots are not necessarily with a dataset ID matching its parent of dataset promotions, just match
-					// its name.
-					if strings.HasSuffix(d.Name, "@"+snapshot) {
-						bootsDataset = append(bootsDataset, d)
-						continue
-					}
-				}
-				// For clones just match the base datasetname or its children.
-				if strings.HasSuffix(d.Name, stateDatasetID) || strings.Contains(d.Name, "/"+stateDatasetID+"/") {
-					bootsDataset = append(bootsDataset, d)
-				}
+			// We don't want lastused to be 1970 in our golden files
+			if d.LastUsed != 0 {
+				lu := time.Unix(int64(d.LastUsed), 0)
+				m.History[d.Name].LastUsed = &lu
 			}
-			h.SystemDatasets = append(h.SystemDatasets, bootsDataset...)
+			return true
+		}
 
-			// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
-			// linked to multiple clones and systems).
-			var userDatasets []zfs.Dataset
-			for _, d := range userdatas {
-				if snapshot != "" {
-					// Snapshots won't match dataset ID matching its system dataset as multiple system datasets can link
-					// to the same user dataset. Use only snapshot name.
-					if strings.HasSuffix(d.Name, "@"+snapshot) {
-						userDatasets = append(userDatasets, d)
-						continue
-					}
-				}
-
-				if d.IsSnapshot {
-					continue
-				}
-				// For clones, proceed as with main system:
-				// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
-				for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
-					if bootfsDataset == h.ID || strings.HasPrefix(d.BootfsDatasets, h.ID+"/") {
-						userDatasets = append(userDatasets, d)
-					}
-				}
+		// Clones or snapshot children
+		for _, h := range m.History {
+			if ok, err := isChild(h.ID, d); err != nil {
+				log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+			} else if ok {
+				h.SystemDatasets = append(h.SystemDatasets, d)
+				return true
 			}
-			h.UserDatasets = append(h.UserDatasets, userDatasets...)
-
-			// Persistent datasets
-			h.PersistentDatasets = persistents
 		}
 	}
 
-	for _, d := range userdatas {
-		if d.CanMount == "off" {
+	return false
+}
+
+// attachRemainingDatasets attaches to machine boot, userdata and persistent datasets if they fit current machine.
+func (m *Machine) attachRemainingDatasets(boots, userdatas, persistents []zfs.Dataset) {
+	e := strings.Split(m.ID, "/")
+	// machineDatasetID is the main State dataset ID.
+	machineDatasetID := e[len(e)-1]
+
+	// Boot datasets
+	var bootsDataset []zfs.Dataset
+	for _, d := range boots {
+		if d.IsSnapshot {
 			continue
 		}
-		machines.allUsersDatasets = append(machines.allUsersDatasets, d)
+		// Matching base dataset name or subdataset of it.
+		if strings.HasSuffix(d.Name, "/"+machineDatasetID) || strings.Contains(d.Name, "/"+machineDatasetID+"/") {
+			bootsDataset = append(bootsDataset, d)
+		}
+	}
+	m.SystemDatasets = append(m.SystemDatasets, bootsDataset...)
+
+	// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
+	// linked to multiple clones and systems).
+	var userDatasets []zfs.Dataset
+	for _, d := range userdatas {
+		if d.IsSnapshot {
+			continue
+		}
+		// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
+		for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
+			if bootfsDataset == m.ID || strings.HasPrefix(d.BootfsDatasets, m.ID+"/") {
+				userDatasets = append(userDatasets, d)
+			}
+		}
+	}
+	m.UserDatasets = append(m.UserDatasets, userDatasets...)
+
+	// Persistent datasets
+	m.PersistentDatasets = persistents
+
+	// Handle history now
+	// We want reproducibility, so iterate to attach datasets in a given order.
+	for _, k := range sortedStateKeys(m.History) {
+		h := m.History[k]
+		h.attachRemainingDatasetsForHistory(boots, userdatas, persistents)
+	}
+}
+
+// attachRemainingDatasetsForHistory attaches to a given history state boot, userdata and persistent datasets if they fit.
+// It's similar to attachRemainingDatasets with some particular rules on snapshots.
+func (h *State) attachRemainingDatasetsForHistory(boots, userdatas, persistents []zfs.Dataset) {
+	e := strings.Split(h.ID, "/")
+	// stateDatasetID may contain @snapshot, which we need to strip to test the suffix
+	stateDatasetID := e[len(e)-1]
+	var snapshot string
+	if j := strings.LastIndex(stateDatasetID, "@"); j > 0 {
+		snapshot = stateDatasetID[j+1:]
 	}
 
-	// Append unlinked boot datasets to ensure we will switch to noauto everything
-	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
-
-	root, _ := bootParametersFromCmdline(cmdline)
-	m, _ := machines.findFromRoot(root)
-	machines.current = m
-
-	if log.GetLevel() == log.DebugLevel {
-		log.Debugln("current machines scanning layout:")
-		pp.Println(machines)
+	// Boot datasets
+	var bootsDataset []zfs.Dataset
+	for _, d := range boots {
+		if snapshot != "" {
+			// Snapshots are not necessarily with a dataset ID matching its parent of dataset promotions, just match
+			// its name.
+			if strings.HasSuffix(d.Name, "@"+snapshot) {
+				bootsDataset = append(bootsDataset, d)
+				continue
+			}
+		}
+		// For clones just match the base datasetname or its children.
+		if strings.HasSuffix(d.Name, stateDatasetID) || strings.Contains(d.Name, "/"+stateDatasetID+"/") {
+			bootsDataset = append(bootsDataset, d)
+		}
 	}
+	h.SystemDatasets = append(h.SystemDatasets, bootsDataset...)
 
-	return machines
+	// Userdata datasets. Don't base on machineID name as it's a tag on the dataset (the same userdataset can be
+	// linked to multiple clones and systems).
+	var userDatasets []zfs.Dataset
+	for _, d := range userdatas {
+		if snapshot != "" {
+			// Snapshots won't match dataset ID matching its system dataset as multiple system datasets can link
+			// to the same user dataset. Use only snapshot name.
+			if strings.HasSuffix(d.Name, "@"+snapshot) {
+				userDatasets = append(userDatasets, d)
+				continue
+			}
+		}
+
+		if d.IsSnapshot {
+			continue
+		}
+		// For clones, proceed as with main system:
+		// Only match datasets corresponding to the linked bootfs datasets (string slice separated by :)
+		for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
+			if bootfsDataset == h.ID || strings.HasPrefix(d.BootfsDatasets, h.ID+"/") {
+				userDatasets = append(userDatasets, d)
+			}
+		}
+	}
+	h.UserDatasets = append(h.UserDatasets, userDatasets...)
+
+	// Persistent datasets
+	h.PersistentDatasets = persistents
 }
 
 // appendDatasetIfNotPresent will check that the dataset wasn't already added and will append it
