@@ -239,3 +239,59 @@ func checkNoClone(d *libzfs.Dataset) error {
 	}
 	return nil
 }
+
+// getProperty abstracts getting from a zfs or user property. It returns the property object.
+func getProperty(d libzfs.Dataset, name string) (libzfs.Property, error) {
+	// TODO: or use getDatasetProp() and cache on Scan() to always have "none" checked.
+	var prop libzfs.Property
+	if !strings.Contains(name, ":") {
+		propName, err := stringToProp(name)
+		if err != nil {
+			return prop, err
+		}
+		return d.GetProperty(propName)
+	}
+
+	return d.GetUserProperty(name)
+}
+
+// setProperty abstracts setting  value to a zfs or user property from a zfs or user property.
+func setProperty(d libzfs.Dataset, name, value string) error {
+	if !strings.Contains(name, ":") {
+		propName, err := stringToProp(name)
+		if err != nil {
+			return err
+		}
+		return d.SetProperty(propName, value)
+	}
+	return d.SetUserProperty(name, value)
+}
+
+// stringToProp convers a string to a validated zfs property (user properties aren't supported here).
+func stringToProp(name string) (libzfs.Prop, error) {
+	var prop libzfs.Prop
+	switch name {
+	case CanmountProp:
+		prop = libzfs.DatasetPropCanmount
+	default:
+		return prop, xerrors.Errorf("unsupported property %q", name)
+	}
+	return prop, nil
+}
+
+type datasetFuncRecursive func(d libzfs.Dataset) error
+
+// recurseFileSystemDatasets takes all children of d, and if it's not a snpashot, run f() over there while
+// returning an error if raised on any children.
+func recurseFileSystemDatasets(d libzfs.Dataset, f datasetFuncRecursive) error {
+	for _, cd := range d.Children {
+		if cd.IsSnapshot() {
+			continue
+		}
+
+		if err := f(cd); err != nil {
+			return err
+		}
+	}
+	return nil
+}

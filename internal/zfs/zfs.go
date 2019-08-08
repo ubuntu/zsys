@@ -176,15 +176,10 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 	}
 
 	// Take snapshots on non snapshot dataset children
-	for _, cd := range d.Children {
-		if cd.IsSnapshot() {
-			continue
-		}
-		if err := z.snapshotRecursive(cd, snapName, recursive); err != nil {
-			return err
-		}
-	}
-	return nil
+	return recurseFileSystemDatasets(d,
+		func(next libzfs.Dataset) error {
+			return z.snapshotRecursive(next, snapName, true)
+		})
 }
 
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
@@ -242,6 +237,37 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 		return xerrors.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, err)
 	}
 
+	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snapshotName), rootName)
+	if (!skipBootfs && srcProps.BootFS) || !srcProps.BootFS {
+		if err := z.cloneDataset(d, newRootName+datasetRelPath, *srcProps, parentName); err != nil {
+			return err
+		}
+	}
+
+	if !recursive {
+		return nil
+	}
+
+	// Handle other datasets (children of parent) which may have snapshots
+	parent, err := libzfs.DatasetOpen(parentName)
+	if err != nil {
+		return xerrors.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
+	}
+	defer parent.Close()
+
+	return recurseFileSystemDatasets(parent,
+		func(next libzfs.Dataset) error {
+			// Look for childrens filesystem datasets having a corresponding snapshot
+			found, snapD := next.FindSnapshotName("@" + snapshotName)
+			if !found {
+				return nil
+			}
+
+			return z.cloneRecursive(snapD, snapshotName, rootName, newRootName, skipBootfs, true)
+		})
+}
+
+func (z *Zfs) cloneDataset(d libzfs.Dataset, target string, srcProps DatasetProp, parentName string) error {
 	props := make(map[libzfs.Prop]libzfs.Property)
 	if srcProps.sources.Mountpoint == "local" {
 		props[libzfs.DatasetPropMountpoint] = libzfs.Property{
@@ -260,66 +286,38 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 		Source: "local",
 	}
 
-	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snapshotName), rootName)
-	n := newRootName + datasetRelPath
-	if (!skipBootfs && srcProps.BootFS) || !srcProps.BootFS {
-		cd, err := d.Clone(n, props)
-		if err != nil {
-			return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, n, err)
-		}
-		defer cd.Close()
-		z.registerRevert(func() error {
-			d, err := libzfs.DatasetOpen(n)
-			if err != nil {
-				return xerrors.Errorf("couldn't open %q for cleanup: %v", n, err)
-			}
-			defer d.Close()
-			if err := d.Destroy(false); err != nil {
-				return xerrors.Errorf("couldn't destroy %q for cleanup: %v", n, err)
-			}
-			return nil
-		})
-
-		// Set user properties that we couldn't set before creating the dataset. Based this for local
-		// or source == parentName (as it will be local)
-		if srcProps.sources.BootFS == "local" || srcProps.sources.BootFS == parentName {
-			bootfsValue := "no"
-			if srcProps.BootFS {
-				bootfsValue = "yes"
-			}
-			if err := cd.SetUserProperty(BootfsProp, bootfsValue); err != nil {
-				return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
-			}
-		}
-		// We don't set BootfsDatasets as this property can't be translated to new datasets
-		// We don't set LastUsed on purpose as the dataset isn't used yet
-	}
-
-	if !recursive {
-		return nil
-	}
-
-	// Handle other datasets (children of parent) which may have snapshots
-	parent, err := libzfs.DatasetOpen(parentName)
+	cd, err := d.Clone(target, props)
 	if err != nil {
-		return xerrors.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
+		name := d.Properties[libzfs.DatasetPropName].Value
+		return xerrors.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, target, err)
 	}
-	defer parent.Close()
-
-	for _, cd := range parent.Children {
-		if cd.IsSnapshot() {
-			continue
+	defer cd.Close()
+	z.registerRevert(func() error {
+		d, err := libzfs.DatasetOpen(target)
+		if err != nil {
+			return xerrors.Errorf("couldn't open %q for cleanup: %v", target, err)
 		}
-		// Look for childrens filesystem datasets having a corresponding snapshot
-		found, snapD := cd.FindSnapshotName("@" + snapshotName)
-		if !found {
-			continue
+		defer d.Close()
+		if err := d.Destroy(false); err != nil {
+			return xerrors.Errorf("couldn't destroy %q for cleanup: %v", target, err)
 		}
+		return nil
+	})
 
-		if err := z.cloneRecursive(snapD, snapshotName, rootName, newRootName, skipBootfs, recursive); err != nil {
-			return err
+	// Set user properties that we couldn't set before creating the dataset. Based this for local
+	// or source == parentName (as it will be local)
+	if srcProps.sources.BootFS == "local" || srcProps.sources.BootFS == parentName {
+		bootfsValue := "no"
+		if srcProps.BootFS {
+			bootfsValue = "yes"
+		}
+		if err := cd.SetUserProperty(BootfsProp, bootfsValue); err != nil {
+			return xerrors.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, target, err)
 		}
 	}
+	// We don't set BootfsDatasets as this property can't be translated to new datasets
+	// We don't set LastUsed on purpose as the dataset isn't used yet
+
 	return nil
 }
 
@@ -377,16 +375,10 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 		})
 	}
 
-	for _, cd := range d.Children {
-		if cd.IsSnapshot() {
-			continue
-		}
-		if err := z.promoteRecursive(cd); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return recurseFileSystemDatasets(d,
+		func(next libzfs.Dataset) error {
+			return z.promoteRecursive(next)
+		})
 }
 
 // Destroy recursively all children, including dataset named "name".
@@ -428,42 +420,16 @@ func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetPr
 		return xerrors.Errorf("can't set a property %q on %q: the dataset a snapshot", name, datasetName)
 	}
 
-	var prop libzfs.Property
-	if !strings.Contains(name, ":") {
-		var propName libzfs.Prop
-		switch name {
-		case CanmountProp:
-			propName = libzfs.DatasetPropCanmount
-		default:
-			return xerrors.Errorf("can't set unsupported property %q for %q", name, datasetName)
-		}
-		prop, err = d.GetProperty(propName)
-		if err != nil {
-			return xerrors.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
-		}
-		if !force && prop.Source != "local" && prop.Source != "default" && prop.Source != "" {
-			log.Debugf("ZFS: can't set property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
-			return nil
-		}
-		if err = d.SetProperty(propName, value); err != nil {
-			return xerrors.Errorf("can't set dataset property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
-		}
-		z.registerRevert(func() error { return z.SetProperty(name, prop.Value, datasetName, force) })
-		return nil
-	}
-
-	// User properties
-	prop, err = d.GetUserProperty(name)
+	prop, err := getProperty(d, name)
 	if err != nil {
-		return xerrors.Errorf("can't get dataset user property %q for %q: "+config.ErrorFormat, name, datasetName, err)
+		return xerrors.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
 	}
-	// TODO: or use getDatasetProp() and cache on Scan() to always have "none" checked.
-	if !force && prop.Source != "local" && prop.Source != "none" && prop.Source != "" {
-		log.Debugf("ZFS: don't set user property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
+	if !force && prop.Source != "local" && prop.Source != "default" && prop.Source != "none" && prop.Source != "" {
+		log.Debugf("ZFS: can't set property %q=%q for %q as not a local property (%q)\n", name, value, datasetName, prop.Source)
 		return nil
 	}
-	if err = d.SetUserProperty(name, value); err != nil {
-		return xerrors.Errorf("can't set dataset user property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
+	if err = setProperty(d, name, value); err != nil {
+		return xerrors.Errorf("can't set dataset property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
 	}
 	z.registerRevert(func() error { return z.SetProperty(name, prop.Value, datasetName, force) })
 

@@ -50,7 +50,7 @@ func (z *Zfs) saveOrRevert(err error) {
 		return
 	}
 	if z.transactional {
-		log.Debugf("ZFS: An error occured and is saved in the zfs transaction: "+config.ErrorFormat+"\n", err)
+		log.Debugf("ZFS: An error occurred and is saved in the zfs transaction: "+config.ErrorFormat+"\n", err)
 		z.transactionErr = true
 		return
 	}
