@@ -16,15 +16,20 @@ import (
 
 // ZfsPropertyCloneScanner interface can clone, set dataset property and scan
 type ZfsPropertyCloneScanner interface {
-	Clone(name, suffix string, skipBootfs, recursive bool) (errClone error)
 	Scan() ([]zfs.Dataset, error)
-	zfsPropertySetter
+	zfsPropertyCloneSetter
 }
 
 // ZfsPropertyPromoteScanner interface can promote, set dataset property and scan
 type ZfsPropertyPromoteScanner interface {
 	Promote(name string) (errPromote error)
 	Scan() ([]zfs.Dataset, error)
+	zfsPropertySetter
+}
+
+// zfsPropertyCloneSetter can SetProperty and Clone
+type zfsPropertyCloneSetter interface {
+	Clone(name, suffix string, skipBootfs, recursive bool) (errClone error)
 	zfsPropertySetter
 }
 
@@ -57,79 +62,14 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) (bool, error) {
 	bootedOnSnapshot := hasBootedOnSnapshot(machines.cmdline)
 	// We are creating new clones (bootfs and optionnally, userdata) if wasn't promoted already
 	if bootedOnSnapshot && machines.current.ID != bootedState.ID {
-		log.Infof("booting on snapshot: %q to %q\n", root, bootedState.ID)
-		// get current generated suffix by initramfs
-		var suffix string
-		if j := strings.LastIndex(bootedState.ID, "_"); j > 0 && !strings.HasSuffix(bootedState.ID, "_") {
-			suffix = bootedState.ID[j+1:]
-		} else {
-			return false, xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedState.ID)
-		}
+		log.Infof("booting on snapshot: %q cloned to %q\n", root, bootedState.ID)
 
-		// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
-		var datasetsToClone []string
-		for _, n := range m.History[root].SystemDatasets {
-			var found bool
-			for _, rootName := range datasetsToClone {
-				base, _ := splitSnapshotName(rootName)
-				if strings.HasPrefix(n.Name, base+"/") {
-					found = true
-				}
-			}
-			if found {
-				continue
-			}
-			datasetsToClone = append(datasetsToClone, n.Name)
-		}
-
-		// Skip bootfs datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
-		// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
-		// in case of a real issue.
-		// TODO: should test the clone return value (clone fails on system dataset already exists -> skip, other clone fails -> return error)
-		for _, n := range datasetsToClone {
-			log.Infof("cloning %q", n)
-			if err := z.Clone(n, suffix, true, true); err != nil {
-				// TODO: transaction fix (as it's now set in error)
-				log.Warnf("couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v", n, err)
-			}
-		}
-
-		// Handle userdata by creating a new clone in case a revert was requested
-		// We skip it if we booted on a snpashot with userdatasets already created. This would mean that EnsureBoot
-		// was called twicebefore Commit() during this boot. A new boot will create a new suffix id, so we won't block
+		// We skip it if we booted on a snapshot with userdatasets already created. This would mean that EnsureBoot
+		// was called twice before Commit() during this boot. A new boot will create a new suffix id, so we won't block
 		// the machine forever in case of a real issue.
-		var userDataSuffix string
-		if revertUserData && !(bootedOnSnapshot && len(bootedState.UserDatasets) > 0) {
-			log.Infoln("reverting user data")
-			// Find user datasets attached to the snapshot and clone them
-			// Only root datasets are cloned
-			userDataSuffix = generateID(6)
-			snapshot := m.History[root]
-			var rootUserDatasets []zfs.Dataset
-			for _, d := range snapshot.UserDatasets {
-				parentFound := false
-				for _, r := range rootUserDatasets {
-					if base, _ := splitSnapshotName(r.Name); strings.Contains(d.Name, base+"/") {
-						parentFound = true
-						break
-					}
-				}
-				if !parentFound {
-					rootUserDatasets = append(rootUserDatasets, d)
-					// Recursively clones childrens, which shouldn't have bootfs elements.
-					if err := z.Clone(d.Name, userDataSuffix, false, true); err != nil {
-						return false, xerrors.Errorf("couldn't create new user datasets from %q: %v", root, err)
-					}
-					// Associate this parent new user dataset to its parent system dataset
-					base, _ := splitSnapshotName(d.Name)
-					// Reformat the name with the new uuid and clone now the dataset.
-					suffixIndex := strings.LastIndex(base, "_")
-					userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
-					if err := z.SetProperty(zfs.BootfsDatasetsProp, bootedState.ID, userdatasetName, false); err != nil {
-						return false, xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
-					}
-				}
-			}
+		needCreateUserDatas := revertUserData && !(bootedOnSnapshot && len(bootedState.UserDatasets) > 0)
+		if err := m.History[root].createClones(z, bootedState.ID, needCreateUserDatas); err != nil {
+			return false, err
 		}
 
 		// Rescan here for getting accessing to new cloned datasets
@@ -149,31 +89,21 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) (bool, error) {
 		bootedState.UserDatasets = m.UserDatasets
 	}
 
-	var needRescan bool
 	// Start switching every non desired system and user datasets to noauto
 	noAutoDatasets := diffDatasets(machines.allSystemDatasets, bootedState.SystemDatasets)
 	noAutoDatasets = append(noAutoDatasets, diffDatasets(machines.allUsersDatasets, bootedState.UserDatasets)...)
-	for _, d := range noAutoDatasets {
-		if d.CanMount != "on" || d.IsSnapshot {
-			continue
-		}
-		log.Infof("switch dataset %q to mount noauto\n", d.Name)
-		if err := z.SetProperty(zfs.CanmountProp, "noauto", d.Name, false); err != nil {
-			return false, xerrors.Errorf("couldn't switch %q canmount property to noauto: "+config.ErrorFormat, d.Name, err)
-		}
-		needRescan = true
+	needRescan, err := switchDatasetsCanMount(z, noAutoDatasets, "noauto")
+	if err != nil {
+		return false, err
 	}
 
 	// Switch current state system and user datasets to on
 	autoDatasets := append(bootedState.SystemDatasets, bootedState.UserDatasets...)
-	for _, d := range autoDatasets {
-		if d.CanMount != "noauto" {
-			continue
-		}
-		log.Infof("switch dataset %q to mount on\n", d.Name)
-		if err := z.SetProperty(zfs.CanmountProp, "on", d.Name, false); err != nil {
-			return false, xerrors.Errorf("couldn't switch %q canmount property to on: "+config.ErrorFormat, d.Name, err)
-		}
+	ok, err := switchDatasetsCanMount(z, autoDatasets, "on")
+	if err != nil {
+		return false, err
+	}
+	if ok {
 		needRescan = true
 	}
 
@@ -342,4 +272,105 @@ func splitSnapshotName(name string) (string, string) {
 		return name, ""
 	}
 	return name[:i], name[i+1:]
+}
+
+// getRootDatasets returns the name of any independent root datasets from a list
+func getRootDatasets(ds []zfs.Dataset) (rds []string) {
+	for _, n := range ds {
+		var found bool
+		for _, rootName := range rds {
+			base, _ := splitSnapshotName(rootName)
+			if strings.HasPrefix(n.Name, base+"/") {
+				found = true
+			}
+		}
+		if found {
+			continue
+		}
+		rds = append(rds, n.Name)
+	}
+
+	return rds
+}
+
+func (snapshot State) createClones(z zfsPropertyCloneSetter, bootedStateID string, needCreateUserDatas bool) error {
+	// get current generated suffix by initramfs
+	j := strings.LastIndex(bootedStateID, "_")
+	if j < 0 || strings.HasSuffix(bootedStateID, "_") {
+		return xerrors.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedStateID)
+	}
+	suffix := bootedStateID[j+1:]
+
+	// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
+	datasetsToClone := getRootDatasets(snapshot.SystemDatasets)
+
+	// Skip bootfs datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
+	// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
+	// in case of a real issue.
+	// TODO: should test the clone return value (clone fails on system dataset already exists -> skip, other clone fails -> return error)
+	for _, n := range datasetsToClone {
+		log.Infof("cloning %q", n)
+		if err := z.Clone(n, suffix, true, true); err != nil {
+			// TODO: transaction fix (as it's now set in error)
+			log.Warnf("couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v", n, err)
+		}
+	}
+
+	// Handle userdata by creating new clones in case a revert was requested
+	if !needCreateUserDatas {
+		return nil
+	}
+
+	log.Infoln("reverting user data")
+	// Find user datasets attached to the snapshot and clone them
+	// Only root datasets are cloned
+	userDataSuffix := generateID(6)
+	var rootUserDatasets []zfs.Dataset
+	for _, d := range snapshot.UserDatasets {
+		parentFound := false
+		for _, r := range rootUserDatasets {
+			if base, _ := splitSnapshotName(r.Name); strings.Contains(d.Name, base+"/") {
+				parentFound = true
+				break
+			}
+		}
+		if !parentFound {
+			rootUserDatasets = append(rootUserDatasets, d)
+			// Recursively clones childrens, which shouldn't have bootfs elements.
+			if err := z.Clone(d.Name, userDataSuffix, false, true); err != nil {
+				return xerrors.Errorf("couldn't create new user datasets from %q: %v", snapshot.ID, err)
+			}
+			// Associate this parent new user dataset to its parent system dataset
+			base, _ := splitSnapshotName(d.Name)
+			// Reformat the name with the new uuid and clone now the dataset.
+			suffixIndex := strings.LastIndex(base, "_")
+			userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
+			if err := z.SetProperty(zfs.BootfsDatasetsProp, bootedStateID, userdatasetName, false); err != nil {
+				return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedStateID, d.Name, err)
+			}
+		}
+	}
+
+	return nil
+}
+
+func switchDatasetsCanMount(z zfsPropertySetter, ds []zfs.Dataset, canMount string) (needRescan bool, err error) {
+	// Only handle on and noauto datasets, not off
+	initialCanMount := "on"
+	if canMount == "on" {
+		initialCanMount = "noauto"
+	}
+
+	for _, d := range ds {
+		if d.CanMount != initialCanMount || d.IsSnapshot {
+			continue
+		}
+		log.Infof("switch dataset %q to mount %q\n", d.Name, canMount)
+		if err := z.SetProperty(zfs.CanmountProp, canMount, d.Name, false); err != nil {
+			return false, xerrors.Errorf("couldn't switch %q canmount property to %q: "+config.ErrorFormat, d.Name, canMount, err)
+		}
+		needRescan = true
+	}
+
+	return needRescan, nil
 }
