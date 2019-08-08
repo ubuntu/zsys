@@ -267,7 +267,7 @@ func setProperty(d libzfs.Dataset, name, value string) error {
 	return d.SetUserProperty(name, value)
 }
 
-// stringToProp convers a string to a validated zfs property (user properties aren't supported here).
+// stringToProp converts a string to a validated zfs property (user properties aren't supported here).
 func stringToProp(name string) (libzfs.Prop, error) {
 	var prop libzfs.Prop
 	switch name {

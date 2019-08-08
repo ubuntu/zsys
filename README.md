@@ -6,6 +6,6 @@ zsys daemon and client for zfs systems
 [![codecov](https://codecov.io/gh/ubuntu/zsys/branch/master/graph/badge.svg)](https://codecov.io/gh/ubuntu/zsys)
 [![License](https://img.shields.io/badge/License-GPL3.0-blue.svg)](https://github.com/ubuntu/zsys/blob/master/LICENSE)
 
-ZSYS is a Zfs SYStem tool targetting an enhanced ZOL experience.
+ZSYS is a Zfs SYStem tool targeting an enhanced ZOL experience.
 
 It allows running multiple ZFS system in parallels on the same machine, get automated snapshots, managing complex zfs dataset layouts separating user data from system and persistent data, and more.

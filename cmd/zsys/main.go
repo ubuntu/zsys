@@ -36,7 +36,7 @@ func generateCommands() *cobra.Command {
 	var rootCmd = &cobra.Command{
 		Use:   "zsys",
 		Short: "ZFS SYStem integration control zsys ",
-		Long: `Zfs SYStem tool targetting an enhanced ZOL experience.
+		Long: `Zfs SYStem tool targeting an enhanced ZOL experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
  user data from system and persistent data, and more.`,
@@ -49,7 +49,7 @@ func generateCommands() *cobra.Command {
 	var printModifiedBoot bool
 	bootCmd := &cobra.Command{
 		Use:       "boot prepare|commit",
-		Short:     "Ensure that the right datasets are ready to be mounted and commited during early boot",
+		Short:     "Ensure that the right datasets are ready to be mounted and committed during early boot",
 		Hidden:    true,
 		Args:      cobra.ExactValidArgs(1),
 		ValidArgs: []string{"prepare", "commit"},
