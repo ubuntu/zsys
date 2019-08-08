@@ -22,9 +22,9 @@ type ZfsPropertyCloneScanner interface {
 
 // ZfsPropertyPromoteScanner interface can promote, set dataset property and scan
 type ZfsPropertyPromoteScanner interface {
-	Promote(name string) (errPromote error)
 	Scan() ([]zfs.Dataset, error)
 	zfsPropertySetter
+	zfsPromoter
 }
 
 // zfsPropertyCloneSetter can SetProperty and Clone
@@ -36,6 +36,11 @@ type zfsPropertyCloneSetter interface {
 // zfsPropertySetter can only SetProperty
 type zfsPropertySetter interface {
 	SetProperty(name, value, datasetName string, force bool) error
+}
+
+// zfsPromoter can only promote datasets
+type zfsPromoter interface {
+	Promote(name string) (errPromote error)
 }
 
 // EnsureBoot consolidates canmount states for early boot.
@@ -144,38 +149,9 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) (bool, error) {
 		bootedState.UserDatasets = m.UserDatasets
 	}
 
-	// Untag non attached userdatasets
-	for _, d := range diffDatasets(machines.allUsersDatasets, bootedState.UserDatasets) {
-		if d.IsSnapshot {
-			continue
-		}
-		var newTag string
-		// Multiple elements, strip current bootfs dataset name
-		if d.BootfsDatasets != "" && d.BootfsDatasets != bootedState.ID {
-			newTag = strings.Replace(d.BootfsDatasets, bootedState.ID+":", "", -1)
-			newTag = strings.TrimSuffix(newTag, ":"+bootedState.ID)
-		}
-		if newTag == d.BootfsDatasets {
-			continue
-		}
-		log.Infof("untagging user dataset: %q\n", d.Name)
-		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-			return false, xerrors.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, bootedState.ID, d.Name, err)
-		}
-	}
-	// Tag userdatasets to associate with this successful boot state, if wasn't tagged already
-	// (case of no user data revert, associate with different previous main system)
-	for _, d := range bootedState.UserDatasets {
-		if d.BootfsDatasets == bootedState.ID ||
-			strings.Contains(d.BootfsDatasets, bootedState.ID+":") ||
-			strings.HasSuffix(d.BootfsDatasets, ":"+bootedState.ID) {
-			continue
-		}
-		log.Infof("tag current user dataset: %q\n", d.Name)
-		newTag := d.BootfsDatasets + ":" + bootedState.ID
-		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-			return false, xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedState.ID, d.Name, err)
-		}
+	// Retag new userdatasets if needed
+	if err := switchUsersDatasetsTags(z, bootedState.ID, machines.allUsersDatasets, bootedState.UserDatasets); err != nil {
+		return false, err
 	}
 
 	// System and users datasets: set lastUsed
@@ -203,27 +179,18 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) (bool, error) {
 	}
 
 	// Promotion needed for system and user datasets
-	for _, d := range bootedState.UserDatasets {
-		if d.Origin == "" {
-			continue
-		}
-		changed = true
-		log.Infof("promoting user dataset: %q\n", d.Name)
-		if err := z.Promote(d.Name); err != nil {
-			return false, xerrors.Errorf("couldn't promote %q user dataset: "+config.ErrorFormat, d.Name, err)
-		}
+	log.Infof("promoting user datasets\n")
+	chg, err := promoteDatasets(z, bootedState.UserDatasets)
+	if err != nil {
+		return false, err
 	}
-	for _, d := range bootedState.SystemDatasets {
-		if d.Origin == "" {
-			continue
-		}
-		changed = true
-		log.Infof("promoting current state system dataset: %q\n", d.Name)
-
-		if err := z.Promote(d.Name); err != nil {
-			return false, xerrors.Errorf("couldn't set %q as current state: "+config.ErrorFormat, d.Name, err)
-		}
+	changed = changed || chg
+	log.Infof("promoting system datasets\n")
+	chg, err = promoteDatasets(z, bootedState.SystemDatasets)
+	if err != nil {
+		return false, err
 	}
+	changed = changed || chg
 
 	// Rescan datasets, with current lastUsed, and main state.
 	ds, err := z.Scan()
@@ -373,4 +340,58 @@ func switchDatasetsCanMount(z zfsPropertySetter, ds []zfs.Dataset, canMount stri
 	}
 
 	return needRescan, nil
+}
+
+// switchUsersDatasetsTags tags and untags users datasets to associate with current main system dataset id.
+func switchUsersDatasetsTags(z zfsPropertySetter, id string, allUsersDatasets, currentUsersDatasets []zfs.Dataset) error {
+	// Untag non attached userdatasets
+	for _, d := range diffDatasets(allUsersDatasets, currentUsersDatasets) {
+		if d.IsSnapshot {
+			continue
+		}
+		var newTag string
+		// Multiple elements, strip current bootfs dataset name
+		if d.BootfsDatasets != "" && d.BootfsDatasets != id {
+			newTag = strings.Replace(d.BootfsDatasets, id+":", "", -1)
+			newTag = strings.TrimSuffix(newTag, ":"+id)
+		}
+		if newTag == d.BootfsDatasets {
+			continue
+		}
+		log.Infof("untagging user dataset: %q\n", d.Name)
+		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+			return xerrors.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, id, d.Name, err)
+		}
+	}
+	// Tag userdatasets to associate with this successful boot state, if wasn't tagged already
+	// (case of no user data revert, associate with different previous main system)
+	for _, d := range currentUsersDatasets {
+		if d.BootfsDatasets == id ||
+			strings.Contains(d.BootfsDatasets, id+":") ||
+			strings.HasSuffix(d.BootfsDatasets, ":"+id) {
+			continue
+		}
+		log.Infof("tag current user dataset: %q\n", d.Name)
+		newTag := d.BootfsDatasets + ":" + id
+		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+			return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, id, d.Name, err)
+		}
+	}
+
+	return nil
+}
+
+func promoteDatasets(z zfsPromoter, ds []zfs.Dataset) (changed bool, err error) {
+	for _, d := range ds {
+		if d.Origin == "" {
+			continue
+		}
+		changed = true
+		log.Infof("promoting dataset: %q\n", d.Name)
+		if err := z.Promote(d.Name); err != nil {
+			return false, xerrors.Errorf("couldn't promote dataset %q: "+config.ErrorFormat, d.Name, err)
+		}
+	}
+
+	return changed, nil
 }
