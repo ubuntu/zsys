@@ -8,5 +8,11 @@ Type=oneshot
 RemainAfterExit=yes
 ExecStart=/sbin/zsys boot commit
 
+# Some daemon restrictions
+NoNewPrivileges=true
+ProtectHome=true
+PrivateTmp=true
+PrivateNetwork=true
+
 [Install]
 WantedBy=default.target
