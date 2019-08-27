@@ -8,6 +8,9 @@ Type=oneshot
 RemainAfterExit=yes
 ExecStart=/sbin/zsys boot commit
 
+# We can't run it in a container
+ConditionVirtualization=!container
+
 # Some daemon restrictions
 NoNewPrivileges=true
 ProtectHome=true
