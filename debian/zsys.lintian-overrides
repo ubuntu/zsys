@@ -1,0 +1,1 @@
+package-supports-alternative-init-but-no-init.d-script lib/systemd/system/zsys-commit.service
