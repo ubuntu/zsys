@@ -3,13 +3,13 @@ Description=Mark current ZSYS boot as successful
 After=default.target
 Requires=default.target
 
+# We can't run it in a container
+ConditionVirtualization=!container
+
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/sbin/zsys boot commit
-
-# We can't run it in a container
-ConditionVirtualization=!container
 
 # Some daemon restrictions
 NoNewPrivileges=true
