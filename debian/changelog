@@ -1,3 +1,20 @@
+zsys (0.1.1) UNRELEASED; urgency=medium
+
+  * Reduce cyclomatic complexity of some functions which results in better
+    code readability and perf.
+  * Hook up "modified boot" printing on command line so that we can avoid
+    rerunning useless scanning.
+  * Additional tests for covering modified boot tags.
+  * Restrict daemon commit privilege in systemd service.
+  * Now that go-libzfs upstream merged our fix, switch back to it rather than
+    our fork (content is exactly the same).
+  * debian/changelog:
+    - ensure we dep on grub.
+  * debian/zsys.lintian-overrides:
+    - we only support systemd in ubuntu (and ship a service file).
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 26 Aug 2019 11:40:15 +0200
+
 zsys (0.1) eoan; urgency=medium
 
   * Initial release
