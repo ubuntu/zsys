@@ -1,4 +1,4 @@
-zsys (0.1.1) UNRELEASED; urgency=medium
+zsys (0.1.1) eoan; urgency=medium
 
   * Reduce cyclomatic complexity of some functions which results in better
     code readability and perf.
