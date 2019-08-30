@@ -34,9 +34,7 @@ var (
 )
 
 func main() {
-	cmd := generateCommands()
-
-	if err := cmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		// This is a usage Error (we don't use postfix E commands other than usage)
 		// Usage error should be the same format than other errors
 		log.SetFormatter(&log.TextFormatter{
@@ -52,8 +50,6 @@ func main() {
 	}
 }
 
-func generateCommands() *cobra.Command {
+func init() {
 	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
-
-	return rootCmd
 }
