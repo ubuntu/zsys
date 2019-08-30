@@ -36,6 +36,12 @@ var (
 	}
 )
 
+const (
+	updateGrubCmd  = "update-grub"
+	modifiedBoot   = "zsys-meta:modified-boot"
+	noModifiedBoot = "zsys-meta:no-modified-boot"
+)
+
 func init() {
 	bootCmd.PersistentFlags().BoolVarP(&printModifiedBoot, "print-changes", "p", false, "Display if any zfs datasets have been modified to boot")
 	rootCmd.AddCommand(bootCmd)

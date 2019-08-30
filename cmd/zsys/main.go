@@ -9,12 +9,6 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 )
 
-const (
-	updateGrubCmd  = "update-grub"
-	modifiedBoot   = "zsys-meta:modified-boot"
-	noModifiedBoot = "zsys-meta:no-modified-boot"
-)
-
 var (
 	cmdErr        error
 	flagVerbosity int
