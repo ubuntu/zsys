@@ -22,6 +22,7 @@ const (
 )
 
 var (
+	cmdErr        error
 	flagVerbosity int
 	rootCmd       = &cobra.Command{
 		Use:   "zsys",
@@ -33,6 +34,8 @@ var (
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.SetVerboseMode(flagVerbosity)
 		},
+		// We display usage error ourselves
+		SilenceErrors: true,
 	}
 )
 
@@ -40,7 +43,17 @@ func main() {
 	cmd := generateCommands()
 
 	if err := cmd.Execute(); err != nil {
+		// This is a usage Error (we don't use postfix E commands other than usage)
+		// Usage error should be the same format than other errors
+		log.SetFormatter(&log.TextFormatter{
+			DisableLevelTruncation: true,
+			DisableTimestamp:       true,
+		})
 		log.Error(err)
+		os.Exit(2)
+	}
+	if cmdErr != nil {
+		log.Error(cmdErr)
 		os.Exit(1)
 	}
 }
@@ -56,16 +69,11 @@ func generateCommands() *cobra.Command {
 		Args:      cobra.ExactValidArgs(1),
 		ValidArgs: []string{"prepare", "commit"},
 		Run: func(cmd *cobra.Command, args []string) {
-			var err error
 			switch args[0] {
 			case "prepare":
-				err = bootCmd(printModifiedBoot)
+				cmdErr = bootCmd(printModifiedBoot)
 			case "commit":
-				err = commitCmd(printModifiedBoot)
-			}
-			if err != nil {
-				log.Error(err)
-				os.Exit(1)
+				cmdErr = commitCmd(printModifiedBoot)
 			}
 		},
 	}
