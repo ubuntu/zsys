@@ -21,19 +21,9 @@ const (
 	noModifiedBoot = "zsys-meta:no-modified-boot"
 )
 
-func main() {
-	cmd := generateCommands()
-
-	if err := cmd.Execute(); err != nil {
-		log.Error(err)
-		os.Exit(1)
-	}
-}
-
-func generateCommands() *cobra.Command {
-	var flagVerbosity int
-
-	var rootCmd = &cobra.Command{
+var (
+	flagVerbosity int
+	rootCmd       = &cobra.Command{
 		Use:   "zsys",
 		Short: "ZFS SYStem integration control zsys ",
 		Long: `Zfs SYStem tool targeting an enhanced ZOL experience.
@@ -44,6 +34,18 @@ func generateCommands() *cobra.Command {
 			config.SetVerboseMode(flagVerbosity)
 		},
 	}
+)
+
+func main() {
+	cmd := generateCommands()
+
+	if err := cmd.Execute(); err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+}
+
+func generateCommands() *cobra.Command {
 	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
 
 	var printModifiedBoot bool
