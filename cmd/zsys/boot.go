@@ -17,25 +17,30 @@ var (
 	printModifiedBoot bool
 
 	bootCmd = &cobra.Command{
-		Use:       "boot prepare|commit",
-		Short:     "Ensure that the right datasets are ready to be mounted and committed during early boot",
-		Hidden:    true,
-		Args:      cobra.ExactValidArgs(1),
-		ValidArgs: []string{"prepare", "commit"},
-		Run: func(cmd *cobra.Command, args []string) {
-			switch args[0] {
-			case "prepare":
-				cmdErr = bootPrepare(printModifiedBoot)
-			case "commit":
-				cmdErr = bootCommit(printModifiedBoot)
-			}
-		},
+		Use:    "boot COMMAND",
+		Short:  "Ensure that the right datasets are ready to be mounted and committed during early boot",
+		Hidden: true,
+		RunE:   requireSubcommand,
+	}
+	bootPrepareCmd = &cobra.Command{
+		Use:   "prepare",
+		Short: "Prepare boot by ensuring correct system and user datasets are switched on and off",
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = bootPrepare(printModifiedBoot) },
+	}
+	bootCommitCmd = &cobra.Command{
+		Use:   "commit",
+		Short: "Commit system and user datasets states as a successful boot",
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = bootCommit(printModifiedBoot) },
 	}
 )
 
 func init() {
-	bootCmd.Flags().BoolVarP(&printModifiedBoot, "print-changes", "p", false, "Display if any zfs datasets have been modified to boot")
+	bootCmd.PersistentFlags().BoolVarP(&printModifiedBoot, "print-changes", "p", false, "Display if any zfs datasets have been modified to boot")
 	rootCmd.AddCommand(bootCmd)
+	bootCmd.AddCommand(bootPrepareCmd)
+	bootCmd.AddCommand(bootCommitCmd)
 }
 
 func bootPrepare(printModifiedBoot bool) (err error) {
