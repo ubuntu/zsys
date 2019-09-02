@@ -87,6 +87,34 @@ func New(options ...func(*Zfs)) *Zfs {
 	return &z
 }
 
+// Create creates a dataset for that path.
+func (z *Zfs) Create(path, mountpoint string) error {
+	props := make(map[libzfs.Prop]libzfs.Property)
+	if mountpoint != "" {
+		props[libzfs.DatasetPropMountpoint] = libzfs.Property{Value: mountpoint}
+	}
+
+	d, err := libzfs.DatasetCreate(path, libzfs.DatasetTypeFilesystem, props)
+	if err != nil {
+		return xerrors.Errorf("can't create %q: %v", path, err)
+	}
+	defer d.Close()
+
+	z.registerRevert(func() error {
+		d, err := libzfs.DatasetOpen(path)
+		if err != nil {
+			return xerrors.Errorf("couldn't open %q for cleanup: %v", path, err)
+		}
+		defer d.Close()
+		if err := d.Destroy(false); err != nil {
+			return xerrors.Errorf("couldn't destroy %q for cleanup: %v", path, err)
+		}
+		return nil
+	})
+
+	return nil
+}
+
 // Scan returns all datasets that are currently imported on the system.
 func (Zfs) Scan() ([]Dataset, error) {
 	log.Debugln("ZFS: scan requested")
