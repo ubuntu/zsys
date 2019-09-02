@@ -394,6 +394,11 @@
 		"CanMount": "noauto"
 	},
 	{
+		"Name": "rpool/USERDATA",
+		"Mountpoint": "/",
+		"CanMount": "off"
+	},
+	{
 		"Name": "rpool/USERDATA/user1_abcd",
 		"Mountpoint": "/home/user1",
 		"CanMount": "on",

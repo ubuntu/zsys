@@ -17,6 +17,11 @@
 		"CanMount": "on"
 	},
 	{
+		"Name": "rpool/USERDATA",
+		"Mountpoint": "/",
+		"CanMount": "off"
+	},
+	{
 		"Name": "rpool/USERDATA/root_bcde",
 		"Mountpoint": "/root",
 		"CanMount": "off",

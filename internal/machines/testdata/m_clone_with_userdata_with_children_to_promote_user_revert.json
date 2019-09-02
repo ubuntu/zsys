@@ -64,6 +64,11 @@
         "Mountpoint": "/home/user1/tools",
         "CanMount": "noauto"
     },
+	{
+		"Name": "rpool/USERDATA",
+		"Mountpoint": "/",
+		"CanMount": "off"
+	},
     {
         "Name": "rpool/USERDATA/user1_efgh",
         "Mountpoint": "/home/user1",

@@ -31,6 +31,11 @@
         "CanMount": "on",
         "Origin": "rpool/ROOT/ubuntu_1234@snap1"
     },
+	{
+		"Name": "rpool/USERDATA",
+		"Mountpoint": "/",
+		"CanMount": "off"
+	},
     {
         "Name": "rpool/USERDATA/user1_abcd",
         "Mountpoint": "/home/user1",

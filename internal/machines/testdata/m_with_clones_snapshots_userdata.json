@@ -32,6 +32,11 @@
         "Mountpoint": "/",
         "CanMount": "off"
     },
+	{
+		"Name": "rpool2/USERDATA",
+		"Mountpoint": "/",
+		"CanMount": "off"
+	},
     {
         "Name": "rpool2/USERDATA/user1_abcd",
         "Mountpoint": "/home/user1",
