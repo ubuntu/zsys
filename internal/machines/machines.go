@@ -340,3 +340,11 @@ func (h *State) attachRemainingDatasetsForHistory(boots, userdatas, persistents 
 	// Persistent datasets
 	h.PersistentDatasets = persistents
 }
+
+// isZsys returns if there is a current machine, and if it's the case, if it's zsys.
+func (m *Machine) isZsys() bool {
+	if m == nil {
+		return false
+	}
+	return m.IsZsys
+}

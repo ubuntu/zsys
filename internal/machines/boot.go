@@ -55,7 +55,7 @@ type zfsPromoter interface {
 // Return if any dataset / machine changed has been done during boot and an error if any encountered.
 // TODO: propagate error to user graphically
 func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) (bool, error) {
-	if machines.current == nil || !machines.current.IsZsys {
+	if !machines.current.isZsys() {
 		log.Infoln("current machine isn't Zsys, nothing to do on boot")
 		return false, nil
 	}
@@ -129,7 +129,7 @@ func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) (bool, error) {
 // After this operation, every New() call will get the current and correct system state.
 // Return if any dataset / machine changed has been done during boot commit and an error if any encountered.
 func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) (bool, error) {
-	if machines.current == nil || !machines.current.IsZsys {
+	if !machines.current.isZsys() {
 		log.Infoln("current machine isn't Zsys, nothing to commit on boot")
 		return false, nil
 	}
