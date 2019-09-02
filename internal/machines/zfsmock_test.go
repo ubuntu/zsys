@@ -10,8 +10,9 @@ import (
 )
 
 type zfsMock struct {
-	d     []*zfs.Dataset
-	nextD []*zfs.Dataset
+	d            []*zfs.Dataset
+	nextD        []*zfs.Dataset
+	newlyCreated map[string]struct{}
 
 	predictableSuffixFor string
 
@@ -35,6 +36,7 @@ func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, c
 	}
 	return &zfsMock{
 		d:                    datasets,
+		newlyCreated:         make(map[string]struct{}),
 		predictableSuffixFor: predictableSuffixFor,
 		cloneErr:             cloneErr,
 		scanErr:              scanErr,
@@ -81,6 +83,7 @@ func (z *zfsMock) Create(p, mountpoint string) error {
 		DatasetProp: datasetProp,
 	})
 	z.nextD = datasets
+	z.newlyCreated[p] = struct{}{}
 
 	return nil
 }
@@ -146,6 +149,7 @@ func (z *zfsMock) Clone(name, suffix string, skipBootfs, recursive bool) (errClo
 				Origin:     d.Name,
 			},
 		}
+		z.newlyCreated[cloneName] = struct{}{}
 		nextDatasets = append(nextDatasets, &clone)
 	}
 
@@ -171,7 +175,7 @@ func (z zfsMock) Scan() ([]zfs.Dataset, error) {
 		// Make predictable generated suffix for storing in golden files
 		// We base on the given name + never used dataset (freshly created), as all clones and snapshots
 		// will share the same prefix
-		if strings.HasPrefix(d.Name, z.predictableSuffixFor+"_") && d.LastUsed == 0 {
+		if _, exists := z.newlyCreated[d.Name]; strings.HasPrefix(d.Name, z.predictableSuffixFor+"_") && exists {
 			suffix := strings.TrimPrefix(d.Name, z.predictableSuffixFor+"_")
 			if i := strings.Index(suffix, "/"); i != -1 {
 				suffix = suffix[i:]
