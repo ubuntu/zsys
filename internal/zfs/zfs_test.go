@@ -23,6 +23,71 @@ func init() {
 	config.SetVerboseMode(1)
 }
 
+func TestCreate(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		def        string
+		path       string
+		mountpoint string
+
+		wantErr bool
+	}{
+		"Simple creation":    {def: "one_pool_one_dataset.yaml", path: "rpool/dataset", mountpoint: "/home/foo"},
+		"Without mountpoint": {def: "one_pool_one_dataset.yaml", path: "rpool/dataset"},
+
+		"Failing on dataset already exists":        {def: "one_pool_n_datasets.yaml", path: "rpool/ROOT/ubuntu", wantErr: true},
+		"Failing on pool directly":                 {def: "one_pool_one_dataset.yaml", path: "rpool", wantErr: true},
+		"Failing on unexisting pool":               {def: "one_pool_one_dataset.yaml", path: "rpool2", wantErr: true},
+		"Failing on missing intermediate datasets": {def: "one_pool_one_dataset.yaml", path: "rpool/intermediate/doesnt/exist", wantErr: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			defer fPools.create(dir)()
+			z := zfs.New()
+			// Scan initial state for no-op
+			var initState []zfs.Dataset
+			if tc.wantErr {
+				var err error
+				initState, err = z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get initial state: %v", err)
+				}
+			}
+
+			err := z.Create(tc.path, tc.mountpoint)
+
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				// we don't return because we want to check that on error, Create() is a no-op
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			got, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get final state: %v", err)
+			}
+
+			// check we didn't change anything on error
+			if tc.wantErr {
+				assertDatasetsEquals(t, ta, initState, got, true)
+				return
+			}
+			assertDatasetsToGolden(t, ta, got, true)
+		})
+	}
+}
+
 func TestScan(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
@@ -498,6 +563,7 @@ func TestTransactions(t *testing.T) {
 
 	tests := map[string]struct {
 		def           string
+		doCreate      bool
 		doSnapshot    bool
 		doClone       bool
 		doPromote     bool
@@ -506,6 +572,11 @@ func TestTransactions(t *testing.T) {
 		shouldErr     bool
 		revert        bool
 	}{
+		"Create only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doCreate: true},
+		"Create only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, revert: true},
+		"Create only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doCreate: true, shouldErr: true, revert: true},
+		"Create only, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, shouldErr: true}, // will issue a warning
+
 		"Snapshot only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true},
 		"Snapshot only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, revert: true},
 		"Snapshot only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true, revert: true},
@@ -531,10 +602,10 @@ func TestTransactions(t *testing.T) {
 		// Destroy can't be in transactions
 		"Destroy, failed before doing anything": {def: "layout1_for_transactions_tests.yaml", doDestroy: true},
 
-		"Multiple steps transaction, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true},
-		"Multiple steps transaction, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, revert: true},
-		"Multiple steps transaction, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true, revert: true},
-		"Multiple steps transaction, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true},
+		"Multiple steps transaction, success, Done":   {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true},
+		"Multiple steps transaction, success, Revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, revert: true},
+		"Multiple steps transaction, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true, revert: true},
+		"Multiple steps transaction, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true},
 	}
 
 	for name, tc := range tests {
@@ -551,6 +622,33 @@ func TestTransactions(t *testing.T) {
 				t.Fatalf("couldn't get initial state: %v", err)
 			}
 			state := initState
+
+			// we issue multiple Create() to test the entire transactions (as not recursive)
+			if tc.doCreate {
+				// This one should always work
+				datasetName := "rpool/ROOT/ubuntu_4242"
+				if err := z.Create(datasetName, "/home/foo"); err != nil {
+					t.Fatalf("creating base dataset %q failed where we expected it not to", datasetName)
+				}
+				datasetName = "rpool/ROOT/ubuntu_4242/opt"
+				if tc.shouldErr {
+					// create a dataset without its parent will make it fail
+					datasetName = "rpool/ROOT/ubuntu_4242/opt/sub"
+				}
+				err = z.Create(datasetName, "/home/other")
+				if !tc.shouldErr && err != nil {
+					t.Fatalf("create %q shouldn't have failed but it did: %v", datasetName, err)
+				} else if tc.shouldErr && err == nil {
+					t.Fatalf("creating %q should have returned an error but it didn't", datasetName)
+				}
+				// We expect some modifications
+				newState, err := z.Scan()
+				if err != nil {
+					t.Fatalf("couldn't get state after create: %v", err)
+				}
+				assertDatasetsNotEquals(t, ta, state, newState, true)
+				state = newState
+			}
 
 			if tc.doSnapshot {
 				snapName := "snap1"

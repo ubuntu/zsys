@@ -1,0 +1,28 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": true,
+      "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "Sources": {
+         "Mountpoint": "local",
+         "BootFS": "local",
+         "LastUsed": "local",
+         "LastBootedKernel": "local"
+      }
+   },
+   {
+      "Name": "rpool/dataset",
+      "Mountpoint": "/dataset",
+      "CanMount": "on",
+      "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "LastUsed": "rpool",
+         "LastBootedKernel": "rpool"
+      }
+   }
+]
