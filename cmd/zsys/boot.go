@@ -2,13 +2,11 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/internal/config"
-	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/zfs"
 	"golang.org/x/xerrors"
 )
@@ -61,15 +59,10 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 		}
 	}()
 
-	ds, err := z.Scan()
+	ms, err := getMachines(z)
 	if err != nil {
 		return err
 	}
-	cmdline, err := procCmdline()
-	if err != nil {
-		return err
-	}
-	ms := machines.New(ds, cmdline)
 
 	changed, err := ms.EnsureBoot(z)
 	if err != nil {
@@ -96,15 +89,10 @@ func bootCommit(printModifiedBoot bool) (err error) {
 		}
 	}()
 
-	ds, err := z.Scan()
+	ms, err := getMachines(z)
 	if err != nil {
 		return err
 	}
-	cmdline, err := procCmdline()
-	if err != nil {
-		return err
-	}
-	ms := machines.New(ds, cmdline)
 
 	changed, err := ms.Commit(z)
 	if err != nil {
@@ -126,13 +114,4 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	}
 
 	return nil
-}
-
-func procCmdline() (string, error) {
-	content, err := ioutil.ReadFile("/proc/cmdline")
-	if err != nil {
-		return "", err
-	}
-
-	return string(content), nil
 }
