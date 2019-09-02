@@ -1,6 +1,8 @@
 package machines_test
 
 import (
+	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/ubuntu/zsys/internal/zfs"
@@ -39,6 +41,48 @@ func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, c
 		setPropErr:           setPropErr,
 		promoteErr:           promoteErr,
 	}
+}
+
+// Create creates a dataset if it doesn't exist already and its parent exists
+func (z *zfsMock) Create(p, mountpoint string) error {
+	ds := strings.Split(p, "/")
+	parentName := filepath.Join(ds[0 : len(ds)-1]...)
+
+	datasets := z.nextD
+	if datasets == nil {
+		// create a new independent baking array to not modify z.d
+		datasets = append([]*zfs.Dataset(nil), z.d...)
+	}
+
+	var parentFound bool
+	var datasetProp zfs.DatasetProp
+	for _, d := range datasets {
+		if d.Name == p {
+			return fmt.Errorf("%q already exists", p)
+		}
+		if d.Name == parentName {
+			parentFound = true
+			datasetProp = d.DatasetProp
+			if mountpoint == "" {
+				mountpoint = filepath.Join(datasetProp.Mountpoint, strings.TrimPrefix(p, parentName))
+				datasetProp.CanMount = "off"
+			} else {
+				datasetProp.CanMount = "on"
+			}
+			datasetProp.Mountpoint = mountpoint
+		}
+	}
+	if !parentFound {
+		return fmt.Errorf("%q has no existing parent", p)
+	}
+
+	datasets = append(datasets, &zfs.Dataset{
+		Name:        p,
+		DatasetProp: datasetProp,
+	})
+	z.nextD = datasets
+
+	return nil
 }
 
 // Clone behaves like zfs.Clone, but is a in memory version with mock zfs datasets
