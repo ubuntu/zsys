@@ -14,13 +14,13 @@ import (
 
 // ZfsPropertyCloneScanner interface can clone, set dataset property and scan
 type ZfsPropertyCloneScanner interface {
-	Scan() ([]zfs.Dataset, error)
+	zfsScanner
 	zfsPropertyCloneSetter
 }
 
 // ZfsPropertyPromoteScanner interface can promote, set dataset property and scan
 type ZfsPropertyPromoteScanner interface {
-	Scan() ([]zfs.Dataset, error)
+	zfsScanner
 	zfsPropertySetter
 	zfsPromoter
 }
@@ -29,6 +29,11 @@ type ZfsPropertyPromoteScanner interface {
 type zfsPropertyCloneSetter interface {
 	Clone(name, suffix string, skipBootfs, recursive bool) (errClone error)
 	zfsPropertySetter
+}
+
+// zfsScanner can only Scan
+type zfsScanner interface {
+	Scan() ([]zfs.Dataset, error)
 }
 
 // zfsPropertySetter can only SetProperty
