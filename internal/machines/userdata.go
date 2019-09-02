@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/config"
@@ -58,9 +60,14 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 		return err
 	}
 
-	// Tag to associate with current system.
+	// Tag to associate with current system and lastUsed
 	if err := z.SetProperty(zfs.BootfsDatasetsProp, ms.current.ID, userdataset, false); err != nil {
 		return xerrors.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, ms.current.ID, userdataset, err)
+	}
+
+	currentTime := strconv.Itoa(int(time.Now().Unix()))
+	if err := z.SetProperty(zfs.LastUsedProp, currentTime, userdataset, false); err != nil {
+		return xerrors.Errorf("couldn't set last used time to %q: "+config.ErrorFormat, currentTime, err)
 	}
 
 	// Rescan datasets, with new user datasets
