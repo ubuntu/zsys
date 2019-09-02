@@ -1,10 +1,8 @@
 package machines
 
 import (
-	"math/rand"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/ubuntu/zsys/internal/config"
@@ -200,21 +198,6 @@ func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) (bool, error) {
 	*machines = New(ds, machines.cmdline)
 
 	return changed, nil
-}
-
-var seedOnce = sync.Once{}
-
-// generateID with n ascii or digits, lowercase, characters
-func generateID(n int) string {
-	seedOnce.Do(func() { rand.Seed(time.Now().UnixNano()) })
-
-	var allowedRunes = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
-
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = allowedRunes[rand.Intn(len(allowedRunes))]
-	}
-	return string(b)
 }
 
 // diffDatasets returns datasets in a that aren't in b

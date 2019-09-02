@@ -1,8 +1,11 @@
 package machines
 
 import (
+	"math/rand"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/zfs"
@@ -140,4 +143,19 @@ func sortedStateKeys(m map[string]*State) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+var seedOnce = sync.Once{}
+
+// generateID with n ascii or digits, lowercase, characters
+func generateID(n int) string {
+	seedOnce.Do(func() { rand.Seed(time.Now().UnixNano()) })
+
+	var allowedRunes = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = allowedRunes[rand.Intn(len(allowedRunes))]
+	}
+	return string(b)
 }
