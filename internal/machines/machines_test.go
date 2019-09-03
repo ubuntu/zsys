@@ -480,10 +480,11 @@ func TestIdempotentCommit(t *testing.T) {
 func TestCreateUserData(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def      string
-		user     string
-		homePath string
-		cmdline  string
+		def                  string
+		user                 string
+		homePath             string
+		predictableSuffixFor string
+		cmdline              string
 
 		setPropertyErr bool
 
@@ -492,7 +493,15 @@ func TestCreateUserData(t *testing.T) {
 	}{
 		"One machine add user dataset":                  {def: "m_with_userdata.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
 		"One machine add user dataset without userdata": {def: "m_without_userdata.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		// TODO: do with pool without userdata
+		"One machine with no user, only userdata":       {def: "m_with_userdata_only.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"No attached userdata":                          {def: "m_no_attached_userdata_first_pool.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+
+		// Second pool cases
+		"User dataset on other pool":                       {def: "m_with_userdata_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"User dataset with no user on other pool":          {def: "m_with_userdata_only_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"Prefer system pool for userdata":                  {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
+		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
 	}
 
 	for name, tc := range tests {
@@ -500,7 +509,10 @@ func TestCreateUserData(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ds := machines.LoadDatasets(t, tc.def)
-			z := NewZfsMock(ds, "", "rpool/USERDATA/userfoo", false, false, tc.setPropertyErr, false)
+			if tc.predictableSuffixFor == "" {
+				tc.predictableSuffixFor = "rpool/USERDATA/userfoo"
+			}
+			z := NewZfsMock(ds, "", tc.predictableSuffixFor, false, false, tc.setPropertyErr, false)
 			initMachines := machines.New(ds, tc.cmdline)
 			ms := initMachines
 
