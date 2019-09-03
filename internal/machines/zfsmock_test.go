@@ -222,6 +222,14 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 					}
 				}
 			}
+		case zfs.MountPointProp:
+			d.Mountpoint = value
+			// If we have any snapshots for this dataset, applies it to them too
+			for _, dSnap := range datasets {
+				if strings.HasPrefix(dSnap.Name, d.Name+"@") {
+					dSnap.Mountpoint = value
+				}
+			}
 		case zfs.BootfsDatasetsProp:
 			d.BootfsDatasets = value
 

@@ -505,6 +505,15 @@ func TestCreateUserData(t *testing.T) {
 		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
 		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
 
+		// User or home edge cases
+		"No user set":                                           {def: "m_with_userdata.json", user: "", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"No home path set":                                      {def: "m_with_userdata.json", user: "userfoo", homePath: "", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"User already exists on this machine":                   {def: "m_with_userdata.json", user: "user1", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"Target directory already exists and match user":        {def: "m_with_userdata.json", user: "user1", homePath: "/home/user1", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
+		"Target directory already exists and don't match user":  {def: "m_with_userdata.json", user: "userfoo", homePath: "/home/user1", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"Set Property when user already exists on this machine": {def: "m_with_userdata.json", setPropertyErr: true, user: "user1", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"Scan when user already exists fails":                   {def: "m_with_userdata.json", scanErr: true, user: "user1", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
+
 		// Error cases
 		"System not zsys":                                              {def: "m_with_userdata_no_zsys.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
 		"Create user dataset fails":                                    {def: "m_with_userdata.json", createErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
