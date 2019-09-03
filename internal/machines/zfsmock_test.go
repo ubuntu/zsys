@@ -46,7 +46,7 @@ func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, c
 }
 
 // Create creates a dataset if it doesn't exist already and its parent exists
-func (z *zfsMock) Create(p, mountpoint string) error {
+func (z *zfsMock) Create(p, mountpoint, canmount string) error {
 	ds := strings.Split(p, "/")
 	parentName := filepath.Join(ds[0 : len(ds)-1]...)
 
@@ -67,10 +67,8 @@ func (z *zfsMock) Create(p, mountpoint string) error {
 			datasetProp = d.DatasetProp
 			if mountpoint == "" {
 				mountpoint = filepath.Join(datasetProp.Mountpoint, strings.TrimPrefix(p, parentName))
-				datasetProp.CanMount = "off"
-			} else {
-				datasetProp.CanMount = "on"
 			}
+			datasetProp.CanMount = canmount
 			datasetProp.Mountpoint = mountpoint
 		}
 	}
