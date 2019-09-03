@@ -207,7 +207,7 @@ func TestBoot(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ds := machines.LoadDatasets(t, tc.def)
-			z := NewZfsMock(ds, tc.mountedDataset, tc.predictableSuffixFor, tc.cloneErr, tc.scanErr, tc.setPropertyErr, false)
+			z := NewZfsMock(ds, tc.mountedDataset, tc.predictableSuffixFor, false, tc.cloneErr, tc.scanErr, tc.setPropertyErr, false)
 			// Reload datasets from zfs, as mountedDataset can change .Mounted property (reused on consecutive Scan())
 			var datasets []zfs.Dataset
 			for _, d := range z.d {
@@ -253,7 +253,7 @@ func TestBoot(t *testing.T) {
 func TestIdempotentBoot(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
-	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
+	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false, false)
 	datasets, err := z.Scan()
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
@@ -287,7 +287,7 @@ func TestIdempotentBoot(t *testing.T) {
 func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
-	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
+	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false, false)
 	datasets, err := z.Scan()
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
@@ -324,7 +324,7 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_reverting.json")
-	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false)
+	z := NewZfsMock(ds, "rpool/ROOT/ubuntu_4242", "rpool/USERDATA/user1", false, false, false, false, false)
 	datasets, err := z.Scan()
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
@@ -407,7 +407,7 @@ func TestCommit(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ds := machines.LoadDatasets(t, tc.def)
-			z := NewZfsMock(ds, "", "", false, tc.scanErr, tc.setPropertyErr, tc.promoteErr)
+			z := NewZfsMock(ds, "", "", false, false, tc.scanErr, tc.setPropertyErr, tc.promoteErr)
 			// Do the Scan() manually, as we don't wan't to suffer from scanErr
 			var datasets []zfs.Dataset
 			for _, d := range z.d {
@@ -450,7 +450,7 @@ func TestCommit(t *testing.T) {
 func TestIdempotentCommit(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_no_user_revert.json")
-	z := NewZfsMock(ds, "", "", false, false, false, false)
+	z := NewZfsMock(ds, "", "", false, false, false, false, false)
 	datasets, err := z.Scan()
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
@@ -487,6 +487,8 @@ func TestCreateUserData(t *testing.T) {
 		cmdline              string
 
 		setPropertyErr bool
+		createErr      bool
+		scanErr        bool
 
 		wantErr bool
 		isNoOp  bool
@@ -512,7 +514,7 @@ func TestCreateUserData(t *testing.T) {
 			if tc.predictableSuffixFor == "" {
 				tc.predictableSuffixFor = "rpool/USERDATA/userfoo"
 			}
-			z := NewZfsMock(ds, "", tc.predictableSuffixFor, false, false, tc.setPropertyErr, false)
+			z := NewZfsMock(ds, "", tc.predictableSuffixFor, tc.createErr, false, tc.scanErr, tc.setPropertyErr, false)
 			initMachines := machines.New(ds, tc.cmdline)
 			ms := initMachines
 
@@ -534,6 +536,10 @@ func TestCreateUserData(t *testing.T) {
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
 
+			// finale rescan undeed if last one failed
+			if z.scanErr {
+				return
+			}
 			datasets, err := z.Scan()
 			if err != nil {
 				t.Fatal("couldn't rescan before checking final state:", err)

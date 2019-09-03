@@ -16,6 +16,7 @@ type zfsMock struct {
 
 	predictableSuffixFor string
 
+	createErr  bool
 	cloneErr   bool
 	scanErr    bool
 	setPropErr bool
@@ -24,7 +25,7 @@ type zfsMock struct {
 
 // NewZfsMock creates a new in memory with mock zfs datasets. We can simulate mounted dataset, and store predictableSuffixFor
 // to change every new created datasets names.
-func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, cloneErr, scanErr, setPropErr, promoteErr bool) (z *zfsMock) {
+func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, createErr, cloneErr, scanErr, setPropErr, promoteErr bool) (z *zfsMock) {
 	var datasets []*zfs.Dataset
 	for _, d := range ds {
 		// copy value to take address
@@ -38,6 +39,7 @@ func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, c
 		d:                    datasets,
 		newlyCreated:         make(map[string]struct{}),
 		predictableSuffixFor: predictableSuffixFor,
+		createErr:            createErr,
 		cloneErr:             cloneErr,
 		scanErr:              scanErr,
 		setPropErr:           setPropErr,
@@ -47,6 +49,10 @@ func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, c
 
 // Create creates a dataset if it doesn't exist already and its parent exists
 func (z *zfsMock) Create(p, mountpoint, canmount string) error {
+	if z.createErr {
+		return xerrors.New("Mock zfs raised an error on Clone")
+	}
+
 	ds := strings.Split(p, "/")
 	parentName := filepath.Join(ds[0 : len(ds)-1]...)
 
