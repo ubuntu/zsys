@@ -514,7 +514,7 @@ func TestSetProperty(t *testing.T) {
 		"Property on snapshot (parent inherit)":                 {def: "one_pool_n_datasets_n_children_n_snapshots_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", wantErr: true, isNoOp: true},
 		"User property on snapshot (parent inherit but forced)": {def: "one_pool_n_datasets_n_children_n_snapshots_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", wantErr: true, isNoOp: true, force: true},
 
-		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "mountpoint", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true, isNoOp: true},
+		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "snapdir", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true, isNoOp: true},
 		"Dataset doesn't exists":                         {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
 		"Authorized property on snapshot doesn't exists": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.CanmountProp, propertyValue: "yes", dataset: "rpool@snap1", wantErr: true, isNoOp: true},
 	}
@@ -760,7 +760,7 @@ func TestTransactions(t *testing.T) {
 				propertyName := zfs.BootfsProp
 				if tc.shouldErr {
 					// this property isn't allowed
-					propertyName = "mountpoint"
+					propertyName = "snapdir"
 				}
 				err := z.SetProperty(propertyName, "no", "rpool/ROOT/ubuntu_1234", false)
 				if !tc.shouldErr && err != nil {
