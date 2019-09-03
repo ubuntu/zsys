@@ -36,11 +36,26 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 		userdatasetRoot = getUserDatasetPath(ms.current.UserDatasets[0].Name)
 	}
 	// If there is none attached to the current system, try to take first existing userdataset detected pool
-	if len(ms.allUsersDatasets) > 0 {
+	if userdatasetRoot == "" && len(ms.allUsersDatasets) > 0 {
 		userdatasetRoot = getUserDatasetPath(ms.allUsersDatasets[0].Name)
 	}
 
-	// If there is still none found, take the current system pool
+	// If there is still none found, check if there is only USERDATA with no user under it as it won't shows up in machines
+	if userdatasetRoot == "" {
+		ds, err := z.Scan()
+		if err != nil {
+			// don't fail if Scan is failing, as the dataset was created
+			return xerrors.Errorf("couldn't rescan for checking empty USERDATA: "+config.ErrorFormat, err)
+		}
+		for _, d := range ds {
+			if strings.HasSuffix(strings.ToLower(d.Name)+"/", userdatasetsContainerName) {
+				userdatasetRoot = d.Name
+				break
+			}
+		}
+	}
+
+	// If there is still none found, take the current system pool and create one
 	if userdatasetRoot == "" {
 		p := ms.current.SystemDatasets[0].Name
 		i := strings.Index(p, "/")
@@ -49,7 +64,7 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 		}
 		userdatasetRoot = filepath.Join(p, "USERDATA")
 
-		// Create parent USERDATA.
+		// Create parent USERDATA
 		if err := z.Create(userdatasetRoot, "/", "off"); err != nil {
 			return xerrors.Errorf("couldn't create user data embedder dataset: "+config.ErrorFormat, err)
 		}
@@ -75,8 +90,9 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 	if err != nil {
 		// don't fail if Scan is failing, as the dataset was created
 		log.Warningf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
+	} else {
+		*ms = New(ds, ms.cmdline)
 	}
-	*ms = New(ds, ms.cmdline)
 
 	return nil
 }
