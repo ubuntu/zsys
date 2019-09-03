@@ -1,0 +1,12 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/foo",
+      "CanMount": "on",
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
+      "Sources": {
+         "Mountpoint": "local",
+         "BootfsDatasets": "local"
+      }
+   }
+]

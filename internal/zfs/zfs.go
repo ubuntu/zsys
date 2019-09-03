@@ -22,6 +22,8 @@ const (
 	LastBootedKernelProp = zsysPrefix + "last-booted-kernel"
 	// CanmountProp string value
 	CanmountProp = "canmount"
+	// MountPointProp string value
+	MountPointProp = "mountpoint"
 )
 
 // Dataset is the abstraction of a physical dataset and exposes only properties that must are accessible by the user.

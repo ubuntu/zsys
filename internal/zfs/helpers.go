@@ -273,6 +273,8 @@ func stringToProp(name string) (libzfs.Prop, error) {
 	switch name {
 	case CanmountProp:
 		prop = libzfs.DatasetPropCanmount
+	case MountPointProp:
+		prop = libzfs.DatasetPropMountpoint
 	default:
 		return prop, xerrors.Errorf("unsupported property %q", name)
 	}

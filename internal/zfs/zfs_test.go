@@ -502,6 +502,9 @@ func TestSetProperty(t *testing.T) {
 		"User property (none)":          {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		// There is no authorized properties that can be "none" for now
 
+		// Canmount prop is already checked in authorized
+		"Mountpoint property": {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.MountPointProp, propertyValue: "/foo", dataset: "rpool"},
+
 		"User property (inherit)":            {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},
 		"User property (inherit but forced)": {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var", force: true},
 		// There is no authorized properties that can be inherited
