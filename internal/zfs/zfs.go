@@ -88,11 +88,12 @@ func New(options ...func(*Zfs)) *Zfs {
 }
 
 // Create creates a dataset for that path.
-func (z *Zfs) Create(path, mountpoint string) error {
+func (z *Zfs) Create(path, mountpoint, canmount string) error {
 	props := make(map[libzfs.Prop]libzfs.Property)
 	if mountpoint != "" {
 		props[libzfs.DatasetPropMountpoint] = libzfs.Property{Value: mountpoint}
 	}
+	props[libzfs.DatasetPropCanmount] = libzfs.Property{Value: canmount}
 
 	d, err := libzfs.DatasetCreate(path, libzfs.DatasetTypeFilesystem, props)
 	if err != nil {

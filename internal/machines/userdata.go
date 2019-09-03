@@ -16,7 +16,7 @@ import (
 
 // ZfsSetPropertyScanCreater can only Create, Scan and SetProperty on datasets
 type ZfsSetPropertyScanCreater interface {
-	Create(path, mountpoint string) error
+	Create(path, mountpoint, canmount string) error
 	zfsScanner
 	zfsPropertySetter
 }
@@ -50,13 +50,13 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 		userdatasetRoot = filepath.Join(p, "USERDATA")
 
 		// Create parent USERDATA.
-		if err := z.Create(userdatasetRoot, "/"); err != nil {
+		if err := z.Create(userdatasetRoot, "/", "off"); err != nil {
 			return xerrors.Errorf("couldn't create user data embedder dataset: "+config.ErrorFormat, err)
 		}
 	}
 
 	userdataset := filepath.Join(userdatasetRoot, fmt.Sprintf("%s_%s", user, generateID(6)))
-	if err := z.Create(userdataset, homepath); err != nil {
+	if err := z.Create(userdataset, homepath, "on"); err != nil {
 		return err
 	}
 
