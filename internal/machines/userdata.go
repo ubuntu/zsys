@@ -28,6 +28,42 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 		return errors.New("Current machine isn't Zsys, nothing to create")
 	}
 
+	if user == "" {
+		return errors.New("Needs a valid user name, got nothing")
+	}
+	if homepath == "" {
+		return errors.New("Needs a valid home path, got nothing")
+	}
+	// If there this user already attached to this machine: retarget home
+	for _, d := range ms.current.UserDatasets {
+		// get user name from dataset
+		n := strings.Split(d.Name, "/")
+		userName := n[len(n)-1]
+		n = strings.Split(userName, "_")
+		userName = strings.Join(n[0:len(n)-1], "_")
+
+		// Home path is already attached to current system, but with a different user name. Fail
+		if d.Mountpoint == homepath && user != userName {
+			return xerrors.Errorf("%q is already associated to %q, which is for a different user name (%q) than %q", homepath, d.Name, userName, user)
+		}
+
+		// We'll reuse that dataset
+		if userName == user {
+			log.Infof("Reusing %q as matching user name", d.Name)
+			if err := z.SetProperty(zfs.MountPointProp, homepath, d.Name, false); err != nil {
+				return xerrors.Errorf("couldn't set new home %q to %q: "+config.ErrorFormat, homepath, d.Name, err)
+			}
+			ds, err := z.Scan()
+			if err != nil {
+				// don't fail if Scan is failing, as the dataset was created
+				log.Warningf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
+			} else {
+				*ms = New(ds, ms.cmdline)
+			}
+			return nil
+		}
+	}
+
 	log.Infof("create user dataset for %q\n", homepath)
 
 	// Take same pool as existing userdatasets for current system
