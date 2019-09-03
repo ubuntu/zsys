@@ -477,6 +477,61 @@ func TestIdempotentCommit(t *testing.T) {
 	assertMachinesEquals(t, ms1, ms2)
 }
 
+func TestCreateUserData(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def      string
+		user     string
+		homePath string
+		cmdline  string
+
+		setPropertyErr bool
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"One machine add user dataset":                  {def: "m_with_userdata.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"One machine add user dataset without userdata": {def: "m_without_userdata.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		// TODO: do with pool without userdata
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			ds := machines.LoadDatasets(t, tc.def)
+			z := NewZfsMock(ds, "", "rpool/USERDATA/userfoo", false, false, tc.setPropertyErr, false)
+			initMachines := machines.New(ds, tc.cmdline)
+			ms := initMachines
+
+			err := ms.CreateUserData(tc.user, tc.homePath, z)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			datasets, err := z.Scan()
+			if err != nil {
+				t.Fatal("couldn't rescan before checking final state:", err)
+			}
+			machinesAfterRescan := machines.New(datasets, tc.cmdline)
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	ds := machines.LoadDatasets(b, "m_layout1_machines_with_snapshots_clones.json")
 	config.SetVerboseMode(0)
