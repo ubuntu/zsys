@@ -504,6 +504,14 @@ func TestCreateUserData(t *testing.T) {
 		"Prefer system pool for userdata":                  {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
 		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
 		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+
+		// Error cases
+		"System not zsys":                                              {def: "m_with_userdata_no_zsys.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"Create user dataset fails":                                    {def: "m_with_userdata.json", createErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"Create user dataset container fails":                          {def: "m_without_userdata.json", createErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"System bootfs property fails":                                 {def: "m_with_userdata.json", setPropertyErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"Scan for user dataset container fails":                        {def: "m_without_userdata.json", scanErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
+		"Final scan fails issue warning and returns same machine list": {def: "m_with_userdata.json", scanErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
 	}
 
 	for name, tc := range tests {
