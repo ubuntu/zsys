@@ -30,11 +30,14 @@ func TestCreate(t *testing.T) {
 		def        string
 		path       string
 		mountpoint string
+		canmount   string
 
 		wantErr bool
 	}{
-		"Simple creation":    {def: "one_pool_one_dataset.yaml", path: "rpool/dataset", mountpoint: "/home/foo"},
-		"Without mountpoint": {def: "one_pool_one_dataset.yaml", path: "rpool/dataset"},
+		"Simple creation":                    {def: "one_pool_one_dataset.yaml", path: "rpool/dataset", mountpoint: "/home/foo", canmount: "on"},
+		"Without mountpoint":                 {def: "one_pool_one_dataset.yaml", path: "rpool/dataset", canmount: "on"},
+		"With canmount false":                {def: "one_pool_one_dataset.yaml", path: "rpool/dataset", mountpoint: "/home/foo", canmount: "off"},
+		"With mountpoint and canmount false": {def: "one_pool_one_dataset.yaml", path: "rpool/dataset", canmount: "off"},
 
 		"Failing on dataset already exists":        {def: "one_pool_n_datasets.yaml", path: "rpool/ROOT/ubuntu", wantErr: true},
 		"Failing on pool directly":                 {def: "one_pool_one_dataset.yaml", path: "rpool", wantErr: true},
@@ -61,7 +64,7 @@ func TestCreate(t *testing.T) {
 				}
 			}
 
-			err := z.Create(tc.path, tc.mountpoint)
+			err := z.Create(tc.path, tc.mountpoint, tc.canmount)
 
 			if err != nil {
 				if !tc.wantErr {
@@ -627,7 +630,7 @@ func TestTransactions(t *testing.T) {
 			if tc.doCreate {
 				// This one should always work
 				datasetName := "rpool/ROOT/ubuntu_4242"
-				if err := z.Create(datasetName, "/home/foo"); err != nil {
+				if err := z.Create(datasetName, "/home/foo", "on"); err != nil {
 					t.Fatalf("creating base dataset %q failed where we expected it not to", datasetName)
 				}
 				datasetName = "rpool/ROOT/ubuntu_4242/opt"
@@ -635,7 +638,7 @@ func TestTransactions(t *testing.T) {
 					// create a dataset without its parent will make it fail
 					datasetName = "rpool/ROOT/ubuntu_4242/opt/sub"
 				}
-				err = z.Create(datasetName, "/home/other")
+				err = z.Create(datasetName, "/home/other", "on")
 				if !tc.shouldErr && err != nil {
 					t.Fatalf("create %q shouldn't have failed but it did: %v", datasetName, err)
 				} else if tc.shouldErr && err == nil {
