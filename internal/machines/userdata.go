@@ -117,6 +117,31 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 	return nil
 }
 
+// ChangeHomeOnUserData tries to find an existing dataset matching home and rename it to newhome
+func (ms *Machines) ChangeHomeOnUserData(home, newHome string, z ZfsSetPropertyScanCreater) error {
+	if !ms.current.isZsys() {
+		return errors.New("Current machine isn't Zsys, nothing to modify")
+	}
+
+	if home == "" {
+		return xerrors.Errorf("can't use empty string for existing home directory")
+	}
+	if newHome == "" {
+		return xerrors.Errorf("can't use empty string for new home directory")
+	}
+
+	log.Infof("reset user dataset path from %q to %q\n", home, newHome)
+	found, err := ms.tryReuseUserDataSet("", home, newHome, z)
+	if err != nil {
+		return err
+	}
+
+	if !found {
+		return xerrors.Errorf("didn't find any existing dataset matching %q", home)
+	}
+	return nil
+}
+
 func getUserDatasetPath(path string) string {
 	lpath := strings.ToLower(path)
 	i := strings.Index(lpath, userdatasetsContainerName)
