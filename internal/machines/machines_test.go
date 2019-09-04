@@ -565,6 +565,73 @@ func TestCreateUserData(t *testing.T) {
 	}
 }
 
+func TestChangeHomeOnUserData(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def     string
+		home    string
+		newHome string
+
+		setPropertyErr bool
+		scanErr        bool
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Rename home": {def: "m_with_userdata.json"},
+
+		// Argument or matching issue
+		"Home doesn't match": {def: "m_with_userdata.json", home: "/home/userabcd", wantErr: true, isNoOp: true},
+		"System not zsys":    {def: "m_with_userdata_no_zsys.json", wantErr: true, isNoOp: true},
+		"Old home empty":     {def: "m_with_userdata.json", home: "[empty]", wantErr: true, isNoOp: true},
+		"New home empty":     {def: "m_with_userdata.json", newHome: "[empty]", wantErr: true, isNoOp: true},
+
+		// Errors
+		"Set property fails":               {def: "m_with_userdata.json", setPropertyErr: true, wantErr: true, isNoOp: true},
+		"Scan fails doesn't trigger error": {def: "m_with_userdata.json", scanErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			ds := machines.LoadDatasets(t, tc.def)
+			z := NewZfsMock(ds, "", "", false, false, tc.scanErr, tc.setPropertyErr, false)
+			initMachines := machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+			ms := initMachines
+
+			err := ms.ChangeHomeOnUserData(getDefaultValue(tc.home, "/home/user1"), getDefaultValue(tc.newHome, "/home/foo"), z)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			// finale rescan uneeded if last one failed
+			if z.scanErr {
+				return
+			}
+			datasets, err := z.Scan()
+			if err != nil {
+				t.Fatal("couldn't rescan before checking final state:", err)
+			}
+			machinesAfterRescan := machines.New(datasets, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	ds := machines.LoadDatasets(b, "m_layout1_machines_with_snapshots_clones.json")
 	config.SetVerboseMode(0)
