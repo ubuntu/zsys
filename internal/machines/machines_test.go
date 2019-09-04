@@ -493,34 +493,34 @@ func TestCreateUserData(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"One machine add user dataset":                  {def: "m_with_userdata.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"One machine add user dataset without userdata": {def: "m_without_userdata.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"One machine with no user, only userdata":       {def: "m_with_userdata_only.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"No attached userdata":                          {def: "m_no_attached_userdata_first_pool.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"One machine add user dataset":                  {def: "m_with_userdata.json"},
+		"One machine add user dataset without userdata": {def: "m_without_userdata.json"},
+		"One machine with no user, only userdata":       {def: "m_with_userdata_only.json"},
+		"No attached userdata":                          {def: "m_no_attached_userdata_first_pool.json"},
 
 		// Second pool cases
-		"User dataset on other pool":                       {def: "m_with_userdata_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"User dataset with no user on other pool":          {def: "m_with_userdata_only_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"Prefer system pool for userdata":                  {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
-		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"User dataset on other pool":                       {def: "m_with_userdata_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo"},
+		"User dataset with no user on other pool":          {def: "m_with_userdata_only_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo"},
+		"Prefer system pool for userdata":                  {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool/USERDATA/userfoo"},
+		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
+		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo"},
 
 		// User or home edge cases
-		"No user set":                                           {def: "m_with_userdata.json", user: "", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"No home path set":                                      {def: "m_with_userdata.json", user: "userfoo", homePath: "", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"User already exists on this machine":                   {def: "m_with_userdata.json", user: "user1", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		"Target directory already exists and match user":        {def: "m_with_userdata.json", user: "user1", homePath: "/home/user1", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
-		"Target directory already exists and don't match user":  {def: "m_with_userdata.json", user: "userfoo", homePath: "/home/user1", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"Set Property when user already exists on this machine": {def: "m_with_userdata.json", setPropertyErr: true, user: "user1", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"Scan when user already exists fails":                   {def: "m_with_userdata.json", scanErr: true, user: "user1", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
+		"No user set":                                           {def: "m_with_userdata.json", user: "[empty]", wantErr: true, isNoOp: true},
+		"No home path set":                                      {def: "m_with_userdata.json", homePath: "[empty]", wantErr: true, isNoOp: true},
+		"User already exists on this machine":                   {def: "m_with_userdata.json", user: "user1"},
+		"Target directory already exists and match user":        {def: "m_with_userdata.json", user: "user1", homePath: "/home/user1", isNoOp: true},
+		"Target directory already exists and don't match user":  {def: "m_with_userdata.json", homePath: "/home/user1", wantErr: true, isNoOp: true},
+		"Set Property when user already exists on this machine": {def: "m_with_userdata.json", setPropertyErr: true, user: "user1", wantErr: true, isNoOp: true},
+		"Scan when user already exists fails":                   {def: "m_with_userdata.json", scanErr: true, user: "user1", isNoOp: true},
 
 		// Error cases
-		"System not zsys":                                              {def: "m_with_userdata_no_zsys.json", user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"Create user dataset fails":                                    {def: "m_with_userdata.json", createErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"Create user dataset container fails":                          {def: "m_without_userdata.json", createErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"System bootfs property fails":                                 {def: "m_with_userdata.json", setPropertyErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"Scan for user dataset container fails":                        {def: "m_without_userdata.json", scanErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), wantErr: true, isNoOp: true},
-		"Final scan fails issue warning and returns same machine list": {def: "m_with_userdata.json", scanErr: true, user: "userfoo", homePath: "/home/foo", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234"), isNoOp: true},
+		"System not zsys":                                              {def: "m_with_userdata_no_zsys.json", wantErr: true, isNoOp: true},
+		"Create user dataset fails":                                    {def: "m_with_userdata.json", createErr: true, wantErr: true, isNoOp: true},
+		"Create user dataset container fails":                          {def: "m_without_userdata.json", createErr: true, wantErr: true, isNoOp: true},
+		"System bootfs property fails":                                 {def: "m_with_userdata.json", setPropertyErr: true, wantErr: true, isNoOp: true},
+		"Scan for user dataset container fails":                        {def: "m_without_userdata.json", scanErr: true, wantErr: true, isNoOp: true},
+		"Final scan fails issue warning and returns same machine list": {def: "m_with_userdata.json", scanErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -528,14 +528,12 @@ func TestCreateUserData(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			ds := machines.LoadDatasets(t, tc.def)
-			if tc.predictableSuffixFor == "" {
-				tc.predictableSuffixFor = "rpool/USERDATA/userfoo"
-			}
-			z := NewZfsMock(ds, "", tc.predictableSuffixFor, tc.createErr, false, tc.scanErr, tc.setPropertyErr, false)
+			tc.cmdline = getDefaultValue(tc.cmdline, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+			z := NewZfsMock(ds, "", getDefaultValue(tc.predictableSuffixFor, "rpool/USERDATA/userfoo"), tc.createErr, false, tc.scanErr, tc.setPropertyErr, false)
 			initMachines := machines.New(ds, tc.cmdline)
 			ms := initMachines
 
-			err := ms.CreateUserData(tc.user, tc.homePath, z)
+			err := ms.CreateUserData(getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"), z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -553,7 +551,7 @@ func TestCreateUserData(t *testing.T) {
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
 
-			// finale rescan undeed if last one failed
+			// finale rescan uneeded if last one failed
 			if z.scanErr {
 				return
 			}
@@ -623,4 +621,16 @@ func generateCmdLine(datasetAndBoot string) string {
 // generateCmdLineWithRevert returns a command line with fake boot and a revert user data argument
 func generateCmdLineWithRevert(datasetAndBoot string) string {
 	return generateCmdLine(datasetAndBoot) + " " + machines.RevertUserDataTag
+}
+
+// getDefaultValue returns default value for this parameter
+func getDefaultValue(v, defaultVal string) string {
+	if v == "" {
+		return defaultVal
+	}
+	if v == "[empty]" {
+		return ""
+	}
+
+	return v
 }
