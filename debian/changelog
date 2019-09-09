@@ -1,3 +1,12 @@
+zsys (0.2) UNRELEASED; urgency=medium
+
+  * Add userdata hidden subcommand for creating and renaming user datasets.
+    (LP: #1842902)
+  * Build-dep on grub2-common to not produce s390x build for now until
+    we support an alternative bootloader.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 30 Aug 2019 10:41:57 +0200
+
 zsys (0.1.1) eoan; urgency=medium
 
   * Reduce cyclomatic complexity of some functions which results in better
