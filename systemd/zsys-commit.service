@@ -13,9 +13,11 @@ ExecStart=/sbin/zsys boot commit
 
 # Some daemon restrictions
 NoNewPrivileges=true
-ProtectHome=true
-PrivateTmp=true
 PrivateNetwork=true
+# We can't use those as this triggers PrivateMounts=true which makes
+# zfs <mountpoint>/.zfs/snapshot/ not showing up snapshot content.
+#ProtectHome=true
+#PrivateTmp=true
 
 [Install]
 WantedBy=default.target
