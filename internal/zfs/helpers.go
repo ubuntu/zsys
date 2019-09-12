@@ -10,55 +10,58 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// local cache of properties, refreshed on Scan()
+var datasetPropertiesCache map[string]*DatasetProp
+
 // getDatasetsProp returns all properties for a given dataset and the source of them.
 // for snapshots, we'll take the parent dataset for the mount properties.
 func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	sources := datasetSources{}
 	name := d.Properties[libzfs.DatasetPropName].Value
 
-	var mountPropertiesDataset = &d
 	isSnapshot := d.IsSnapshot()
 	var parentName string
-	if isSnapshot {
-		parentName = name[:strings.LastIndex(name, "@")]
-		pd, err := libzfs.DatasetOpen(parentName)
-		if err != nil {
-			return nil, xerrors.Errorf("can't get parent dataset: "+config.ErrorFormat, err)
-		}
-		defer pd.Close()
-		mountPropertiesDataset = &pd
-	}
-
-	var mountpoint, canMount string
-	mp, err := mountPropertiesDataset.GetProperty(libzfs.DatasetPropMountpoint)
-	if err != nil {
-		return nil, xerrors.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
-	}
-	if mp.Source != "none" {
-		sources.Mountpoint = mp.Source
-	}
-
-	p, err := mountPropertiesDataset.Pool()
-	if err != nil {
-		return nil, xerrors.Errorf("can't get associated pool: "+config.ErrorFormat, err)
-	}
-	poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
-	if err != nil {
-		return nil, xerrors.Errorf("can't get altroot for associated pool: "+config.ErrorFormat, err)
-	}
-	mountpoint = strings.TrimPrefix(mp.Value, poolRoot.Value)
-	if mountpoint == "" {
-		mountpoint = "/"
-	}
-
-	cm, err := mountPropertiesDataset.GetProperty(libzfs.DatasetPropCanmount)
-	if err != nil {
-		return nil, xerrors.Errorf("can't get canmount property: "+config.ErrorFormat, err)
-	}
-	canMount = cm.Value
 
 	var mounted bool
-	if !isSnapshot {
+	var mountpoint, canMount string
+
+	if isSnapshot {
+		parentName = name[:strings.LastIndex(name, "@")]
+		p, ok := datasetPropertiesCache[parentName]
+		if ok != true {
+			return nil, xerrors.Errorf("couldn't find %q in cache for getting properties of snapshot %q", parentName, name)
+		}
+		mountpoint = p.Mountpoint
+		sources.Mountpoint = p.sources.Mountpoint
+		canMount = p.CanMount
+	} else {
+		mp, err := d.GetProperty(libzfs.DatasetPropMountpoint)
+		if err != nil {
+			return nil, xerrors.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
+		}
+		if mp.Source != "none" {
+			sources.Mountpoint = mp.Source
+		}
+
+		p, err := d.Pool()
+		if err != nil {
+			return nil, xerrors.Errorf("can't get associated pool: "+config.ErrorFormat, err)
+		}
+		poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
+		if err != nil {
+			return nil, xerrors.Errorf("can't get altroot for associated pool: "+config.ErrorFormat, err)
+		}
+		mountpoint = strings.TrimPrefix(mp.Value, poolRoot.Value)
+		if mountpoint == "" {
+			mountpoint = "/"
+		}
+
+		cm, err := d.GetProperty(libzfs.DatasetPropCanmount)
+		if err != nil {
+			return nil, xerrors.Errorf("can't get canmount property: "+config.ErrorFormat, err)
+		}
+		canMount = cm.Value
+
 		mountedp, err := d.GetProperty(libzfs.DatasetPropMounted)
 		if err != nil {
 			return nil, xerrors.Errorf("can't get mounted: "+config.ErrorFormat, err)
@@ -132,7 +135,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		sources.BootfsDatasets = sDataset.Source
 	}
 
-	return &DatasetProp{
+	dp := DatasetProp{
 		Mountpoint:       mountpoint,
 		CanMount:         canMount,
 		Mounted:          mounted,
@@ -142,7 +145,11 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		BootfsDatasets:   BootfsDatasets,
 		Origin:           origin,
 		sources:          sources,
-	}, nil
+	}
+
+	datasetPropertiesCache[name] = &dp
+
+	return &dp, nil
 }
 
 // collectDatasets returns a Dataset tuple of all its properties and children

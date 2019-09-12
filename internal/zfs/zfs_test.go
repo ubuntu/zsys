@@ -198,15 +198,13 @@ func TestSnapshot(t *testing.T) {
 			z := zfs.New()
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
-			if tc.isNoOp {
-				var err error
-				initState, err = z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get initial state: %v", err)
-				}
+			var err error
+			initState, err = z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
 			}
 
-			err := z.Snapshot(tc.snapshotName, tc.datasetName, tc.recursive)
+			err = z.Snapshot(tc.snapshotName, tc.datasetName, tc.recursive)
 
 			if err != nil {
 				if !tc.wantErr {
@@ -281,15 +279,13 @@ func TestClone(t *testing.T) {
 			z := zfs.New()
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
-			if tc.isNoOp {
-				var err error
-				initState, err = z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get initial state: %v", err)
-				}
+			var err error
+			initState, err = z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
 			}
 
-			err := z.Clone(tc.dataset, tc.suffix, tc.skipBootfs, tc.recursive)
+			err = z.Clone(tc.dataset, tc.suffix, tc.skipBootfs, tc.recursive)
 
 			if err != nil {
 				if !tc.wantErr {

@@ -127,6 +127,9 @@ func (Zfs) Scan() ([]Dataset, error) {
 	}
 	defer libzfs.DatasetCloseAll(ds)
 
+	// Refresh cache
+	datasetPropertiesCache = make(map[string]*DatasetProp)
+
 	var datasets []Dataset
 	for _, d := range ds {
 		datasets = append(datasets, collectDatasets(d)...)
