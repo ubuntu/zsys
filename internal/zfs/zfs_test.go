@@ -347,6 +347,10 @@ func TestPromote(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New()
+			_, err := z.Scan() // Needed for cache
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
 			if tc.cloneFrom != "" {
 				err := z.Clone(tc.cloneFrom, "5678", false, !tc.cloneOnlyOne)
 				if err != nil {
@@ -369,7 +373,7 @@ func TestPromote(t *testing.T) {
 				}
 			}
 
-			err := z.Promote(tc.dataset)
+			err = z.Promote(tc.dataset)
 
 			if err != nil {
 				if !tc.wantErr {
@@ -431,6 +435,10 @@ func TestDestroy(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New()
+			_, err := z.Scan() // Needed for cache
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
 			if tc.cloneFrom != "" {
 				err := z.Clone(tc.cloneFrom, "5678", false, true)
 				if err != nil {
@@ -453,7 +461,7 @@ func TestDestroy(t *testing.T) {
 				}
 			}
 
-			err := z.Destroy(tc.dataset)
+			err = z.Destroy(tc.dataset)
 
 			if err != nil {
 				if !tc.wantErr {
