@@ -1,3 +1,11 @@
+zsys (0.2.1) UNRELEASED; urgency=medium
+
+  * Add caching for optimizing Scan() calls (from multiple seconds depending
+    on the amount of snapshots to subseconds).
+  * Fix update-grub not working when started by zsys boot systemd service.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 12 Sep 2019 12:00:10 +0200
+
 zsys (0.2) eoan; urgency=medium
 
   * Add userdata hidden subcommand for creating and renaming user datasets.
