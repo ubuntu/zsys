@@ -1,3 +1,6 @@
-Test-Command: sudo go test -v -mod=vendor ./...
-Restrictions: needs-root, allow-stderr
+# Skip tests on platform we don't build a binary for (no grub2-common package available).
+# Autopkgtests will still try to run it if it ever ran one day and would fail as it can't
+# install zsys.
+Test-Command: [ ! -f /usr/sbin/update-grub ] && exit 77 || sudo go test -v -mod=vendor ./...
+Restrictions: needs-root, allow-stderr, skippable
 Depends: @builddeps@
