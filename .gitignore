@@ -1,5 +1,5 @@
 # Binaries for programs and plugins
-cmd/zsys/zsys
+cmd/zsys/zsys*
 *.so
 *.dylib
 
