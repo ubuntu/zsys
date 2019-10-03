@@ -2,32 +2,26 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-
-	"github.com/ubuntu/zsys/internal/config"
-)
-
-var (
-	cmdErr        error
-	flagVerbosity int
-	rootCmd       = &cobra.Command{
-		Use:   "zsys",
-		Short: "ZFS SYStem integration control zsys ",
-		Long: `Zfs SYStem tool targeting an enhanced ZOL experience.
- It allows running multiple ZFS system in parallels on the same machine,
- get automated snapshots, managing complex zfs dataset layouts separating
- user data from system and persistent data, and more.`,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			config.SetVerboseMode(flagVerbosity)
-		},
-		// We display usage error ourselves
-		SilenceErrors: true,
-	}
+	"github.com/ubuntu/zsys/cmd/zsys/client"
+	"github.com/ubuntu/zsys/cmd/zsys/daemon"
 )
 
 func main() {
+	var rootCmd *cobra.Command
+	var errFunc func() error
+
+	if filepath.Base(os.Args[0]) == "zsysd" {
+		rootCmd = daemon.Cmd()
+		errFunc = daemon.Error
+	} else {
+		rootCmd = client.Cmd()
+		errFunc = client.Error
+	}
+
 	if err := rootCmd.Execute(); err != nil {
 		// This is a usage Error (we don't use postfix E commands other than usage)
 		// Usage error should be the same format than other errors
@@ -38,12 +32,8 @@ func main() {
 		log.Error(err)
 		os.Exit(2)
 	}
-	if cmdErr != nil {
-		log.Error(cmdErr)
+	if errFunc() != nil {
+		log.Error(errFunc())
 		os.Exit(1)
 	}
-}
-
-func init() {
-	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
 }
