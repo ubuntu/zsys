@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: debhelper (>= 11),
                dh-golang,
-               golang-go (>= 2:1.11~),
+               golang-1.13-go,
                libzfslinux-dev,
                zfsutils-linux,
                grub2-common,
