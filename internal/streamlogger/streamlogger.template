@@ -14,8 +14,8 @@ import (
 /*
   Clients generated code
 */
+{{- range .Clients}}
 
-{{range .Clients -}}
 // {{.LogClient}} is a grpc {{.OrigClient}} (*{{.PrivateClient}}), augmented by a connexion id in context.
 type {{.LogClient}} struct {
 	{{.OrigClient}}
@@ -34,13 +34,13 @@ func New{{.OrigClient}}WithLogs(ctx context.Context, cc *grpc.ClientConn) *{{.Lo
 func (z *{{.LogClient}}) Close() error {
 	return z.{{.OrigClient}}.(*{{.PrivateClient}}).cc.Close()
 }
+{{- end}}
 
-{{end -}}
 /*
    Servers
 */
+{{- range .Servers}}
 
-{{range .Servers -}}
 // {{.LogServer}} is used to intercept the server and inserting an intermediate log stream.
 // This can't be done in interceptor as the creation of each per-function server struct from a grpc.ServerStream
 // is only done in the handler() call, which is blocking until the whole handler has ran, once the stream
@@ -53,9 +53,10 @@ type {{.LogServer}} struct {
 func Register{{.OrigServer}}WithLogs(s *grpc.Server, srv {{.OrigServer}}) {
 	Register{{.OrigServer}}(s, &{{.LogServer}}{srv})
 }
+{{- end}}
 
-{{end -}}
-{{range .Calls -}}
+{{- range .Calls}}
+
 /*
  * {{.Service}}.{{.Name}}()
  */
@@ -85,14 +86,13 @@ func (z *{{.LogServer}}) {{.Name}}(req *{{.ReqType}}, stream {{.OrigStream}}) er
 		ctx:                   ctx,
 	})
 }
-
-{{end -}}
+{{- end}}
 
 /*
  * Extend streams to io.Writer
  */
+{{- range .Writers}}
 
-{{range .Writers -}}
 // Write promote {{.Stream}} to an io.Writer
 func (s *{{.Stream}}) Write(p []byte) (n int, err error) {
 	err = s.Send(
@@ -105,4 +105,4 @@ func (s *{{.Stream}}) Write(p []byte) (n int, err error) {
 
 	return len(p), nil
 }
-{{end -}}
+{{- end}}
