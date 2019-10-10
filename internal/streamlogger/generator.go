@@ -3,8 +3,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
 	"html/template"
@@ -219,17 +221,29 @@ func main() {
 		}
 	}
 
+	var buf bytes.Buffer
+	if err := t.Execute(&buf, data); err != nil {
+		log.Fatalf("couldn't execute template: %v", err)
+	}
+
+	// Reformat the source (for number of \t in struct to align fields)
+	res, err := format.Source(buf.Bytes())
+	if err != nil {
+		log.Fatalf("couldn't format buffered template: %v", err)
+	}
+
 	tmpName := dest + ".new"
 	out, err := os.Create(tmpName)
 	if err != nil {
 		log.Fatalf("couldn't create file: %v", err)
 	}
-	defer out.Close()
 
-	if err := t.Execute(out, data); err != nil {
+	if _, err := out.Write(res); err != nil {
+		out.Close()
 		os.Remove(tmpName)
-		log.Fatalf("couldn't execute template: %v", err)
+		log.Fatalf("couldn't format and save in file: %v", err)
 	}
+	out.Close()
 
 	if err := os.Rename(tmpName, dest); err != nil {
 		log.Fatalf("couldn't rename temporary file to new name: %v", err)
