@@ -72,7 +72,7 @@ func (s *{{.LogStream}}) Context() context.Context {
 }
 
 // {{.Name}} overrides {{.OrigServer}} {{.Name}}, installing a logger first
-func (z *{{.LogServer}}) {{.Name}}(req *VersionRequest, stream {{.OrigStream}}) error {
+func (z *{{.LogServer}}) {{.Name}}(req *{{.ReqType}}, stream {{.OrigStream}}) error {
 	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
 	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "{{.Name}}")
 	if err != nil {

@@ -33,6 +33,7 @@ type call struct {
 	LogServer  string
 	OrigStream string
 	LogStream  string
+	ReqType    string
 	Name       string
 }
 
@@ -158,32 +159,39 @@ func main() {
 						continue
 					}
 
-					if !strings.HasSuffix(name, "Server") {
+					// Only look for interface type Server, not per call server
+					if !strings.HasSuffix(name, "Server") || strings.Contains(name, "_") {
 						continue
 					}
 
 					// Connection servers
-					if !strings.Contains(name, "_") {
-						data.Servers = append(data.Servers, server{
-							OrigServer: name,
-							LogServer:  fmt.Sprintf("%sLogServer", strings.TrimSuffix(name, "Server")),
-						})
-						continue
-					}
-
-					// Per function call server
-					r := strings.SplitN(name, "_", 2)
-					service := r[0]
-					function := strings.TrimSuffix(r[1], "Server")
-
-					data.Calls = append(data.Calls, call{
-						Service:    service,
-						OrigServer: fmt.Sprintf("%sServer", service),
-						LogServer:  fmt.Sprintf("%sLogServer", strings.TrimSuffix(service, "Server")),
-						OrigStream: name,
-						LogStream:  fmt.Sprintf("%s%sLogStream", firstLetterLowercase(service), function),
-						Name:       function,
+					data.Servers = append(data.Servers, server{
+						OrigServer: name,
+						LogServer:  fmt.Sprintf("%sLogServer", strings.TrimSuffix(name, "Server")),
 					})
+
+					for _, callFunc := range elem.Methods.List {
+
+						function := callFunc.Names[0].Name
+
+						fields := callFunc.Type.(*ast.FuncType).Params.List
+						reqType := fields[0].Type.(*ast.StarExpr).X.(*ast.Ident).Name
+						origStream := fields[1].Type.(*ast.Ident).Name
+
+						// Per function call server
+						r := strings.SplitN(origStream, "_", 2)
+						service := r[0]
+
+						data.Calls = append(data.Calls, call{
+							Service:    service,
+							OrigServer: fmt.Sprintf("%sServer", service),
+							LogServer:  fmt.Sprintf("%sLogServer", strings.TrimSuffix(service, "Server")),
+							OrigStream: origStream,
+							LogStream:  fmt.Sprintf("%s%sLogStream", firstLetterLowercase(service), function),
+							ReqType:    reqType,
+							Name:       function,
+						})
+					}
 				}
 			}
 
