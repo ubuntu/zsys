@@ -32,8 +32,9 @@ func main() {
 		log.Error(err)
 		os.Exit(2)
 	}
-	if errFunc() != nil {
-		log.Error(errFunc())
+	err := errFunc()
+	if err != nil {
+		log.Error(err)
 		os.Exit(1)
 	}
 }

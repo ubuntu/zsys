@@ -18,17 +18,13 @@ var (
 		Use:   "create USER HOME_DIRECTORY",
 		Short: "Create a new home user dataset via an user dataset (if doesn't exist) creation",
 		Args:  cobra.ExactArgs(2),
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdErr = createUserData(args[0], args[1])
-		},
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = createUserData(args[0], args[1]) },
 	}
 	userdataRenameCmd = &cobra.Command{
 		Use:   "set-home OLD_HOME NEW_HOME",
 		Short: "Rename a user's home directory via renaming corresponding user dataset",
 		Args:  cobra.ExactArgs(2),
-		Run: func(cmd *cobra.Command, args []string) {
-			cmdErr = changeHomeOnUserData(args[0], args[1])
-		},
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = changeHomeOnUserData(args[0], args[1]) },
 	}
 )
 
