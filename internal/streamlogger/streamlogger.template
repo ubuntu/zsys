@@ -97,7 +97,11 @@ func (z *{{.LogServer}}) {{.Name}}(req *{{.ReqType}}, stream {{.OrigStream}}) er
 func (s *{{.Stream}}) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&{{.MessageType}}{
+		  {{- if.OneOfField}}
 			{{.OneOfField}}: &{{.LogField}}{Log: string(p)},
+		  {{- else}}
+			{{.LogField}}: string(p),
+		  {{- end}}
 		})
 	if err != nil {
 		return 0, err

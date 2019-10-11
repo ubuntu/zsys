@@ -118,23 +118,30 @@ func main() {
 					var oneOfField string
 					var logField string
 					for _, field := range elem.Fields.List {
-						if field.Tag == nil || field.Doc == nil || !strings.Contains(field.Tag.Value, "protobuf_oneof") {
+						if field.Tag == nil {
 							continue
 						}
 
-						for _, comment := range field.Doc.List {
-							logFieldCandidate := fmt.Sprintf("%s_Log", messageTypeName)
-							if strings.HasSuffix(comment.Text, logFieldCandidate) {
-								logField = logFieldCandidate
-								break
+						// Could be a oneof or direct Log sender.
+						if strings.Contains(field.Tag.Value, "protobuf_oneof") {
+							if field.Doc == nil {
+								continue
 							}
+							for _, comment := range field.Doc.List {
+								logFieldCandidate := fmt.Sprintf("%s_Log", messageTypeName)
+								if strings.HasSuffix(comment.Text, logFieldCandidate) {
+									logField = logFieldCandidate
+									break
+								}
+							}
+							oneOfField = field.Names[0].Name
+							break
+						} else if strings.Contains(field.Tag.Value, "protobuf:") && strings.Contains(field.Tag.Value, "name=log") {
+							logField = "Log"
 						}
-
-						oneOfField = field.Names[0].Name
-						break
 					}
 
-					if oneOfField == "" || logField == "" {
+					if logField == "" {
 						continue
 					}
 
