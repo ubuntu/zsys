@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	zsysPrefix = "org.zsys:"
+	zsysPrefix = "com.ubuntu.zsys:"
 	// BootfsProp string value
 	BootfsProp = zsysPrefix + "bootfs"
 	// LastUsedProp string value
