@@ -1,3 +1,9 @@
+zsys (0.2.2) eoan; urgency=medium
+
+  * Move identifier tags to com.ubuntu.zsys (LP: #1847711)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 11 Oct 2019 08:25:04 +0200
+
 zsys (0.2.1) eoan; urgency=medium
 
   * Add caching for optimizing Scan() calls (from multiple seconds depending
