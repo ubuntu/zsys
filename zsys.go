@@ -9,7 +9,6 @@ import (
 
 	"github.com/coreos/go-systemd/activation"
 	"github.com/coreos/go-systemd/daemon"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/streamlogger"
@@ -41,7 +40,7 @@ func RegisterAndListenZsysUnixSocketServer(ctx context.Context, socket string, s
 	// systemd socket activation or local creation
 	listeners, err := activation.Listeners()
 	if err != nil {
-		return errors.Errorf("cannot retrieve systemd listeners: %v", err)
+		return fmt.Errorf("cannot retrieve systemd listeners: %v", err)
 	}
 	var lis net.Listener
 	switch len(listeners) {
@@ -55,7 +54,7 @@ func RegisterAndListenZsysUnixSocketServer(ctx context.Context, socket string, s
 	case 1:
 		lis = listeners[0]
 	default:
-		return errors.Errorf("unexpected number of systemd socket activation (%d != 1)", len(listeners))
+		return fmt.Errorf("unexpected number of systemd socket activation (%d != 1)", len(listeners))
 	}
 
 	s := grpc.NewServer()
@@ -63,7 +62,7 @@ func RegisterAndListenZsysUnixSocketServer(ctx context.Context, socket string, s
 
 	// systemd activation
 	if sent, err := daemon.SdNotify(false, "READY=1"); err != nil {
-		return errors.Errorf("couldn't send ready notification to systemd while supported: %v", err)
+		return fmt.Errorf("couldn't send ready notification to systemd while supported: %v", err)
 	} else if sent {
 		log.Debug(ctx, "ready state sent to systemd")
 	}
