@@ -2,6 +2,7 @@ package machines
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"sort"
 	"strings"
@@ -10,7 +11,6 @@ import (
 
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
-	"golang.org/x/xerrors"
 )
 
 // sortDataset enables sorting a slice of Dataset elements.
@@ -46,7 +46,7 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 			return true, nil
 		}
 	default:
-		err = xerrors.Errorf("unexpected number of @ in dataset name %q", d.Name)
+		err = fmt.Errorf("unexpected number of @ in dataset name %q", d.Name)
 	}
 	return false, err
 }

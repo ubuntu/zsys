@@ -1,9 +1,11 @@
 package zfs
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/log"
-	"golang.org/x/xerrors"
 )
 
 // WithTransactions brings support fake transaction to Zfs.
@@ -17,7 +19,7 @@ func WithTransactions() func(z *Zfs) {
 // It will issue a warning if an error occurred during the transaction
 func (z *Zfs) Done() {
 	if z.transactionErr {
-		log.Warningf(z.ctx, config.ErrorFormat, xerrors.New("An error occurred during a Zfs transaction and Done() was called instead of Cancel()"))
+		log.Warningf(z.ctx, config.ErrorFormat, errors.New("An error occurred during a Zfs transaction and Done() was called instead of Cancel()"))
 	}
 	z.transactionErr = false
 	z.reverts = nil
@@ -27,7 +29,7 @@ func (z *Zfs) Done() {
 func (z *Zfs) Cancel() {
 	for i := len(z.reverts) - 1; i >= 0; i-- {
 		if err := z.reverts[i](); err != nil {
-			log.Warningf(z.ctx, config.ErrorFormat, xerrors.Errorf("An error occurred when reverting a Zfs transaction: "+config.ErrorFormat, err))
+			log.Warningf(z.ctx, config.ErrorFormat, fmt.Errorf("An error occurred when reverting a Zfs transaction: "+config.ErrorFormat, err))
 		}
 	}
 	z.transactionErr = false

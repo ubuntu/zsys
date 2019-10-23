@@ -1,13 +1,13 @@
 package zfs
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
 
 	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/config"
-	"golang.org/x/xerrors"
 )
 
 // local cache of properties, refreshed on Scan()
@@ -29,7 +29,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		parentName = name[:strings.LastIndex(name, "@")]
 		p, ok := datasetPropertiesCache[parentName]
 		if ok != true {
-			return nil, xerrors.Errorf("couldn't find %q in cache for getting properties of snapshot %q", parentName, name)
+			return nil, fmt.Errorf("couldn't find %q in cache for getting properties of snapshot %q", parentName, name)
 		}
 		mountpoint = p.Mountpoint
 		sources.Mountpoint = p.sources.Mountpoint
@@ -37,7 +37,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	} else {
 		mp, err := d.GetProperty(libzfs.DatasetPropMountpoint)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
+			return nil, fmt.Errorf("can't get mountpoint: "+config.ErrorFormat, err)
 		}
 		if mp.Source != "none" {
 			sources.Mountpoint = mp.Source
@@ -45,11 +45,11 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 
 		p, err := d.Pool()
 		if err != nil {
-			return nil, xerrors.Errorf("can't get associated pool: "+config.ErrorFormat, err)
+			return nil, fmt.Errorf("can't get associated pool: "+config.ErrorFormat, err)
 		}
 		poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get altroot for associated pool: "+config.ErrorFormat, err)
+			return nil, fmt.Errorf("can't get altroot for associated pool: "+config.ErrorFormat, err)
 		}
 		mountpoint = strings.TrimPrefix(mp.Value, poolRoot.Value)
 		if mountpoint == "" {
@@ -58,13 +58,13 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 
 		cm, err := d.GetProperty(libzfs.DatasetPropCanmount)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get canmount property: "+config.ErrorFormat, err)
+			return nil, fmt.Errorf("can't get canmount property: "+config.ErrorFormat, err)
 		}
 		canMount = cm.Value
 
 		mountedp, err := d.GetProperty(libzfs.DatasetPropMounted)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get mounted: "+config.ErrorFormat, err)
+			return nil, fmt.Errorf("can't get mounted: "+config.ErrorFormat, err)
 		}
 		if mountedp.Value == "yes" {
 			mounted = true
@@ -77,7 +77,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 
 	bfs, err := d.GetUserProperty(BootfsProp)
 	if err != nil {
-		return nil, xerrors.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
+		return nil, fmt.Errorf("can't get bootfs property: "+config.ErrorFormat, err)
 	}
 	var bootfs bool
 	// Only consider local, explicitly set bootfs as meaningful
@@ -92,12 +92,12 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	if !d.IsSnapshot() {
 		lu, err = d.GetUserProperty(LastUsedProp)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, LastUsedProp, err)
+			return nil, fmt.Errorf("can't get %q property: "+config.ErrorFormat, LastUsedProp, err)
 		}
 	} else {
 		lu, err = d.GetProperty(libzfs.DatasetPropCreation)
 		if err != nil {
-			return nil, xerrors.Errorf("can't get creation property: "+config.ErrorFormat, err)
+			return nil, fmt.Errorf("can't get creation property: "+config.ErrorFormat, err)
 		}
 	}
 	if lu.Source != "none" {
@@ -108,12 +108,12 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	}
 	lastused, err := strconv.Atoi(lu.Value)
 	if err != nil {
-		return nil, xerrors.Errorf("%q property isn't an int: "+config.ErrorFormat, LastUsedProp, err)
+		return nil, fmt.Errorf("%q property isn't an int: "+config.ErrorFormat, LastUsedProp, err)
 	}
 
 	lbk, err := d.GetUserProperty(LastBootedKernelProp)
 	if err != nil {
-		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, LastBootedKernelProp, err)
+		return nil, fmt.Errorf("can't get %q property: "+config.ErrorFormat, LastBootedKernelProp, err)
 	}
 	lastBootedKernel := lbk.Value
 	if lastBootedKernel == "-" {
@@ -125,7 +125,7 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 
 	sDataset, err := d.GetUserProperty(BootfsDatasetsProp)
 	if err != nil {
-		return nil, xerrors.Errorf("can't get %q property: "+config.ErrorFormat, BootfsDatasetsProp, err)
+		return nil, fmt.Errorf("can't get %q property: "+config.ErrorFormat, BootfsDatasetsProp, err)
 	}
 	BootfsDatasets := sDataset.Value
 	if BootfsDatasets == "-" {
@@ -172,7 +172,7 @@ func collectDatasets(d libzfs.Dataset) []Dataset {
 
 	props, err := getDatasetProp(d)
 	if err != nil {
-		collectErr = xerrors.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, err)
+		collectErr = fmt.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, err)
 		return nil
 	}
 
@@ -215,7 +215,7 @@ func checkSnapshotHierarchyIntegrity(d libzfs.Dataset, snapshotName string, snap
 	// No more snapshot was expected for children (parent dataset didn't have a snapshot, so all children shouldn't have them)
 	if found && !snapshotExpected {
 		name := d.Properties[libzfs.DatasetPropName].Value
-		return xerrors.Errorf("parent of %q doesn't have a snapshot named %q. Every of its children shouldn't have a snapshot. However %q exists.",
+		return fmt.Errorf("parent of %q doesn't have a snapshot named %q. Every of its children shouldn't have a snapshot. However %q exists",
 			name, snapshotName, name+"@"+snapshotName)
 	}
 
@@ -233,10 +233,10 @@ func checkNoClone(d *libzfs.Dataset) error {
 
 	clones, err := d.Clones()
 	if err != nil {
-		return xerrors.Errorf("couldn't scan %q for clones", name)
+		return fmt.Errorf("couldn't scan %q for clones", name)
 	}
 	if len(clones) > 0 {
-		return xerrors.Errorf("%q has some clones when it shouldn't", name)
+		return fmt.Errorf("%q has some clones when it shouldn't", name)
 	}
 
 	for _, cd := range d.Children {
@@ -283,7 +283,7 @@ func stringToProp(name string) (libzfs.Prop, error) {
 	case MountPointProp:
 		prop = libzfs.DatasetPropMountpoint
 	default:
-		return prop, xerrors.Errorf("unsupported property %q", name)
+		return prop, fmt.Errorf("unsupported property %q", name)
 	}
 	return prop, nil
 }

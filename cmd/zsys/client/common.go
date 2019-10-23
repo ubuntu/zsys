@@ -2,18 +2,18 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/zfs"
-	"golang.org/x/xerrors"
 )
 
 // requireSubcommand is a no-op command which return an error message to trigger
 // a command usage error.
 func requireSubcommand(cmd *cobra.Command, args []string) error {
-	return xerrors.Errorf("%s requires a subcommand", cmd.Name())
+	return fmt.Errorf("%s requires a subcommand", cmd.Name())
 }
 
 // getMachines returns all scanned machines on the current system

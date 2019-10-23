@@ -1,12 +1,12 @@
 package machines_test
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/ubuntu/zsys/internal/zfs"
-	"golang.org/x/xerrors"
 )
 
 type zfsMock struct {
@@ -50,7 +50,7 @@ func NewZfsMock(ds []zfs.Dataset, mountedDataset, predictableSuffixFor string, c
 // Create creates a dataset if it doesn't exist already and its parent exists
 func (z *zfsMock) Create(p, mountpoint, canmount string) error {
 	if z.createErr {
-		return xerrors.New("Mock zfs raised an error on Clone")
+		return errors.New("Mock zfs raised an error on Clone")
 	}
 
 	ds := strings.Split(p, "/")
@@ -95,7 +95,7 @@ func (z *zfsMock) Create(p, mountpoint, canmount string) error {
 // Clone behaves like zfs.Clone, but is a in memory version with mock zfs datasets
 func (z *zfsMock) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
 	if z.cloneErr {
-		return xerrors.New("Mock zfs raised an error on Clone")
+		return errors.New("Mock zfs raised an error on Clone")
 	}
 
 	datasets := z.nextD
@@ -106,7 +106,7 @@ func (z *zfsMock) Clone(name, suffix string, skipBootfs, recursive bool) (errClo
 
 	rootName, snapshot := splitSnapshotName(name)
 	if snapshot == "" {
-		return xerrors.Errorf("should clone a snapshot, got %q", name)
+		return fmt.Errorf("should clone a snapshot, got %q", name)
 	}
 
 	// Reformat the name with the new uuid and clone now the dataset.
@@ -137,7 +137,7 @@ func (z *zfsMock) Clone(name, suffix string, skipBootfs, recursive bool) (errClo
 			}
 		}
 		if found {
-			return xerrors.Errorf("can't clone: %q already exists", d.Name)
+			return fmt.Errorf("can't clone: %q already exists", d.Name)
 		}
 
 		cm := d.CanMount
@@ -165,7 +165,7 @@ func (z *zfsMock) Clone(name, suffix string, skipBootfs, recursive bool) (errClo
 // Scan behaves like zfs.Scan, but is a in memory version with mock zfs datasets
 func (z zfsMock) Scan() ([]zfs.Dataset, error) {
 	if z.scanErr {
-		return nil, xerrors.New("Mock zfs raised an error on Scan")
+		return nil, errors.New("Mock zfs raised an error on Scan")
 	}
 
 	// "Scan" zfs datasets by switch to the next prepared state
@@ -199,7 +199,7 @@ func (z zfsMock) Scan() ([]zfs.Dataset, error) {
 // SetProperty behaves like zfs.SetProperty, but is a in memory version with mock zfs datasets
 func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error {
 	if z.setPropErr {
-		return xerrors.New("Mock zfs raised an error on SetProperty")
+		return errors.New("Mock zfs raised an error on SetProperty")
 	}
 
 	datasets := z.nextD
@@ -262,7 +262,7 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 				}
 			}
 		default:
-			return xerrors.Errorf("trying to set invalid property in zfs mock: %q", name)
+			return fmt.Errorf("trying to set invalid property in zfs mock: %q", name)
 		}
 	}
 	z.nextD = datasets
@@ -275,7 +275,7 @@ func (z *zfsMock) SetProperty(name, value, datasetName string, force bool) error
 // before the targeted clone time creation), but we don't really care of it in the mock version.
 func (z *zfsMock) Promote(name string) error {
 	if z.promoteErr {
-		return xerrors.New("Mock zfs raised an error on Promote")
+		return errors.New("Mock zfs raised an error on Promote")
 	}
 
 	datasets := z.nextD

@@ -3,10 +3,10 @@ package streamlogger
 import (
 	"context"
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/log"
 	"google.golang.org/grpc"

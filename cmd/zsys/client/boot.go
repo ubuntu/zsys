@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
-	"golang.org/x/xerrors"
 )
 
 var (
@@ -54,7 +53,7 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 	defer func() {
 		if err != nil {
 			z.Cancel()
-			err = xerrors.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
+			err = fmt.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
 		} else {
 			z.Done()
 		}
@@ -84,7 +83,7 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	defer func() {
 		if err != nil {
 			z.Cancel()
-			err = xerrors.Errorf("couldn't commit: "+config.ErrorFormat, err)
+			err = fmt.Errorf("couldn't commit: "+config.ErrorFormat, err)
 		} else {
 			z.Done()
 		}
@@ -110,7 +109,7 @@ func bootCommit(printModifiedBoot bool) (err error) {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		if err := cmd.Run(); err != nil {
-			return xerrors.Errorf("%q returns an error:"+config.ErrorFormat, updateGrubCmd, err)
+			return fmt.Errorf("%q returns an error:"+config.ErrorFormat, updateGrubCmd, err)
 		}
 	}
 

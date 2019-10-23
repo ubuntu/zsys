@@ -2,11 +2,11 @@ package client
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
-	"golang.org/x/xerrors"
 )
 
 var (
@@ -48,7 +48,7 @@ func createUserData(user, homepath string) (err error) {
 	defer func() {
 		if err != nil {
 			z.Cancel()
-			err = xerrors.Errorf("couldn't create userdataset for %q: "+config.ErrorFormat, homepath, err)
+			err = fmt.Errorf("couldn't create userdataset for %q: "+config.ErrorFormat, homepath, err)
 		} else {
 			z.Done()
 		}
@@ -68,7 +68,7 @@ func changeHomeOnUserData(home, newHome string) (err error) {
 	defer func() {
 		if err != nil {
 			z.Cancel()
-			err = xerrors.Errorf("couldn't change home userdataset for %q: "+config.ErrorFormat, home, err)
+			err = fmt.Errorf("couldn't change home userdataset for %q: "+config.ErrorFormat, home, err)
 		} else {
 			z.Done()
 		}

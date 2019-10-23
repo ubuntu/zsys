@@ -2,10 +2,10 @@ package streamlogger
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/log"
 	"google.golang.org/grpc"
