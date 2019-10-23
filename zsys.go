@@ -7,7 +7,11 @@ import (
 	"os"
 	"time"
 
+	"github.com/coreos/go-systemd/activation"
+	"github.com/coreos/go-systemd/daemon"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 	"google.golang.org/grpc"
 )
@@ -31,21 +35,46 @@ func NewZsysUnixSocketClient(socket string, level logrus.Level) (*ZsysLogClient,
 }
 
 // RegisterAndListenZsysUnixSocketServer serves on an unix socket path, and register a ZsysServer.
+// It handles systemd activation and notifications.
 // The listener can be cancelled to remove the socket file properly.
 func RegisterAndListenZsysUnixSocketServer(ctx context.Context, socket string, srv ZsysServer) error {
-	lis, err := net.Listen("unix", socket)
+	// systemd socket activation or local creation
+	listeners, err := activation.Listeners()
 	if err != nil {
-		return fmt.Errorf("failed to listen on %q: %w", socket, err)
+		return errors.Errorf("cannot retrieve systemd listeners: %v", err)
 	}
-	defer os.Remove(socket)
+	var lis net.Listener
+	switch len(listeners) {
+	case 0:
+		l, err := net.Listen("unix", socket)
+		if err != nil {
+			return fmt.Errorf("failed to listen on %q: %w", socket, err)
+		}
+		defer os.Remove(socket)
+		lis = l
+	case 1:
+		lis = listeners[0]
+	default:
+		return errors.Errorf("unexpected number of systemd socket activation (%d != 1)", len(listeners))
+	}
 
 	s := grpc.NewServer()
 	RegisterZsysServerWithLogs(s, srv)
 
+	// systemd activation
+	if sent, err := daemon.SdNotify(false, "READY=1"); err != nil {
+		return errors.Errorf("couldn't send ready notification to systemd while supported: %v", err)
+	} else if sent {
+		log.Debug(ctx, "ready state sent to systemd")
+	}
+
 	go func() {
 		<-ctx.Done()
-		s.Stop()
+		log.Debug(ctx, "stopping daemon requested. Wait for active requests to close")
+		s.GracefulStop()
+		log.Debug(ctx, "all connexions closed")
 	}()
+	log.Debug(ctx, "daemon serving")
 	return s.Serve(lis)
 }
 
