@@ -4,7 +4,7 @@ import (
 	"os"
 
 	"github.com/k0kubun/pp"
-	log "github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/log"
 )
 
 // ErrorFormat switch between "%v" and "%+v" depending if we want more verbose info
@@ -16,23 +16,18 @@ func init() {
 
 // SetVerboseMode change ErrorFormat and logs between very, middly and non verbose
 func SetVerboseMode(level int) {
+	if level > 2 {
+		level = 2
+	}
 	switch level {
-	case 0:
+	default:
 		ErrorFormat = "%v"
-		log.SetFormatter(&log.TextFormatter{
-			DisableLevelTruncation: true,
-			DisableTimestamp:       true,
-		})
-		log.SetLevel(log.WarnLevel)
+		log.SetLevel(log.DefaultLevel)
 	case 1:
 		ErrorFormat = "%+v"
-		log.SetFormatter(&log.TextFormatter{DisableLevelTruncation: true})
 		log.SetLevel(log.InfoLevel)
-		log.Debug("verbosity set to info and will print stacktraces")
 	case 2:
 		ErrorFormat = "%+v"
-		log.SetFormatter(&log.TextFormatter{DisableLevelTruncation: true})
 		log.SetLevel(log.DebugLevel)
-		log.Debug("verbosity set to debug and will print stacktraces")
 	}
 }
