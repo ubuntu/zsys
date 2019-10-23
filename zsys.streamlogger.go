@@ -22,8 +22,8 @@ type ZsysLogClient struct {
 	Ctx context.Context
 }
 
-// NewZsysClientWithLogs returns a ZsysLogClient, which can send logs at level "level", attached to the given context
-func NewZsysClientWithLogs(ctx context.Context, cc *grpc.ClientConn, level logrus.Level) *ZsysLogClient {
+// newZsysClientWithLogs returns a ZsysLogClient, which can send logs at level "level", attached to the given context
+func newZsysClientWithLogs(ctx context.Context, cc *grpc.ClientConn, level logrus.Level) *ZsysLogClient {
 	return &ZsysLogClient{
 		ZsysClient: NewZsysClient(cc),
 		Ctx:        streamlogger.NewClientCtx(ctx, level),
@@ -47,8 +47,8 @@ type ZsysLogServer struct {
 	ZsysServer
 }
 
-// RegisterZsysServerWithLogs wraps the server to a logged variant intercepting all grpc calls.
-func RegisterZsysServerWithLogs(s *grpc.Server, srv ZsysServer) {
+// registerZsysServerWithLogs wraps the server to a logged variant intercepting all grpc calls.
+func registerZsysServerWithLogs(s *grpc.Server, srv ZsysServer) {
 	RegisterZsysServer(s, &ZsysLogServer{srv})
 }
 

@@ -23,8 +23,8 @@ type {{.LogClient}} struct {
 	Ctx context.Context
 }
 
-// New{{.OrigClient}}WithLogs returns a {{.LogClient}}, which can send logs at level "level", attached to the given context
-func New{{.OrigClient}}WithLogs(ctx context.Context, cc *grpc.ClientConn, level logrus.Level) *{{.LogClient}} {
+// new{{.OrigClient}}WithLogs returns a {{.LogClient}}, which can send logs at level "level", attached to the given context
+func new{{.OrigClient}}WithLogs(ctx context.Context, cc *grpc.ClientConn, level logrus.Level) *{{.LogClient}} {
 	return &{{.LogClient}}{
 		{{.OrigClient}}: New{{.OrigClient}}(cc),
 		Ctx:        streamlogger.NewClientCtx(ctx, level),
@@ -50,8 +50,8 @@ type {{.LogServer}} struct {
 	{{.OrigServer}}
 }
 
-// Register{{.OrigServer}}WithLogs wraps the server to a logged variant intercepting all grpc calls.
-func Register{{.OrigServer}}WithLogs(s *grpc.Server, srv {{.OrigServer}}) {
+// register{{.OrigServer}}WithLogs wraps the server to a logged variant intercepting all grpc calls.
+func register{{.OrigServer}}WithLogs(s *grpc.Server, srv {{.OrigServer}}) {
 	Register{{.OrigServer}}(s, &{{.LogServer}}{srv})
 }
 {{- end}}

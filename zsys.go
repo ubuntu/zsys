@@ -31,7 +31,7 @@ func NewZsysUnixSocketClient(socket string, level logrus.Level) (*ZsysLogClient,
 		return nil, fmt.Errorf("couldn't connect to unix socket %q: %w", socket, err)
 	}
 
-	return NewZsysClientWithLogs(context.Background(), conn, level), nil
+	return newZsysClientWithLogs(context.Background(), conn, level), nil
 }
 
 // RegisterAndListenZsysUnixSocketServer serves on an unix socket path, and register a ZsysServer.
@@ -59,7 +59,7 @@ func RegisterAndListenZsysUnixSocketServer(ctx context.Context, socket string, s
 	}
 
 	s := grpc.NewServer()
-	RegisterZsysServerWithLogs(s, srv)
+	registerZsysServerWithLogs(s, srv)
 
 	// systemd activation
 	if sent, err := daemon.SdNotify(false, "READY=1"); err != nil {
