@@ -14,7 +14,7 @@ import (
 )
 
 // NewClientCtx creates a requester ID and attach it to returned context.
-func NewClientCtx(ctx context.Context) context.Context {
+func NewClientCtx(ctx context.Context, level logrus.Level) context.Context {
 	requesterID := "unknown"
 	b := make([]byte, 4)
 	if _, err := rand.Read(b); err != nil {
@@ -25,7 +25,7 @@ func NewClientCtx(ctx context.Context) context.Context {
 
 	return metadata.NewOutgoingContext(ctx, metadata.Pairs(
 		metaRequesterIDKey, requesterID,
-		metaLevelKey, log.DebugLevel.String()))
+		metaLevelKey, level.String()))
 }
 
 // ClientRequestIDInterceptor ensure that the stream get a valid requestID from the service in headers.

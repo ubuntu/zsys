@@ -8,7 +8,7 @@ package streamlogger
 
 const (
 	// DefaultSocket path.
-	DefaultSocket = "/tmp/mysocket.socket"
+	DefaultSocket = "/run/zsysd.sock"
 
 	// metaRequesterIDKey is the metadata key provided by the client to associate a given requester
 	metaRequesterIDKey = "requesterid"

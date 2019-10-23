@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 	"google.golang.org/grpc"
 )
@@ -22,11 +23,11 @@ type {{.LogClient}} struct {
 	Ctx context.Context
 }
 
-// New{{.OrigClient}}WithLogs returns a {{.LogClient}}, which can send logs, attached to the given context
-func New{{.OrigClient}}WithLogs(ctx context.Context, cc *grpc.ClientConn) *{{.LogClient}} {
+// New{{.OrigClient}}WithLogs returns a {{.LogClient}}, which can send logs at level "level", attached to the given context
+func New{{.OrigClient}}WithLogs(ctx context.Context, cc *grpc.ClientConn, level logrus.Level) *{{.LogClient}} {
 	return &{{.LogClient}}{
 		{{.OrigClient}}: New{{.OrigClient}}(cc),
-		Ctx:        streamlogger.NewClientCtx(ctx),
+		Ctx:        streamlogger.NewClientCtx(ctx, level),
 	}
 }
 
