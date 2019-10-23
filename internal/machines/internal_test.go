@@ -1,6 +1,7 @@
 package machines
 
 import (
+	"context"
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
@@ -49,7 +50,7 @@ func TestResolveOrigin(t *testing.T) {
 			t.Parallel()
 			ds := LoadDatasets(t, tc.def)
 
-			got := resolveOrigin(ds)
+			got := resolveOrigin(context.Background(), ds)
 
 			assertDatasetsOrigin(t, got)
 		})

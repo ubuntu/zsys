@@ -1,6 +1,7 @@
 package machines
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -8,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 	"golang.org/x/xerrors"
 )
@@ -29,7 +30,7 @@ type zfsSetPropertyScanner interface {
 
 // CreateUserData creates a new dataset for homepath and attach to current system.
 // It creates intermediates user datasets if needed.
-func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCreater) error {
+func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string, z ZfsSetPropertyScanCreater) error {
 	if !ms.current.isZsys() {
 		return errors.New("Current machine isn't Zsys, nothing to create")
 	}
@@ -41,14 +42,14 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 		return errors.New("Needs a valid home path, got nothing")
 	}
 	// If there this user already attached to this machine: retarget home
-	reused, err := ms.tryReuseUserDataSet(user, "", homepath, z)
+	reused, err := ms.tryReuseUserDataSet(ctx, user, "", homepath, z)
 	if err != nil {
 		return err
 	} else if reused {
 		return nil
 	}
 
-	log.Infof("create user dataset for %q\n", homepath)
+	log.Infof(ctx, "Create user dataset for %q", homepath)
 
 	// Take same pool as existing userdatasets for current system
 	userdatasetRoot := ""
@@ -109,16 +110,16 @@ func (ms *Machines) CreateUserData(user, homepath string, z ZfsSetPropertyScanCr
 	ds, err := z.Scan()
 	if err != nil {
 		// don't fail if Scan is failing, as the dataset was created
-		log.Warningf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
+		log.Warningf(ctx, "couldn't rescan after committing boot: "+config.ErrorFormat, err)
 	} else {
-		*ms = New(ds, ms.cmdline)
+		*ms = New(ctx, ds, ms.cmdline)
 	}
 
 	return nil
 }
 
 // ChangeHomeOnUserData tries to find an existing dataset matching home and rename it to newhome
-func (ms *Machines) ChangeHomeOnUserData(home, newHome string, z ZfsSetPropertyScanCreater) error {
+func (ms *Machines) ChangeHomeOnUserData(ctx context.Context, home, newHome string, z ZfsSetPropertyScanCreater) error {
 	if !ms.current.isZsys() {
 		return errors.New("Current machine isn't Zsys, nothing to modify")
 	}
@@ -130,8 +131,8 @@ func (ms *Machines) ChangeHomeOnUserData(home, newHome string, z ZfsSetPropertyS
 		return xerrors.Errorf("can't use empty string for new home directory")
 	}
 
-	log.Infof("reset user dataset path from %q to %q\n", home, newHome)
-	found, err := ms.tryReuseUserDataSet("", home, newHome, z)
+	log.Infof(ctx, "Reset user dataset path from %q to %q", home, newHome)
+	found, err := ms.tryReuseUserDataSet(ctx, "", home, newHome, z)
 	if err != nil {
 		return err
 	}
@@ -153,8 +154,8 @@ func getUserDatasetPath(path string) string {
 
 // tryReuseUserDataSet tries to match an existing user dataset for the current machine.
 // user match is used first, if empty, it will try to match old home directory.
-func (ms *Machines) tryReuseUserDataSet(user string, oldhome, newhome string, z zfsSetPropertyScanner) (bool, error) {
-	log.Debugf("trying to check if there is a user or home directory already attached to this machine")
+func (ms *Machines) tryReuseUserDataSet(ctx context.Context, user string, oldhome, newhome string, z zfsSetPropertyScanner) (bool, error) {
+	log.Debugf(ctx, "Trying to check if there is a user or home directory already attached to this machine")
 
 	// If there this user or home already attached to this machine: retarget home
 	for _, d := range ms.current.UserDatasets {
@@ -183,16 +184,16 @@ func (ms *Machines) tryReuseUserDataSet(user string, oldhome, newhome string, z 
 
 		// We'll reuse that dataset
 		if match {
-			log.Infof("Reusing %q as matching user name or old mountpoint", d.Name)
+			log.Infof(ctx, "Reusing %q as matching user name or old mountpoint", d.Name)
 			if err := z.SetProperty(zfs.MountPointProp, newhome, d.Name, false); err != nil {
 				return false, xerrors.Errorf("couldn't set new home %q to %q: "+config.ErrorFormat, newhome, d.Name, err)
 			}
 			ds, err := z.Scan()
 			if err != nil {
 				// don't fail if Scan is failing, as the dataset was created
-				log.Warningf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
+				log.Warningf(ctx, "Couldn't rescan after committing boot: "+config.ErrorFormat, err)
 			} else {
-				*ms = New(ds, ms.cmdline)
+				*ms = New(ctx, ds, ms.cmdline)
 			}
 			return true, nil
 		}

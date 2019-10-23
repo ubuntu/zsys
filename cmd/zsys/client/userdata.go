@@ -1,6 +1,8 @@
 package client
 
 import (
+	"context"
+
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
@@ -37,12 +39,12 @@ func init() {
 // createUserData creates a new userdata for user and set it to homepath on current zsys system.
 // if the user already exists for a dataset attached to the current system, set its mountpoint to homepath.
 func createUserData(user, homepath string) (err error) {
-	ms, err := getMachines(zfs.New())
+	ms, err := getMachines(context.Background(), zfs.New(context.Background()))
 	if err != nil {
 		return err
 	}
 
-	z := zfs.New(zfs.WithTransactions())
+	z := zfs.New(context.Background(), zfs.WithTransactions())
 	defer func() {
 		if err != nil {
 			z.Cancel()
@@ -52,17 +54,17 @@ func createUserData(user, homepath string) (err error) {
 		}
 	}()
 
-	return ms.CreateUserData(user, homepath, z)
+	return ms.CreateUserData(context.Background(), user, homepath, z)
 }
 
 // changeHomeOnUserData change from home to newHome on current zsys system.
 func changeHomeOnUserData(home, newHome string) (err error) {
-	ms, err := getMachines(zfs.New())
+	ms, err := getMachines(context.Background(), zfs.New(context.Background()))
 	if err != nil {
 		return err
 	}
 
-	z := zfs.New(zfs.WithTransactions())
+	z := zfs.New(context.Background(), zfs.WithTransactions())
 	defer func() {
 		if err != nil {
 			z.Cancel()
@@ -72,5 +74,5 @@ func changeHomeOnUserData(home, newHome string) (err error) {
 		}
 	}()
 
-	return ms.ChangeHomeOnUserData(home, newHome, z)
+	return ms.ChangeHomeOnUserData(context.Background(), home, newHome, z)
 }

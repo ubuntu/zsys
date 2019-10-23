@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"io/ioutil"
 
 	"github.com/spf13/cobra"
@@ -16,7 +17,7 @@ func requireSubcommand(cmd *cobra.Command, args []string) error {
 }
 
 // getMachines returns all scanned machines on the current system
-func getMachines(z *zfs.Zfs) (*machines.Machines, error) {
+func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
 	ds, err := z.Scan()
 	if err != nil {
 		return nil, err
@@ -25,7 +26,7 @@ func getMachines(z *zfs.Zfs) (*machines.Machines, error) {
 	if err != nil {
 		return nil, err
 	}
-	ms := machines.New(ds, cmdline)
+	ms := machines.New(ctx, ds, cmdline)
 
 	return &ms, nil
 }

@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"os/exec"
@@ -48,7 +49,7 @@ func init() {
 }
 
 func bootPrepare(printModifiedBoot bool) (err error) {
-	z := zfs.New(zfs.WithTransactions())
+	z := zfs.New(context.Background(), zfs.WithTransactions())
 
 	defer func() {
 		if err != nil {
@@ -59,12 +60,12 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 		}
 	}()
 
-	ms, err := getMachines(z)
+	ms, err := getMachines(context.Background(), z)
 	if err != nil {
 		return err
 	}
 
-	changed, err := ms.EnsureBoot(z)
+	changed, err := ms.EnsureBoot(context.Background(), z)
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 }
 
 func bootCommit(printModifiedBoot bool) (err error) {
-	z := zfs.New(zfs.WithTransactions())
+	z := zfs.New(context.Background(), zfs.WithTransactions())
 
 	defer func() {
 		if err != nil {
@@ -89,12 +90,12 @@ func bootCommit(printModifiedBoot bool) (err error) {
 		}
 	}()
 
-	ms, err := getMachines(z)
+	ms, err := getMachines(context.Background(), z)
 	if err != nil {
 		return err
 	}
 
-	changed, err := ms.Commit(z)
+	changed, err := ms.Commit(context.Background(), z)
 	if err != nil {
 		return err
 	}

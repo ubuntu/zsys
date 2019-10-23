@@ -1,13 +1,14 @@
 package machines
 
 import (
+	"context"
 	"math/rand"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 	"golang.org/x/xerrors"
 )
@@ -52,7 +53,7 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 
 // resolveOrigin iterates over each datasets up to their true origin and replaces them.
 // This is only done for / as it's the deduplication we are interested in.
-func resolveOrigin(datasets []zfs.Dataset) map[string]*string {
+func resolveOrigin(ctx context.Context, datasets []zfs.Dataset) map[string]*string {
 	r := make(map[string]*string)
 	for _, curDataset := range datasets {
 		if curDataset.Mountpoint != "/" || curDataset.CanMount == "off" {
@@ -91,7 +92,7 @@ func resolveOrigin(datasets []zfs.Dataset) map[string]*string {
 				break nextOrigin
 			}
 			if originStart == *curOrig {
-				log.Warningf("didn't find origin %q for %q matching any dataset", *curOrig, curDataset.Name)
+				log.Warningf(ctx, "Didn't find origin %q for %q matching any dataset", *curOrig, curDataset.Name)
 				delete(r, curDataset.Name)
 				break
 			}

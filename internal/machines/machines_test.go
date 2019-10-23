@@ -1,6 +1,7 @@
 package machines_test
 
 import (
+	"context"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -113,7 +114,7 @@ func TestNew(t *testing.T) {
 				}
 			}
 
-			got := machines.New(ds, tc.cmdline)
+			got := machines.New(context.Background(), ds, tc.cmdline)
 
 			assertMachinesToGolden(t, got)
 		})
@@ -124,8 +125,8 @@ func TestIdempotentNew(t *testing.T) {
 	t.Parallel()
 	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones.json")
 
-	got1 := machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
-	got2 := machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+	got1 := machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+	got2 := machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 
 	assertMachinesEquals(t, got1, got2)
 }
@@ -213,10 +214,10 @@ func TestBoot(t *testing.T) {
 			for _, d := range z.d {
 				datasets = append(datasets, *d)
 			}
-			initMachines := machines.New(datasets, tc.cmdline)
+			initMachines := machines.New(context.Background(), datasets, tc.cmdline)
 			ms := initMachines
 
-			hasChanged, err := ms.EnsureBoot(z)
+			hasChanged, err := ms.EnsureBoot(context.Background(), z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -244,7 +245,7 @@ func TestBoot(t *testing.T) {
 			if err != nil {
 				t.Fatal("couldn't rescan before checking final state:", err)
 			}
-			machinesAfterRescan := machines.New(datasets, tc.cmdline)
+			machinesAfterRescan := machines.New(context.Background(), datasets, tc.cmdline)
 			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
@@ -258,9 +259,9 @@ func TestIdempotentBoot(t *testing.T) {
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
 	}
-	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"))
+	ms1 := machines.New(context.Background(), datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"))
 
-	changed, err := ms1.EnsureBoot(z)
+	changed, err := ms1.EnsureBoot(context.Background(), z)
 	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
@@ -269,7 +270,7 @@ func TestIdempotentBoot(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.EnsureBoot(z)
+	changed, err = ms2.EnsureBoot(context.Background(), z)
 	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
@@ -292,16 +293,16 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
 	}
-	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
+	ms1 := machines.New(context.Background(), datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	changed, err := ms1.EnsureBoot(z)
+	changed, err := ms1.EnsureBoot(context.Background(), z)
 	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
 	if !changed {
 		t.Fatal("expected first boot to signal a changed, but got false")
 	}
-	changed, err = ms1.Commit(z)
+	changed, err = ms1.Commit(context.Background(), z)
 	if err != nil {
 		t.Fatal("Commit failed:", err)
 	}
@@ -310,7 +311,7 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.EnsureBoot(z)
+	changed, err = ms2.EnsureBoot(context.Background(), z)
 	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
@@ -329,9 +330,9 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
 	}
-	ms1 := machines.New(datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
+	ms1 := machines.New(context.Background(), datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	changed, err := ms1.EnsureBoot(z)
+	changed, err := ms1.EnsureBoot(context.Background(), z)
 	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
@@ -340,7 +341,7 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.EnsureBoot(z)
+	changed, err = ms2.EnsureBoot(context.Background(), z)
 	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
@@ -413,10 +414,10 @@ func TestCommit(t *testing.T) {
 			for _, d := range z.d {
 				datasets = append(datasets, *d)
 			}
-			initMachines := machines.New(datasets, tc.cmdline)
+			initMachines := machines.New(context.Background(), datasets, tc.cmdline)
 			ms := initMachines
 
-			hasChanged, err := ms.Commit(z)
+			hasChanged, err := ms.Commit(context.Background(), z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -441,7 +442,7 @@ func TestCommit(t *testing.T) {
 			if err != nil {
 				t.Fatal("couldn't rescan before checking final state:", err)
 			}
-			machinesAfterRescan := machines.New(datasets, tc.cmdline)
+			machinesAfterRescan := machines.New(context.Background(), datasets, tc.cmdline)
 			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
@@ -455,9 +456,9 @@ func TestIdempotentCommit(t *testing.T) {
 	if err != nil {
 		t.Fatal("couldn't scan for initial state:", err)
 	}
-	ms1 := machines.New(datasets, generateCmdLine("rpool/ROOT/ubuntu_9876"))
+	ms1 := machines.New(context.Background(), datasets, generateCmdLine("rpool/ROOT/ubuntu_9876"))
 
-	changed, err := ms1.Commit(z)
+	changed, err := ms1.Commit(context.Background(), z)
 	if err != nil {
 		t.Fatal("first commit failed:", err)
 	}
@@ -466,7 +467,7 @@ func TestIdempotentCommit(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.Commit(z)
+	changed, err = ms2.Commit(context.Background(), z)
 	if err != nil {
 		t.Fatal("second commit failed:", err)
 	}
@@ -530,10 +531,10 @@ func TestCreateUserData(t *testing.T) {
 			ds := machines.LoadDatasets(t, tc.def)
 			tc.cmdline = getDefaultValue(tc.cmdline, generateCmdLine("rpool/ROOT/ubuntu_1234"))
 			z := NewZfsMock(ds, "", getDefaultValue(tc.predictableSuffixFor, "rpool/USERDATA/userfoo"), tc.createErr, false, tc.scanErr, tc.setPropertyErr, false)
-			initMachines := machines.New(ds, tc.cmdline)
+			initMachines := machines.New(context.Background(), ds, tc.cmdline)
 			ms := initMachines
 
-			err := ms.CreateUserData(getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"), z)
+			err := ms.CreateUserData(context.Background(), getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"), z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -559,7 +560,7 @@ func TestCreateUserData(t *testing.T) {
 			if err != nil {
 				t.Fatal("couldn't rescan before checking final state:", err)
 			}
-			machinesAfterRescan := machines.New(datasets, tc.cmdline)
+			machinesAfterRescan := machines.New(context.Background(), datasets, tc.cmdline)
 			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
@@ -597,10 +598,10 @@ func TestChangeHomeOnUserData(t *testing.T) {
 			t.Parallel()
 			ds := machines.LoadDatasets(t, tc.def)
 			z := NewZfsMock(ds, "", "", false, false, tc.scanErr, tc.setPropertyErr, false)
-			initMachines := machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+			initMachines := machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_1234"))
 			ms := initMachines
 
-			err := ms.ChangeHomeOnUserData(getDefaultValue(tc.home, "/home/user1"), getDefaultValue(tc.newHome, "/home/foo"), z)
+			err := ms.ChangeHomeOnUserData(context.Background(), getDefaultValue(tc.home, "/home/user1"), getDefaultValue(tc.newHome, "/home/foo"), z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -626,7 +627,7 @@ func TestChangeHomeOnUserData(t *testing.T) {
 			if err != nil {
 				t.Fatal("couldn't rescan before checking final state:", err)
 			}
-			machinesAfterRescan := machines.New(datasets, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+			machinesAfterRescan := machines.New(context.Background(), datasets, generateCmdLine("rpool/ROOT/ubuntu_1234"))
 			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
@@ -637,7 +638,7 @@ func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
 	for n := 0; n < b.N; n++ {
-		machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+		machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 	}
 }
 
@@ -646,7 +647,7 @@ func BenchmarkNewServer(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
 	for n := 0; n < b.N; n++ {
-		machines.New(ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+		machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
 	}
 }
 

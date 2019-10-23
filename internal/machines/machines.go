@@ -1,13 +1,14 @@
 package machines
 
 import (
+	"context"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/k0kubun/pp"
-	log "github.com/sirupsen/logrus"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
@@ -52,8 +53,8 @@ const (
 )
 
 // New detects and generate machines elems
-func New(ds []zfs.Dataset, cmdline string) Machines {
-	log.Infoln("building new machines list")
+func New(ctx context.Context, ds []zfs.Dataset, cmdline string) Machines {
+	log.Info(ctx, "Building new machines list")
 	machines := Machines{
 		all:     make(map[string]*Machine),
 		cmdline: cmdline,
@@ -68,7 +69,7 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 	sort.Sort(sortedDataset)
 
 	// Resolve out to its root origin for /, /boot* and user datasets
-	origins := resolveOrigin([]zfs.Dataset(sortedDataset))
+	origins := resolveOrigin(ctx, []zfs.Dataset(sortedDataset))
 
 	// First, set main datasets, then set clones
 	mainDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
@@ -87,7 +88,7 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 	}
 
 	// First, handle system datasets (active for each machine and history) and return remaining ones.
-	boots, userdatas, persistents := machines.triageDatasets(append(append(mainDatasets, cloneDatasets...), otherDatasets...), origins)
+	boots, userdatas, persistents := machines.triageDatasets(ctx, append(append(mainDatasets, cloneDatasets...), otherDatasets...), origins)
 
 	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
 	// Same with children and history datasets.
@@ -118,16 +119,13 @@ func New(ds []zfs.Dataset, cmdline string) Machines {
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
 
-	if log.GetLevel() == log.DebugLevel {
-		log.Debugln("current machines scanning layout:")
-		pp.Println(machines)
-	}
+	log.Debugf(ctx, "current machines scanning layout:\n"+pp.Sprint(machines))
 
 	return machines
 }
 
 // triageDatasets attach main system datasets to machines and returns other types of datasets for later triage/attachment.
-func (machines *Machines) triageDatasets(allDatasets []zfs.Dataset, origins map[string]*string) (boots, userdatas, persistents []zfs.Dataset) {
+func (machines *Machines) triageDatasets(ctx context.Context, allDatasets []zfs.Dataset, origins map[string]*string) (boots, userdatas, persistents []zfs.Dataset) {
 	for _, d := range allDatasets {
 		// Main active system dataset building up a machine
 		m := newMachineFromDataset(d, origins[d.Name])
@@ -137,7 +135,7 @@ func (machines *Machines) triageDatasets(allDatasets []zfs.Dataset, origins map[
 		}
 
 		// Check for children, clones and snapshots
-		if machines.attachSystemAndHistory(d, origins[d.Name]) {
+		if machines.attachSystemAndHistory(ctx, d, origins[d.Name]) {
 			continue
 		}
 
@@ -160,7 +158,7 @@ func (machines *Machines) triageDatasets(allDatasets []zfs.Dataset, origins map[
 		// At this point, it's either non zfs system or persistent dataset. Filters out canmount != "on" as nothing
 		// will mount them.
 		if d.CanMount != "on" {
-			log.Debugf("ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on", d.Name)
+			log.Debugf(ctx, "ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on", d.Name)
 			continue
 		}
 
@@ -196,12 +194,12 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 // attachSystemAndHistory identified if the given dataset is a system dataset (children of root one) or a history
 // one. It creates and attach the states as needed.
 // It returns ok if the dataset matches any machine and is attached.
-func (machines *Machines) attachSystemAndHistory(d zfs.Dataset, origin *string) (ok bool) {
+func (machines *Machines) attachSystemAndHistory(ctx context.Context, d zfs.Dataset, origin *string) (ok bool) {
 	for _, m := range machines.all {
 
 		// Direct main machine state children
 		if ok, err := isChild(m.ID, d); err != nil {
-			log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+			log.Warningf(ctx, "ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
 		} else if ok {
 			m.SystemDatasets = append(m.SystemDatasets, d)
 			return true
@@ -225,7 +223,7 @@ func (machines *Machines) attachSystemAndHistory(d zfs.Dataset, origin *string) 
 		// Clones or snapshot children
 		for _, h := range m.History {
 			if ok, err := isChild(h.ID, d); err != nil {
-				log.Warningf("ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+				log.Warningf(ctx, "ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
 			} else if ok {
 				h.SystemDatasets = append(h.SystemDatasets, d)
 				return true

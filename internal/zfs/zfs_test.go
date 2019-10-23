@@ -1,6 +1,7 @@
 package zfs_test
 
 import (
+	"context"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -53,7 +54,7 @@ func TestCreate(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New()
+			z := zfs.New(context.Background())
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			if tc.wantErr {
@@ -143,7 +144,7 @@ func TestScan(t *testing.T) {
 				}
 			}
 
-			z := zfs.New()
+			z := zfs.New(context.Background())
 			got, err := z.Scan()
 			if err != nil {
 				if !tc.wantErr {
@@ -195,7 +196,7 @@ func TestSnapshot(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New()
+			z := zfs.New(context.Background())
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			var err error
@@ -276,7 +277,7 @@ func TestClone(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New()
+			z := zfs.New(context.Background())
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			var err error
@@ -346,7 +347,7 @@ func TestPromote(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New()
+			z := zfs.New(context.Background())
 			_, err := z.Scan() // Needed for cache
 			if err != nil {
 				t.Fatalf("couldn't get initial state: %v", err)
@@ -434,7 +435,7 @@ func TestDestroy(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New()
+			z := zfs.New(context.Background())
 			_, err := z.Scan() // Needed for cache
 			if err != nil {
 				t.Fatalf("couldn't get initial state: %v", err)
@@ -531,7 +532,7 @@ func TestSetProperty(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New()
+			z := zfs.New(context.Background())
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			if tc.isNoOp {
@@ -626,7 +627,7 @@ func TestTransactions(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New(zfs.WithTransactions())
+			z := zfs.New(context.Background(), zfs.WithTransactions())
 			initState, err := z.Scan()
 			if err != nil {
 				t.Fatalf("couldn't get initial state: %v", err)
@@ -716,7 +717,7 @@ func TestTransactions(t *testing.T) {
 				} else {
 					// Prepare cloning in its own transaction
 					if !tc.doClone {
-						z2 := zfs.New()
+						z2 := zfs.New(context.Background())
 						err := z2.Clone("rpool/ROOT/ubuntu_1234@snap_r2", "5678", false, true)
 						if err != nil {
 							t.Fatalf("couldnt clone to prepare dataset hierarchy: %v", err)
