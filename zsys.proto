@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package zsys;
+
+service Zsys {
+  rpc CreateUserData(CreateUserDataRequest) returns (stream LogResponse);
+}
+
+message CreateUserDataRequest {
+  string user = 1;
+  string homepath = 2;
+}
+
+message LogResponse {
+  string log = 1;
+}
