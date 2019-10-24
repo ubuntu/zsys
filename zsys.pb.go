@@ -71,6 +71,53 @@ func (m *CreateUserDataRequest) GetHomepath() string {
 	return ""
 }
 
+type ChangeHomeOnUserDataRequest struct {
+	Home                 string   `protobuf:"bytes,1,opt,name=home,proto3" json:"home,omitempty"`
+	NewHome              string   `protobuf:"bytes,2,opt,name=newHome,proto3" json:"newHome,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *ChangeHomeOnUserDataRequest) Reset()         { *m = ChangeHomeOnUserDataRequest{} }
+func (m *ChangeHomeOnUserDataRequest) String() string { return proto.CompactTextString(m) }
+func (*ChangeHomeOnUserDataRequest) ProtoMessage()    {}
+func (*ChangeHomeOnUserDataRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{1}
+}
+
+func (m *ChangeHomeOnUserDataRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ChangeHomeOnUserDataRequest.Unmarshal(m, b)
+}
+func (m *ChangeHomeOnUserDataRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ChangeHomeOnUserDataRequest.Marshal(b, m, deterministic)
+}
+func (m *ChangeHomeOnUserDataRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ChangeHomeOnUserDataRequest.Merge(m, src)
+}
+func (m *ChangeHomeOnUserDataRequest) XXX_Size() int {
+	return xxx_messageInfo_ChangeHomeOnUserDataRequest.Size(m)
+}
+func (m *ChangeHomeOnUserDataRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_ChangeHomeOnUserDataRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ChangeHomeOnUserDataRequest proto.InternalMessageInfo
+
+func (m *ChangeHomeOnUserDataRequest) GetHome() string {
+	if m != nil {
+		return m.Home
+	}
+	return ""
+}
+
+func (m *ChangeHomeOnUserDataRequest) GetNewHome() string {
+	if m != nil {
+		return m.NewHome
+	}
+	return ""
+}
+
 type LogResponse struct {
 	Log                  string   `protobuf:"bytes,1,opt,name=log,proto3" json:"log,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -82,7 +129,7 @@ func (m *LogResponse) Reset()         { *m = LogResponse{} }
 func (m *LogResponse) String() string { return proto.CompactTextString(m) }
 func (*LogResponse) ProtoMessage()    {}
 func (*LogResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_05865bfaed6eea5d, []int{1}
+	return fileDescriptor_05865bfaed6eea5d, []int{2}
 }
 
 func (m *LogResponse) XXX_Unmarshal(b []byte) error {
@@ -112,23 +159,28 @@ func (m *LogResponse) GetLog() string {
 
 func init() {
 	proto.RegisterType((*CreateUserDataRequest)(nil), "zsys.CreateUserDataRequest")
+	proto.RegisterType((*ChangeHomeOnUserDataRequest)(nil), "zsys.ChangeHomeOnUserDataRequest")
 	proto.RegisterType((*LogResponse)(nil), "zsys.LogResponse")
 }
 
 func init() { proto.RegisterFile("zsys.proto", fileDescriptor_05865bfaed6eea5d) }
 
 var fileDescriptor_05865bfaed6eea5d = []byte{
-	// 160 bytes of a gzipped FileDescriptorProto
+	// 214 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0xaa, 0x2a, 0xae, 0x2c,
 	0xd6, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0x62, 0x01, 0xb1, 0x95, 0xdc, 0xb9, 0x44, 0x9d, 0x8b,
 	0x52, 0x13, 0x4b, 0x52, 0x43, 0x8b, 0x53, 0x8b, 0x5c, 0x12, 0x4b, 0x12, 0x83, 0x52, 0x0b, 0x4b,
 	0x53, 0x8b, 0x4b, 0x84, 0x84, 0xb8, 0x58, 0x4a, 0x8b, 0x53, 0x8b, 0x24, 0x18, 0x15, 0x18, 0x35,
 	0x38, 0x83, 0xc0, 0x6c, 0x21, 0x29, 0x2e, 0x8e, 0x8c, 0xfc, 0xdc, 0xd4, 0x82, 0xc4, 0x92, 0x0c,
-	0x09, 0x26, 0xb0, 0x38, 0x9c, 0xaf, 0x24, 0xcf, 0xc5, 0xed, 0x93, 0x9f, 0x1e, 0x94, 0x5a, 0x5c,
-	0x90, 0x9f, 0x57, 0x9c, 0x2a, 0x24, 0xc0, 0xc5, 0x9c, 0x93, 0x9f, 0x0e, 0xd5, 0x0d, 0x62, 0x1a,
-	0x79, 0x71, 0xb1, 0x44, 0x15, 0x57, 0x16, 0x0b, 0x39, 0x71, 0xf1, 0xa1, 0xda, 0x28, 0x24, 0xad,
-	0x07, 0x76, 0x16, 0x56, 0x77, 0x48, 0x09, 0x42, 0x24, 0x91, 0xcc, 0x36, 0x60, 0x4c, 0x62, 0x03,
-	0x7b, 0xc1, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0x40, 0x12, 0x78, 0x4d, 0xd0, 0x00, 0x00, 0x00,
+	0x09, 0x26, 0xb0, 0x38, 0x9c, 0xaf, 0xe4, 0xcd, 0x25, 0xed, 0x9c, 0x91, 0x98, 0x97, 0x9e, 0xea,
+	0x91, 0x9f, 0x9b, 0xea, 0x9f, 0x87, 0xc5, 0x38, 0x90, 0x52, 0x98, 0x71, 0x20, 0xb6, 0x90, 0x04,
+	0x17, 0x7b, 0x5e, 0x6a, 0x39, 0x48, 0x3d, 0xd4, 0x34, 0x18, 0x57, 0x49, 0x9e, 0x8b, 0xdb, 0x27,
+	0x3f, 0x3d, 0x28, 0xb5, 0xb8, 0x20, 0x3f, 0xaf, 0x38, 0x55, 0x48, 0x80, 0x8b, 0x39, 0x27, 0x3f,
+	0x1d, 0xaa, 0x17, 0xc4, 0x34, 0x9a, 0xc5, 0xc8, 0xc5, 0x12, 0x55, 0x5c, 0x59, 0x2c, 0xe4, 0xc4,
+	0xc5, 0x87, 0xea, 0x7e, 0x21, 0x69, 0x3d, 0xb0, 0x27, 0xb1, 0xfa, 0x4a, 0x4a, 0x10, 0x22, 0x89,
+	0x64, 0xb8, 0x01, 0xa3, 0x90, 0x1f, 0x97, 0x08, 0x36, 0xa7, 0x0b, 0x29, 0x42, 0x4d, 0xc2, 0xed,
+	0x2d, 0xac, 0xe6, 0x25, 0xb1, 0x81, 0x03, 0xd8, 0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0xbe, 0xe8,
+	0x0f, 0xf3, 0x6e, 0x01, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -144,6 +196,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ZsysClient interface {
 	CreateUserData(ctx context.Context, in *CreateUserDataRequest, opts ...grpc.CallOption) (Zsys_CreateUserDataClient, error)
+	ChangeHomeOnUserData(ctx context.Context, in *ChangeHomeOnUserDataRequest, opts ...grpc.CallOption) (Zsys_ChangeHomeOnUserDataClient, error)
 }
 
 type zsysClient struct {
@@ -186,9 +239,42 @@ func (x *zsysCreateUserDataClient) Recv() (*LogResponse, error) {
 	return m, nil
 }
 
+func (c *zsysClient) ChangeHomeOnUserData(ctx context.Context, in *ChangeHomeOnUserDataRequest, opts ...grpc.CallOption) (Zsys_ChangeHomeOnUserDataClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[1], "/zsys.Zsys/ChangeHomeOnUserData", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysChangeHomeOnUserDataClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_ChangeHomeOnUserDataClient interface {
+	Recv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type zsysChangeHomeOnUserDataClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysChangeHomeOnUserDataClient) Recv() (*LogResponse, error) {
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ZsysServer is the server API for Zsys service.
 type ZsysServer interface {
 	CreateUserData(*CreateUserDataRequest, Zsys_CreateUserDataServer) error
+	ChangeHomeOnUserData(*ChangeHomeOnUserDataRequest, Zsys_ChangeHomeOnUserDataServer) error
 }
 
 // UnimplementedZsysServer can be embedded to have forward compatible implementations.
@@ -197,6 +283,9 @@ type UnimplementedZsysServer struct {
 
 func (*UnimplementedZsysServer) CreateUserData(req *CreateUserDataRequest, srv Zsys_CreateUserDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method CreateUserData not implemented")
+}
+func (*UnimplementedZsysServer) ChangeHomeOnUserData(req *ChangeHomeOnUserDataRequest, srv Zsys_ChangeHomeOnUserDataServer) error {
+	return status.Errorf(codes.Unimplemented, "method ChangeHomeOnUserData not implemented")
 }
 
 func RegisterZsysServer(s *grpc.Server, srv ZsysServer) {
@@ -224,6 +313,27 @@ func (x *zsysCreateUserDataServer) Send(m *LogResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Zsys_ChangeHomeOnUserData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ChangeHomeOnUserDataRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).ChangeHomeOnUserData(m, &zsysChangeHomeOnUserDataServer{stream})
+}
+
+type Zsys_ChangeHomeOnUserDataServer interface {
+	Send(*LogResponse) error
+	grpc.ServerStream
+}
+
+type zsysChangeHomeOnUserDataServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysChangeHomeOnUserDataServer) Send(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 var _Zsys_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "zsys.Zsys",
 	HandlerType: (*ZsysServer)(nil),
@@ -232,6 +342,11 @@ var _Zsys_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "CreateUserData",
 			Handler:       _Zsys_CreateUserData_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "ChangeHomeOnUserData",
+			Handler:       _Zsys_ChangeHomeOnUserData_Handler,
 			ServerStreams: true,
 		},
 	},

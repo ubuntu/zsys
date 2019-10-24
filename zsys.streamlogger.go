@@ -83,11 +83,54 @@ func (z *ZsysLogServer) CreateUserData(req *CreateUserDataRequest, stream Zsys_C
 }
 
 /*
+ * Zsys.ChangeHomeOnUserData()
+ */
+
+// zsysChangeHomeOnUserDataLogStream is a Zsys_ChangeHomeOnUserDataServer augmented by its own Context containing the log streamer
+type zsysChangeHomeOnUserDataLogStream struct {
+	Zsys_ChangeHomeOnUserDataServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysChangeHomeOnUserDataLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// ChangeHomeOnUserData overrides ZsysServer ChangeHomeOnUserData, installing a logger first
+func (z *ZsysLogServer) ChangeHomeOnUserData(req *ChangeHomeOnUserDataRequest, stream Zsys_ChangeHomeOnUserDataServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "ChangeHomeOnUserData")
+	if err != nil {
+		return fmt.Errorf("couldn't attach a logger to request: %w", err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServer.ChangeHomeOnUserData(req, &zsysChangeHomeOnUserDataLogStream{
+		Zsys_ChangeHomeOnUserDataServer: stream,
+		ctx:                             ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
 // Write promote zsysCreateUserDataServer to an io.Writer
 func (s *zsysCreateUserDataServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysChangeHomeOnUserDataServer to an io.Writer
+func (s *zsysChangeHomeOnUserDataServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),
