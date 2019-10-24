@@ -4,11 +4,17 @@ package zsys;
 
 service Zsys {
   rpc CreateUserData(CreateUserDataRequest) returns (stream LogResponse);
+  rpc ChangeHomeOnUserData(ChangeHomeOnUserDataRequest) returns (stream LogResponse);
 }
 
 message CreateUserDataRequest {
   string user = 1;
   string homepath = 2;
+}
+
+message ChangeHomeOnUserDataRequest {
+  string home = 1;
+  string newHome = 2;
 }
 
 message LogResponse {
