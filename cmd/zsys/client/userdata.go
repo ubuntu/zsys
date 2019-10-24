@@ -2,11 +2,17 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -39,22 +45,41 @@ func init() {
 // createUserData creates a new userdata for user and set it to homepath on current zsys system.
 // if the user already exists for a dataset attached to the current system, set its mountpoint to homepath.
 func createUserData(user, homepath string) (err error) {
-	ms, err := getMachines(context.Background(), zfs.New(context.Background()))
+	client, err := newClient()
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
-	z := zfs.New(context.Background(), zfs.WithTransactions())
-	defer func() {
-		if err != nil {
-			z.Cancel()
-			err = fmt.Errorf("couldn't create userdataset for %q: "+config.ErrorFormat, homepath, err)
-		} else {
-			z.Done()
+	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	defer cancel()
+
+	stream, err := client.CreateUserData(ctx, &zsys.CreateUserDataRequest{User: user, Homepath: homepath})
+	if err != nil {
+		st, _ := status.FromError(err)
+		if st.Code() == codes.Unavailable {
+			return fmt.Errorf("couldn't connect to zsys daemon: %v", st.Message())
 		}
-	}()
+		return errors.New(st.Message())
+	}
 
-	return ms.CreateUserData(context.Background(), user, homepath, z)
+	for {
+		r, err := stream.Recv()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			st, _ := status.FromError(err)
+			return errors.New(st.Message())
+		}
+		l := r.GetLog()
+		if l != "" {
+			fmt.Fprint(os.Stderr, l)
+			continue
+		}
+	}
+
+	return nil
 }
 
 // changeHomeOnUserData change from home to newHome on current zsys system.

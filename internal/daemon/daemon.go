@@ -1,0 +1,68 @@
+package daemon
+
+import (
+	"context"
+	"fmt"
+	"io/ioutil"
+
+	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/log"
+	"github.com/ubuntu/zsys/internal/machines"
+	"github.com/ubuntu/zsys/internal/zfs"
+)
+
+// Server is used to implement zsys.ZsysServer.
+type Server struct{}
+
+// CreateUserData creates a new userdata for user and set it to homepath on current zsys system.
+// if the user already exists for a dataset attached to the current system, set its mountpoint to homepath.
+// This is called by zsys grpc request, once the server is registered
+func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsys_CreateUserDataServer) error {
+	user := req.GetUser()
+	homepath := req.GetHomepath()
+
+	log.Infof(stream.Context(), "CreateUserData request received for %q on %q", user, homepath)
+
+	ms, err := getMachines(stream.Context(), zfs.New(context.Background()))
+	if err != nil {
+		return err
+	}
+
+	z := zfs.New(stream.Context(), zfs.WithTransactions())
+	defer func() {
+		if err != nil {
+			z.Cancel()
+			err = fmt.Errorf("couldn't create userdataset for %q: "+config.ErrorFormat, homepath, err)
+		} else {
+			z.Done()
+		}
+	}()
+
+	return ms.CreateUserData(stream.Context(), user, homepath, z)
+}
+
+// getMachines returns all scanned machines on the current system
+func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
+	ds, err := z.Scan()
+	if err != nil {
+		return nil, err
+	}
+	cmdline, err := procCmdline()
+	if err != nil {
+		return nil, err
+	}
+	ms := machines.New(ctx, ds, cmdline)
+
+	return &ms, nil
+}
+
+// procCmdline returns kernel command line
+func procCmdline() (string, error) {
+	content, err := ioutil.ReadFile("/proc/cmdline")
+	if err != nil {
+		return "", err
+	}
+
+	return string(content), nil
+}

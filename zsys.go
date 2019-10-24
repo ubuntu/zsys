@@ -19,6 +19,14 @@ import (
 // Takes output of protoc for second streamlogger generation.
 //go:generate go run internal/streamlogger/generator.go -- zsys.pb.go
 
+const (
+	// DefaultSocket path.
+	DefaultSocket = "/run/zsysd.sock"
+
+	// DefaultTimeout for client requests
+	DefaultTimeout = 30 * time.Second
+)
+
 // NewZsysUnixSocketClient returns a new grpc zsys compatible client connection,
 // via the unix socket path, with an initialized context and requester ID.
 // It will send log request at level "level"

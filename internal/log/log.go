@@ -30,6 +30,11 @@ func SetLevel(l logrus.Level) {
 	setLevelLogger(logrus.StandardLogger(), l, false)
 }
 
+// GetLevel gets default logger level
+func GetLevel() logrus.Level {
+	return logrus.GetLevel()
+}
+
 // setLevelLogger sets given logger to level.
 // "simplified" enables to ignore the TTY check in logrus and force color mode and not systemd printing.
 func setLevelLogger(logger *logrus.Logger, l logrus.Level, simplified bool) {

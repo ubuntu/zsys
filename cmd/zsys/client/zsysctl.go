@@ -10,7 +10,7 @@ var (
 	cmdErr        error
 	flagVerbosity int
 	rootCmd       = &cobra.Command{
-		Use:   "zsys",
+		Use:   "zsysctl",
 		Short: "ZFS SYStem integration control zsys ",
 		Long: `Zfs SYStem tool targetting an enhanced ZOL experience.
  It allows running multiple ZFS system in parallels on the same machine,
