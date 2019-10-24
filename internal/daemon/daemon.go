@@ -24,7 +24,7 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 
 	log.Infof(stream.Context(), "CreateUserData request received for %q on %q", user, homepath)
 
-	ms, err := getMachines(stream.Context(), zfs.New(context.Background()))
+	ms, err := getMachines(stream.Context(), zfs.New(stream.Context()))
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, str
 
 	log.Infof(stream.Context(), "ChangeHomeOnUserData request received to rename %q to %q", home, newHome)
 
-	ms, err := getMachines(stream.Context(), zfs.New(context.Background()))
+	ms, err := getMachines(stream.Context(), zfs.New(stream.Context()))
 	if err != nil {
 		return err
 	}
