@@ -117,7 +117,7 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string, z
 	return nil
 }
 
-// ChangeHomeOnUserData tries to find an existing dataset matching home and rename it to newhome
+// ChangeHomeOnUserData tries to find an existing dataset matching home as a valid mountpoint and rename it to newhome
 func (ms *Machines) ChangeHomeOnUserData(ctx context.Context, home, newHome string, z ZfsSetPropertyScanCreater) error {
 	if !ms.current.isZsys() {
 		return errors.New("Current machine isn't Zsys, nothing to modify")

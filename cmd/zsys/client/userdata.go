@@ -2,14 +2,11 @@ package client
 
 import (
 	"context"
-	"fmt"
 	"io"
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
-	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/streamlogger"
-	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 var (
@@ -74,20 +71,32 @@ func createUserData(user, homepath string) (err error) {
 
 // changeHomeOnUserData change from home to newHome on current zsys system.
 func changeHomeOnUserData(home, newHome string) (err error) {
-	ms, err := getMachines(context.Background(), zfs.New(context.Background()))
+	client, err := newClient()
 	if err != nil {
 		return err
 	}
+	defer client.Close()
 
-	z := zfs.New(context.Background(), zfs.WithTransactions())
-	defer func() {
-		if err != nil {
-			z.Cancel()
-			err = fmt.Errorf("couldn't change home userdataset for %q: "+config.ErrorFormat, home, err)
-		} else {
-			z.Done()
+	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	defer cancel()
+
+	stream, err := client.ChangeHomeOnUserData(ctx, &zsys.ChangeHomeOnUserDataRequest{Home: home, NewHome: newHome})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
 		}
-	}()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
 
-	return ms.ChangeHomeOnUserData(context.Background(), home, newHome, z)
+	return nil
 }

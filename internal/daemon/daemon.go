@@ -42,6 +42,31 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 	return ms.CreateUserData(stream.Context(), user, homepath, z)
 }
 
+// ChangeHomeOnUserData tries to find an existing dataset matching home as a valid mountpoint and rename it to newhome
+func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, stream zsys.Zsys_ChangeHomeOnUserDataServer) error {
+	home := req.GetHome()
+	newHome := req.GetNewHome()
+
+	log.Infof(stream.Context(), "ChangeHomeOnUserData request received to rename %q to %q", home, newHome)
+
+	ms, err := getMachines(stream.Context(), zfs.New(context.Background()))
+	if err != nil {
+		return err
+	}
+
+	z := zfs.New(stream.Context(), zfs.WithTransactions())
+	defer func() {
+		if err != nil {
+			z.Cancel()
+			err = fmt.Errorf("couldn't change home userdataset for %q: "+config.ErrorFormat, home, err)
+		} else {
+			z.Done()
+		}
+	}()
+
+	return ms.ChangeHomeOnUserData(stream.Context(), home, newHome, z)
+}
+
 // getMachines returns all scanned machines on the current system
 func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
 	ds, err := z.Scan()
