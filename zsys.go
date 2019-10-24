@@ -33,7 +33,7 @@ const (
 func NewZsysUnixSocketClient(socket string, level logrus.Level) (*ZsysLogClient, error) {
 	conn, err := grpc.Dial(socket,
 		grpc.WithInsecure(), grpc.WithDialer(unixConnect(socket)),
-		grpc.WithStreamInterceptor(streamlogger.ClientRequestIDInterceptor))
+		grpc.WithStreamInterceptor(streamlogger.ClientRequestLogInterceptor))
 	if err != nil {
 		return nil, fmt.Errorf("couldn't connect to unix socket %q: %w", socket, err)
 	}

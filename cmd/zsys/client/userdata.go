@@ -2,17 +2,14 @@ package client
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
-	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/streamlogger"
 	"github.com/ubuntu/zsys/internal/zfs"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 var (
@@ -55,27 +52,20 @@ func createUserData(user, homepath string) (err error) {
 	defer cancel()
 
 	stream, err := client.CreateUserData(ctx, &zsys.CreateUserDataRequest{User: user, Homepath: homepath})
-	if err != nil {
-		st, _ := status.FromError(err)
-		if st.Code() == codes.Unavailable {
-			return fmt.Errorf("couldn't connect to zsys daemon: %v", st.Message())
-		}
-		return errors.New(st.Message())
+	if err = checkConn(err); err != nil {
+		return err
 	}
 
 	for {
-		r, err := stream.Recv()
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			st, _ := status.FromError(err)
-			return errors.New(st.Message())
-		}
-		l := r.GetLog()
-		if l != "" {
-			fmt.Fprint(os.Stderr, l)
-			continue
+			return err
 		}
 	}
 

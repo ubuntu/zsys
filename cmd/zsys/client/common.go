@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io/ioutil"
 
@@ -10,6 +11,8 @@ import (
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // requireSubcommand is a no-op command which return an error message to trigger
@@ -26,6 +29,18 @@ func newClient() (*zsys.ZsysLogClient, error) {
 		return nil, fmt.Errorf("couldn't connect to zsys daemon: %v", err)
 	}
 	return c, nil
+}
+
+func checkConn(err error) error {
+	if err != nil {
+		st, _ := status.FromError(err)
+		if st.Code() == codes.Unavailable {
+			return fmt.Errorf("couldn't connect to zsys daemon: %v", st.Message())
+		}
+		return errors.New(st.Message())
+	}
+
+	return nil
 }
 
 // getMachines returns all scanned machines on the current system
