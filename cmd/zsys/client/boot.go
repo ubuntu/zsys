@@ -9,7 +9,6 @@ import (
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/streamlogger"
-	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 var (
@@ -35,11 +34,6 @@ var (
 	}
 )
 
-const (
-	modifiedBoot   = "zsys-meta:modified-boot"
-	noModifiedBoot = "zsys-meta:no-modified-boot"
-)
-
 func init() {
 	bootCmd.PersistentFlags().BoolVarP(&printModifiedBoot, "print-changes", "p", false, "Display if any zfs datasets have been modified to boot")
 	rootCmd.AddCommand(bootCmd)
@@ -48,30 +42,40 @@ func init() {
 }
 
 func bootPrepare(printModifiedBoot bool) (err error) {
-	z := zfs.New(context.Background(), zfs.WithTransactions())
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
 
-	defer func() {
-		if err != nil {
-			z.Cancel()
-			err = fmt.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
-		} else {
-			z.Done()
+	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	defer cancel()
+
+	stream, err := client.PrepareBoot(ctx, &zsys.Empty{})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	var changed bool
+	for {
+		r, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
 		}
-	}()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
 
-	ms, err := getMachines(context.Background(), z)
-	if err != nil {
-		return err
+		changed = r.GetChanged()
 	}
 
-	changed, err := ms.EnsureBoot(context.Background(), z)
-	if err != nil {
-		return err
-	}
 	if printModifiedBoot && changed {
-		fmt.Println(modifiedBoot)
+		fmt.Println(config.ModifiedBoot)
 	} else if printModifiedBoot && !changed {
-		fmt.Println(noModifiedBoot)
+		fmt.Println(config.NoModifiedBoot)
 	}
 
 	return nil
@@ -109,9 +113,9 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	}
 
 	if printModifiedBoot && changed {
-		fmt.Println(modifiedBoot)
+		fmt.Println(config.ModifiedBoot)
 	} else if printModifiedBoot && !changed {
-		fmt.Println(noModifiedBoot)
+		fmt.Println(config.NoModifiedBoot)
 	}
 
 	return nil

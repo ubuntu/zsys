@@ -1,16 +1,12 @@
 package client
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"io/ioutil"
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/log"
-	"github.com/ubuntu/zsys/internal/machines"
-	"github.com/ubuntu/zsys/internal/zfs"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -41,29 +37,4 @@ func checkConn(err error) error {
 	}
 
 	return nil
-}
-
-// getMachines returns all scanned machines on the current system
-func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
-	ds, err := z.Scan()
-	if err != nil {
-		return nil, err
-	}
-	cmdline, err := procCmdline()
-	if err != nil {
-		return nil, err
-	}
-	ms := machines.New(ctx, ds, cmdline)
-
-	return &ms, nil
-}
-
-// procCmdline returns kernel command line
-func procCmdline() (string, error) {
-	content, err := ioutil.ReadFile("/proc/cmdline")
-	if err != nil {
-		return "", err
-	}
-
-	return string(content), nil
 }

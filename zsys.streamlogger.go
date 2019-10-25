@@ -113,6 +113,36 @@ func (z *ZsysLogServer) ChangeHomeOnUserData(req *ChangeHomeOnUserDataRequest, s
 }
 
 /*
+ * Zsys.PrepareBoot()
+ */
+
+// zsysPrepareBootLogStream is a Zsys_PrepareBootServer augmented by its own Context containing the log streamer
+type zsysPrepareBootLogStream struct {
+	Zsys_PrepareBootServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysPrepareBootLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// PrepareBoot overrides ZsysServer PrepareBoot, installing a logger first
+func (z *ZsysLogServer) PrepareBoot(req *Empty, stream Zsys_PrepareBootServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "PrepareBoot")
+	if err != nil {
+		return fmt.Errorf("couldn't attach a logger to request: %w", err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServer.PrepareBoot(req, &zsysPrepareBootLogStream{
+		Zsys_PrepareBootServer: stream,
+		ctx:                    ctx,
+	})
+}
+
+/*
  * Zsys.CommitBoot()
  */
 
@@ -164,6 +194,19 @@ func (s *zsysChangeHomeOnUserDataServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysPrepareBootServer to an io.Writer
+func (s *zsysPrepareBootServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&PrepareBootResponse{
+			Reply: &PrepareBootResponse_Log{Log: string(p)},
 		})
 	if err != nil {
 		return 0, err
