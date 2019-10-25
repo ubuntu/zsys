@@ -50,10 +50,19 @@ var (
 		// We display usage error ourselves
 		SilenceErrors: true,
 	}
+
+	bootPrepareCmd = &cobra.Command{
+		Use:    "boot-prepare",
+		Short:  "Prepare boot by ensuring correct system and user datasets are switched on and off, synchronously",
+		Args:   cobra.NoArgs,
+		Hidden: true,
+		Run:    func(cmd *cobra.Command, args []string) { cmdErr = syncBootPrepare() },
+	}
 )
 
 func init() {
 	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
+	rootCmd.AddCommand(bootPrepareCmd)
 }
 
 // Cmd returns the zsysd command and options
