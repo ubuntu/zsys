@@ -5,6 +5,13 @@ package zsys;
 service Zsys {
   rpc CreateUserData(CreateUserDataRequest) returns (stream LogResponse);
   rpc ChangeHomeOnUserData(ChangeHomeOnUserDataRequest) returns (stream LogResponse);
+  rpc CommitBoot(Empty) returns (stream CommitBootResponse);
+}
+
+message Empty {}
+
+message LogResponse {
+  string log = 1;
 }
 
 message CreateUserDataRequest {
@@ -17,6 +24,9 @@ message ChangeHomeOnUserDataRequest {
   string newHome = 2;
 }
 
-message LogResponse {
-  string log = 1;
+message CommitBootResponse {
+  oneof reply {
+    string log = 1;
+    bool changed = 2;
+  }
 }

@@ -113,6 +113,36 @@ func (z *ZsysLogServer) ChangeHomeOnUserData(req *ChangeHomeOnUserDataRequest, s
 }
 
 /*
+ * Zsys.CommitBoot()
+ */
+
+// zsysCommitBootLogStream is a Zsys_CommitBootServer augmented by its own Context containing the log streamer
+type zsysCommitBootLogStream struct {
+	Zsys_CommitBootServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysCommitBootLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// CommitBoot overrides ZsysServer CommitBoot, installing a logger first
+func (z *ZsysLogServer) CommitBoot(req *Empty, stream Zsys_CommitBootServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "CommitBoot")
+	if err != nil {
+		return fmt.Errorf("couldn't attach a logger to request: %w", err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServer.CommitBoot(req, &zsysCommitBootLogStream{
+		Zsys_CommitBootServer: stream,
+		ctx:                   ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -134,6 +164,19 @@ func (s *zsysChangeHomeOnUserDataServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysCommitBootServer to an io.Writer
+func (s *zsysCommitBootServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&CommitBootResponse{
+			Reply: &CommitBootResponse_Log{Log: string(p)},
 		})
 	if err != nil {
 		return 0, err

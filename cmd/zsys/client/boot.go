@@ -3,11 +3,12 @@ package client
 import (
 	"context"
 	"fmt"
-	"os"
-	"os/exec"
+	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/streamlogger"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
@@ -35,7 +36,6 @@ var (
 )
 
 const (
-	updateGrubCmd  = "update-grub"
 	modifiedBoot   = "zsys-meta:modified-boot"
 	noModifiedBoot = "zsys-meta:no-modified-boot"
 )
@@ -78,39 +78,40 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 }
 
 func bootCommit(printModifiedBoot bool) (err error) {
-	z := zfs.New(context.Background(), zfs.WithTransactions())
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
 
-	defer func() {
-		if err != nil {
-			z.Cancel()
-			err = fmt.Errorf("couldn't commit: "+config.ErrorFormat, err)
-		} else {
-			z.Done()
+	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	defer cancel()
+
+	stream, err := client.CommitBoot(ctx, &zsys.Empty{})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	var changed bool
+	for {
+		r, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
 		}
-	}()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
 
-	ms, err := getMachines(context.Background(), z)
-	if err != nil {
-		return err
+		changed = r.GetChanged()
 	}
 
-	changed, err := ms.Commit(context.Background(), z)
-	if err != nil {
-		return err
-	}
 	if printModifiedBoot && changed {
 		fmt.Println(modifiedBoot)
 	} else if printModifiedBoot && !changed {
 		fmt.Println(noModifiedBoot)
-	}
-
-	if changed {
-		cmd := exec.Command(updateGrubCmd)
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("%q returns an error:"+config.ErrorFormat, updateGrubCmd, err)
-		}
 	}
 
 	return nil
