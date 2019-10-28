@@ -1,3 +1,10 @@
+zsys (0.2.3) focal; urgency=medium
+
+  * Backward compatibility for org.zsys set on user datasets and transition
+    to newer com.ubuntu.zsys (LP: #1850052)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 28 Oct 2019 09:51:38 +0100
+
 zsys (0.2.2) eoan; urgency=medium
 
   * Move identifier tags to com.ubuntu.zsys (LP: #1847711)
