@@ -353,14 +353,21 @@ func switchUsersDatasetsTags(ctx context.Context, z zfsPropertySetter, id string
 	}
 	// Tag userdatasets to associate with this successful boot state, if wasn't tagged already
 	// (case of no user data revert, associate with different previous main system)
+	// TOREMOVE in 20.04 once compatible ubiquity is uploaded: && d.LastUsed != 0)
+	// We want to transition to newer tag format com.ubuntu.zsys the first time we
+	// set it.
 	for _, d := range currentUsersDatasets {
-		if d.BootfsDatasets == id ||
+		if (d.BootfsDatasets == id && d.LastUsed != 0) ||
 			strings.Contains(d.BootfsDatasets, id+":") ||
 			strings.HasSuffix(d.BootfsDatasets, ":"+id) {
 			continue
 		}
 		log.Infof(ctx, "Tag current user dataset: %q", d.Name)
 		newTag := d.BootfsDatasets + ":" + id
+		// TOREMOVE in 20.04: this double check as well (due to && d.LastUsed != 0)
+		if d.BootfsDatasets == id && d.LastUsed == 0 {
+			newTag = d.BootfsDatasets
+		}
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 			return fmt.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, id, d.Name, err)
 		}

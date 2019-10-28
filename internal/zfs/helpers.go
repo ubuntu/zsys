@@ -123,16 +123,25 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 		sources.LastBootedKernel = lbk.Source
 	}
 
-	sDataset, err := d.GetUserProperty(BootfsDatasetsProp)
-	if err != nil {
-		return nil, fmt.Errorf("can't get %q property: "+config.ErrorFormat, BootfsDatasetsProp, err)
-	}
-	BootfsDatasets := sDataset.Value
-	if BootfsDatasets == "-" {
-		BootfsDatasets = ""
-	}
-	if sDataset.Source != "none" {
-		sources.BootfsDatasets = sDataset.Source
+	// TOREMOVE in 20.04 once compatible ubiquity is uploaded
+	// Temporary compatibility harness for old org.zsys prefix
+	var BootfsDatasets string
+	for _, userdataTag := range []string{BootfsDatasetsProp, strings.Replace(BootfsDatasetsProp, "com.ubuntu", "org", -1)} {
+		sDataset, err := d.GetUserProperty(userdataTag)
+		if err != nil {
+			return nil, fmt.Errorf("can't get %q property: "+config.ErrorFormat, userdataTag, err)
+		}
+		BootfsDatasets = sDataset.Value
+		if BootfsDatasets == "-" {
+			BootfsDatasets = ""
+		}
+		if sDataset.Source != "none" {
+			sources.BootfsDatasets = sDataset.Source
+		}
+		// Prefer new tag name
+		if BootfsDatasets != "" {
+			break
+		}
 	}
 
 	dp := DatasetProp{
