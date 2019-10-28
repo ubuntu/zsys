@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 )
 
@@ -14,7 +15,8 @@ var (
 		Use:    "userdata COMMAND",
 		Short:  "User datasets creation and renaming",
 		Hidden: true,
-		RunE:   requireSubcommand,
+		Args:   cmdhandler.SubcommandsRequiredWithSuggestions,
+		Run:    cmdhandler.NoCmd,
 	}
 	userdataCreateCmd = &cobra.Command{
 		Use:   "create USER HOME_DIRECTORY",

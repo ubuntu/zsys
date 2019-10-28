@@ -4,18 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
-
-// requireSubcommand is a no-op command which return an error message to trigger
-// a command usage error.
-func requireSubcommand(cmd *cobra.Command, args []string) error {
-	return fmt.Errorf("%s requires a subcommand", cmd.Name())
-}
 
 // newClient returns a new zsys client object
 func newClient() (*zsys.ZsysLogClient, error) {

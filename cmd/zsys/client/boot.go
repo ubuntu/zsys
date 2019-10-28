@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 )
@@ -18,7 +19,8 @@ var (
 		Use:    "boot COMMAND",
 		Short:  "Ensure that the right datasets are ready to be mounted and committed during early boot",
 		Hidden: true,
-		RunE:   requireSubcommand,
+		Args:   cmdhandler.SubcommandsRequiredWithSuggestions,
+		Run:    cmdhandler.NoCmd,
 	}
 	bootPrepareCmd = &cobra.Command{
 		Use:   "prepare",

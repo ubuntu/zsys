@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
 	"github.com/ubuntu/zsys/internal/config"
 )
 
@@ -18,6 +19,8 @@ var (
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.SetVerboseMode(flagVerbosity)
 		},
+		Args: cmdhandler.SubcommandsRequiredWithSuggestions,
+		Run:  cmdhandler.NoCmd,
 		// We display usage error ourselves
 		SilenceErrors: true,
 	}
