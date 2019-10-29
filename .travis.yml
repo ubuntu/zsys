@@ -31,6 +31,7 @@ script:
   - echo '============== Benchmarks ==============' >/dev/null
   - sudo -E env "PATH=$PATH" go test -bench -run=Benchmark ./...
   - echo '============== Assets generated ==============' >/dev/null
+  - go install github.com/golang/protobuf/protoc-gen-go
   - ./ci/check-generate
   - echo '============== Modules updated ==============' >/dev/null
   - ./ci/check-modules
