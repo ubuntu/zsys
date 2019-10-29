@@ -1,3 +1,12 @@
+zsys (0.2.4) focal; urgency=medium
+
+  * Skip tests on platform we don't build a binary for
+    (no grub2-common package available).
+    Autopkgtests will still try to run it if it ever ran one day
+    and would fail as it can't install zsys.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 29 Oct 2019 07:48:55 +0100
+
 zsys (0.2.3) focal; urgency=medium
 
   * Backward compatibility for org.zsys set on user datasets and transition
