@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
+	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 )
 
@@ -47,7 +48,7 @@ func createUserData(user, homepath string) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.CreateUserData(ctx, &zsys.CreateUserDataRequest{User: user, Homepath: homepath})
@@ -79,7 +80,7 @@ func changeHomeOnUserData(home, newHome string) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.ChangeHomeOnUserData(ctx, &zsys.ChangeHomeOnUserDataRequest{Home: home, NewHome: newHome})

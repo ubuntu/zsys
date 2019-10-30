@@ -50,7 +50,7 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.PrepareBoot(ctx, &zsys.Empty{})
@@ -90,7 +90,7 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, zsys.DefaultTimeout)
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.CommitBoot(ctx, &zsys.Empty{})

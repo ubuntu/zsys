@@ -1,13 +1,12 @@
 package daemon
 
 import (
-	"context"
+	"fmt"
 	"os"
 	"os/signal"
 
 	"github.com/spf13/cobra"
 
-	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/daemon"
 )
@@ -29,23 +28,21 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			// TODO: timeout on idling
 
-			// trap Ctrl+C and call cancel on the context
-			ctx, cancel := context.WithCancel(context.Background())
+			s, err := daemon.New(config.DefaultSocket)
+			if err != nil {
+				cmdErr = fmt.Errorf("Couldn't register grpc server: %v", err)
+				return
+			}
+
+			// trap Ctrl+C and shutdown the server
 			c := make(chan os.Signal, 1)
 			signal.Notify(c, os.Interrupt)
-			defer func() {
-				signal.Stop(c)
-				cancel()
-			}()
 			go func() {
-				select {
-				case <-c:
-					cancel()
-				case <-ctx.Done():
-				}
+				<-c
+				s.Stop()
 			}()
 
-			cmdErr = zsys.RegisterAndListenZsysUnixSocketServer(ctx, zsys.DefaultSocket, &daemon.Server{})
+			cmdErr = s.Listen()
 		},
 		// We display usage error ourselves
 		SilenceErrors: true,

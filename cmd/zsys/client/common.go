@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -13,7 +14,7 @@ import (
 // newClient returns a new zsys client object
 func newClient() (*zsys.ZsysLogClient, error) {
 	// TODO: allow change socket address
-	c, err := zsys.NewZsysUnixSocketClient(zsys.DefaultSocket, log.GetLevel())
+	c, err := zsys.NewZsysUnixSocketClient(config.DefaultSocket, log.GetLevel())
 	if err != nil {
 		return nil, fmt.Errorf("couldn't connect to zsys daemon: %v", err)
 	}
