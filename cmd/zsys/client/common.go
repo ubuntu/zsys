@@ -20,6 +20,7 @@ func newClient() (*zsys.ZsysLogClient, error) {
 	return c, nil
 }
 
+// checkConn checks for unavailable service and unwrap any other rpc error to its message.
 func checkConn(err error) error {
 	if err != nil {
 		st, _ := status.FromError(err)
