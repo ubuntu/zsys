@@ -1,0 +1,9 @@
+[Unit]
+Description=Socker activation for zsys daemon
+PartOf=zsyd.service
+
+[Socket]
+ListenStream=/run/zsysd.sock
+
+[Install]
+WantedBy=sockets.target

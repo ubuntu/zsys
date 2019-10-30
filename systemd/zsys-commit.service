@@ -9,15 +9,11 @@ ConditionVirtualization=!container
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/sbin/zsys boot commit
+ExecStart=/sbin/zsysctl boot commit
 
 # Some daemon restrictions
 NoNewPrivileges=true
 PrivateNetwork=true
-# We can't use those as this triggers PrivateMounts=true which makes
-# zfs <mountpoint>/.zfs/snapshot/ not showing up snapshot content.
-#ProtectHome=true
-#PrivateTmp=true
 
 [Install]
 WantedBy=default.target

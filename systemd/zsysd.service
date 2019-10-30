@@ -1,0 +1,15 @@
+[Unit]
+Description=ZSYS daemon service
+After=zsysd.socket
+Requires=zsysd.socket
+
+# We can't run it in a container as there is no ZFS namespaces
+ConditionVirtualization=!container
+
+[Service]
+Type=notify
+ExecStart=/sbin/zsysd
+
+# Some daemon restrictions
+NoNewPrivileges=true
+PrivateNetwork=true
