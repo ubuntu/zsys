@@ -10,6 +10,8 @@ import (
 	"github.com/ubuntu/zsys/cmd/zsys/daemon"
 )
 
+//go:generate go run ./generate-mancomp.go cobracompletion.go ../../generated
+
 func main() {
 	var rootCmd *cobra.Command
 	var errFunc func() error
