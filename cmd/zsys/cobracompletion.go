@@ -337,7 +337,7 @@ fi
 func writeCommands(buf *bytes.Buffer, cmd *cobra.Command) {
 	buf.WriteString("    commands=()\n")
 	for _, c := range cmd.Commands() {
-		if !c.IsAvailableCommand() && !c.Hidden {
+		if !c.IsAvailableCommand() && !c.Hidden && c.Name() != "help" {
 			continue
 		}
 		commands := "commands"
