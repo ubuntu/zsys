@@ -50,7 +50,6 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		if err != nil {
 			return nil, fmt.Errorf("failed to listen on %q: %w", socket, err)
 		}
-		defer os.Remove(socket)
 		lis = l
 	case 1:
 		socket = ""
@@ -100,9 +99,9 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 
 // Listen serves on its unix socket path.
 // It handles systemd activation notification.
-// When the server stop listening, it will remove the socket file properly.
+// When the server stop listening, the socket is removed automatically.
 func (s *Server) Listen() error {
-	log.Infof(context.Background(), "Daemon serving on %s", s.lis.Addr().String())
+	log.Infof(context.Background(), "Serving on %s", s.lis.Addr().String())
 
 	// systemd activation
 	if sent, err := daemon.SdNotify(false, "READY=1"); err != nil {
