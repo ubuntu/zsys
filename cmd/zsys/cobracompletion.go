@@ -1,11 +1,10 @@
-//+build ignore
 // This is fork of github.com/spf13/cobra matching github.com/didrocks/cobra branch-for-completion branch.
 // The goal is to fix the completion issues addressed in https://github.com/spf13/cobra/pull/983
 // and file completion if no match was found.
 // A detailed upstream bug is available at https://github.com/spf13/cobra/issues/981.
 
 // However, we don't want for the runtime to diverge from upstream cobra, hence the copy here
-// to only impact bash completion, which is generated in the upstream zsys tree.
+// to only impact bash completion, which is generated in the upstream zsys tree or on demand.
 
 package main
 

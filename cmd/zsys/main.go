@@ -23,6 +23,7 @@ func main() {
 		rootCmd = client.Cmd()
 		errFunc = client.Error
 	}
+	installCompletionCmd(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		// This is a usage Error (we don't use postfix E commands other than usage)
