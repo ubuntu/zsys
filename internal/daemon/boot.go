@@ -1,12 +1,13 @@
 package daemon
 
 import (
+	"context"
 	"fmt"
-	"os"
 	"os/exec"
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
@@ -83,13 +84,22 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 		return nil
 	}
 
-	// TODO: redirect to logs
 	cmd := exec.Command(updateGrubCmd)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	logger := &logWriter{ctx: stream.Context()}
+	cmd.Stdout = logger
+	cmd.Stderr = logger
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("%q returns an error:"+config.ErrorFormat, updateGrubCmd, err)
+		return fmt.Errorf("%q returned an error:"+config.ErrorFormat, updateGrubCmd, err)
 	}
 
 	return nil
+}
+
+type logWriter struct {
+	ctx context.Context
+}
+
+func (lw logWriter) Write(p []byte) (n int, err error) {
+	log.Debug(lw.ctx, string(p))
+	return len(p), nil
 }
