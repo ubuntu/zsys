@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
-	"os"
+	"time"
 
 	"github.com/coreos/go-systemd/activation"
 	"github.com/coreos/go-systemd/daemon"
@@ -21,6 +21,9 @@ type Server struct {
 	socket     string
 	lis        net.Listener
 	grpcserver *grpc.Server
+
+	idleTimeout time.Duration
+	reset       chan struct{}
 }
 
 // New returns an new, initialized daemon server, which handles systemd activation
@@ -47,11 +50,34 @@ func New(socket string) (*Server, error) {
 	}
 
 	s := &Server{
-		socket: socket,
-		lis:    lis,
+		socket:      socket,
+		lis:         lis,
+		idleTimeout: 10 * time.Second,
+		reset:       make(chan struct{}),
 	}
 	grpcserver := zsys.RegisterServer(s)
 	s.grpcserver = grpcserver
+
+	// Handle idle timeout
+	go func() {
+		timeout := time.NewTimer(s.idleTimeout)
+
+	out:
+		for {
+			select {
+			case <-timeout.C:
+				Log.Debug(context.Background(), "Idle timeout expired")
+				break out
+			case <-s.reset:
+				if !timeout.Stop() {
+					<-timeout.C
+				}
+				timeout.Reset(s.idleTimeout)
+			}
+		}
+		s.Stop()
+	}()
+
 	return s, nil
 }
 
@@ -68,15 +94,7 @@ func (s *Server) Listen() error {
 		log.Debug(context.Background(), "Ready state sent to systemd")
 	}
 
-	err := s.grpcserver.Serve(s.lis)
-
-	// cleanup socket if created manually
-	if s.socket != "" {
-		if errRemoveSocket := os.Remove(s.socket); errRemoveSocket != nil {
-			log.Warningf(context.Background(), "Couldn't remove socket %s: %v", s.socket, errRemoveSocket)
-		}
-	}
-	return err
+	return s.grpcserver.Serve(s.lis)
 }
 
 // Stop gracefully stops the grpc server
@@ -84,6 +102,12 @@ func (s *Server) Stop() {
 	log.Debug(context.Background(), "Stopping daemon requested. Wait for active requests to close")
 	s.grpcserver.GracefulStop()
 	log.Debug(context.Background(), "All connexions closed")
+}
+
+// resetTimeout resets the idling timeout on the server
+func (s *Server) resetTimeout() {
+	log.Debugf(context.Background(), "Reset idle timeout to %s", s.idleTimeout)
+	s.reset <- struct{}{}
 }
 
 // getMachines returns all scanned machines on the current system

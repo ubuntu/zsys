@@ -26,8 +26,6 @@ var (
 			config.SetVerboseMode(flagVerbosity)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			// TODO: timeout on idling
-
 			s, err := daemon.New(config.DefaultSocket)
 			if err != nil {
 				cmdErr = fmt.Errorf("Couldn't register grpc server: %v", err)
