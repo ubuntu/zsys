@@ -13,4 +13,7 @@ const (
 
 	// DefaultClientTimeout for client requests
 	DefaultClientTimeout = 30 * time.Second
+
+	// DefaultServerIdleTimeout is the default time without a request before the server exits
+	DefaultServerIdleTimeout = time.Minute
 )

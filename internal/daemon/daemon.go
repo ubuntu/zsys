@@ -10,6 +10,7 @@ import (
 	"github.com/coreos/go-systemd/activation"
 	"github.com/coreos/go-systemd/daemon"
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/zfs"
@@ -26,8 +27,17 @@ type Server struct {
 	reset       chan struct{}
 }
 
+// IdleTimeout changes server default idle timeout
+func IdleTimeout(t time.Duration) func(s *Server) error {
+	return func(s *Server) error {
+		s.idleTimeout = t
+		return nil
+	}
+}
+
 // New returns an new, initialized daemon server, which handles systemd activation
-func New(socket string) (*Server, error) {
+// socket is ignored if we are using socket activation.
+func New(socket string, options ...func(s *Server) error) (*Server, error) {
 	// systemd socket activation or local creation
 	listeners, err := activation.Listeners()
 	if err != nil {
@@ -50,13 +60,20 @@ func New(socket string) (*Server, error) {
 	}
 
 	s := &Server{
-		socket:      socket,
-		lis:         lis,
-		idleTimeout: 10 * time.Second,
+		socket: socket,
+		lis:    lis,
+
+		idleTimeout: config.DefaultServerIdleTimeout,
 		reset:       make(chan struct{}),
 	}
 	grpcserver := zsys.RegisterServer(s)
 	s.grpcserver = grpcserver
+
+	for _, option := range options {
+		if err := option(s); err != nil {
+			log.Warningf(context.Background(), "Couldn't apply option to server: %v", err)
+		}
+	}
 
 	// Handle idle timeout
 	go func() {
@@ -66,7 +83,7 @@ func New(socket string) (*Server, error) {
 		for {
 			select {
 			case <-timeout.C:
-				Log.Debug(context.Background(), "Idle timeout expired")
+				log.Debug(context.Background(), "Idle timeout expired")
 				break out
 			case <-s.reset:
 				if !timeout.Stop() {
