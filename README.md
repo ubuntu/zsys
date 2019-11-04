@@ -36,6 +36,38 @@ zsysctl COMMAND [flags]
   -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
 ```
 
+#### zsysctl completion
+
+Generates bash completion scripts
+
+##### Synopsis
+
+To load completion run
+
+. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+
+To configure your bash shell to load completions for each session add to your bashrc
+
+# ~/.bashrc or ~/.profile
+. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+
+
+```
+zsysctl completion [flags]
+```
+
+##### Options
+
+```
+  -h, --help   help for completion
+```
+
+##### Options inherited from parent commands
+
+```
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
 #### zsysd
 
 ZFS SYStem integration daemon
@@ -55,6 +87,38 @@ zsysd [flags]
 
 ```
   -h, --help            help for zsysd
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
+#### zsysd completion
+
+Generates bash completion scripts
+
+##### Synopsis
+
+To load completion run
+
+. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+
+To configure your bash shell to load completions for each session add to your bashrc
+
+# ~/.bashrc or ~/.profile
+. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+
+
+```
+zsysd completion [flags]
+```
+
+##### Options
+
+```
+  -h, --help   help for completion
+```
+
+##### Options inherited from parent commands
+
+```
   -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
 ```
 
