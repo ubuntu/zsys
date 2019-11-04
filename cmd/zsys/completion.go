@@ -8,7 +8,7 @@ import (
 )
 
 func installCompletionCmd(rootCmd *cobra.Command) {
-	prog := os.Args[0]
+	prog := rootCmd.Name()
 	var completionCmd = &cobra.Command{
 		Use:   "completion",
 		Short: "Generates bash completion scripts",

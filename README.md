@@ -44,12 +44,12 @@ Generates bash completion scripts
 
 To load completion run
 
-. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+. <(zsysctl completion)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.bashrc or ~/.profile
-. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+. <(zsysctl completion)
 
 
 ```
@@ -98,12 +98,12 @@ Generates bash completion scripts
 
 To load completion run
 
-. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+. <(zsysd completion)
 
 To configure your bash shell to load completions for each session add to your bashrc
 
 # ~/.bashrc or ~/.profile
-. <(/tmp/go-build621429091/b001/exe/generate-mancomp completion)
+. <(zsysd completion)
 
 
 ```
