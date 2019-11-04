@@ -15,7 +15,7 @@ import (
 func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsys_CreateUserDataServer) error {
 	user := req.GetUser()
 	homepath := req.GetHomepath()
-	log.Infof(stream.Context(), "CreateUserData request received for %q on %q", user, homepath)
+	log.Infof(stream.Context(), "Create user dataset for %q on %q", user, homepath)
 
 	ms, err := getMachines(stream.Context(), zfs.New(stream.Context()))
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, stream zsys.Zsys_ChangeHomeOnUserDataServer) error {
 	home := req.GetHome()
 	newHome := req.GetNewHome()
-	log.Infof(stream.Context(), "ChangeHomeOnUserData request received to rename %q to %q", home, newHome)
+	log.Infof(stream.Context(), "Rename home user dataset from %q to %q", home, newHome)
 
 	ms, err := getMachines(stream.Context(), zfs.New(stream.Context()))
 	if err != nil {
