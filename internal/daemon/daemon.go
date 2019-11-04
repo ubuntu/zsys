@@ -120,8 +120,8 @@ func (s *Server) Stop() {
 	log.Debug(context.Background(), "All connexions closed")
 }
 
-// resetTimeout resets the idling timeout on the server
-func (s *Server) resetTimeout() {
+// ResetTimeout resets the idling timeout on the server
+func (s *Server) ResetTimeout() {
 	log.Debugf(context.Background(), "Reset idle timeout to %s", s.idleTimeout)
 	s.reset <- struct{}{}
 }

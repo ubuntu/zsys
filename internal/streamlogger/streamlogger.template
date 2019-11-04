@@ -46,12 +46,18 @@ func (z *{{.LogClient}}) Close() error {
 // This can't be done in interceptor as the creation of each per-function server struct from a grpc.ServerStream
 // is only done in the handler() call, which is blocking until the whole handler has ran, once the stream
 // has closed.
+// It also wraps an idle timeout server, so that the interceptor can call ResetTimeout on it after each call.
 type {{.LogServer}} struct {
-	{{.OrigServer}}
+	{{.OrigServer}}IdleTimeout
 }
 
-// register{{.OrigServer}}WithLogs wraps the server to a logged variant intercepting all grpc calls.
-func register{{.OrigServer}}WithLogs(s *grpc.Server, srv {{.OrigServer}}) {
+type {{.OrigServer}}IdleTimeout interface {
+	{{.OrigServer}}
+	ResetTimeout()
+}
+
+// register{{.OrigServer}}IdleWithLogs wraps the server to an idle timeout server and logged variant intercepting all grpc calls.
+func register{{.OrigServer}}IdleWithLogs(s *grpc.Server, srv {{.OrigServer}}IdleTimeout) {
 	Register{{.OrigServer}}(s, &{{.LogServer}}{srv})
 }
 {{- end}}
@@ -82,7 +88,7 @@ func (z *{{.LogServer}}) {{.Name}}(req *{{.ReqType}}, stream {{.OrigStream}}) er
 	}
 
 	// wrap the context to access the context with logger
-	return z.{{.OrigServer}}.{{.Name}}(req, &{{.LogStream}}{
+	return z.{{.OrigServer}}IdleTimeout.{{.Name}}(req, &{{.LogStream}}{
 		{{.OrigStream}}: stream,
 		ctx:                   ctx,
 	})

@@ -30,9 +30,9 @@ func NewZsysUnixSocketClient(socket string, level logrus.Level) (*ZsysLogClient,
 }
 
 // RegisterServer registers a ZsysServer after creating the grpc server which it returns.
-func RegisterServer(srv ZsysServer) *grpc.Server {
-	s := grpc.NewServer()
-	registerZsysServerWithLogs(s, srv)
+func RegisterServer(srv ZsysServerIdleTimeout) *grpc.Server {
+	s := grpc.NewServer(grpc.StreamInterceptor(streamlogger.ServerIdleTimeoutInterceptor))
+	registerZsysServerIdleWithLogs(s, srv)
 	return s
 }
 

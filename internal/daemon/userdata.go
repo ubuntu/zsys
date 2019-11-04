@@ -13,8 +13,6 @@ import (
 // if the user already exists for a dataset attached to the current system, set its mountpoint to homepath.
 // This is called by zsys grpc request, once the server is registered
 func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsys_CreateUserDataServer) error {
-	defer s.resetTimeout()
-
 	user := req.GetUser()
 	homepath := req.GetHomepath()
 	log.Infof(stream.Context(), "CreateUserData request received for %q on %q", user, homepath)
@@ -39,8 +37,6 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 
 // ChangeHomeOnUserData tries to find an existing dataset matching home as a valid mountpoint and rename it to newhome
 func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, stream zsys.Zsys_ChangeHomeOnUserDataServer) error {
-	defer s.resetTimeout()
-
 	home := req.GetHome()
 	newHome := req.GetNewHome()
 	log.Infof(stream.Context(), "ChangeHomeOnUserData request received to rename %q to %q", home, newHome)

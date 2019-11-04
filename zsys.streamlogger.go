@@ -43,12 +43,18 @@ func (z *ZsysLogClient) Close() error {
 // This can't be done in interceptor as the creation of each per-function server struct from a grpc.ServerStream
 // is only done in the handler() call, which is blocking until the whole handler has ran, once the stream
 // has closed.
+// It also wraps an idle timeout server, so that the interceptor can call ResetTimeout on it after each call.
 type ZsysLogServer struct {
-	ZsysServer
+	ZsysServerIdleTimeout
 }
 
-// registerZsysServerWithLogs wraps the server to a logged variant intercepting all grpc calls.
-func registerZsysServerWithLogs(s *grpc.Server, srv ZsysServer) {
+type ZsysServerIdleTimeout interface {
+	ZsysServer
+	ResetTimeout()
+}
+
+// registerZsysServerIdleWithLogs wraps the server to an idle timeout server and logged variant intercepting all grpc calls.
+func registerZsysServerIdleWithLogs(s *grpc.Server, srv ZsysServerIdleTimeout) {
 	RegisterZsysServer(s, &ZsysLogServer{srv})
 }
 
@@ -76,7 +82,7 @@ func (z *ZsysLogServer) CreateUserData(req *CreateUserDataRequest, stream Zsys_C
 	}
 
 	// wrap the context to access the context with logger
-	return z.ZsysServer.CreateUserData(req, &zsysCreateUserDataLogStream{
+	return z.ZsysServerIdleTimeout.CreateUserData(req, &zsysCreateUserDataLogStream{
 		Zsys_CreateUserDataServer: stream,
 		ctx:                       ctx,
 	})
@@ -106,7 +112,7 @@ func (z *ZsysLogServer) ChangeHomeOnUserData(req *ChangeHomeOnUserDataRequest, s
 	}
 
 	// wrap the context to access the context with logger
-	return z.ZsysServer.ChangeHomeOnUserData(req, &zsysChangeHomeOnUserDataLogStream{
+	return z.ZsysServerIdleTimeout.ChangeHomeOnUserData(req, &zsysChangeHomeOnUserDataLogStream{
 		Zsys_ChangeHomeOnUserDataServer: stream,
 		ctx:                             ctx,
 	})
@@ -136,7 +142,7 @@ func (z *ZsysLogServer) PrepareBoot(req *Empty, stream Zsys_PrepareBootServer) e
 	}
 
 	// wrap the context to access the context with logger
-	return z.ZsysServer.PrepareBoot(req, &zsysPrepareBootLogStream{
+	return z.ZsysServerIdleTimeout.PrepareBoot(req, &zsysPrepareBootLogStream{
 		Zsys_PrepareBootServer: stream,
 		ctx:                    ctx,
 	})
@@ -166,7 +172,7 @@ func (z *ZsysLogServer) CommitBoot(req *Empty, stream Zsys_CommitBootServer) err
 	}
 
 	// wrap the context to access the context with logger
-	return z.ZsysServer.CommitBoot(req, &zsysCommitBootLogStream{
+	return z.ZsysServerIdleTimeout.CommitBoot(req, &zsysCommitBootLogStream{
 		Zsys_CommitBootServer: stream,
 		ctx:                   ctx,
 	})
