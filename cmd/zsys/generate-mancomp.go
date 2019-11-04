@@ -189,11 +189,12 @@ func collectSubCmds(cmd *cobra.Command, selectHidden, parentWasHidden bool) (cmd
 			continue
 		}
 		// Flip that we have a hidden parent
-		if c.Hidden && selectHidden {
-			parentWasHidden = true
+		currentOrParentHidden := parentWasHidden
+		if c.Hidden {
+			currentOrParentHidden = true
 		}
 		cmds = append(cmds, c)
-		cmds = append(cmds, collectSubCmds(c, selectHidden, parentWasHidden)...)
+		cmds = append(cmds, collectSubCmds(c, selectHidden, currentOrParentHidden)...)
 	}
 	return cmds
 }
