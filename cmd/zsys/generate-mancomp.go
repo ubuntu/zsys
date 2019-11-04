@@ -19,10 +19,12 @@ import (
 )
 
 func main() {
-
 	if len(os.Args) != 2 {
 		log.Fatal("Need one argument: output directory")
 	}
+
+	installCompletionCmd(client.Cmd())
+	installCompletionCmd(daemon.Cmd())
 
 	dir := os.Args[1]
 	if err := os.RemoveAll(dir); err != nil {
