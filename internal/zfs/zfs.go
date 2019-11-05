@@ -69,27 +69,102 @@ type datasetSources struct {
 }
 
 // Zfs is a system handler talking to zfs linux module.
-// It can handle a single transaction if "WithTransaction()"" is passed to the New constructor.
-// An error won't then try to rollback the changes and Cancel() should be called.
-// If no error happened and we want to finish the transaction before starting a new one, call "Done()".
-// If no transaction support is used, any error in a method call will try to rollback changes automatically.
+// It can handle transactions if the context passed to the constructor is cancellable (timeout, deadline or cancel).
+// We finally need to call Done() to end a transaction. This object shouldn't be reused then.
+// If cancel() on the context is called before Done(), we'll rollback the changes.
+// Some multi-zfs-calls functions will create a subtransaction and try to rollback those in-flight changes in case of error.
 type Zfs struct {
 	ctx context.Context
 
-	// TODO: hook ctx cancel to it and only have transactions (context.Background() is without cancelling possibility)
-	transactional  bool
-	reverts        []func() error
-	transactionErr bool
+	commit chan struct{}
+	done   chan struct{}
+
+	reverts []func() error
 }
 
-// New return a new zfs system handler.
+// New returns a new zfs system handler.
 func New(ctx context.Context, options ...func(*Zfs)) *Zfs {
-	z := Zfs{ctx: ctx}
+	z := Zfs{
+		ctx:    ctx,
+		commit: make(chan struct{}),
+		done:   make(chan struct{}),
+	}
 	for _, options := range options {
 		options(&z)
 	}
 
+	ready := make(chan struct{})
+
+	// cancel transactions when context is cancelled before any commit
+	go func() {
+		close(ready)
+		select {
+		case <-z.ctx.Done():
+			log.Debugf(z.ctx, "ZFS: reverting all in progress zfs transactions")
+			for i := len(z.reverts) - 1; i >= 0; i-- {
+				if err := z.reverts[i](); err != nil {
+					log.Warningf(z.ctx, config.ErrorFormat, fmt.Errorf("An error occurred when reverting a Zfs transaction: "+config.ErrorFormat, err))
+				}
+			}
+			z.reverts = nil
+		case <-z.commit:
+		}
+		z.commit = nil
+		z.done <- struct{}{}
+	}()
+	// wait for teardown goroutine to start
+	<-ready
+
 	return &z
+}
+
+// NewTransaction create a new Zfs handler for a sub transaction. This is useful for recursive calls
+// to hide implementations details from outside. If an error is not nil in the function callback, the
+// sub transaction will be reverted. If none is found, the in progress reverts will be appended to the
+// parent transaction.
+func (z *Zfs) NewTransaction() (*Zfs, func(err *error)) {
+	// Create a subtransaction (for recursive calls)
+	subctx, subrevert := context.WithCancel(z.ctx)
+	subz := New(subctx)
+	return subz,
+		func(err *error) {
+			if *err != nil {
+				subrevert()
+			} else {
+				// attach reverts to parent context and purge current routine
+				z.reverts = append(z.reverts, subz.reverts...)
+			}
+
+			// Purge current subtransaction
+			subz.Done()
+		}
+}
+
+// registerRevert is a helper for defer() setting error value
+func (z *Zfs) registerRevert(f func() error) {
+	z.reverts = append(z.reverts, f)
+}
+
+// Done commits current changes and starts a new transactions.
+// This should be called to release underlying resources and will block until all is good.
+// This is a no-op if associated context was already cancelled or isn't cancellable.
+func (z *Zfs) Done() {
+	// We already committed, other calls are no-op
+	if z.commit == nil {
+		return
+	}
+
+	select {
+	// try to send a commit to purge goroutine
+	case z.commit <- struct{}{}:
+	default:
+		<-z.done
+		return
+	}
+
+	log.Debugf(z.ctx, "ZFS: committing transaction")
+	z.reverts = nil
+	<-z.done
 }
 
 // Create creates a dataset for that path.
@@ -150,11 +225,13 @@ func (z *Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapsho
 		return fmt.Errorf("couldn't open %q: %v", datasetName, err)
 	}
 	defer d.Close()
-	defer func() { z.saveOrRevert(errSnapshot) }()
+
+	subz, done := z.NewTransaction()
+	defer done(&errSnapshot)
 
 	// We can't use the recursive version of snapshotting, as we want to track user properties and
 	// set them explicitly as needed
-	return z.snapshotRecursive(d, snapName, recursive)
+	return subz.snapshotRecursive(d, snapName, recursive)
 }
 
 // snapshotRecursive recursively try snapshotting all children and store "revert" operations by cleaning newly
@@ -237,7 +314,9 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 	if !d.IsSnapshot() {
 		return fmt.Errorf("%q isn't a snapshot", name)
 	}
-	defer func() { z.saveOrRevert(errClone) }()
+
+	subz, done := z.NewTransaction()
+	defer done(&errClone)
 
 	rootName, snapshotName := splitSnapshotName(name)
 
@@ -260,7 +339,7 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 		}
 	}
 
-	return z.cloneRecursive(d, snapshotName, rootName, newRootName, skipBootfs, recursive)
+	return subz.cloneRecursive(d, snapshotName, rootName, newRootName, skipBootfs, recursive)
 }
 
 // cloneRecursive recursively clones all children and store "revert" operations by cleaning newly
@@ -372,7 +451,9 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 	if d.IsSnapshot() {
 		return fmt.Errorf("can't promote %q: it's a snapshot", name)
 	}
-	defer func() { z.saveOrRevert(errPromote) }()
+
+	subz, done := z.NewTransaction()
+	defer done(&errPromote)
 
 	originParent, snapshotName := splitSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
 	// Only check integrity for non promoted elements
@@ -388,7 +469,7 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 		}
 	}
 
-	return z.promoteRecursive(d)
+	return subz.promoteRecursive(d)
 }
 
 func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
@@ -425,8 +506,8 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 // in a transactional Zfs element.
 func (z *Zfs) Destroy(name string) error {
 	log.Debugf(z.ctx, "ZFS: trying to destroy %q", name)
-	if z.transactional {
-		return fmt.Errorf("couldn't call Destroy in a transactional context.")
+	if z.ctx.Done() != nil {
+		return fmt.Errorf("couldn't call Destroy in a transactional context")
 	}
 
 	d, err := libzfs.DatasetOpen(name)
@@ -445,14 +526,13 @@ func (z *Zfs) Destroy(name string) error {
 // SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
-func (z *Zfs) SetProperty(name, value, datasetName string, force bool) (errSetProperty error) {
+func (z *Zfs) SetProperty(name, value, datasetName string, force bool) error {
 	log.Debugf(z.ctx, "ZFS: trying to set %q=%q on %q", name, value, datasetName)
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
 		return fmt.Errorf("can't get dataset %q: "+config.ErrorFormat, datasetName, err)
 	}
 	defer d.Close()
-	defer func() { z.saveOrRevert(errSetProperty) }()
 
 	if d.IsSnapshot() {
 		return fmt.Errorf("can't set a property %q on %q: the dataset a snapshot", name, datasetName)
