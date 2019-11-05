@@ -109,7 +109,6 @@ func New(ctx context.Context, options ...func(*Zfs)) *Zfs {
 			z.reverts = nil
 		case <-z.commit:
 		}
-		z.commit = nil
 		z.done <- struct{}{}
 	}()
 	// wait for teardown goroutine to start
@@ -159,12 +158,14 @@ func (z *Zfs) Done() {
 	case z.commit <- struct{}{}:
 	default:
 		<-z.done
+		z.commit = nil
 		return
 	}
 
 	log.Debugf(z.ctx, "ZFS: committing transaction")
 	z.reverts = nil
 	<-z.done
+	z.commit = nil
 }
 
 // Create creates a dataset for that path.
