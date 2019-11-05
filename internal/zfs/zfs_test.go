@@ -55,6 +55,7 @@ func TestCreate(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New(context.Background())
+			defer z.Done()
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			if tc.wantErr {
@@ -145,6 +146,7 @@ func TestScan(t *testing.T) {
 			}
 
 			z := zfs.New(context.Background())
+			defer z.Done()
 			got, err := z.Scan()
 			if err != nil {
 				if !tc.wantErr {
@@ -197,6 +199,7 @@ func TestSnapshot(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New(context.Background())
+			defer z.Done()
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			var err error
@@ -278,6 +281,7 @@ func TestClone(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New(context.Background())
+			defer z.Done()
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			var err error
@@ -348,6 +352,7 @@ func TestPromote(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New(context.Background())
+			defer z.Done()
 			_, err := z.Scan() // Needed for cache
 			if err != nil {
 				t.Fatalf("couldn't get initial state: %v", err)
@@ -436,6 +441,7 @@ func TestDestroy(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New(context.Background())
+			defer z.Done()
 			_, err := z.Scan() // Needed for cache
 			if err != nil {
 				t.Fatalf("couldn't get initial state: %v", err)
@@ -533,6 +539,7 @@ func TestSetProperty(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 			z := zfs.New(context.Background())
+			defer z.Done()
 			// Scan initial state for no-op
 			var initState []zfs.Dataset
 			if tc.isNoOp {
@@ -581,42 +588,42 @@ func TestTransactions(t *testing.T) {
 		doSetProperty bool
 		doDestroy     bool
 		shouldErr     bool
-		revert        bool
+		cancel        bool
 	}{
 		"Create only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doCreate: true},
-		"Create only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, revert: true},
-		"Create only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doCreate: true, shouldErr: true, revert: true},
-		"Create only, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, shouldErr: true}, // will issue a warning
+		"Create only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doCreate: true, cancel: true},
+		"Create only, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doCreate: true, shouldErr: true, cancel: true}, // cancel is a no-op as it errored
+		"Create only, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doCreate: true, shouldErr: true},
 
 		"Snapshot only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSnapshot: true},
-		"Snapshot only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, revert: true},
-		"Snapshot only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true, revert: true},
-		"Snapshot only, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true}, // will issue a warning
+		"Snapshot only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, cancel: true},
+		"Snapshot only, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true, cancel: true}, // cancel is a no-op as it errored
+		"Snapshot only, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true},
 
-		"Clone only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doClone: true, revert: true},
-		"Clone only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doClone: true},
+		"Clone only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doClone: true, cancel: true},
+		"Clone only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doClone: true},
 		// We unfortunately can't do those because we can't fail in the middle of Clone(), after some modification were done
 		// The 2 failures are: either the dataset exists with suffix (won't clone anything) or missing intermediate snapshot
 		// (won't even start cloning).
 		// Avoid special casing the test code for no benefits.
-		//"Clone only, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true, revert: true},
-		//"Clone only, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true}, // will issue a warning
+		//"Clone only, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true, cancel: true},
+		//"Clone only, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true},
 
-		"Promote only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doPromote: true, revert: true},
-		"Promote only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doPromote: true},
+		"Promote only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doPromote: true, cancel: true},
+		"Promote only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doPromote: true},
 		// We unfortunately can't do those because we can't fail in the middle of Promote(), after some modification were done
 
-		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, revert: true},
-		"SetProperty only, success, Revert": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
+		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, cancel: true},
+		"SetProperty only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
 		// We unfortunately can't do those because we can't fail in the middle of SetProperty(), after some modification were done
 
 		// Destroy can't be in transactions
 		"Destroy, failed before doing anything": {def: "layout1_for_transactions_tests.yaml", doDestroy: true},
 
 		"Multiple steps transaction, success, Done":   {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true},
-		"Multiple steps transaction, success, Revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, revert: true},
-		"Multiple steps transaction, fail, Revert":    {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true, revert: true},
-		"Multiple steps transaction, fail, No revert": {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true},
+		"Multiple steps transaction, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, cancel: true},
+		"Multiple steps transaction, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true, cancel: true},
+		"Multiple steps transaction, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doCreate: true, doSnapshot: true, doClone: true, doPromote: true, doSetProperty: true, shouldErr: true},
 	}
 
 	for name, tc := range tests {
@@ -627,37 +634,42 @@ func TestTransactions(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New(context.Background(), zfs.WithTransactions())
+
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			z := zfs.New(ctx)
+			defer z.Done()
+
 			initState, err := z.Scan()
 			if err != nil {
 				t.Fatalf("couldn't get initial state: %v", err)
 			}
 			state := initState
+			var haveChanges bool
 
 			// we issue multiple Create() to test the entire transactions (as not recursive)
 			if tc.doCreate {
-				// This one should always work
 				datasetName := "rpool/ROOT/ubuntu_4242"
-				if err := z.Create(datasetName, "/home/foo", "on"); err != nil {
-					t.Fatalf("creating base dataset %q failed where we expected it not to", datasetName)
-				}
-				datasetName = "rpool/ROOT/ubuntu_4242/opt"
 				if tc.shouldErr {
 					// create a dataset without its parent will make it fail
-					datasetName = "rpool/ROOT/ubuntu_4242/opt/sub"
+					datasetName = "rpool/ROOT/ubuntu_4242/opt"
 				}
-				err = z.Create(datasetName, "/home/other", "on")
+				err := z.Create(datasetName, "/home/foo", "on")
 				if !tc.shouldErr && err != nil {
 					t.Fatalf("create %q shouldn't have failed but it did: %v", datasetName, err)
 				} else if tc.shouldErr && err == nil {
 					t.Fatalf("creating %q should have returned an error but it didn't", datasetName)
 				}
-				// We expect some modifications
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get state after create: %v", err)
+				newState, errScan := z.Scan()
+				if errScan != nil {
+					t.Fatalf("couldn't get state after create: %v", errScan)
 				}
-				assertDatasetsNotEquals(t, ta, state, newState, true)
+				if err != nil {
+					assertDatasetsEquals(t, ta, state, newState, true)
+				} else {
+					assertDatasetsNotEquals(t, ta, state, newState, true)
+					haveChanges = true
+				}
 				state = newState
 			}
 
@@ -675,12 +687,16 @@ func TestTransactions(t *testing.T) {
 				} else if tc.shouldErr && err == nil {
 					t.Fatal("taking snapshot should have returned an error but it didn't")
 				}
-				// We expect some modifications
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get state after snapshot: %v", err)
+				newState, errScan := z.Scan()
+				if errScan != nil {
+					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
-				assertDatasetsNotEquals(t, ta, state, newState, true)
+				if err != nil {
+					assertDatasetsEquals(t, ta, state, newState, true)
+				} else {
+					assertDatasetsNotEquals(t, ta, state, newState, true)
+					haveChanges = true
+				}
 				state = newState
 			}
 
@@ -697,14 +713,15 @@ func TestTransactions(t *testing.T) {
 				} else if tc.shouldErr && err == nil {
 					t.Fatal("cloning should have returned an error but it didn't")
 				}
-				// We can't expect some modifications (see above)
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get state after cloning: %v", err)
+				newState, errScan := z.Scan()
+				if errScan != nil {
+					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
-				// bypass checks on error (things will be equal), as we can't have an error with changes see the test definition above
-				if !tc.shouldErr {
+				if err != nil {
+					assertDatasetsEquals(t, ta, state, newState, true)
+				} else {
 					assertDatasetsNotEquals(t, ta, state, newState, true)
+					haveChanges = true
 				}
 				state = newState
 			}
@@ -718,6 +735,7 @@ func TestTransactions(t *testing.T) {
 					// Prepare cloning in its own transaction
 					if !tc.doClone {
 						z2 := zfs.New(context.Background())
+						defer z2.Done()
 						err := z2.Clone("rpool/ROOT/ubuntu_1234@snap_r2", "5678", false, true)
 						if err != nil {
 							t.Fatalf("couldnt clone to prepare dataset hierarchy: %v", err)
@@ -727,6 +745,7 @@ func TestTransactions(t *testing.T) {
 						if err != nil {
 							t.Fatalf("couldn't get initial state: %v", err)
 						}
+						z2.Done()
 						state = initState
 					}
 				}
@@ -736,14 +755,15 @@ func TestTransactions(t *testing.T) {
 				} else if tc.shouldErr && err == nil {
 					t.Fatal("promoting should have returned an error but it didn't")
 				}
-				// We can't expect some modifications (see above)
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get state after promoting: %v", err)
+				newState, errScan := z.Scan()
+				if errScan != nil {
+					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
-				// bypass checks on error (things will be equal), as we can't have an error with changes see the test definition above
-				if !tc.shouldErr {
+				if err != nil {
+					assertDatasetsEquals(t, ta, state, newState, true)
+				} else {
 					assertDatasetsNotEquals(t, ta, state, newState, true)
+					haveChanges = true
 				}
 				state = newState
 			}
@@ -752,10 +772,10 @@ func TestTransactions(t *testing.T) {
 				if err := z.Destroy("rpool/ROOT/ubuntu_1234"); err == nil {
 					t.Fatalf("expected destroy to not work in transactions, but it returned no error")
 				}
-				// Expect no modifications
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get state after destruction: %v", err)
+				// Expect no modifications: the only case we can test is a failing one
+				newState, errScan := z.Scan()
+				if errScan != nil {
+					t.Fatalf("couldn't get state after destruction: %v", errScan)
 				}
 				assertDatasetsEquals(t, ta, state, newState, true)
 				return
@@ -773,37 +793,36 @@ func TestTransactions(t *testing.T) {
 				} else if tc.shouldErr && err == nil {
 					t.Fatal("changing property should have returned an error but it didn't")
 				}
-				// We expect some modifications
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get state after snapshot: %v", err)
+				newState, errScan := z.Scan()
+				if errScan != nil {
+					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
-				// bypass checks on error (things will be equal), as we can't have an error with changes see the test definition above
-				if !tc.shouldErr {
+				if err != nil {
+					assertDatasetsEquals(t, ta, state, newState, true)
+				} else {
 					assertDatasetsNotEquals(t, ta, state, newState, true)
+					haveChanges = true
 				}
 				state = newState
 			}
 
 			// Final transaction states
-			if tc.revert {
-				// Revert: should get back to initial state
-				z.Cancel()
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get finale state: %v", err)
-				}
-				assertDatasetsNotEquals(t, ta, state, newState, true)
-				assertDatasetsEquals(t, ta, initState, newState, true)
+			if tc.cancel {
+				// Cancel: should get back to initial state
+				cancel()
+				haveChanges = false
+			}
+			z.Done()
+			finalState, errScan := z.Scan()
+			if errScan != nil {
+				t.Fatalf("couldn't get finale state: %v", errScan)
+			}
+
+			// Done: should have commit the current state and be different from initial one
+			if haveChanges {
+				assertDatasetsNotEquals(t, ta, initState, finalState, true)
 			} else {
-				// Done: should commit the current state and be different from initial one
-				z.Done()
-				newState, err := z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get finale state: %v", err)
-				}
-				assertDatasetsEquals(t, ta, state, newState, true)
-				assertDatasetsNotEquals(t, ta, initState, newState, true)
+				assertDatasetsEquals(t, ta, initState, finalState, true)
 			}
 		})
 	}
