@@ -828,6 +828,106 @@ func TestTransactions(t *testing.T) {
 	}
 }
 
+func TestNewTransaction(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		errSnapshot     bool
+		cancellable     bool
+		cancel          bool
+		cancelAfterDone bool
+	}{
+		"Everything pass":                       {},
+		"Cancel":                                {cancellable: true, cancel: true},
+		"Cancellable context but didn't cancel": {cancellable: true, cancel: false},
+		"Cancel after done call already committed the change": {cancellable: true, cancel: true, cancelAfterDone: true},
+
+		"Error reverts automatically intermediate changes, but not all":  {errSnapshot: true},
+		"Error with cancel reverted everything":                          {errSnapshot: true, cancellable: true, cancel: true},
+		"Error with cancel after done only committed some state changes": {errSnapshot: true, cancellable: true, cancel: true, cancelAfterDone: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", "layout1__one_pool_n_datasets_n_snapshots.yaml"))
+			defer fPools.create(dir)()
+			ctx := context.Background()
+			var cancel context.CancelFunc
+			if tc.cancellable {
+				ctx, cancel = context.WithCancel(ctx)
+				defer cancel()
+			}
+
+			z := zfs.New(ctx)
+			defer z.Done()
+
+			// Scan initial state for no-op
+			initState, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
+
+			if err := z.Create("rpool/ROOT/New", "/", "on"); err != nil {
+				t.Fatalf("didn't expect a failure but got: %v", err)
+			}
+
+			intermediateState, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
+
+			snapshotName := "new_snap"
+			if tc.errSnapshot {
+				// this snapshot already exists on a subdatasets
+				snapshotName = "snap_r1"
+			}
+			err = z.Snapshot(snapshotName, "rpool", true)
+			if !tc.errSnapshot && err != nil {
+				t.Fatalf("didn't expect an error on snapshot but got: %v", err)
+			} else if tc.errSnapshot && err == nil {
+				t.Fatalf("did expect an error on snapshot but got none")
+			}
+
+			afterSnapshotState, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
+
+			// check that an error in the recursive snapshot call has always been reverted (having a cancellable or non cancellable transactions)
+			if tc.errSnapshot {
+				assertDatasetsEquals(t, ta, intermediateState, afterSnapshotState, true)
+			} else {
+				assertDatasetsNotEquals(t, ta, intermediateState, afterSnapshotState, true)
+			}
+
+			if tc.cancellable && tc.cancel {
+				if tc.cancelAfterDone {
+					z.Done() // this should make the next cancel a no-op
+				}
+				cancel()
+				z.Done() // wait for cancel() to return
+			}
+
+			finaleState, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
+
+			// cancel should have reverted everything, including snapshot transaction if didn't fail
+			if !tc.cancelAfterDone && tc.cancellable && tc.cancel {
+				assertDatasetsEquals(t, ta, initState, finaleState, true)
+				return
+			}
+			// no cancel or cancel after Done is too late: we should have changes
+			assertDatasetsNotEquals(t, ta, initState, finaleState, true)
+		})
+	}
+}
+
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
 // DataSlices.
 func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) zfs.DatasetSlice {
