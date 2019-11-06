@@ -21,6 +21,8 @@ func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
+	log.Infof(stream.Context(), "Prepare current boot state")
+
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
@@ -42,6 +44,8 @@ func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer
 func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) (err error) {
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
+
+	log.Infof(stream.Context(), "Commit current boot state")
 
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)

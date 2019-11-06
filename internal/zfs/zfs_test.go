@@ -1137,7 +1137,7 @@ func (ta timeAsserter) assertAndReplaceCreationTimeInRange(t *testing.T, ds []*z
 		}
 
 		if int64(r.LastUsed) < start || int64(r.LastUsed) > curr {
-			t.Errorf("expected snapshot time outside of range: %d", r.LastUsed)
+			t.Errorf("expected LastUsed time outside of range: %d. Start: %d, Current: %d", r.LastUsed, start, curr)
 		} else {
 			r.LastUsed = currentMagicTime
 		}
