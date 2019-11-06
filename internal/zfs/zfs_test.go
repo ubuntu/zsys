@@ -2,6 +2,7 @@ package zfs_test
 
 import (
 	"context"
+	"errors"
 	"io/ioutil"
 	"os"
 	"os/user"
@@ -924,6 +925,93 @@ func TestNewTransaction(t *testing.T) {
 			}
 			// no cancel or cancel after Done is too late: we should have changes
 			assertDatasetsNotEquals(t, ta, initState, finaleState, true)
+		})
+	}
+}
+
+func TestNewWithAutoCancel(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		err error
+	}{
+		"Everything pass":                {},
+		"Error automatically rollbacked": {err: errors.New("an error")},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"))
+			defer fPools.create(dir)()
+
+			z := zfs.NewWithAutoCancel(context.Background())
+			defer z.Done()
+
+			// Scan initial state for no-op
+			initState, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
+
+			if err := z.Create("rpool/New", "/", "on"); err != nil {
+				t.Fatalf("didn't expect a failure but got: %v", err)
+			}
+
+			z.DoneCheckErr(&tc.err)
+
+			finaleState, err := z.Scan()
+			if err != nil {
+				t.Fatalf("couldn't get initial state: %v", err)
+			}
+
+			// auto cancel should have reverted everything
+			if tc.err != nil {
+				assertDatasetsEquals(t, ta, initState, finaleState, true)
+				return
+			}
+			assertDatasetsNotEquals(t, ta, initState, finaleState, true)
+		})
+	}
+}
+
+func TestDoneCheckErrOnNoneAutoCancel(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		err error
+	}{
+		"Called with nil error": {},
+		"Error when called on non nil error as we don't have a zfs auto cancel object": {err: errors.New("an error")},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := tempDir(t)
+			defer cleanup()
+
+			fPools := newFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"))
+			defer fPools.create(dir)()
+
+			z := zfs.New(context.Background())
+			defer z.Done()
+
+			func() {
+				defer func() {
+					hasPaniced := recover()
+					if tc.err != nil && hasPaniced == nil {
+						t.Fatal("did expect to panic on calling DoneCheckErr with a non nil error")
+					} else if tc.err == nil && hasPaniced != nil {
+						t.Fatalf("didn't expect to panic on calling DoneCheckErr with nil error")
+					}
+				}()
+
+				z.DoneCheckErr(&tc.err)
+			}()
+
 		})
 	}
 }
