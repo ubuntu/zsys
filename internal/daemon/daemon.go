@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"sync"
 	"time"
 
 	"github.com/coreos/go-systemd/activation"
@@ -21,6 +22,9 @@ import (
 type Server struct {
 	// Machines scanned
 	Machines *machines.Machines
+
+	// Requests mutex
+	RWRequest sync.RWMutex
 
 	socket     string
 	lis        net.Listener

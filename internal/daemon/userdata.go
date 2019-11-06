@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
@@ -15,6 +16,9 @@ import (
 func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsys_CreateUserDataServer) (err error) {
 	user := req.GetUser()
 	homepath := req.GetHomepath()
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
 	log.Infof(stream.Context(), "Create user dataset for %q on %q", user, homepath)
 
 	z := zfs.NewWithAutoCancel(stream.Context())
@@ -30,6 +34,9 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, stream zsys.Zsys_ChangeHomeOnUserDataServer) (err error) {
 	home := req.GetHome()
 	newHome := req.GetNewHome()
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
 	log.Infof(stream.Context(), "Rename home user dataset from %q to %q", home, newHome)
 
 	z := zfs.NewWithAutoCancel(stream.Context())

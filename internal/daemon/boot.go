@@ -18,6 +18,9 @@ const (
 // PrepareBoot consolidates canmount states for early boot.
 // Return if any dataset / machine changed has been done during boot and an error if any encountered.
 func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer) (err error) {
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
@@ -37,6 +40,9 @@ func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer
 // After this operation, every New() call will get the current and correct system state.
 // Return if any dataset / machine changed has been done during boot commit and an error if any encountered.
 func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) (err error) {
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
