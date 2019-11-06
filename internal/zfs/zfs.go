@@ -76,6 +76,7 @@ type datasetSources struct {
 type Zfs struct {
 	ctx context.Context
 
+	cancel context.CancelFunc
 	commit chan struct{}
 	done   chan struct{}
 
@@ -127,6 +128,19 @@ func NewWithCancel(ctx context.Context, options ...func(*Zfs)) (*Zfs, context.Ca
 	return z, cancel
 }
 
+// NewWithAutoCancel returns a new zfs system handler which can autocancel in case DoneCheckErr is called.
+// If the given error it points at is not nil, it will cancel the transaction.
+// A call to Done() is equivalent to DoneCheckErr(nil).
+// First Done() or DoneCheckErr is relevant and the following calls are no-op.
+func NewWithAutoCancel(ctx context.Context, options ...func(*Zfs)) *Zfs {
+	ctx, cancel := context.WithCancel(ctx)
+	z := New(ctx, func(z *Zfs) {
+		z.cancel = cancel
+	})
+
+	return z
+}
+
 // NewTransaction create a new Zfs handler for a sub transaction. This is useful for recursive calls
 // to hide implementations details from outside. If an error is not nil in the function callback, the
 // sub transaction will be reverted. If none is found, the in progress reverts will be appended to the
@@ -154,13 +168,30 @@ func (z *Zfs) registerRevert(f func() error) {
 	z.reverts = append(z.reverts, f)
 }
 
-// Done commits current changes and starts a new transactions.
+// Done commits current changes.
 // This should be called to release underlying resources and will block until all is good.
 // This is a no-op if associated context was already cancelled or isn't cancellable.
+// First Done() or DoneCheckErr is relevant and the following calls are no-op.
 func (z *Zfs) Done() {
+	z.DoneCheckErr(nil)
+}
+
+// DoneCheckErr commits current changes if associated error it's pointing at is nil.
+// It will otherwise revert the commit and cancel the associated internal context.
+// It should be called with err != nil only on zfs object created with NewWithAutoCancel
+// or it will panic otherwise.
+// First Done() or DoneCheckErr is relevant and the following calls are no-op.
+func (z *Zfs) DoneCheckErr(err *error) {
 	// We already committed, other calls are no-op
 	if z.commit == nil {
 		return
+	}
+
+	if err != nil && *err != nil {
+		if z.cancel == nil {
+			panic("DoneCheckErr with a non nil error called on an zfs object not created with NewWithAutoCancel")
+		}
+		z.cancel()
 	}
 
 	select {
