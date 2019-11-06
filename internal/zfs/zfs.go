@@ -141,11 +141,11 @@ func NewWithAutoCancel(ctx context.Context, options ...func(*Zfs)) *Zfs {
 	return z
 }
 
-// NewTransaction create a new Zfs handler for a sub transaction. This is useful for recursive calls
+// newTransaction create a new Zfs handler for a sub transaction. This is useful for recursive calls
 // to hide implementations details from outside. If an error is not nil in the function callback, the
 // sub transaction will be reverted. If none is found, the in progress reverts will be appended to the
 // parent transaction.
-func (z *Zfs) NewTransaction() (*Zfs, func(err *error)) {
+func (z *Zfs) newTransaction() (*Zfs, func(err *error)) {
 	// Create a subtransaction (for recursive calls)
 	subctx, subrevert := context.WithCancel(z.ctx)
 	subz := New(subctx)
@@ -268,7 +268,7 @@ func (z *Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapsho
 	}
 	defer d.Close()
 
-	subz, done := z.NewTransaction()
+	subz, done := z.newTransaction()
 	defer done(&errSnapshot)
 
 	// We can't use the recursive version of snapshotting, as we want to track user properties and
@@ -357,7 +357,7 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 		return fmt.Errorf("%q isn't a snapshot", name)
 	}
 
-	subz, done := z.NewTransaction()
+	subz, done := z.newTransaction()
 	defer done(&errClone)
 
 	rootName, snapshotName := splitSnapshotName(name)
@@ -494,7 +494,7 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 		return fmt.Errorf("can't promote %q: it's a snapshot", name)
 	}
 
-	subz, done := z.NewTransaction()
+	subz, done := z.newTransaction()
 	defer done(&errPromote)
 
 	originParent, snapshotName := splitSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
