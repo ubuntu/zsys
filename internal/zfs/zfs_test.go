@@ -635,9 +635,8 @@ func TestTransactions(t *testing.T) {
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
 
-			ctx, cancel := context.WithCancel(context.Background())
+			z, cancel := zfs.NewWithCancel(context.Background())
 			defer cancel()
-			z := zfs.New(ctx)
 			defer z.Done()
 
 			initState, err := z.Scan()
@@ -855,14 +854,15 @@ func TestNewTransaction(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", "layout1__one_pool_n_datasets_n_snapshots.yaml"))
 			defer fPools.create(dir)()
-			ctx := context.Background()
+
+			var z *zfs.Zfs
 			var cancel context.CancelFunc
 			if tc.cancellable {
-				ctx, cancel = context.WithCancel(ctx)
+				z, cancel = zfs.NewWithCancel(context.Background())
 				defer cancel()
+			} else {
+				z = zfs.New(context.Background())
 			}
-
-			z := zfs.New(ctx)
 			defer z.Done()
 
 			// Scan initial state for no-op

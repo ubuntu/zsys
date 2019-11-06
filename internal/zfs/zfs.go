@@ -117,6 +117,16 @@ func New(ctx context.Context, options ...func(*Zfs)) *Zfs {
 	return &z
 }
 
+// NewWithCancel returns a new zfs system handler and its associated cancellable context.
+// It returns the context cancel function which should always be called to release ressources.
+// Call it before Done() to cancel the transaction or after Done() to be a no-op.
+func NewWithCancel(ctx context.Context, options ...func(*Zfs)) (*Zfs, context.CancelFunc) {
+	ctx, cancel := context.WithCancel(ctx)
+	z := New(ctx, options...)
+
+	return z, cancel
+}
+
 // NewTransaction create a new Zfs handler for a sub transaction. This is useful for recursive calls
 // to hide implementations details from outside. If an error is not nil in the function callback, the
 // sub transaction will be reverted. If none is found, the in progress reverts will be appended to the
