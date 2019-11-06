@@ -10,18 +10,9 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
-func syncBootPrepare() error {
-	z := zfs.New(context.Background(), zfs.WithTransactions())
-
-	var err error
-	defer func() {
-		if err != nil {
-			z.Cancel()
-			err = fmt.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
-		} else {
-			z.Done()
-		}
-	}()
+func syncBootPrepare() (err error) {
+	z := zfs.NewWithAutoCancel(context.Background())
+	defer z.DoneCheckErr(&err)
 
 	ms, err := getMachines(context.Background(), z)
 	if err != nil {
@@ -30,7 +21,7 @@ func syncBootPrepare() error {
 
 	changed, err := ms.EnsureBoot(context.Background(), z)
 	if err != nil {
-		return err
+		return fmt.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
 	}
 
 	if changed {
