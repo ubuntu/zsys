@@ -19,6 +19,9 @@ import (
 
 // Server is used to implement zsys.ZsysServer.
 type Server struct {
+	// Machines scanned
+	Machines *machines.Machines
+
 	socket     string
 	lis        net.Listener
 	grpcserver *grpc.Server
@@ -58,7 +61,16 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		return nil, fmt.Errorf("unexpected number of systemd socket activation (%d != 1)", len(listeners))
 	}
 
+	z := zfs.New(context.Background())
+	defer z.Done()
+	ms, err := getMachines(context.Background(), z)
+	if err != nil {
+		return nil, fmt.Errorf("couldn't scan machines: %v", err)
+	}
+
 	s := &Server{
+		Machines: ms,
+
 		socket: socket,
 		lis:    lis,
 

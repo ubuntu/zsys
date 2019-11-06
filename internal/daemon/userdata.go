@@ -20,12 +20,7 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
-	ms, err := getMachines(stream.Context(), z)
-	if err != nil {
-		return err
-	}
-
-	if err := ms.CreateUserData(stream.Context(), user, homepath, z); err != nil {
+	if err := s.Machines.CreateUserData(stream.Context(), user, homepath, z); err != nil {
 		return fmt.Errorf("couldn't create userdataset for %q: "+config.ErrorFormat, homepath, err)
 	}
 	return nil
@@ -40,12 +35,7 @@ func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, str
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
-	ms, err := getMachines(stream.Context(), z)
-	if err != nil {
-		return err
-	}
-
-	if err := ms.ChangeHomeOnUserData(stream.Context(), home, newHome, z); err != nil {
+	if err := s.Machines.ChangeHomeOnUserData(stream.Context(), home, newHome, z); err != nil {
 		return fmt.Errorf("couldn't change home userdataset for %q: "+config.ErrorFormat, home, err)
 	}
 	return nil

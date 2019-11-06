@@ -21,12 +21,7 @@ func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
-	ms, err := getMachines(stream.Context(), z)
-	if err != nil {
-		return err
-	}
-
-	changed, err := ms.EnsureBoot(stream.Context(), z)
+	changed, err := s.Machines.EnsureBoot(stream.Context(), z)
 	if err != nil {
 		return fmt.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
 	}
@@ -45,12 +40,7 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
-	ms, err := getMachines(stream.Context(), z)
-	if err != nil {
-		return err
-	}
-
-	changed, err := ms.Commit(stream.Context(), z)
+	changed, err := s.Machines.Commit(stream.Context(), z)
 	if err != nil {
 		return fmt.Errorf("couldn't commit: "+config.ErrorFormat, err)
 	}
