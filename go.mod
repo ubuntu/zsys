@@ -11,6 +11,7 @@ require (
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/sirupsen/logrus v1.4.2
+	github.com/snapcore/go-gettext v0.0.0-20190812090936-a77afd68d2bd
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
 	golang.org/x/net v0.0.0-20191002035440-2ec189313ef0 // indirect

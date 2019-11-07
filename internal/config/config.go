@@ -7,6 +7,10 @@ import (
 	"github.com/ubuntu/zsys/internal/log"
 )
 
+// TEXTDOMAIN is the message domain used by snappy; see dgettext(3)
+// for more information.
+const TEXTDOMAIN = "zsys"
+
 // ErrorFormat switch between "%v" and "%+v" depending if we want more verbose info
 var ErrorFormat = "%v"
 
