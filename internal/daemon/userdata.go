@@ -2,7 +2,6 @@ package daemon
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
