@@ -30,8 +30,10 @@ type Server struct {
 	lis        net.Listener
 	grpcserver *grpc.Server
 
-	idleTimeout time.Duration
-	reset       chan struct{}
+	idleTimeout       time.Duration
+	requestsInFlights int
+	newRequest        chan struct{}
+	reset             chan struct{}
 }
 
 // IdleTimeout changes server default idle timeout
@@ -79,6 +81,7 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		lis:    lis,
 
 		idleTimeout: config.DefaultServerIdleTimeout,
+		newRequest:  make(chan struct{}),
 		reset:       make(chan struct{}),
 	}
 	grpcserver := zsys.RegisterServer(s)
@@ -100,9 +103,17 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 			case <-timeout.C:
 				log.Debug(context.Background(), "Idle timeout expired")
 				break out
-			case <-s.reset:
-				if !timeout.Stop() {
+			case <-s.newRequest:
+				s.requestsInFlights++
+				// Stop can return false if the timeout has fired OR if it's already stopped. Use requestsInFlights
+				// to only drain the timeout channel if the timeout has already fired.
+				if s.requestsInFlights == 1 && !timeout.Stop() {
 					<-timeout.C
+				}
+			case <-s.reset:
+				s.requestsInFlights--
+				if s.requestsInFlights > 0 {
+					continue
 				}
 				timeout.Reset(s.idleTimeout)
 			}
@@ -136,10 +147,13 @@ func (s *Server) Stop() {
 	log.Debug(context.Background(), "All connexions closed")
 }
 
-// ResetTimeout resets the idling timeout on the server
-func (s *Server) ResetTimeout() {
-	log.Debugf(context.Background(), "Reset idle timeout to %s", s.idleTimeout)
-	s.reset <- struct{}{}
+// TrackRequest prevents the idling timeout to fire up and return the function to reset it.
+func (s *Server) TrackRequest() func() {
+	s.newRequest <- struct{}{}
+	return func() {
+		log.Debugf(context.Background(), "Reset idle timeout to %s", s.idleTimeout)
+		s.reset <- struct{}{}
+	}
 }
 
 // getMachines returns all scanned machines on the current system

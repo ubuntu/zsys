@@ -59,15 +59,15 @@ func AddLogger(stream StreamLogger, funcName string) (context.Context, error) {
 	return ctx, nil
 }
 
-type resetTimeouter interface {
-	ResetTimeout()
+type requestTracker interface {
+	TrackRequest() func()
 }
 
 // ServerIdleTimeoutInterceptor adds a call to reset the server stream timeout if available.
 func ServerIdleTimeoutInterceptor(srv interface{}, ss grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
-	err := handler(srv, ss)
-	if s, ok := srv.(resetTimeouter); ok {
-		s.ResetTimeout()
+	// Stop idling timeout and restart with resetting it in defer statement
+	if s, ok := srv.(requestTracker); ok {
+		defer s.TrackRequest()()
 	}
-	return err
+	return handler(srv, ss)
 }

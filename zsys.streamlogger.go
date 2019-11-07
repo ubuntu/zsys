@@ -43,14 +43,14 @@ func (z *ZsysLogClient) Close() error {
 // This can't be done in interceptor as the creation of each per-function server struct from a grpc.ServerStream
 // is only done in the handler() call, which is blocking until the whole handler has ran, once the stream
 // has closed.
-// It also wraps an idle timeout server, so that the interceptor can call ResetTimeout on it after each call.
+// It also wraps an idle timeout server, so that the interceptor can stop the idling timeout and reset it after each call.
 type ZsysLogServer struct {
 	ZsysServerIdleTimeout
 }
 
 type ZsysServerIdleTimeout interface {
 	ZsysServer
-	ResetTimeout()
+	TrackRequest() func()
 }
 
 // registerZsysServerIdleWithLogs wraps the server to an idle timeout server and logged variant intercepting all grpc calls.
