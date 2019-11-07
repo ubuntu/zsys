@@ -5,6 +5,7 @@ import (
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -18,13 +19,13 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
-	log.Infof(stream.Context(), "Create user dataset for %q on %q", user, homepath)
+	log.Infof(stream.Context(), i18n.G("Create user dataset for %q on %q"), user, homepath)
 
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
 	if err := s.Machines.CreateUserData(stream.Context(), user, homepath, z); err != nil {
-		return fmt.Errorf("couldn't create userdataset for %q: "+config.ErrorFormat, homepath, err)
+		return fmt.Errorf(i18n.G("couldn't create userdataset for %q: ")+config.ErrorFormat, homepath, err)
 	}
 	return nil
 }
@@ -36,13 +37,13 @@ func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, str
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
-	log.Infof(stream.Context(), "Rename home user dataset from %q to %q", home, newHome)
+	log.Infof(stream.Context(), i18n.G("Rename home user dataset from %q to %q"), home, newHome)
 
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
 	if err := s.Machines.ChangeHomeOnUserData(stream.Context(), home, newHome, z); err != nil {
-		return fmt.Errorf("couldn't change home userdataset for %q: "+config.ErrorFormat, home, err)
+		return fmt.Errorf(i18n.G("couldn't change home userdataset for %q: ")+config.ErrorFormat, home, err)
 	}
 	return nil
 }

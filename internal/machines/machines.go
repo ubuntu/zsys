@@ -8,6 +8,7 @@ import (
 
 	"github.com/k0kubun/pp"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -54,7 +55,7 @@ const (
 
 // New detects and generate machines elems
 func New(ctx context.Context, ds []zfs.Dataset, cmdline string) Machines {
-	log.Info(ctx, "Building new machines list")
+	log.Info(ctx, i18n.G("Building new machines list"))
 	machines := Machines{
 		all:     make(map[string]*Machine),
 		cmdline: cmdline,
@@ -119,7 +120,7 @@ func New(ctx context.Context, ds []zfs.Dataset, cmdline string) Machines {
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
 
-	log.Debugf(ctx, "current machines scanning layout:\n"+pp.Sprint(machines))
+	log.Debugf(ctx, i18n.G("current machines scanning layout:\n"+pp.Sprint(machines)))
 
 	return machines
 }
@@ -158,7 +159,7 @@ func (machines *Machines) triageDatasets(ctx context.Context, allDatasets []zfs.
 		// At this point, it's either non zfs system or persistent dataset. Filters out canmount != "on" as nothing
 		// will mount them.
 		if d.CanMount != "on" {
-			log.Debugf(ctx, "ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on", d.Name)
+			log.Debugf(ctx, i18n.G("ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on"), d.Name)
 			continue
 		}
 
@@ -199,7 +200,7 @@ func (machines *Machines) attachSystemAndHistory(ctx context.Context, d zfs.Data
 
 		// Direct main machine state children
 		if ok, err := isChild(m.ID, d); err != nil {
-			log.Warningf(ctx, "ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+			log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 		} else if ok {
 			m.SystemDatasets = append(m.SystemDatasets, d)
 			return true
@@ -223,7 +224,7 @@ func (machines *Machines) attachSystemAndHistory(ctx context.Context, d zfs.Data
 		// Clones or snapshot children
 		for _, h := range m.History {
 			if ok, err := isChild(h.ID, d); err != nil {
-				log.Warningf(ctx, "ignoring %q as couldn't assert if it's a child: "+config.ErrorFormat, d.Name, err)
+				log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 			} else if ok {
 				h.SystemDatasets = append(h.SystemDatasets, d)
 				return true

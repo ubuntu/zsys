@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -59,18 +60,18 @@ type zfsPromoter interface {
 // TODO: propagate error to user graphically
 func (machines *Machines) EnsureBoot(ctx context.Context, z ZfsPropertyCloneScanner) (bool, error) {
 	if !machines.current.isZsys() {
-		log.Info(ctx, "Current machine isn't Zsys, nothing to do on boot")
+		log.Info(ctx, i18n.G("Current machine isn't Zsys, nothing to do on boot"))
 		return false, nil
 	}
 
 	root, revertUserData := bootParametersFromCmdline(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
-	log.Infof(ctx, "Ensure boot on %q", root)
+	log.Infof(ctx, i18n.G("Ensure boot on %q"), root)
 
 	bootedOnSnapshot := hasBootedOnSnapshot(machines.cmdline)
 	// We are creating new clones (bootfs and optionnally, userdata) if wasn't promoted already
 	if bootedOnSnapshot && machines.current.ID != bootedState.ID {
-		log.Infof(ctx, "Booting on snapshot: %q cloned to %q\n", root, bootedState.ID)
+		log.Infof(ctx, i18n.G("Booting on snapshot: %q cloned to %q\n"), root, bootedState.ID)
 
 		// We skip it if we booted on a snapshot with userdatasets already created. This would mean that EnsureBoot
 		// was called twice before Commit() during this boot. A new boot will create a new suffix id, so we won't block
@@ -83,7 +84,7 @@ func (machines *Machines) EnsureBoot(ctx context.Context, z ZfsPropertyCloneScan
 		// Rescan here for getting accessing to new cloned datasets
 		ds, err := z.Scan()
 		if err != nil {
-			return false, fmt.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
+			return false, fmt.Errorf(i18n.G("couldn't rescan after modifying boot: ")+config.ErrorFormat, err)
 		}
 		*machines = New(ctx, ds, machines.cmdline)
 		m, bootedState = machines.findFromRoot(root) // We did rescan, refresh pointers
@@ -119,7 +120,7 @@ func (machines *Machines) EnsureBoot(ctx context.Context, z ZfsPropertyCloneScan
 	if needRescan {
 		ds, err := z.Scan()
 		if err != nil {
-			return false, fmt.Errorf("couldn't rescan after modifying boot: "+config.ErrorFormat, err)
+			return false, fmt.Errorf(i18n.G("couldn't rescan after modifying boot: ")+config.ErrorFormat, err)
 		}
 		*machines = New(ctx, ds, machines.cmdline)
 	}
@@ -133,13 +134,13 @@ func (machines *Machines) EnsureBoot(ctx context.Context, z ZfsPropertyCloneScan
 // Return if any dataset / machine changed has been done during boot commit and an error if any encountered.
 func (machines *Machines) Commit(ctx context.Context, z ZfsPropertyPromoteScanner) (bool, error) {
 	if !machines.current.isZsys() {
-		log.Info(ctx, "Current machine isn't Zsys, nothing to commit on boot")
+		log.Info(ctx, i18n.G("Current machine isn't Zsys, nothing to commit on boot"))
 		return false, nil
 	}
 
 	root, revertUserData := bootParametersFromCmdline(machines.cmdline)
 	m, bootedState := machines.findFromRoot(root)
-	log.Infof(ctx, "Committing boot for %q", root)
+	log.Infof(ctx, i18n.G("Committing boot for %q"), root)
 
 	// Get user datasets. As we didn't tag the user datasets and promote the system one, the machines doesn't correspond
 	// to the reality.
@@ -161,34 +162,34 @@ func (machines *Machines) Commit(ctx context.Context, z ZfsPropertyPromoteScanne
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
 	// Last used is not a relevant change for signalling a change and justify bootloader rebuild: last-used is not
 	// displayed for current system dataset.
-	log.Infof(ctx, "set current time to %q", currentTime)
+	log.Infof(ctx, i18n.G("set current time to %q"), currentTime)
 	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
 		if err := z.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false); err != nil {
-			return false, fmt.Errorf("couldn't set last used time to %q: "+config.ErrorFormat, currentTime, err)
+			return false, fmt.Errorf(i18n.G("couldn't set last used time to %q: ")+config.ErrorFormat, currentTime, err)
 		}
 	}
 
 	var changed bool
 
 	kernel := kernelFromCmdline(machines.cmdline)
-	log.Infof(ctx, "Set latest booted kernel to %q\n", kernel)
+	log.Infof(ctx, i18n.G("Set latest booted kernel to %q\n"), kernel)
 	if bootedState.SystemDatasets[0].LastBootedKernel != kernel {
 		// Signal last booted kernel changes.
 		// This will help the bootloader, like grub, to rebuild and adjust the marker for last successfully booted kernel in advanced options.
 		changed = true
 		if err := z.SetProperty(zfs.LastBootedKernelProp, kernel, bootedState.SystemDatasets[0].Name, false); err != nil {
-			return false, fmt.Errorf("couldn't set last booted kernel to %q "+config.ErrorFormat, kernel, err)
+			return false, fmt.Errorf(i18n.G("couldn't set last booted kernel to %q ")+config.ErrorFormat, kernel, err)
 		}
 	}
 
 	// Promotion needed for system and user datasets
-	log.Info(ctx, "Promoting user datasets")
+	log.Info(ctx, i18n.G("Promoting user datasets"))
 	chg, err := promoteDatasets(ctx, z, bootedState.UserDatasets)
 	if err != nil {
 		return false, err
 	}
 	changed = changed || chg
-	log.Info(ctx, "Promoting system datasets")
+	log.Info(ctx, i18n.G("Promoting system datasets"))
 	chg, err = promoteDatasets(ctx, z, bootedState.SystemDatasets)
 	if err != nil {
 		return false, err
@@ -198,7 +199,7 @@ func (machines *Machines) Commit(ctx context.Context, z ZfsPropertyPromoteScanne
 	// Rescan datasets, with current lastUsed, and main state.
 	ds, err := z.Scan()
 	if err != nil {
-		return false, fmt.Errorf("couldn't rescan after committing boot: "+config.ErrorFormat, err)
+		return false, fmt.Errorf(i18n.G("couldn't rescan after committing boot: ")+config.ErrorFormat, err)
 	}
 	*machines = New(ctx, ds, machines.cmdline)
 
@@ -252,7 +253,7 @@ func (snapshot State) createClones(ctx context.Context, z zfsPropertyCloneSetter
 	// get current generated suffix by initramfs
 	j := strings.LastIndex(bootedStateID, "_")
 	if j < 0 || strings.HasSuffix(bootedStateID, "_") {
-		return fmt.Errorf("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q", bootedStateID)
+		return fmt.Errorf(i18n.G("Mounted clone bootFS dataset created by initramfs doesn't have a valid _suffix (at least .*_<onechar>): %q"), bootedStateID)
 	}
 	suffix := bootedStateID[j+1:]
 
@@ -264,10 +265,10 @@ func (snapshot State) createClones(ctx context.Context, z zfsPropertyCloneSetter
 	// in case of a real issue.
 	// TODO: should test the clone return value (clone fails on system dataset already exists -> skip, other clone fails -> return error)
 	for _, n := range datasetsToClone {
-		log.Infof(ctx, "cloning %q", n)
+		log.Infof(ctx, i18n.G("cloning %q"), n)
 		if err := z.Clone(n, suffix, true, true); err != nil {
 			// TODO: transaction fix (as it's now set in error)
-			log.Warningf(ctx, "Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v", n, err)
+			log.Warningf(ctx, i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), n, err)
 		}
 	}
 
@@ -276,7 +277,7 @@ func (snapshot State) createClones(ctx context.Context, z zfsPropertyCloneSetter
 		return nil
 	}
 
-	log.Info(ctx, "Reverting user data")
+	log.Info(ctx, i18n.G("Reverting user data"))
 	// Find user datasets attached to the snapshot and clone them
 	// Only root datasets are cloned
 	userDataSuffix := generateID(6)
@@ -293,7 +294,7 @@ func (snapshot State) createClones(ctx context.Context, z zfsPropertyCloneSetter
 			rootUserDatasets = append(rootUserDatasets, d)
 			// Recursively clones childrens, which shouldn't have bootfs elements.
 			if err := z.Clone(d.Name, userDataSuffix, false, true); err != nil {
-				return fmt.Errorf("couldn't create new user datasets from %q: %v", snapshot.ID, err)
+				return fmt.Errorf(i18n.G("couldn't create new user datasets from %q: %v"), snapshot.ID, err)
 			}
 			// Associate this parent new user dataset to its parent system dataset
 			base, _ := splitSnapshotName(d.Name)
@@ -301,7 +302,7 @@ func (snapshot State) createClones(ctx context.Context, z zfsPropertyCloneSetter
 			suffixIndex := strings.LastIndex(base, "_")
 			userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
 			if err := z.SetProperty(zfs.BootfsDatasetsProp, bootedStateID, userdatasetName, false); err != nil {
-				return fmt.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, bootedStateID, d.Name, err)
+				return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, bootedStateID, d.Name, err)
 			}
 		}
 	}
@@ -320,9 +321,9 @@ func switchDatasetsCanMount(ctx context.Context, z zfsPropertySetter, ds []zfs.D
 		if d.CanMount != initialCanMount || d.IsSnapshot {
 			continue
 		}
-		log.Infof(ctx, "Switch dataset %q to mount %q", d.Name, canMount)
+		log.Infof(ctx, i18n.G("Switch dataset %q to mount %q"), d.Name, canMount)
 		if err := z.SetProperty(zfs.CanmountProp, canMount, d.Name, false); err != nil {
-			return false, fmt.Errorf("couldn't switch %q canmount property to %q: "+config.ErrorFormat, d.Name, canMount, err)
+			return false, fmt.Errorf(i18n.G("couldn't switch %q canmount property to %q: ")+config.ErrorFormat, d.Name, canMount, err)
 		}
 		needRescan = true
 	}
@@ -346,9 +347,9 @@ func switchUsersDatasetsTags(ctx context.Context, z zfsPropertySetter, id string
 		if newTag == d.BootfsDatasets {
 			continue
 		}
-		log.Infof(ctx, "Untagging user dataset: %q", d.Name)
+		log.Infof(ctx, i18n.G("Untagging user dataset: %q"), d.Name)
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-			return fmt.Errorf("couldn't remove %q to BootfsDatasets property of %q:"+config.ErrorFormat, id, d.Name, err)
+			return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, id, d.Name, err)
 		}
 	}
 	// Tag userdatasets to associate with this successful boot state, if wasn't tagged already
@@ -362,14 +363,14 @@ func switchUsersDatasetsTags(ctx context.Context, z zfsPropertySetter, id string
 			strings.HasSuffix(d.BootfsDatasets, ":"+id) {
 			continue
 		}
-		log.Infof(ctx, "Tag current user dataset: %q", d.Name)
+		log.Infof(ctx, i18n.G("Tag current user dataset: %q"), d.Name)
 		newTag := d.BootfsDatasets + ":" + id
 		// TOREMOVE in 20.04: this double check as well (due to && d.LastUsed != 0)
 		if d.BootfsDatasets == id && d.LastUsed == 0 {
 			newTag = d.BootfsDatasets
 		}
 		if err := z.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-			return fmt.Errorf("couldn't add %q to BootfsDatasets property of %q: "+config.ErrorFormat, id, d.Name, err)
+			return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, id, d.Name, err)
 		}
 	}
 
@@ -382,9 +383,9 @@ func promoteDatasets(ctx context.Context, z zfsPromoter, ds []zfs.Dataset) (chan
 			continue
 		}
 		changed = true
-		log.Infof(ctx, "Promoting dataset: %q", d.Name)
+		log.Infof(ctx, i18n.G("Promoting dataset: %q"), d.Name)
 		if err := z.Promote(d.Name); err != nil {
-			return false, fmt.Errorf("couldn't promote dataset %q: "+config.ErrorFormat, d.Name, err)
+			return false, fmt.Errorf(i18n.G("couldn't promote dataset %q: ")+config.ErrorFormat, d.Name, err)
 		}
 	}
 

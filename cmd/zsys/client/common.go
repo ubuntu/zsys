@@ -6,6 +6,7 @@ import (
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -16,7 +17,7 @@ func newClient() (*zsys.ZsysLogClient, error) {
 	// TODO: allow change socket address
 	c, err := zsys.NewZsysUnixSocketClient(config.DefaultSocket, log.GetLevel())
 	if err != nil {
-		return nil, fmt.Errorf("couldn't connect to zsys daemon: %v", err)
+		return nil, fmt.Errorf(i18n.G("couldn't connect to zsys daemon: %v"), err)
 	}
 	return c, nil
 }
@@ -26,7 +27,7 @@ func checkConn(err error) error {
 	if err != nil {
 		st, _ := status.FromError(err)
 		if st.Code() == codes.Unavailable {
-			return fmt.Errorf("couldn't connect to zsys daemon: %v", st.Message())
+			return fmt.Errorf(i18n.G("couldn't connect to zsys daemon: %v"), st.Message())
 		}
 		return errors.New(st.Message())
 	}

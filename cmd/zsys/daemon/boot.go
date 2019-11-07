@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -21,7 +22,7 @@ func syncBootPrepare() (err error) {
 
 	changed, err := ms.EnsureBoot(context.Background(), z)
 	if err != nil {
-		return fmt.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
+		return fmt.Errorf(i18n.G("couldn't ensure boot: ")+config.ErrorFormat, err)
 	}
 
 	if changed {

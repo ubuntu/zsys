@@ -8,11 +8,15 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/cmd/zsys/client"
 	"github.com/ubuntu/zsys/cmd/zsys/daemon"
+	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 )
 
 //go:generate go run ./generate-mancomp.go cobracompletion.go completion.go ../../generated
 
 func main() {
+	i18n.InitI18nDomain(config.TEXTDOMAIN)
+
 	var rootCmd *cobra.Command
 	var errFunc func() error
 

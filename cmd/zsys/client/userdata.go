@@ -8,26 +8,27 @@ import (
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 )
 
 var (
 	userdataCmd = &cobra.Command{
 		Use:    "userdata COMMAND",
-		Short:  "User datasets creation and renaming",
+		Short:  i18n.G("User datasets creation and renaming"),
 		Hidden: true,
 		Args:   cmdhandler.SubcommandsRequiredWithSuggestions,
 		Run:    cmdhandler.NoCmd,
 	}
 	userdataCreateCmd = &cobra.Command{
 		Use:   "create USER HOME_DIRECTORY",
-		Short: "Create a new home user dataset via an user dataset (if doesn't exist) creation",
+		Short: i18n.G("Create a new home user dataset via an user dataset (if doesn't exist) creation"),
 		Args:  cobra.ExactArgs(2),
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = createUserData(args[0], args[1]) },
 	}
 	userdataRenameCmd = &cobra.Command{
 		Use:   "set-home OLD_HOME NEW_HOME",
-		Short: "Rename a user's home directory via renaming corresponding user dataset",
+		Short: i18n.G("Rename a user's home directory via renaming corresponding user dataset"),
 		Args:  cobra.ExactArgs(2),
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = changeHomeOnUserData(args[0], args[1]) },
 	}

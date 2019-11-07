@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 )
 
 var (
@@ -11,11 +12,11 @@ var (
 	flagVerbosity int
 	rootCmd       = &cobra.Command{
 		Use:   "zsysctl COMMAND",
-		Short: "ZFS SYStem integration control zsys ",
-		Long: `Zfs SYStem tool targetting an enhanced ZOL experience.
+		Short: i18n.G("ZFS SYStem integration control zsys daemon"),
+		Long: i18n.G(`Zfs SYStem tool targetting an enhanced ZOL experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
- user data from system and persistent data, and more.`,
+ user data from system and persistent data, and more.`),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.SetVerboseMode(flagVerbosity)
 		},
@@ -27,7 +28,7 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
+	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", i18n.G("issue INFO (-v) and DEBUG (-vv) output"))
 }
 
 // Cmd returns the zsysctl command and options

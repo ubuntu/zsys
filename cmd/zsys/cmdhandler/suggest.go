@@ -5,12 +5,13 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/ubuntu/zsys/internal/i18n"
 )
 
 // SubcommandsRequiredWithSuggestions will ensure we have a subcommand provided by the user and augments it with
 // suggestion for commands, alias and help on root command.
 func SubcommandsRequiredWithSuggestions(cmd *cobra.Command, args []string) error {
-	requireMsg := "%s requires a valid subcommand"
+	requireMsg := i18n.G("%s requires a valid subcommand")
 	// This will be triggered if cobra didn't find any subcommands.
 	// Find some suggestions.
 	var suggestions []string
@@ -47,14 +48,14 @@ func SubcommandsRequiredWithSuggestions(cmd *cobra.Command, args []string) error
 
 	var suggestionsMsg string
 	if len(suggestions) > 0 {
-		suggestionsMsg += "Did you mean this?\n"
+		suggestionsMsg += i18n.G("Did you mean this?\n")
 		for _, s := range suggestions {
-			suggestionsMsg += fmt.Sprintf("\t%v\n", s)
+			suggestionsMsg += fmt.Sprintf(i18n.G("\t%v\n"), s)
 		}
 	}
 
 	if suggestionsMsg != "" {
-		requireMsg = fmt.Sprintf("%s. %s", requireMsg, suggestionsMsg)
+		requireMsg = fmt.Sprintf(i18n.G("%s. %s"), requireMsg, suggestionsMsg)
 	}
 
 	return fmt.Errorf(requireMsg, cmd.Name())

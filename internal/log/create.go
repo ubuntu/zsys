@@ -8,6 +8,7 @@ import (
 	"io"
 
 	"github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/i18n"
 )
 
 const (
@@ -31,7 +32,7 @@ func ContextWithLogger(ctx context.Context, requesterID, level string, w io.Writ
 	requestID := defaultRequestID
 	b := make([]byte, 4)
 	if _, err := rand.Read(b); err != nil {
-		logrus.Warningf("couldn't generate request id, setting to %q: %v", defaultRequestID, err)
+		logrus.Warningf(i18n.G("couldn't generate request id, setting to %q: %v"), defaultRequestID, err)
 	} else {
 		requestID = fmt.Sprintf("%x", b[0:])
 	}
@@ -40,7 +41,7 @@ func ContextWithLogger(ctx context.Context, requesterID, level string, w io.Writ
 	// Get logging level.
 	logLevel := DefaultLevel
 	if logLevel, err = logrus.ParseLevel(level); err != nil {
-		logrus.Warningf("invalid log level requested. Using default: %v", err)
+		logrus.Warningf(i18n.G("invalid log level requested. Using default: %v"), err)
 	}
 
 	// Associate the context with a new logger, for which output is the io.Writer.
@@ -59,7 +60,7 @@ func ContextWithLogger(ctx context.Context, requesterID, level string, w io.Writ
 func IDFromContext(ctx context.Context) (string, error) {
 	info, ok := ctx.Value(requestInfoKey).(*requestInfo)
 	if !ok {
-		return "", errors.New("no request ID attached to this context")
+		return "", errors.New(i18n.G("no request ID attached to this context"))
 	}
 
 	return info.id, nil

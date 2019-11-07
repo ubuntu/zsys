@@ -9,6 +9,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -46,7 +47,7 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 			return true, nil
 		}
 	default:
-		err = fmt.Errorf("unexpected number of @ in dataset name %q", d.Name)
+		err = fmt.Errorf(i18n.G("unexpected number of @ in dataset name %q"), d.Name)
 	}
 	return false, err
 }
@@ -92,7 +93,7 @@ func resolveOrigin(ctx context.Context, datasets []zfs.Dataset) map[string]*stri
 				break nextOrigin
 			}
 			if originStart == *curOrig {
-				log.Warningf(ctx, "Didn't find origin %q for %q matching any dataset", *curOrig, curDataset.Name)
+				log.Warningf(ctx, i18n.G("Didn't find origin %q for %q matching any dataset"), *curOrig, curDataset.Name)
 				delete(r, curDataset.Name)
 				break
 			}

@@ -7,6 +7,7 @@ import (
 
 	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 )
 
@@ -101,10 +102,10 @@ func New(ctx context.Context, options ...func(*Zfs)) *Zfs {
 		close(ready)
 		select {
 		case <-z.ctx.Done():
-			log.Debugf(z.ctx, "ZFS: reverting all in progress zfs transactions")
+			log.Debugf(z.ctx, i18n.G("ZFS: reverting all in progress zfs transactions"))
 			for i := len(z.reverts) - 1; i >= 0; i-- {
 				if err := z.reverts[i](); err != nil {
-					log.Warningf(z.ctx, config.ErrorFormat, fmt.Errorf("An error occurred when reverting a Zfs transaction: "+config.ErrorFormat, err))
+					log.Warningf(z.ctx, i18n.G("An error occurred when reverting a Zfs transaction: ")+config.ErrorFormat, err)
 				}
 			}
 			z.reverts = nil
@@ -203,7 +204,7 @@ func (z *Zfs) DoneCheckErr(err *error) {
 		return
 	}
 
-	log.Debugf(z.ctx, "ZFS: committing transaction")
+	log.Debugf(z.ctx, i18n.G("ZFS: committing transaction"))
 	z.reverts = nil
 	<-z.done
 	z.commit = nil
@@ -211,7 +212,7 @@ func (z *Zfs) DoneCheckErr(err *error) {
 
 // Create creates a dataset for that path.
 func (z *Zfs) Create(path, mountpoint, canmount string) error {
-	log.Debugf(z.ctx, "ZFS: trying to Create %q with mountpoint %q", path, mountpoint)
+	log.Debugf(z.ctx, i18n.G("ZFS: trying to Create %q with mountpoint %q"), path, mountpoint)
 	props := make(map[libzfs.Prop]libzfs.Property)
 	if mountpoint != "" {
 		props[libzfs.DatasetPropMountpoint] = libzfs.Property{Value: mountpoint}
@@ -220,18 +221,18 @@ func (z *Zfs) Create(path, mountpoint, canmount string) error {
 
 	d, err := libzfs.DatasetCreate(path, libzfs.DatasetTypeFilesystem, props)
 	if err != nil {
-		return fmt.Errorf("can't create %q: %v", path, err)
+		return fmt.Errorf(i18n.G("can't create %q: %v"), path, err)
 	}
 	defer d.Close()
 
 	z.registerRevert(func() error {
 		d, err := libzfs.DatasetOpen(path)
 		if err != nil {
-			return fmt.Errorf("couldn't open %q for cleanup: %v", path, err)
+			return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), path, err)
 		}
 		defer d.Close()
 		if err := d.Destroy(false); err != nil {
-			return fmt.Errorf("couldn't destroy %q for cleanup: %v", path, err)
+			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), path, err)
 		}
 		return nil
 	})
@@ -241,10 +242,10 @@ func (z *Zfs) Create(path, mountpoint, canmount string) error {
 
 // Scan returns all datasets that are currently imported on the system.
 func (z *Zfs) Scan() ([]Dataset, error) {
-	log.Debug(z.ctx, "ZFS: scan requested")
+	log.Debug(z.ctx, i18n.G("ZFS: scan requested"))
 	ds, err := libzfs.DatasetOpenAll()
 	if err != nil {
-		return nil, fmt.Errorf("can't list datasets: %v", err)
+		return nil, fmt.Errorf(i18n.G("can't list datasets: %v"), err)
 	}
 	defer libzfs.DatasetCloseAll(ds)
 
@@ -261,10 +262,10 @@ func (z *Zfs) Scan() ([]Dataset, error) {
 
 // Snapshot creates a new snapshot for dataset (and children if recursive is true) with the given name.
 func (z *Zfs) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot error) {
-	log.Debugf(z.ctx, "ZFS: trying to snapshot %q, recursive: %v", datasetName, recursive)
+	log.Debugf(z.ctx, i18n.G("ZFS: trying to snapshot %q, recursive: %v"), datasetName, recursive)
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
-		return fmt.Errorf("couldn't open %q: %v", datasetName, err)
+		return fmt.Errorf(i18n.G("couldn't open %q: %v"), datasetName, err)
 	}
 	defer d.Close()
 
@@ -284,24 +285,24 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 	// Get properties from parent snapshot.
 	srcProps, err := getDatasetProp(d)
 	if err != nil {
-		return fmt.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, datasetName, err)
+		return fmt.Errorf(i18n.G("can't get dataset properties for %q: ")+config.ErrorFormat, datasetName, err)
 	}
 
 	props := make(map[libzfs.Prop]libzfs.Property)
 	n := datasetName + "@" + snapName
 	ds, err := libzfs.DatasetSnapshot(n, false, props)
 	if err != nil {
-		return fmt.Errorf("couldn't snapshot %q: %v", datasetName, err)
+		return fmt.Errorf(i18n.G("couldn't snapshot %q: %v"), datasetName, err)
 	}
 	defer ds.Close()
 	z.registerRevert(func() error {
 		d, err := libzfs.DatasetOpen(n)
 		if err != nil {
-			return fmt.Errorf("couldn't open %q for cleanup: %v", n, err)
+			return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), n, err)
 		}
 		defer d.Close()
 		if err := d.Destroy(false); err != nil {
-			return fmt.Errorf("couldn't destroy %q for cleanup: %v", n, err)
+			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), n, err)
 		}
 		return nil
 	})
@@ -314,17 +315,17 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 			bootfsValue = "yes"
 		}
 		if err := ds.SetUserProperty(BootfsProp, bootfsValue); err != nil {
-			return fmt.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, n, err)
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, BootfsProp, n, err)
 		}
 	}
 	if srcProps.sources.BootfsDatasets == "local" {
 		if err := ds.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
-			return fmt.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsDatasetsProp, n, err)
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, BootfsDatasetsProp, n, err)
 		}
 	}
 	if srcProps.sources.LastBootedKernel == "local" {
 		if err := ds.SetUserProperty(LastBootedKernelProp, srcProps.LastBootedKernel); err != nil {
-			return fmt.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, LastBootedKernelProp, n, err)
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, LastBootedKernelProp, n, err)
 		}
 	}
 
@@ -342,19 +343,19 @@ func (z *Zfs) snapshotRecursive(d libzfs.Dataset, snapName string, recursive boo
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
 func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
-	log.Debugf(z.ctx, "ZFS: trying to clone %q", name)
+	log.Debugf(z.ctx, i18n.G("ZFS: trying to clone %q"), name)
 	if suffix == "" {
-		return fmt.Errorf("no suffix was provided for cloning")
+		return fmt.Errorf(i18n.G("no suffix was provided for cloning"))
 	}
 
 	d, err := libzfs.DatasetOpen(name)
 	if err != nil {
-		return fmt.Errorf("%q doesn't exist: %v", name, err)
+		return fmt.Errorf(i18n.G("%q doesn't exist: %v"), name, err)
 	}
 	defer d.Close()
 
 	if !d.IsSnapshot() {
-		return fmt.Errorf("%q isn't a snapshot", name)
+		return fmt.Errorf(i18n.G("%q isn't a snapshot"), name)
 	}
 
 	subz, done := z.newTransaction()
@@ -372,12 +373,12 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 
 	parent, err := libzfs.DatasetOpen(d.Properties[libzfs.DatasetPropName].Value[:strings.LastIndex(name, "@")])
 	if err != nil {
-		return fmt.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("can't get parent dataset of %q: ")+config.ErrorFormat, name, err)
 	}
 	defer parent.Close()
 	if recursive {
 		if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
-			return fmt.Errorf("integrity check failed: %v", err)
+			return fmt.Errorf(i18n.G("integrity check failed: %v"), err)
 		}
 	}
 
@@ -393,7 +394,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 	// Get properties from snapshot and parents.
 	srcProps, err := getDatasetProp(d)
 	if err != nil {
-		return fmt.Errorf("can't get dataset properties for %q: "+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("can't get dataset properties for %q: ")+config.ErrorFormat, name, err)
 	}
 
 	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snapshotName), rootName)
@@ -410,7 +411,7 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 	// Handle other datasets (children of parent) which may have snapshots
 	parent, err := libzfs.DatasetOpen(parentName)
 	if err != nil {
-		return fmt.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("can't get parent dataset of %q: ")+config.ErrorFormat, name, err)
 	}
 	defer parent.Close()
 
@@ -448,17 +449,17 @@ func (z *Zfs) cloneDataset(d libzfs.Dataset, target string, srcProps DatasetProp
 	cd, err := d.Clone(target, props)
 	if err != nil {
 		name := d.Properties[libzfs.DatasetPropName].Value
-		return fmt.Errorf("couldn't clone %q to %q: "+config.ErrorFormat, name, target, err)
+		return fmt.Errorf(i18n.G("couldn't clone %q to %q: ")+config.ErrorFormat, name, target, err)
 	}
 	defer cd.Close()
 	z.registerRevert(func() error {
 		d, err := libzfs.DatasetOpen(target)
 		if err != nil {
-			return fmt.Errorf("couldn't open %q for cleanup: %v", target, err)
+			return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), target, err)
 		}
 		defer d.Close()
 		if err := d.Destroy(false); err != nil {
-			return fmt.Errorf("couldn't destroy %q for cleanup: %v", target, err)
+			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), target, err)
 		}
 		return nil
 	})
@@ -471,7 +472,7 @@ func (z *Zfs) cloneDataset(d libzfs.Dataset, target string, srcProps DatasetProp
 			bootfsValue = "yes"
 		}
 		if err := cd.SetUserProperty(BootfsProp, bootfsValue); err != nil {
-			return fmt.Errorf("couldn't set user property %q to %q: "+config.ErrorFormat, BootfsProp, target, err)
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, BootfsProp, target, err)
 		}
 	}
 	// We don't set BootfsDatasets as this property can't be translated to new datasets
@@ -483,15 +484,15 @@ func (z *Zfs) cloneDataset(d libzfs.Dataset, target string, srcProps DatasetProp
 // Promote recursively all children, including dataset named "name".
 // If the hierarchy is partially promoted, promote the missing one and be no-op for the rest.
 func (z *Zfs) Promote(name string) (errPromote error) {
-	log.Debugf(z.ctx, "ZFS: trying to promote %q", name)
+	log.Debugf(z.ctx, i18n.G("ZFS: trying to promote %q"), name)
 	d, err := libzfs.DatasetOpen(name)
 	if err != nil {
-		return fmt.Errorf("can't get dataset %q: "+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("can't get dataset %q: ")+config.ErrorFormat, name, err)
 	}
 	defer d.Close()
 
 	if d.IsSnapshot() {
-		return fmt.Errorf("can't promote %q: it's a snapshot", name)
+		return fmt.Errorf(i18n.G("can't promote %q: it's a snapshot"), name)
 	}
 
 	subz, done := z.newTransaction()
@@ -503,11 +504,11 @@ func (z *Zfs) Promote(name string) (errPromote error) {
 	if len(originParent) > 0 {
 		parent, err := libzfs.DatasetOpen(originParent)
 		if err != nil {
-			return fmt.Errorf("can't get parent dataset of %q: "+config.ErrorFormat, name, err)
+			return fmt.Errorf(i18n.G("can't get parent dataset of %q: ")+config.ErrorFormat, name, err)
 		}
 		defer parent.Close()
 		if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
-			return fmt.Errorf("integrity check failed: %v", err)
+			return fmt.Errorf(i18n.G("integrity check failed: %v"), err)
 		}
 	}
 
@@ -521,16 +522,16 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 	// Only promote if not promoted yet.
 	if len(origin) > 0 {
 		if err := d.Promote(); err != nil {
-			return fmt.Errorf("couldn't promote %q: "+config.ErrorFormat, name, err)
+			return fmt.Errorf(i18n.G("couldn't promote %q: ")+config.ErrorFormat, name, err)
 		}
 		z.registerRevert(func() error {
 			origD, err := libzfs.DatasetOpen(origin)
 			if err != nil {
-				return fmt.Errorf("couldn't open %q for cleanup: %v", origin, err)
+				return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), origin, err)
 			}
 			defer origD.Close()
 			if err := origD.Promote(); err != nil {
-				return fmt.Errorf("couldn't promote %q for cleanup: %v", origin, err)
+				return fmt.Errorf(i18n.G("couldn't promote %q for cleanup: %v"), origin, err)
 			}
 			return nil
 		})
@@ -547,19 +548,19 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 // Note that destruction can't be rollbacked as filesystem content can't be recreated, so we don't accept them
 // in a transactional Zfs element.
 func (z *Zfs) Destroy(name string) error {
-	log.Debugf(z.ctx, "ZFS: trying to destroy %q", name)
+	log.Debugf(z.ctx, i18n.G("ZFS: trying to destroy %q"), name)
 	if z.ctx.Done() != nil {
-		return fmt.Errorf("couldn't call Destroy in a transactional context")
+		return fmt.Errorf(i18n.G("couldn't call Destroy in a transactional context"))
 	}
 
 	d, err := libzfs.DatasetOpen(name)
 	if err != nil {
-		return fmt.Errorf("can't get dataset %q: "+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("can't get dataset %q: ")+config.ErrorFormat, name, err)
 	}
 	defer d.Close()
 
 	if err := checkNoClone(&d); err != nil {
-		return fmt.Errorf("couldn't destroy %q due to clones: %v", name, err)
+		return fmt.Errorf(i18n.G("couldn't destroy %q due to clones: %v"), name, err)
 	}
 
 	return d.DestroyRecursive()
@@ -569,27 +570,27 @@ func (z *Zfs) Destroy(name string) error {
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
 func (z *Zfs) SetProperty(name, value, datasetName string, force bool) error {
-	log.Debugf(z.ctx, "ZFS: trying to set %q=%q on %q", name, value, datasetName)
+	log.Debugf(z.ctx, i18n.G("ZFS: trying to set %q=%q on %q"), name, value, datasetName)
 	d, err := libzfs.DatasetOpen(datasetName)
 	if err != nil {
-		return fmt.Errorf("can't get dataset %q: "+config.ErrorFormat, datasetName, err)
+		return fmt.Errorf(i18n.G("can't get dataset %q: ")+config.ErrorFormat, datasetName, err)
 	}
 	defer d.Close()
 
 	if d.IsSnapshot() {
-		return fmt.Errorf("can't set a property %q on %q: the dataset a snapshot", name, datasetName)
+		return fmt.Errorf(i18n.G("can't set a property %q on %q: the dataset a snapshot"), name, datasetName)
 	}
 
 	prop, err := getProperty(d, name)
 	if err != nil {
-		return fmt.Errorf("can't get dataset property %q for %q: "+config.ErrorFormat, name, datasetName, err)
+		return fmt.Errorf(i18n.G("can't get dataset property %q for %q: ")+config.ErrorFormat, name, datasetName, err)
 	}
 	if !force && prop.Source != "local" && prop.Source != "default" && prop.Source != "none" && prop.Source != "" {
-		log.Debugf(z.ctx, "ZFS: can't set property %q=%q for %q as not a local property (%q)", name, value, datasetName, prop.Source)
+		log.Debugf(z.ctx, i18n.G("ZFS: can't set property %q=%q for %q as not a local property (%q)"), name, value, datasetName, prop.Source)
 		return nil
 	}
 	if err = setProperty(d, name, value); err != nil {
-		return fmt.Errorf("can't set dataset property %q=%q for %q: "+config.ErrorFormat, name, value, datasetName, err)
+		return fmt.Errorf(i18n.G("can't set dataset property %q=%q for %q: ")+config.ErrorFormat, name, value, datasetName, err)
 	}
 	z.registerRevert(func() error { return z.SetProperty(name, prop.Value, datasetName, force) })
 

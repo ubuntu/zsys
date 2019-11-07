@@ -9,6 +9,7 @@ import (
 
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/daemon"
+	"github.com/ubuntu/zsys/internal/i18n"
 )
 
 var (
@@ -16,11 +17,11 @@ var (
 	flagVerbosity int
 	rootCmd       = &cobra.Command{
 		Use:   "zsysd",
-		Short: "ZFS SYStem integration daemon",
-		Long: `Zfs SYStem daemon targetting an enhanced ZOL experience.
+		Short: i18n.G("ZFS SYStem integration daemon"),
+		Long: i18n.G(`Zfs SYStem daemon targetting an enhanced ZOL experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
- user data from system and persistent data, and more.`,
+ user data from system and persistent data, and more.`),
 		Args: cobra.ExactArgs(0),
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.SetVerboseMode(flagVerbosity)
@@ -28,7 +29,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			s, err := daemon.New(config.DefaultSocket)
 			if err != nil {
-				cmdErr = fmt.Errorf("Couldn't register grpc server: %v", err)
+				cmdErr = fmt.Errorf(i18n.G("Couldn't register grpc server: %v"), err)
 				return
 			}
 
@@ -48,7 +49,7 @@ var (
 
 	bootPrepareCmd = &cobra.Command{
 		Use:    "boot-prepare",
-		Short:  "Prepare boot by ensuring correct system and user datasets are switched on and off, synchronously",
+		Short:  i18n.G("Prepare boot by ensuring correct system and user datasets are switched on and off, synchronously"),
 		Args:   cobra.NoArgs,
 		Hidden: true,
 		Run:    func(cmd *cobra.Command, args []string) { cmdErr = syncBootPrepare() },
@@ -56,7 +57,7 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", "issue INFO (-v) and DEBUG (-vv) output")
+	rootCmd.PersistentFlags().CountVarP(&flagVerbosity, "verbose", "v", i18n.G("issue INFO (-v) and DEBUG (-vv) output"))
 	rootCmd.AddCommand(bootPrepareCmd)
 }
 

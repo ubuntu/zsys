@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 	"google.golang.org/grpc"
 )
@@ -23,7 +24,7 @@ func NewZsysUnixSocketClient(socket string, level logrus.Level) (*ZsysLogClient,
 		grpc.WithInsecure(), grpc.WithDialer(unixConnect(socket)),
 		grpc.WithStreamInterceptor(streamlogger.ClientRequestLogInterceptor))
 	if err != nil {
-		return nil, fmt.Errorf("couldn't connect to unix socket %q: %w", socket, err)
+		return nil, fmt.Errorf(i18n.G("couldn't connect to unix socket %q: %w"), socket, err)
 	}
 
 	return newZsysClientWithLogs(context.Background(), conn, level), nil

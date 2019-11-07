@@ -9,6 +9,7 @@ import (
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 )
 
@@ -17,27 +18,27 @@ var (
 
 	bootCmd = &cobra.Command{
 		Use:    "boot COMMAND",
-		Short:  "Ensure that the right datasets are ready to be mounted and committed during early boot",
+		Short:  i18n.G("Ensure that the right datasets are ready to be mounted and committed during early boot"),
 		Hidden: true,
 		Args:   cmdhandler.SubcommandsRequiredWithSuggestions,
 		Run:    cmdhandler.NoCmd,
 	}
 	bootPrepareCmd = &cobra.Command{
 		Use:   "prepare",
-		Short: "Prepare boot by ensuring correct system and user datasets are switched on and off",
+		Short: i18n.G("Prepare boot by ensuring correct system and user datasets are switched on and off"),
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = bootPrepare(printModifiedBoot) },
 	}
 	bootCommitCmd = &cobra.Command{
 		Use:   "commit",
-		Short: "Commit system and user datasets states as a successful boot",
+		Short: i18n.G("Commit system and user datasets states as a successful boot"),
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = bootCommit(printModifiedBoot) },
 	}
 )
 
 func init() {
-	bootCmd.PersistentFlags().BoolVarP(&printModifiedBoot, "print-changes", "p", false, "Display if any zfs datasets have been modified to boot")
+	bootCmd.PersistentFlags().BoolVarP(&printModifiedBoot, "print-changes", "p", false, i18n.G("Display if any zfs datasets have been modified to boot"))
 	rootCmd.AddCommand(bootCmd)
 	bootCmd.AddCommand(bootPrepareCmd)
 	bootCmd.AddCommand(bootCommitCmd)

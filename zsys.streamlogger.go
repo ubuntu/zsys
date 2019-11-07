@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 	"google.golang.org/grpc"
 )
@@ -78,7 +79,7 @@ func (z *ZsysLogServer) CreateUserData(req *CreateUserDataRequest, stream Zsys_C
 	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
 	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "CreateUserData")
 	if err != nil {
-		return fmt.Errorf("couldn't attach a logger to request: %w", err)
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
 	}
 
 	// wrap the context to access the context with logger
@@ -108,7 +109,7 @@ func (z *ZsysLogServer) ChangeHomeOnUserData(req *ChangeHomeOnUserDataRequest, s
 	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
 	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "ChangeHomeOnUserData")
 	if err != nil {
-		return fmt.Errorf("couldn't attach a logger to request: %w", err)
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
 	}
 
 	// wrap the context to access the context with logger
@@ -138,7 +139,7 @@ func (z *ZsysLogServer) PrepareBoot(req *Empty, stream Zsys_PrepareBootServer) e
 	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
 	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "PrepareBoot")
 	if err != nil {
-		return fmt.Errorf("couldn't attach a logger to request: %w", err)
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
 	}
 
 	// wrap the context to access the context with logger
@@ -168,7 +169,7 @@ func (z *ZsysLogServer) CommitBoot(req *Empty, stream Zsys_CommitBootServer) err
 	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
 	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "CommitBoot")
 	if err != nil {
-		return fmt.Errorf("couldn't attach a logger to request: %w", err)
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
 	}
 
 	// wrap the context to access the context with logger

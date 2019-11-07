@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -17,14 +18,14 @@ import (
 )
 
 // ErrLogMsg allows detecting when a recv message was only logs to client, consumed by the interceptor.
-var ErrLogMsg = errors.New("message was log")
+var ErrLogMsg = errors.New(i18n.G("message was log"))
 
 // NewClientCtx creates a requester ID and attach it to returned context.
 func NewClientCtx(ctx context.Context, level logrus.Level) context.Context {
 	requesterID := "unknown"
 	b := make([]byte, 4)
 	if _, err := rand.Read(b); err != nil {
-		logrus.Warningf("couldn't generate request id, setting to %q: %v", requesterID, err)
+		logrus.Warningf(i18n.G("couldn't generate request id, setting to %q: %v"), requesterID, err)
 	} else {
 		requesterID = fmt.Sprintf("%x", b[0:])
 	}
@@ -65,16 +66,16 @@ func (w *clientRequestLogStream) SendMsg(m interface{}) (errFn error) {
 	w.once.Do(func() {
 		header, err := w.Header()
 		if err != nil {
-			errFn = fmt.Errorf("failed to get header from stream: %w", err)
+			errFn = fmt.Errorf(i18n.G("failed to get header from stream: %w"), err)
 			return
 		}
 		// Read metadata from server's header.
 		id, ok := header[metaRequestIDKey]
 		if !ok {
-			errFn = errors.New("no request ID found on server header")
+			errFn = errors.New(i18n.G("no request ID found on server header"))
 			return
 		}
-		log.Debugf(context.Background(), "%s() call logged as %s", w.method, id)
+		log.Debugf(context.Background(), i18n.G("%s() call logged as %s"), w.method, id)
 	})
 
 	return errFn

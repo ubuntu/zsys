@@ -7,6 +7,7 @@ import (
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -21,14 +22,14 @@ func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
-	log.Infof(stream.Context(), "Prepare current boot state")
+	log.Infof(stream.Context(), i18n.G("Prepare current boot state"))
 
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
 	changed, err := s.Machines.EnsureBoot(stream.Context(), z)
 	if err != nil {
-		return fmt.Errorf("couldn't ensure boot: "+config.ErrorFormat, err)
+		return fmt.Errorf(i18n.G("couldn't ensure boot: ")+config.ErrorFormat, err)
 	}
 	stream.Send(&zsys.PrepareBootResponse{
 		Reply: &zsys.PrepareBootResponse_Changed{Changed: changed},
@@ -45,14 +46,14 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
-	log.Infof(stream.Context(), "Commit current boot state")
+	log.Infof(stream.Context(), i18n.G("Commit current boot state"))
 
 	z := zfs.NewWithAutoCancel(stream.Context())
 	defer z.DoneCheckErr(&err)
 
 	changed, err := s.Machines.Commit(stream.Context(), z)
 	if err != nil {
-		return fmt.Errorf("couldn't commit: "+config.ErrorFormat, err)
+		return fmt.Errorf(i18n.G("couldn't commit: ")+config.ErrorFormat, err)
 	}
 	stream.Send(&zsys.CommitBootResponse{
 		Reply: &zsys.CommitBootResponse_Changed{Changed: changed},
@@ -67,7 +68,7 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 	cmd.Stdout = logger
 	cmd.Stderr = logger
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("%q returned an error:"+config.ErrorFormat, updateGrubCmd, err)
+		return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
 	}
 
 	return nil

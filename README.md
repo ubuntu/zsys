@@ -16,7 +16,7 @@ It allows running multiple ZFS systems in parallel on the same machine, get auto
 
 #### zsysctl
 
-ZFS SYStem integration control zsys 
+ZFS SYStem integration control zsys daemon
 
 ##### Synopsis
 

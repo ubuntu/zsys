@@ -12,6 +12,7 @@ import (
 	"github.com/coreos/go-systemd/daemon"
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/zfs"
@@ -50,28 +51,28 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 	// systemd socket activation or local creation
 	listeners, err := activation.Listeners()
 	if err != nil {
-		return nil, fmt.Errorf("cannot retrieve systemd listeners: %v", err)
+		return nil, fmt.Errorf(i18n.G("cannot retrieve systemd listeners: %v"), err)
 	}
 	var lis net.Listener
 	switch len(listeners) {
 	case 0:
 		l, err := net.Listen("unix", socket)
 		if err != nil {
-			return nil, fmt.Errorf("failed to listen on %q: %w", socket, err)
+			return nil, fmt.Errorf(i18n.G("failed to listen on %q: %w"), socket, err)
 		}
 		lis = l
 	case 1:
 		socket = ""
 		lis = listeners[0]
 	default:
-		return nil, fmt.Errorf("unexpected number of systemd socket activation (%d != 1)", len(listeners))
+		return nil, fmt.Errorf(i18n.G("unexpected number of systemd socket activation (%d != 1)"), len(listeners))
 	}
 
 	z := zfs.New(context.Background())
 	defer z.Done()
 	ms, err := getMachines(context.Background(), z)
 	if err != nil {
-		return nil, fmt.Errorf("couldn't scan machines: %v", err)
+		return nil, fmt.Errorf(i18n.G("couldn't scan machines: %v"), err)
 	}
 
 	s := &Server{
@@ -89,7 +90,7 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 
 	for _, option := range options {
 		if err := option(s); err != nil {
-			log.Warningf(context.Background(), "Couldn't apply option to server: %v", err)
+			log.Warningf(context.Background(), i18n.G("Couldn't apply option to server: %v"), err)
 		}
 	}
 
@@ -101,7 +102,7 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		for {
 			select {
 			case <-timeout.C:
-				log.Debug(context.Background(), "Idle timeout expired")
+				log.Debug(context.Background(), i18n.G("Idle timeout expired"))
 				break out
 			case <-s.newRequest:
 				s.requestsInFlights++
@@ -128,13 +129,13 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 // It handles systemd activation notification.
 // When the server stop listening, the socket is removed automatically.
 func (s *Server) Listen() error {
-	log.Infof(context.Background(), "Serving on %s", s.lis.Addr().String())
+	log.Infof(context.Background(), i18n.G("Serving on %s"), s.lis.Addr().String())
 
 	// systemd activation
 	if sent, err := daemon.SdNotify(false, "READY=1"); err != nil {
-		return fmt.Errorf("couldn't send ready notification to systemd while supported: %v", err)
+		return fmt.Errorf(i18n.G("couldn't send ready notification to systemd while supported: %v"), err)
 	} else if sent {
-		log.Debug(context.Background(), "Ready state sent to systemd")
+		log.Debug(context.Background(), i18n.G("Ready state sent to systemd"))
 	}
 
 	return s.grpcserver.Serve(s.lis)
@@ -142,16 +143,16 @@ func (s *Server) Listen() error {
 
 // Stop gracefully stops the grpc server
 func (s *Server) Stop() {
-	log.Debug(context.Background(), "Stopping daemon requested. Wait for active requests to close")
+	log.Debug(context.Background(), i18n.G("Stopping daemon requested. Wait for active requests to close"))
 	s.grpcserver.GracefulStop()
-	log.Debug(context.Background(), "All connexions closed")
+	log.Debug(context.Background(), i18n.G("All connexions closed"))
 }
 
 // TrackRequest prevents the idling timeout to fire up and return the function to reset it.
 func (s *Server) TrackRequest() func() {
 	s.newRequest <- struct{}{}
 	return func() {
-		log.Debugf(context.Background(), "Reset idle timeout to %s", s.idleTimeout)
+		log.Debugf(context.Background(), i18n.G("Reset idle timeout to %s"), s.idleTimeout)
 		s.reset <- struct{}{}
 	}
 }
