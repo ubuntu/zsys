@@ -14,6 +14,7 @@ require (
 	github.com/snapcore/go-gettext v0.0.0-20190812090936-a77afd68d2bd
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
+	github.com/stretchr/testify v1.2.2
 	golang.org/x/net v0.0.0-20191002035440-2ec189313ef0 // indirect
 	golang.org/x/sys v0.0.0-20191002091554-b397fe3ad8ed // indirect
 	golang.org/x/text v0.3.2 // indirect
