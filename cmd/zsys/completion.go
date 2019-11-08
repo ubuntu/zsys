@@ -17,9 +17,8 @@ func installCompletionCmd(rootCmd *cobra.Command) {
 
 . <(%s completion)
 
-To configure your bash shell to load completions for each session add to your bashrc
+To configure your bash shell to load completions for each session add to your ~/.bashrc or ~/.profile:
 
-# ~/.bashrc or ~/.profile
 . <(%s completion)
 `), prog, prog),
 		Run: func(cmd *cobra.Command, args []string) {

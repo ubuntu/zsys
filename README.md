@@ -46,9 +46,8 @@ To load completion run
 
 . <(zsysctl completion)
 
-To configure your bash shell to load completions for each session add to your bashrc
+To configure your bash shell to load completions for each session add to your ~/.bashrc or ~/.profile:
 
-# ~/.bashrc or ~/.profile
 . <(zsysctl completion)
 
 
@@ -100,9 +99,8 @@ To load completion run
 
 . <(zsysd completion)
 
-To configure your bash shell to load completions for each session add to your bashrc
+To configure your bash shell to load completions for each session add to your ~/.bashrc or ~/.profile:
 
-# ~/.bashrc or ~/.profile
 . <(zsysd completion)
 
 
