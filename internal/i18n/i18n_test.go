@@ -66,6 +66,7 @@ func TestTranslations(t *testing.T) {
 		loc        string // loc can be set to "-" to ensure it's empty
 
 		rename map[string]string
+		noinit bool
 	}{
 		"One text elem, prefer en_DK over en": {},
 		"Multiple text elems":                 {text: []string{"plural_1", "plural_2"}, want: "translated plural_1"},
@@ -91,6 +92,7 @@ func TestTranslations(t *testing.T) {
 		"Missing locale":           {loc: "doesntexists", want: "singular"},
 		"Missing domain":           {domain: "doesntexists", want: "singular"},
 		"Invalid locale directory": {localeDir: "/doesntexists", want: "singular"},
+		"Init wasn't ran":          {noinit: true, want: "singular"},
 	}
 
 	for name, tc := range tests {
@@ -133,7 +135,9 @@ func TestTranslations(t *testing.T) {
 				}
 			}
 
-			i18n.InitI18nDomain(tc.domain, i18n.WithLocaleDir(tc.localeDir), i18n.WithLoc(tc.loc))
+			if !tc.noinit {
+				i18n.InitI18nDomain(tc.domain, i18n.WithLocaleDir(tc.localeDir), i18n.WithLoc(tc.loc))
+			}
 			switch len(tc.text) {
 			case 1:
 				assert.Equal(t, tc.want, i18n.G(tc.text[0]))
