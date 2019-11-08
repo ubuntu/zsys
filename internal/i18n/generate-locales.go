@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -94,7 +95,7 @@ func updatePo(localeDir string) error {
 		return fmt.Errorf("couldn't create directory for %q: %v", localeDir, err)
 	}
 
-	// Create temporary pot file
+	// Create pot file
 	var files []string
 	root := filepath.Dir(localeDir)
 	err := filepath.Walk(root, func(p string, info os.FileInfo, err error) error {
@@ -119,11 +120,23 @@ func updatePo(localeDir string) error {
 	}
 
 	potfile := filepath.Join(localeDir, config.TEXTDOMAIN+".pot")
+	var potcreation string
+	// if already existed: extract POT creation date to keep it (xgettext always updates it)
+	if _, err := os.Stat(potfile); err == nil {
+		if potcreation, err = getPOTCreationDate(potfile); err != nil {
+			log.Fatal(err)
+		}
+	}
 	args := append([]string{
 		"--keyword=G", "--keyword=GN", "--add-comments", "--sort-output", "--package-name=" + config.TEXTDOMAIN,
 		"-D", root, "--output=" + potfile}, files...)
 	if out, err := exec.Command("xgettext", args...).CombinedOutput(); err != nil {
 		return fmt.Errorf("couldn't compile pot file: %v\nCommand output: %s", err, out)
+	}
+	if potcreation != "" {
+		if err := rewritePOTCreationDate(potcreation, potfile); err != nil {
+			log.Fatalf("couldn't change POT Creation file: %v", err)
+		}
 	}
 
 	// Merge existing po files
@@ -137,8 +150,19 @@ func updatePo(localeDir string) error {
 		}
 
 		pofile := filepath.Join(localeDir, f.Name())
+
+		// extract POT creation date to keep it (msgmerge always updates it)
+		potcreation, err := getPOTCreationDate(pofile)
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		if out, err := exec.Command("msgmerge", "--update", "--backup=none", pofile, potfile).CombinedOutput(); err != nil {
 			return fmt.Errorf("couldn't refresh %q: %v.\nCommand output: %s", pofile, err, out)
+		}
+
+		if err := rewritePOTCreationDate(potcreation, pofile); err != nil {
+			log.Fatalf("couldn't change POT Creation file: %v", err)
 		}
 	}
 
@@ -171,6 +195,64 @@ func generateMo(in, out string) error {
 			candidate).CombinedOutput(); err != nil {
 			return fmt.Errorf("couldn't compile mo file from %q: %v.\nCommand output: %s", candidate, err, out)
 		}
+	}
+	return nil
+}
+
+const potCreationDatePrefix = `"POT-Creation-Date:`
+
+func getPOTCreationDate(p string) (string, error) {
+	f, err := os.Open(p)
+	if err != nil {
+		return "", fmt.Errorf("couldn't open %q: %v", p, err)
+	}
+	defer f.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if strings.HasPrefix(scanner.Text(), potCreationDatePrefix) {
+			return scanner.Text(), nil
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return "", fmt.Errorf("error while reading %q: %v", p, err)
+	}
+
+	return "", fmt.Errorf("didn't find %q in %q", potCreationDatePrefix, p)
+}
+
+func rewritePOTCreationDate(potcreation, p string) error {
+	f, err := os.Open(p)
+	if err != nil {
+		return fmt.Errorf("couldn't open %q: %v", p, err)
+	}
+	defer f.Close()
+	out, err := os.Create(p + ".new")
+	if err != nil {
+		return fmt.Errorf("couldn't open %q: %v", p+".new", err)
+	}
+	defer out.Close()
+
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		t := scanner.Text()
+		if strings.HasPrefix(t, potCreationDatePrefix) {
+			t = potcreation
+		}
+		if _, err := out.WriteString(t + "\n"); err != nil {
+			return fmt.Errorf("couldn't write to %q: %v", p+".new", err)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return fmt.Errorf("error while reading %q: %v", p, err)
+	}
+	f.Close()
+	out.Close()
+
+	if err := os.Rename(p+".new", p); err != nil {
+		return fmt.Errorf("couldn't rename %q to %q: %v", p+".new", p, err)
 	}
 	return nil
 }
