@@ -16,6 +16,7 @@ import (
 	"github.com/spf13/cobra/doc"
 	"github.com/ubuntu/zsys/cmd/zsys/client"
 	"github.com/ubuntu/zsys/cmd/zsys/daemon"
+	"github.com/ubuntu/zsys/internal/generators"
 )
 
 const usage = `Usage of %s:
@@ -37,13 +38,6 @@ func main() {
 	installCompletionCmd(daemon.Cmd())
 
 	dir := os.Args[2]
-	if err := os.RemoveAll(dir); err != nil {
-		log.Fatalf("Couldn't delete out directory: %v", err)
-	}
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		log.Fatalf("Couldn't create out directory: %v", err)
-	}
-
 	commands := []*cobra.Command{client.Cmd(), daemon.Cmd()}
 	switch os.Args[1] {
 	case "completion":
@@ -56,7 +50,12 @@ func main() {
 }
 
 func genBashCompletions(cmds []*cobra.Command, dir string) {
-	out := filepath.Join(dir, "bash-completion", "completions")
+	bashCompDir := filepath.Join(dir, "bash-completion")
+	if err := generators.CleanDirectory(bashCompDir); err != nil {
+		log.Fatalln(err)
+	}
+
+	out := filepath.Join(bashCompDir, "completions")
 	if err := os.MkdirAll(out, 0755); err != nil {
 		log.Fatalf("Couldn't create bash completion directory: %v", err)
 	}
@@ -69,7 +68,12 @@ func genBashCompletions(cmds []*cobra.Command, dir string) {
 }
 
 func genManPages(cmds []*cobra.Command, dir string) {
-	out := filepath.Join(dir, "man", "man1")
+	manBaseDir := filepath.Join(dir, "man")
+	if err := generators.CleanDirectory(manBaseDir); err != nil {
+		log.Fatalln(err)
+	}
+
+	out := filepath.Join(manBaseDir, "man1")
 	if err := os.MkdirAll(out, 0755); err != nil {
 		log.Fatalf("Couldn't create man pages directory: %v", err)
 	}

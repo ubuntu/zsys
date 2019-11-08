@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/generators"
 )
 
 const usage = `Usage of %s:
@@ -140,9 +141,9 @@ func updatePo(localeDir string) error {
 
 // generateMo generates a locale directory stucture with a mo for each po in localeDir.
 func generateMo(in, out string) error {
-	baseOut := filepath.Join(out, "locale")
-	if err := os.RemoveAll(baseOut); err != nil {
-		log.Fatalf("couldn't clean %q: %v", baseOut, err)
+	baseLocaleDir := filepath.Join(out, "locale")
+	if err := generators.CleanDirectory(baseLocaleDir); err != nil {
+		log.Fatalln(err)
 	}
 
 	poCandidates, err := ioutil.ReadDir(in)
@@ -155,7 +156,7 @@ func generateMo(in, out string) error {
 		}
 
 		candidate := filepath.Join(in, f.Name())
-		outDir := filepath.Join(baseOut, strings.TrimSuffix(f.Name(), ".po"), "LC_MESSAGES")
+		outDir := filepath.Join(baseLocaleDir, strings.TrimSuffix(f.Name(), ".po"), "LC_MESSAGES")
 		if err := os.MkdirAll(outDir, 0755); err != nil {
 			return fmt.Errorf("couldn't create %q: %v", out, err)
 		}
