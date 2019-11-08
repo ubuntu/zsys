@@ -12,7 +12,9 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 )
 
-//go:generate go run ./generate-mancomp.go cobracompletion.go completion.go ../../generated
+//go:generate go run ./generate-mancomp.go cobracompletion.go completion.go completion ../../generated
+//go:generate go run ./generate-mancomp.go cobracompletion.go completion.go man ../../generated
+//go:generate go run ./generate-mancomp.go cobracompletion.go completion.go update-readme ../../generated
 
 func main() {
 	i18n.InitI18nDomain(config.TEXTDOMAIN)

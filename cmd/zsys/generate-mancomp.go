@@ -18,15 +18,25 @@ import (
 	"github.com/ubuntu/zsys/cmd/zsys/daemon"
 )
 
+const usage = `Usage of %s:
+
+   completion DIRECTORY
+     Create completions files in a structured hierarchy in DIRECTORY.
+   man DIRECTORY
+     Create man pages files in a structured hierarchy in DIRECTORY.
+   update-readme
+     Update repository README with commands.
+`
+
 func main() {
-	if len(os.Args) != 2 {
-		log.Fatal("Need one argument: output directory")
+	if len(os.Args) != 3 {
+		log.Fatalf(usage, os.Args[0])
 	}
 
 	installCompletionCmd(client.Cmd())
 	installCompletionCmd(daemon.Cmd())
 
-	dir := os.Args[1]
+	dir := os.Args[2]
 	if err := os.RemoveAll(dir); err != nil {
 		log.Fatalf("Couldn't delete out directory: %v", err)
 	}
@@ -35,9 +45,14 @@ func main() {
 	}
 
 	commands := []*cobra.Command{client.Cmd(), daemon.Cmd()}
-	genBashCompletions(commands, dir)
-	genManPages(commands, dir)
-	updateREADME(commands)
+	switch os.Args[1] {
+	case "completion":
+		genBashCompletions(commands, dir)
+	case "man":
+		genManPages(commands, dir)
+	case "update-readme":
+		updateREADME(commands)
+	}
 }
 
 func genBashCompletions(cmds []*cobra.Command, dir string) {
