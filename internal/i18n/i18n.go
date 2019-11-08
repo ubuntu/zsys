@@ -5,7 +5,8 @@ package i18n
  * and adapted to follow common go best practices.
  */
 
-//FIXME: go:generate update-pot
+//go:generate go run generate-locales.go update-po ../../po
+//go:generate go run generate-locales.go generate-mo ../../po ../../generated
 
 import (
 	"fmt"
