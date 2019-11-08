@@ -30,19 +30,26 @@ const usage = `Usage of %s:
 `
 
 func main() {
-	if len(os.Args) != 3 {
+	if len(os.Args) < 2 {
 		log.Fatalf(usage, os.Args[0])
 	}
 
 	installCompletionCmd(client.Cmd())
 	installCompletionCmd(daemon.Cmd())
 
-	dir := os.Args[2]
 	commands := []*cobra.Command{client.Cmd(), daemon.Cmd()}
 	switch os.Args[1] {
 	case "completion":
+		if len(os.Args) < 3 {
+			log.Fatalf(usage, os.Args[0])
+		}
+		dir := os.Args[2]
 		genBashCompletions(commands, dir)
 	case "man":
+		if len(os.Args) < 3 {
+			log.Fatalf(usage, os.Args[0])
+		}
+		dir := os.Args[2]
 		genManPages(commands, dir)
 	case "update-readme":
 		updateREADME(commands)
