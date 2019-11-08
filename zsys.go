@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//go:generate protoc --go_out=plugins=grpc:. zsys.proto
+//go:generate sh -c "if go run internal/generators/can_modify_repo.go 2>/dev/null; then protoc --go_out=plugins=grpc:. zsys.proto; fi"
 // Takes output of protoc for second streamlogger generation.
 //go:generate go run internal/streamlogger/generator.go -- zsys.pb.go
 

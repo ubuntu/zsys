@@ -35,6 +35,9 @@ func main() {
 		if len(os.Args) < 4 {
 			log.Fatalf(usage, os.Args[0])
 		}
+		if generators.InstallOnlyMode() {
+			return
+		}
 		if err := createPo(os.Args[2], os.Args[3:]); err != nil {
 			log.Fatalf("Error when creating po files: %v", err)
 		}
@@ -42,6 +45,9 @@ func main() {
 	case "update-po":
 		if len(os.Args) != 3 {
 			log.Fatalf(usage, os.Args[0])
+		}
+		if generators.InstallOnlyMode() {
+			return
 		}
 		if err := updatePo(os.Args[2]); err != nil {
 			log.Fatalf("Error when updating po files: %v", err)
@@ -51,7 +57,7 @@ func main() {
 		if len(os.Args) != 4 {
 			log.Fatalf(usage, os.Args[0])
 		}
-		if err := generateMo(os.Args[2], os.Args[3]); err != nil {
+		if err := generateMo(os.Args[2], generators.DestDirectory(os.Args[3])); err != nil {
 			log.Fatalf("Error when generating mo files: %v", err)
 		}
 	default:

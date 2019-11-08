@@ -43,15 +43,18 @@ func main() {
 		if len(os.Args) < 3 {
 			log.Fatalf(usage, os.Args[0])
 		}
-		dir := os.Args[2]
+		dir := generators.DestDirectory(os.Args[2])
 		genBashCompletions(commands, dir)
 	case "man":
 		if len(os.Args) < 3 {
 			log.Fatalf(usage, os.Args[0])
 		}
-		dir := os.Args[2]
+		dir := generators.DestDirectory(os.Args[2])
 		genManPages(commands, dir)
 	case "update-readme":
+		if generators.InstallOnlyMode() {
+			return
+		}
 		updateREADME(commands)
 	}
 }
