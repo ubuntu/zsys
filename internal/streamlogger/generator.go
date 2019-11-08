@@ -75,7 +75,7 @@ func main() {
 	// Get current directory for finding template
 	_, filename, _, _ := runtime.Caller(0)
 	curDir := filepath.Dir(filename)
-	t, err := template.ParseFiles(filepath.Join(curDir, "streamlogger.template"))
+	t, err := template.ParseFiles(filepath.Join(curDir, "streamlogger.go.template"))
 	if err != nil {
 		log.Fatalf("couldn't parse template file: %v", err)
 	}
