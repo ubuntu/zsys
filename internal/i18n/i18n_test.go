@@ -101,7 +101,8 @@ func TestTranslations(t *testing.T) {
 			// We can't run those subtests in parallel as we want defer of global functions to end once all subtests are.
 
 			// As we can't run those tests in parallel, we are doing the file switches and env changes to test priorities
-			// in subtests here.
+			// in subtests here and reset globals.
+			defer i18n.ResetGlobals()
 			if tc.text == nil {
 				tc.text = []string{"singular"}
 			}

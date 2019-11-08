@@ -13,3 +13,9 @@ func WithLoc(loc string) func(l *i18n) {
 		l.loc = loc
 	}
 }
+
+// ResetGlobals resets G and GN to their empty func
+func ResetGlobals() {
+	G = func(msgid string) string { return msgid }
+	NG = func(msgid string, msgidPlural string, n uint32) string { return msgid }
+}
