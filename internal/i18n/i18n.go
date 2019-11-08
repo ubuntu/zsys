@@ -27,6 +27,11 @@ type i18n struct {
 
 var (
 	locale i18n
+
+	// G is the shorthand for Gettext
+	G = func(msgid string) string { return msgid }
+	// NG is the shorthand for NGettext
+	NG = func(msgid string, msgidPlural string, n uint32) string { return msgid }
 )
 
 // InitI18nDomain calls bind + set locale to system values
@@ -41,6 +46,9 @@ func InitI18nDomain(domain string, options ...func(l *i18n)) {
 
 	locale.bindTextDomain(locale.domain, locale.localeDir)
 	locale.setLocale(locale.loc)
+
+	G = locale.Gettext
+	NG = locale.NGettext
 }
 
 // langpackResolver tries to fetch locale mo file path.
@@ -88,16 +96,6 @@ func (l *i18n) setLocale(loc string) {
 	fmt.Println(loc)
 
 	l.Catalog = l.translations.Locale(loc)
-}
-
-// G is the shorthand for Gettext
-func G(msgid string) string {
-	return locale.Gettext(msgid)
-}
-
-// NG is the shorthand for NGettext
-func NG(msgid string, msgidPlural string, n int) string {
-	return locale.NGettext(msgid, msgidPlural, ngn(n))
 }
 
 // https://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html
