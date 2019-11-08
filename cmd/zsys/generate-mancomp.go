@@ -41,7 +41,7 @@ func main() {
 }
 
 func genBashCompletions(cmds []*cobra.Command, dir string) {
-	out := filepath.Join(dir, "bash-completion")
+	out := filepath.Join(dir, "bash-completion", "completions")
 	if err := os.MkdirAll(out, 0755); err != nil {
 		log.Fatalf("Couldn't create bash completion directory: %v", err)
 	}
@@ -54,7 +54,7 @@ func genBashCompletions(cmds []*cobra.Command, dir string) {
 }
 
 func genManPages(cmds []*cobra.Command, dir string) {
-	out := filepath.Join(dir, "man")
+	out := filepath.Join(dir, "man", "man1")
 	if err := os.MkdirAll(out, 0755); err != nil {
 		log.Fatalf("Couldn't create man pages directory: %v", err)
 	}
