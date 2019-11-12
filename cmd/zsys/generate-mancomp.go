@@ -56,6 +56,8 @@ func main() {
 			return
 		}
 		updateREADME(commands)
+	default:
+		log.Fatalf(usage, os.Args[0])
 	}
 }
 

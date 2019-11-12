@@ -94,7 +94,6 @@ func (l *i18n) setLocale(loc string) {
 	// de_DE.UTF-8, de_DE@euro all need to get simplified
 	loc = strings.Split(loc, "@")[0]
 	loc = strings.Split(loc, ".")[0]
-	fmt.Println(loc)
 
 	l.Catalog = l.translations.Locale(loc)
 }
