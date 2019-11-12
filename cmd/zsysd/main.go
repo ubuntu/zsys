@@ -6,8 +6,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"github.com/ubuntu/zsys/cmd/zsys/client"
-	"github.com/ubuntu/zsys/cmd/zsys/daemon"
+	"github.com/ubuntu/zsys/cmd/zsysd/client"
+	"github.com/ubuntu/zsys/cmd/zsysd/daemon"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 )

@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys"
-	"github.com/ubuntu/zsys/cmd/zsys/cmdhandler"
+	"github.com/ubuntu/zsys/cmd/zsysd/cmdhandler"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/streamlogger"

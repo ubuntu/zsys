@@ -14,8 +14,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
-	"github.com/ubuntu/zsys/cmd/zsys/client"
-	"github.com/ubuntu/zsys/cmd/zsys/daemon"
+	"github.com/ubuntu/zsys/cmd/zsysd/client"
+	"github.com/ubuntu/zsys/cmd/zsysd/daemon"
 	"github.com/ubuntu/zsys/internal/generators"
 )
 
