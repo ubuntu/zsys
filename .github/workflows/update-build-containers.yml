@@ -26,6 +26,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build images
       run: |
+        export DISTRO_VERSION=$(echo ${BUILD_ENV} | cut -f1 -d/)
+        export GOLANG_VERSION=$(echo ${BUILD_ENV} | cut -f2 -d/)
         docker build \
         -t "zsys/build-${DISTRO_VERSION}-${GOLANG_VERSION} \
         - <<-EOF
@@ -39,8 +41,7 @@ jobs:
             ${GOLANG_VERSION}
         EOF
       env:
-        GOLANG_VERSION: golang-go
-        DISTRO_VERSION: rolling
+        BUILD_ENV: rolling/golang-go
     - name: Publish images
       run: |
         docker push "${DOCKER_REGISTRY}/ubuntu/zsys/build-container-foo"
