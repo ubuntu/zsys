@@ -980,7 +980,7 @@ func TestNewWithAutoCancel(t *testing.T) {
 }
 
 func TestDoneCheckErrOnNoneAutoCancel(t *testing.T) {
-	t.Parallel()
+	skipOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		err error
@@ -991,7 +991,6 @@ func TestDoneCheckErrOnNoneAutoCancel(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
 			dir, cleanup := tempDir(t)
 			defer cleanup()
 
