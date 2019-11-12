@@ -169,6 +169,11 @@ func (z *Zfs) registerRevert(f func() error) {
 	z.reverts = append(z.reverts, f)
 }
 
+// Context returns underlying context created or associated to the Zfs object.
+func (z *Zfs) Context() context.Context {
+	return z.ctx
+}
+
 // Done commits current changes.
 // This should be called to release underlying resources and will block until all is good.
 // This is a no-op if associated context was already cancelled or isn't cancellable.

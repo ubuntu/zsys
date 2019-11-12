@@ -15,6 +15,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k0kubun/pp"
+	"github.com/stretchr/testify/assert"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
@@ -1014,6 +1015,37 @@ func TestDoneCheckErrOnNoneAutoCancel(t *testing.T) {
 
 		})
 	}
+}
+
+func TestCheckZfsContext(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+	z := zfs.New(ctx)
+	defer z.Done()
+
+	assert.Equal(t, ctx, z.Context(), "Basic ZFS store current context")
+}
+
+func TestCheckZfsWithCancelContext(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.WithValue(context.Background(), "foo", "bar")
+	z, cancel := zfs.NewWithCancel(ctx)
+	defer cancel()
+	defer z.Done()
+
+	assert.Equal(t, "bar", ctx.Value("foo"), "Context created WithCancel has value property from parents")
+}
+
+func TestCheckZfsWithAutoCancelContext(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.WithValue(context.Background(), "foo", "bar")
+	z := zfs.NewWithAutoCancel(ctx)
+	defer z.DoneCheckErr(nil)
+
+	assert.Equal(t, "bar", ctx.Value("foo"), "Context created WithAutoCancel has value property from parents")
 }
 
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
