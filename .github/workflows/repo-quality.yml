@@ -1,0 +1,102 @@
+# Checks codes
+# We don't run tests here but on travis as we need to modprobe zfs, and so, needs a VM with the same version
+# then our libzfs.
+
+name: CI
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+
+jobs:
+
+  quality:
+    name: Code quality and mod files up to date
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      # Install go
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13.x'
+      - name: Code formatting
+        run: |
+          FMT=`go fmt ./...`
+          echo "$FMT"
+          [ -z "$FMT" ]
+      - name: Check mod files
+        run: ./ci/check-modules
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container: ubuntu:rolling
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      # Add dependencies
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install -y ca-certificates gcc libzfslinux-dev
+      # Install go
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13.x'
+      - name: Building
+        run: go build ./...
+
+  generators:
+    name: Generated files are up to date
+    runs-on: ubuntu-latest
+    container: ubuntu:rolling
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      # Add dependencies
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install -y ca-certificates gcc libzfslinux-dev protobuf-compiler gettext
+      # Install go
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13.x'
+      - name: Check generators
+        run: go generate ./...
+
+  extended-quality:
+    name: Extended quality checks
+    runs-on: ubuntu-latest
+    container: ubuntu:rolling
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      # Add dependencies
+      - name: Install dependencies
+        run: |
+          apt update
+          apt install -y ca-certificates gcc libzfslinux-dev # go vet needs libzfs headers (for cgo analysis)
+      # Install go
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13.x'
+      - name: Report suspicious constructs
+        run: go vet ./...
+      # TODO: add statichecks and others?
+
+  # TODO: create a container on a schedule, with the following matrix:
+  #  - ubuntu (rolling) | ubuntu (devel)
+  #  - go X | go master
+  # every tests with ubuntu devel and go master aren't required (can be transitive failures)
+  # tests (race without race) -> travis
