@@ -16,25 +16,15 @@ install: true
 
 before_script:
   - sudo sh -c "sed -i s/bionic/eoan/g /etc/apt/sources.list && apt update && apt --yes full-upgrade"
-  - sudo apt install libzfslinux-dev protobuf-compiler
+  - sudo apt install libzfslinux-dev
   - sudo modprobe zfs
 
 script:
-  - echo '============== Code quality ==============' >/dev/null
-  - go vet ./...
-  - FMT=`go fmt ./...` && echo "$FMT" && [ -z "$FMT" ]
-  - echo '============== BUILD ==============' >/dev/null
-  - go build ./...
   - echo '============== Tests ==============' >/dev/null
   - sudo -E env "PATH=$PATH" go test -coverprofile=coverage.txt -covermode=atomic ./...
   - sudo -E env "PATH=$PATH" go test -race ./...
   - echo '============== Benchmarks ==============' >/dev/null
   - sudo -E env "PATH=$PATH" go test -bench -run=Benchmark ./...
-  - echo '============== Assets generated ==============' >/dev/null
-  - go install github.com/golang/protobuf/protoc-gen-go
-  - ./ci/check-generate
-  - echo '============== Modules updated ==============' >/dev/null
-  - ./ci/check-modules
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
