@@ -1,0 +1,37 @@
+name: Update build container images
+on:
+  push:
+    paths:
+      - '.github/workflows/update-build-containers.yml'
+      - '.github/Dockerfile'
+  schedule:
+    - cron: '0 0 * * 5'
+
+env:
+  DOCKER_BUILDKIT: '1'
+
+jobs:
+  # https://github.com/1138-4EB/vunit/blob/master/.github/workflows/images.yml
+  build:
+    runs-on: ubuntu-latest
+    env:
+      DOCKER_REGISTRY: docker.pkg.github.com
+    steps:
+    - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+    - name: Login to github docker registry
+      run: echo "${GITHUB_TOKEN}" | docker login -u zsys-gha --password-stdin "${DOCKER_REGISTRY}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: test
+      run: exit 1
+    - name: Build images
+      run: |
+        docker build . --file .github.com/zsys-build.dockerfile
+    - name: docker push
+      run: |
+        docker push "${DOCKER_REGISTRY}/ubuntu/zsys/build-container-foo"
+    - name: docker logout
+      run: docker logout "${DOCKER_REGISTRY}"
+      if: always()
