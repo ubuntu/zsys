@@ -30,13 +30,13 @@ jobs:
         -t "zsys/build-${DISTRO_VERSION}-${GOLANG_VERSION} \
         - <<-EOF
         FROM ubuntu:${DISTRO_VERSION}
-# We install the certificats for GPROXY and protobuf/gettext for generator.
-RUN apt update &&                     \\
-    apt install -y                    \\
-        ca-certificates               \\
-        protobuf-compiler gettext     \\
-        gcc libzfslinux-dev           \\
-        ${GOLANG_VERSION}
+        # We install the certificats for GPROXY and protobuf/gettext for generator.
+        RUN apt update &&                     \
+            apt install -y                    \
+            ca-certificates               \
+            protobuf-compiler gettext     \
+            gcc libzfslinux-dev           \
+            ${GOLANG_VERSION}
         EOF
       env:
         GOLANG_VERSION: golang-go
