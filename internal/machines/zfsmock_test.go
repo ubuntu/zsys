@@ -1,6 +1,7 @@
 package machines_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
@@ -90,6 +91,11 @@ func (z *zfsMock) Create(p, mountpoint, canmount string) error {
 	z.newlyCreated[p] = struct{}{}
 
 	return nil
+}
+
+// Context returns a background context
+func (z *zfsMock) Context() context.Context {
+	return context.Background()
 }
 
 // Clone behaves like zfs.Clone, but is a in memory version with mock zfs datasets

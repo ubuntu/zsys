@@ -20,17 +20,20 @@ type ZfsSetPropertyScanCreater interface {
 	Create(path, mountpoint, canmount string) error
 	zfsScanner
 	zfsPropertySetter
+	Context() context.Context
 }
 
 // zfsSetPropertyScanner can only SetProperty and Scan
 type zfsSetPropertyScanner interface {
 	zfsScanner
 	zfsPropertySetter
+	Context() context.Context
 }
 
 // CreateUserData creates a new dataset for homepath and attach to current system.
 // It creates intermediates user datasets if needed.
-func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string, z ZfsSetPropertyScanCreater) error {
+func (ms *Machines) CreateUserData(z ZfsSetPropertyScanCreater, user, homepath string) error {
+	ctx := z.Context()
 	if !ms.current.isZsys() {
 		return errors.New(i18n.G("Current machine isn't Zsys, nothing to create"))
 	}
@@ -119,7 +122,8 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string, z
 }
 
 // ChangeHomeOnUserData tries to find an existing dataset matching home as a valid mountpoint and rename it to newhome
-func (ms *Machines) ChangeHomeOnUserData(ctx context.Context, home, newHome string, z ZfsSetPropertyScanCreater) error {
+func (ms *Machines) ChangeHomeOnUserData(z ZfsSetPropertyScanCreater, home, newHome string) error {
+	ctx := z.Context()
 	if !ms.current.isZsys() {
 		return errors.New(i18n.G("Current machine isn't Zsys, nothing to modify"))
 	}

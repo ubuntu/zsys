@@ -15,12 +15,12 @@ func syncBootPrepare() (err error) {
 	z := zfs.NewWithAutoCancel(context.Background())
 	defer z.DoneCheckErr(&err)
 
-	ms, err := getMachines(context.Background(), z)
+	ms, err := getMachines(z)
 	if err != nil {
 		return err
 	}
 
-	changed, err := ms.EnsureBoot(context.Background(), z)
+	changed, err := ms.EnsureBoot(z)
 	if err != nil {
 		return fmt.Errorf(i18n.G("couldn't ensure boot: ")+config.ErrorFormat, err)
 	}
@@ -35,7 +35,7 @@ func syncBootPrepare() (err error) {
 }
 
 // getMachines returns all scanned machines on the current system
-func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
+func getMachines(z *zfs.Zfs) (*machines.Machines, error) {
 	ds, err := z.Scan()
 	if err != nil {
 		return nil, err
@@ -44,7 +44,7 @@ func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
 	if err != nil {
 		return nil, err
 	}
-	ms := machines.New(ctx, ds, cmdline)
+	ms := machines.New(z.Context(), ds, cmdline)
 
 	return &ms, nil
 }

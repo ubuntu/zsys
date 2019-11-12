@@ -17,6 +17,7 @@ import (
 type ZfsPropertyCloneScanner interface {
 	zfsScanner
 	zfsPropertyCloneSetter
+	Context() context.Context
 }
 
 // ZfsPropertyPromoteScanner interface can promote, set dataset property and scan
@@ -24,6 +25,7 @@ type ZfsPropertyPromoteScanner interface {
 	zfsScanner
 	zfsPropertySetter
 	zfsPromoter
+	Context() context.Context
 }
 
 // zfsPropertyCloneSetter can SetProperty and Clone
@@ -58,7 +60,8 @@ type zfsPromoter interface {
 // in .Commit()
 // Return if any dataset / machine changed has been done during boot and an error if any encountered.
 // TODO: propagate error to user graphically
-func (machines *Machines) EnsureBoot(ctx context.Context, z ZfsPropertyCloneScanner) (bool, error) {
+func (machines *Machines) EnsureBoot(z ZfsPropertyCloneScanner) (bool, error) {
+	ctx := z.Context()
 	if !machines.current.isZsys() {
 		log.Info(ctx, i18n.G("Current machine isn't Zsys, nothing to do on boot"))
 		return false, nil
@@ -132,7 +135,8 @@ func (machines *Machines) EnsureBoot(ctx context.Context, z ZfsPropertyCloneScan
 // associate user datasets to it and rebuilding grub menu.
 // After this operation, every New() call will get the current and correct system state.
 // Return if any dataset / machine changed has been done during boot commit and an error if any encountered.
-func (machines *Machines) Commit(ctx context.Context, z ZfsPropertyPromoteScanner) (bool, error) {
+func (machines *Machines) Commit(z ZfsPropertyPromoteScanner) (bool, error) {
+	ctx := z.Context()
 	if !machines.current.isZsys() {
 		log.Info(ctx, i18n.G("Current machine isn't Zsys, nothing to commit on boot"))
 		return false, nil

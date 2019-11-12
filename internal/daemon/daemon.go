@@ -70,7 +70,7 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 
 	z := zfs.New(context.Background())
 	defer z.Done()
-	ms, err := getMachines(context.Background(), z)
+	ms, err := getMachines(z)
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("couldn't scan machines: %v"), err)
 	}
@@ -158,7 +158,7 @@ func (s *Server) TrackRequest() func() {
 }
 
 // getMachines returns all scanned machines on the current system
-func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
+func getMachines(z *zfs.Zfs) (*machines.Machines, error) {
 	ds, err := z.Scan()
 	if err != nil {
 		return nil, err
@@ -167,7 +167,7 @@ func getMachines(ctx context.Context, z *zfs.Zfs) (*machines.Machines, error) {
 	if err != nil {
 		return nil, err
 	}
-	ms := machines.New(ctx, ds, cmdline)
+	ms := machines.New(z.Context(), ds, cmdline)
 
 	return &ms, nil
 }

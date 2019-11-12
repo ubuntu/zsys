@@ -217,7 +217,7 @@ func TestBoot(t *testing.T) {
 			initMachines := machines.New(context.Background(), datasets, tc.cmdline)
 			ms := initMachines
 
-			hasChanged, err := ms.EnsureBoot(context.Background(), z)
+			hasChanged, err := ms.EnsureBoot(z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -261,7 +261,7 @@ func TestIdempotentBoot(t *testing.T) {
 	}
 	ms1 := machines.New(context.Background(), datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"))
 
-	changed, err := ms1.EnsureBoot(context.Background(), z)
+	changed, err := ms1.EnsureBoot(z)
 	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
@@ -270,7 +270,7 @@ func TestIdempotentBoot(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.EnsureBoot(context.Background(), z)
+	changed, err = ms2.EnsureBoot(z)
 	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
@@ -295,14 +295,14 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	}
 	ms1 := machines.New(context.Background(), datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	changed, err := ms1.EnsureBoot(context.Background(), z)
+	changed, err := ms1.EnsureBoot(z)
 	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
 	if !changed {
 		t.Fatal("expected first boot to signal a changed, but got false")
 	}
-	changed, err = ms1.Commit(context.Background(), z)
+	changed, err = ms1.Commit(z)
 	if err != nil {
 		t.Fatal("Commit failed:", err)
 	}
@@ -311,7 +311,7 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.EnsureBoot(context.Background(), z)
+	changed, err = ms2.EnsureBoot(z)
 	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
@@ -332,7 +332,7 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	}
 	ms1 := machines.New(context.Background(), datasets, generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"))
 
-	changed, err := ms1.EnsureBoot(context.Background(), z)
+	changed, err := ms1.EnsureBoot(z)
 	if err != nil {
 		t.Fatal("First EnsureBoot failed:", err)
 	}
@@ -341,7 +341,7 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.EnsureBoot(context.Background(), z)
+	changed, err = ms2.EnsureBoot(z)
 	if err != nil {
 		t.Fatal("Second EnsureBoot failed:", err)
 	}
@@ -417,7 +417,7 @@ func TestCommit(t *testing.T) {
 			initMachines := machines.New(context.Background(), datasets, tc.cmdline)
 			ms := initMachines
 
-			hasChanged, err := ms.Commit(context.Background(), z)
+			hasChanged, err := ms.Commit(z)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -458,7 +458,7 @@ func TestIdempotentCommit(t *testing.T) {
 	}
 	ms1 := machines.New(context.Background(), datasets, generateCmdLine("rpool/ROOT/ubuntu_9876"))
 
-	changed, err := ms1.Commit(context.Background(), z)
+	changed, err := ms1.Commit(z)
 	if err != nil {
 		t.Fatal("first commit failed:", err)
 	}
@@ -467,7 +467,7 @@ func TestIdempotentCommit(t *testing.T) {
 	}
 	ms2 := ms1
 
-	changed, err = ms2.Commit(context.Background(), z)
+	changed, err = ms2.Commit(z)
 	if err != nil {
 		t.Fatal("second commit failed:", err)
 	}
@@ -534,7 +534,7 @@ func TestCreateUserData(t *testing.T) {
 			initMachines := machines.New(context.Background(), ds, tc.cmdline)
 			ms := initMachines
 
-			err := ms.CreateUserData(context.Background(), getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"), z)
+			err := ms.CreateUserData(z, getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"))
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -601,7 +601,7 @@ func TestChangeHomeOnUserData(t *testing.T) {
 			initMachines := machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_1234"))
 			ms := initMachines
 
-			err := ms.ChangeHomeOnUserData(context.Background(), getDefaultValue(tc.home, "/home/user1"), getDefaultValue(tc.newHome, "/home/foo"), z)
+			err := ms.ChangeHomeOnUserData(z, getDefaultValue(tc.home, "/home/user1"), getDefaultValue(tc.newHome, "/home/foo"))
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
