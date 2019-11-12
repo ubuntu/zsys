@@ -24,14 +24,26 @@ jobs:
       run: echo "${GITHUB_TOKEN}" | docker login -u zsys-gha --password-stdin "${DOCKER_REGISTRY}"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    - name: test
-      run: exit 1
     - name: Build images
       run: |
-        docker build . --file .github.com/zsys-build.dockerfile
-    - name: docker push
+        docker build \
+        -t "zsys/build-${DISTRO_VERSION}-${GOLANG_VERSION} \
+        - <<-EOF
+        FROM ubuntu:${DISTRO_VERSION}
+# We install the certificats for GPROXY and protobuf/gettext for generator.
+RUN apt update &&                     \
+    apt install -y                    \
+        ca-certificates               \
+        protobuf-compiler gettext     \
+        gcc libzfslinux-dev           \
+        ${GOLANG_VERSION}
+        EOF
+      env:
+        GOLANG_VERSION: golang-go
+        DISTRO_VERSION: rolling
+    - name: Publish images
       run: |
         docker push "${DOCKER_REGISTRY}/ubuntu/zsys/build-container-foo"
-    - name: docker logout
+    - name: Logout from github docker registry
       run: docker logout "${DOCKER_REGISTRY}"
       if: always()
