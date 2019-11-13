@@ -1,0 +1,56 @@
+name: Update build container images
+on:
+  push:
+    paths:
+      - '.github/workflows/update-build-containers.yml'
+  schedule:
+    - cron: '0 0 * * 5'
+
+env:
+  DOCKER_BUILDKIT: '1'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        buildenv: [
+          { distro: devel, go: golang-go },
+          { distro: rolling, go: golang-go },
+          { distro: rolling, go: golang-1.13-go },
+      ]
+    env:
+      DOCKER_REGISTRY: docker.pkg.github.com
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        fetch-depth: 1
+    - name: Login to github docker registry
+      run: echo "${GITHUB_TOKEN}" | docker login -u zsys-gha --password-stdin "${DOCKER_REGISTRY}"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build images
+      run: |
+        export CONTAINER="${DOCKER_REGISTRY}/ubuntu/zsys/build-${DISTRO_VERSION}-${GO_VERSION}"
+        echo "::set-env name=CONTAINER::${CONTAINER}"
+        docker build \
+        -t "${CONTAINER}" \
+        - <<-EOF
+        FROM ubuntu:${DISTRO_VERSION}
+        # We install the certificates for GOPROXY and protobuf/gettext for generator.
+        RUN apt update &&                 \
+            apt install -y                \
+            ca-certificates               \
+            protobuf-compiler gettext     \
+            gcc libzfslinux-dev           \
+            ${GOLANG_VERSION}
+        EOF
+      env:
+        DISTRO_VERSION: ${{ matrix.buildenv.distro }}
+        GO_VERSION: ${{ matrix.buildenv.go }}
+    - name: Publish images
+      run: |
+        docker push "${CONTAINER}"
+    - name: Logout from github docker registry
+      run: docker logout "${DOCKER_REGISTRY}"
+      if: always()
