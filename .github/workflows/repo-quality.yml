@@ -10,6 +10,7 @@ on:
   pull_request:
     paths-ignore:
       - '.github/workflows/update-build-containers.yaml'
+      - '.github/workflows/pr-commands.yaml'
       - 'po/*'
 jobs:
 
