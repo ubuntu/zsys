@@ -4,9 +4,10 @@ on:
     paths:
       - '.github/workflows/update-build-containers.yml'
   schedule:
-    - cron: '0 0 * * 5'
+    - cron: '8 0 * * *'
 
 env:
+  DOCKER_REGISTRY: docker.pkg.github.com
   DOCKER_BUILDKIT: '1'
 
 jobs:
@@ -19,8 +20,6 @@ jobs:
           { distro: rolling, go: golang-go },
           { distro: rolling, go: golang-1.13-go },
       ]
-    env:
-      DOCKER_REGISTRY: docker.pkg.github.com
     steps:
     - uses: actions/checkout@v1
       with:
