@@ -14,32 +14,39 @@ on:
 
 env:
   DOCKER_BUILDKIT: '1'
+  DOCKER_REGISTRY: 'docker.pkg.github.com'
+  TARGET_CONTAINER: 'docker.pkg.github.com/ubuntu/zsys/build-devel-golang-go'
 
 jobs:
 
   quality:
     name: Code quality and mod files up to date
     runs-on: ubuntu-latest
-    container:
-      image: docker.pkg.github.com/ubuntu/zsys:build-devel-golang-go
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      # This is to workaround the lack of possible use of "container:" usage (pulling from public GPR)
+      - name: Login to github docker registry
+        run: echo "${GITHUB_TOKEN}" | docker login -u zsys-gha --password-stdin "${DOCKER_REGISTRY}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run image
+        run: docker run -it -d -u root --name runenv -v ${GITHUB_WORKSPACE}:/workspace -w /workspace "${TARGET_CONTAINER}"
       # Checkout code
       - uses: actions/checkout@v1
         with:
           fetch-depth: 1
-      # Install go
-      - uses: actions/setup-go@v1
-        with:
-          go-version: '1.13.x'
-      - name: Code formatting
+      - name: test
         run: |
-          FMT=`go fmt ./...`
-          echo "$FMT"
-          [ -z "$FMT" ]
+          docker exec -u root runenv bash -c 'ls /'
+          docker exec -u root runenv bash -c 'which go'
+          docker exec -u root runenv bash -c 'ls -l /usr/bin/go'
+          docker exec -u root runenv bash -c 'dpkg -L golang-go'
+      #- name: Code formatting
+      #  run: docker exec runenv bash -c 'FMT=$(go fmt ./...) && echo "$FMT" && [ -z "$FMT" ]'
       - name: Check mod files
-        run: ./ci/check-modules
+        run: docker exec runenv bash -c ci/check-modules
+      - name: Logout from github docker registry
+        run: docker logout "${DOCKER_REGISTRY}"
+        if: always()
 
   build:
     name: Build
