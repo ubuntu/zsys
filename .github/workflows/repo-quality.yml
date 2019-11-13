@@ -12,11 +12,18 @@ on:
       - '.github/workflows/update-build-containers.yaml'
       - 'po/*'
 
+env:
+  DOCKER_BUILDKIT: '1'
+
 jobs:
 
   quality:
     name: Code quality and mod files up to date
     runs-on: ubuntu-latest
+    container:
+      image: docker.pkg.github.com/ubuntu/zsys:build-devel-golang-go
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       # Checkout code
       - uses: actions/checkout@v1
@@ -37,7 +44,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: ubuntu:rolling
+    container: docker.pkg.github.com/ubuntu/zsys:build-devel-golang-go
     steps:
       # Checkout code
       - uses: actions/checkout@v1
@@ -58,7 +65,7 @@ jobs:
   generators:
     name: Generated files are up to date
     runs-on: ubuntu-latest
-    container: ubuntu:rolling
+    container: docker.pkg.github.com/ubuntu/zsys:build-devel-golang-go
     steps:
       # Checkout code
       - uses: actions/checkout@v1
@@ -79,7 +86,7 @@ jobs:
   extended-quality:
     name: Extended quality checks
     runs-on: ubuntu-latest
-    container: ubuntu:rolling
+    container: docker.pkg.github.com/ubuntu/zsys:build-devel-golang-go
     steps:
       # Checkout code
       - uses: actions/checkout@v1
