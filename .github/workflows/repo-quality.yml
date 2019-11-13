@@ -8,6 +8,9 @@ on:
     branches:
     - master
   pull_request:
+    paths-ignore:
+      - '.github/workflows/update-build-containers.yaml'
+      - 'po/*'
 
 jobs:
 
