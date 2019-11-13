@@ -36,12 +36,12 @@ jobs:
         export GO_VERSION=$(echo ${BUILD_ENV} | cut -f2 -d/)
         # echo "::set-env name=CONTAINER::build-${DISTRO_VERSION}-${GO_VERSION}"
         docker build \
-        -t "zsys/build-${DISTRO_VERSION}-${GO_VERSION} \
+        -t "zsys/build-${DISTRO_VERSION}-${GO_VERSION}" \
         - <<-EOF
         FROM ubuntu:${DISTRO_VERSION}
         # We install the certificats for GPROXY and protobuf/gettext for generator.
-        RUN apt update &&                     \
-            apt install -y                    \
+        RUN apt update &&                 \
+            apt install -y                \
             ca-certificates               \
             protobuf-compiler gettext     \
             gcc libzfslinux-dev           \

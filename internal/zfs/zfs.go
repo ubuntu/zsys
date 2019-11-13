@@ -133,6 +133,7 @@ func NewWithCancel(ctx context.Context, options ...func(*Zfs)) (*Zfs, context.Ca
 // If the given error it points at is not nil, it will cancel the transaction.
 // A call to Done() is equivalent to DoneCheckErr(nil).
 // First Done() or DoneCheckErr is relevant and the following calls are no-op.
+// FIXME: we should prevent it being called when there is an autocancel error
 func NewWithAutoCancel(ctx context.Context, options ...func(*Zfs)) *Zfs {
 	ctx, cancel := context.WithCancel(ctx)
 	z := New(ctx, func(z *Zfs) {

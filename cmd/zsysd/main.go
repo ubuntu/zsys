@@ -12,6 +12,9 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 )
 
+// TODO: github action
+// TODO: perm system with polkit
+// TODO: update README (trad, generateur, installation) and deps (libzfs, gettext…)
 //go:generate go run ./generate-mancomp.go cobracompletion.go completion.go completion ../../generated
 //go:generate go run ./generate-mancomp.go cobracompletion.go completion.go man ../../generated
 //go:generate go run ./generate-mancomp.go cobracompletion.go completion.go update-readme
