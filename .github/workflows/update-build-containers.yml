@@ -14,6 +14,12 @@ jobs:
   # https://github.com/1138-4EB/vunit/blob/master/.github/workflows/images.yml
   build:
     runs-on: ubuntu-latest
+    #strategy:
+    #  matrix:
+    #    buildenv: [
+    #            { distro: rolling, go: golang-go },
+    #  "rolling/golang-go", "rolling/golang-1.13-go", "devel/golang-go"
+    #  ]
     env:
       DOCKER_REGISTRY: docker.pkg.github.com
     steps:
@@ -27,9 +33,24 @@ jobs:
     - name: Build images
       run: |
         export DISTRO_VERSION=$(echo ${BUILD_ENV} | cut -f1 -d/)
-        export GOLANG_VERSION=$(echo ${BUILD_ENV} | cut -f2 -d/)
+        export GO_VERSION=$(echo ${BUILD_ENV} | cut -f2 -d/)
+        # echo "::set-env name=CONTAINER::build-${DISTRO_VERSION}-${GO_VERSION}"
+        docker build \
+        -t "zsys/build-${DISTRO_VERSION}-${GO_VERSION} \
+        - <<-EOF
+        FROM ubuntu:${DISTRO_VERSION}
+        # We install the certificats for GPROXY and protobuf/gettext for generator.
+        RUN apt update &&                     \
+            apt install -y                    \
+            ca-certificates               \
+            protobuf-compiler gettext     \
+            gcc libzfslinux-dev           \
+            ${GOLANG_VERSION}
+        EOF
       env:
         BUILD_ENV: rolling/golang-go
+        # DISTRO_VERSION: ${{ matrix.buildenv.distro }}
+        # GO_VERSION: ${{ matrix.buildenv.go }}
     - name: Publish images
       run: |
         docker push "${DOCKER_REGISTRY}/ubuntu/zsys/build-container-foo"
