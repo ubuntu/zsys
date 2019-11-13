@@ -32,7 +32,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Build images
       run: |
-        echo "::set-env name=CONTAINER::build-${DISTRO_VERSION}-${GO_VERSION}"
+        export CONTAINER="build-${DISTRO_VERSION}-${GO_VERSION}"
+        echo "::set-env name=CONTAINER::{$CONTAINER}"
         docker build \
         -t "zsys/${CONTAINER}" \
         - <<-EOF
