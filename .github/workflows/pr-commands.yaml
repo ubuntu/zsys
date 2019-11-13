@@ -6,11 +6,17 @@ name: PR commands
 jobs:
   rebase:
     name: Rebase
-    if: contains(github.event.comment.body, '/rebase')
+    # https://github.community/t5/GitHub-Actions/Workflow-is-failing-if-no-job-can-be-ran-due-to-condition/m-p/38085#M3215
+    #if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/rebase')
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
+      # We have to duplicate the action here rather than the job because the workflow would fail as having no running job
+      # https://github.community/t5/GitHub-Actions/Workflow-is-failing-if-no-job-can-be-ran-due-to-condition/m-p/38085#M3215
+      if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/rebase')
     - name: Automatic Rebase
+      # We have to duplicate the action here rather than the job because the workflow would fail as having no running job
+      if: github.event.issue.pull_request != '' && contains(github.event.comment.body, '/rebase')
       uses: cirrus-actions/rebase@1.2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
