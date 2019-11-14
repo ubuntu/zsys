@@ -18,7 +18,7 @@ var (
 
 	bootCmd = &cobra.Command{
 		Use:    "boot COMMAND",
-		Short:  i18n.G("Ensure that the right datasets are ready to be mounted and committed during early boot"),
+		Short:  i18n.G("Enssure that the right datasets are ready to be mounted and committed during early boot"),
 		Hidden: true,
 		Args:   cmdhandler.SubcommandsRequiredWithSuggestions,
 		Run:    cmdhandler.NoCmd,
