@@ -17,20 +17,41 @@ jobs:
         with:
           go-version: '1.13.x'
       - name: Install required dependencies
-        run: apt install -y gettext
+        run: sudo apt install -y gettext
       # Update po if needed
-      - name: Check and update po files
+      - name: Checkpo files
+        id: checkpo
         run: |
-          echo "::set-env name=pomodified::false"
+          hasModif="false"
           go generate ./internal/i18n/
           # Exclude line diffs only
-          #MODIFIED=$(git difftool -y -x "diff -Nup -I '^#: '" po/)
+          MODIFIED=$(git difftool -y -x "diff -Nup -I '^#: '" po/)
           if [ -n "$MODIFIED" ]; then
-              echo "::set-env name=pomodified::true"
+            hasModif="true"
           fi
-      - name: test
-        if: steps.test.env.pomodified == "true"
-        run: echo "PO modified"
-      - name: test2
-        if: steps.test2.env.pomodified == "true"
-        run: echo "PO NOT modified"
+          echo "::set-output name=pomodified::${hasModif}"
+      - name: Delete previous branch if present
+        if: steps.checkpo.outputs.pomodified == 'true'
+        run: |
+          git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY
+          git push -d origin auto-update-po || true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Pull Request
+        if: steps.checkpo.outputs.pomodified == 'true'
+        uses: peter-evans/create-pull-request@v1
+        with:
+          commit-message: Auto update po files
+          title: Auto update po files
+          labels: po, automated pr
+          body: "[Auto-generated pull request](https://github.com/ubuntu/zsys/actions?query=workflow%3A%22Update+master+branch+automatically%22) by GitHub Action"
+          branch: auto-update-po
+          branch-suffix: none
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push and delete branch
+        if: steps.checkpo.outputs.pomodified == 'true'
+        run: |
+          git push origin auto-update-po:test
+          git push -d origin auto-update-po
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
