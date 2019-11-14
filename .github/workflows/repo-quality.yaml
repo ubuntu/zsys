@@ -98,6 +98,47 @@ jobs:
         run: go vet ./...
       # TODO: add statichecks and others?
 
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout code
+      - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
+      # Reset env so that apt install golang-go then reads GOROOT with uncompatible local version installed by github
+      - name: Reset environment without GOROOT
+        run: sudo sed -i "/GOROOT/d" /etc/environment
+      # Add dependencies
+      - name: Upgrade to eoan for matching libzfs
+        run: |
+          sudo apt update
+          sudo apt install -y eatmydata
+          sudo sed -i s/bionic/eoan/g /etc/apt/sources.list
+          sudo eatmydata apt update
+          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
+      - name: Install dependencies
+        run: |
+          #apt update
+          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt install -y ca-certificates gcc libzfslinux-dev gettext golang-go
+          sudo sync
+          sudo modprobe zfs
+      - name: Run tests
+        run: |
+          sudo go test -coverprofile=coverage.txt -covermode=atomic ./...
+      - name: Run tests (with race detector)
+        run: |
+          sudo go test -race ./...
+      - name: Run benchkmarks
+        run: |
+          sudo go test -bench -run=Benchmark ./...
+      - name: Upload coverage
+        uses: codecov/codecov-action@v1.0.3
+        with:
+          file: ./coverage.txt
+          token: ${{secrets.CODECOV_TOKEN}}
+
+
   # TODO: create a container on a schedule, with the following matrix:
   #  - ubuntu (rolling) | ubuntu (devel)
   #  - go X | go master
