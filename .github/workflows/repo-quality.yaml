@@ -32,7 +32,7 @@ jobs:
           echo "$FMT"
           [ -z "$FMT" ]
       - name: Check mod files
-        run: ./ci/check-modules
+        run: ./.github/ci/check-modules
 
   build:
     name: Build
@@ -73,8 +73,8 @@ jobs:
       - uses: actions/setup-go@v1
         with:
           go-version: '1.13.x'
-      - name: Generate and check
-        run: ci/check-generate
+      - name: Check generated files
+        run: ./.github/ci/check-generate
 
   extended-quality:
     name: Extended quality checks
