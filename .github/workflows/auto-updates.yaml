@@ -1,7 +1,8 @@
 name: Update master branch automatically
 on:
   push:
-    branch: master
+    branches:
+      - master
 
 jobs:
   update-po:
