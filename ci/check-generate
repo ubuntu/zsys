@@ -4,7 +4,7 @@ set -eu
 
 # Ignore mod file changes and po files
 # Modules are handled in another check and aren't related to generator
-# po files are handled below, but separately, to exclude some diff.
+# po files will be automatically updated once master in master.
 git update-index --assume-unchanged go.* po/*
 on_exit() {
     # Restore files
@@ -12,27 +12,12 @@ on_exit() {
 }
 trap on_exit EXIT INT QUIT ABRT PIPE TERM
 
-HAVE_MODIF_MSG=""
 go generate ./...
 
 # Handle everything but po files
 MODIFIED=`git status --porcelain --untracked-files=no`
 if [ -n "$MODIFIED" ]; then
-    HAVE_MODIF_MSG="ERROR: 'go generate' modified files:\n"
-    HAVE_MODIF_MSG="${HAVE_MODIF_MSG}"`git --no-pager diff`"\n"
-fi
-
-# Handle po files now, excluding line diffs
-git update-index --no-assume-unchanged po/*
-MODIFIED=`git difftool -y -x "diff -Nup -I '^#: '" po/`
-if [ -n "$MODIFIED" ]; then
-    if [ -z "$HAVE_MODIF_MSG" ]; then
-        HAVE_MODIF_MSG="ERROR: 'go generate' modified files:\n"
-    fi
-    HAVE_MODIF_MSG="${HAVE_MODIF_MSG}${MODIFIED}"
-fi
-
-if [ -n "$HAVE_MODIF_MSG" ]; then
-    echo -e "$HAVE_MODIF_MSG"
+    echo "ERROR: 'go generate' modified files:"
+    git --no-pager diff
     exit 1
 fi
