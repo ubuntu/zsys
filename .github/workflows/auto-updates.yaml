@@ -79,7 +79,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt update
-          apt install -y ca-certificates gcc libzfslinux-dev
+          apt install -y ca-certificates gcc libzfslinux-dev git
       # Try updating README
       - name: Check README file
         id: checkreadme
