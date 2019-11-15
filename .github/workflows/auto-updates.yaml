@@ -33,16 +33,16 @@ jobs:
           if [ -n "$MODIFIED" ]; then
             hasModif="true"
           fi
-          echo "::set-output name=pomodified::${hasModif}"
+          echo "::set-output name=modified::${hasModif}"
       - name: Delete previous branch if present
-        if: steps.checkpo.outputs.pomodified == 'true'
+        if: steps.checkpo.outputs.modified == 'true'
         run: |
           git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY
           git push -d origin auto-update-po || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Pull Request
-        if: steps.checkpo.outputs.pomodified == 'true'
+        if: steps.checkpo.outputs.modified == 'true'
         uses: peter-evans/create-pull-request@v1
         with:
           commit-message: Auto update po files
@@ -53,7 +53,7 @@ jobs:
           branch-suffix: none
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Push and delete branch
-        if: steps.checkpo.outputs.pomodified == 'true'
+        if: steps.checkpo.outputs.modified == 'true'
         run: |
           git push origin auto-update-po:master
           git push -d origin auto-update-po
@@ -65,6 +65,7 @@ jobs:
     # This should just be "after", but we don't want the 2 jobs to push at the same time
     needs: update-po
     runs-on: ubuntu-latest
+    container: ubuntu:rolling
     steps:
       # Checkout code
       - uses: actions/checkout@v1
@@ -77,8 +78,8 @@ jobs:
       # Add dependencies
       - name: Install dependencies
         run: |
-          sudo apt update
-          sudo apt install -y ca-certificates gcc libzfslinux-dev
+          apt update
+          apt install -y ca-certificates gcc libzfslinux-dev
       # Try updating README
       - name: Check README file
         id: checkreadme
@@ -90,16 +91,16 @@ jobs:
           if [ -n "$MODIFIED" ]; then
             hasModif="true"
           fi
-          echo "::set-output name=readmemodified::${hasModif}"
+          echo "::set-output name=modified::${hasModif}"
       - name: Delete previous branch if present
-        if: steps.checkreadme.outputs.readmemodified == 'true'
+        if: steps.checkreadme.outputs.modified == 'true'
         run: |
           git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY
           git push -d origin auto-update-readme || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Pull Request
-        if: steps.checkreadme.outputs.readmemodified == 'true'
+        if: steps.checkreadme.outputs.modified == 'true'
         uses: peter-evans/create-pull-request@v1
         with:
           commit-message: Auto update readme files
@@ -110,7 +111,7 @@ jobs:
           branch-suffix: none
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Push and delete branch
-        if: steps.checkreadme.outputs.readmemodified == 'true'
+        if: steps.checkreadme.outputs.modified == 'true'
         run: |
           git push origin auto-update-readme:master
           git push -d origin auto-update-readme
