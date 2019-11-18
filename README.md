@@ -201,11 +201,11 @@ zsysctl boot prepare [flags]
 
 #### zsysctl userdata
 
-User datasets creation and renaming
+User datasets creation and rename
 
 ##### Synopsis
 
-User datasets creation and renaming
+User datasets creation and rename
 
 ```
 zsysctl userdata COMMAND [flags]
