@@ -15,7 +15,7 @@ import (
 var (
 	userdataCmd = &cobra.Command{
 		Use:    "userdata COMMAND",
-		Short:  i18n.G("User datasets creation and renaming"),
+		Short:  i18n.G("User datasets creation and rename"),
 		Hidden: true,
 		Args:   cmdhandler.SubcommandsRequiredWithSuggestions,
 		Run:    cmdhandler.NoCmd,
