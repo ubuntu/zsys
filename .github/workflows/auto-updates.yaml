@@ -14,8 +14,6 @@ jobs:
     steps:
       # Checkout code
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       # Install go
       - uses: actions/setup-go@v1
         with:
@@ -65,12 +63,9 @@ jobs:
     # This should just be "after", but we don't want the 2 jobs to push at the same time
     needs: update-po
     runs-on: ubuntu-latest
-    container: ubuntu:rolling
     steps:
       # Checkout code
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       # Install go
       - uses: actions/setup-go@v1
         with:
@@ -78,8 +73,9 @@ jobs:
       # Add dependencies
       - name: Install dependencies
         run: |
-          apt update
-          apt install -y ca-certificates gcc libzfslinux-dev git
+          sudo sed -i s/bionic/eoan/g /etc/apt/sources.list
+          sudo apt update
+          sudo DEBIAN_FRONTEND=noninteractive apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install libzfslinux-dev
       # Try updating README
       - name: Check README file
         id: checkreadme
