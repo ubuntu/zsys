@@ -234,6 +234,14 @@ msgstr ""
 msgid "Reset user dataset path from %q to %q"
 msgstr ""
 
+#: internal/daemon/version.go:12
+msgid "Retrieving version of daemon"
+msgstr ""
+
+#: cmd/zsysd/client/version.go:18
+msgid "Returns version of client and server"
+msgstr ""
+
 #: internal/machines/userdata.go:191
 msgid "Reusing %q as matching user name or old mountpoint"
 msgstr ""
@@ -417,6 +425,7 @@ msgstr ""
 
 #: internal/streamlogger/streamlogger.go.template:88 zsys.streamlogger.go:82
 #: zsys.streamlogger.go:112 zsys.streamlogger.go:142 zsys.streamlogger.go:172
+#: zsys.streamlogger.go:202
 msgid "couldn't attach a logger to request: %w"
 msgstr ""
 
@@ -667,4 +676,14 @@ msgstr ""
 
 #: internal/zfs/helpers.go:296
 msgid "unsupported property %q"
+msgstr ""
+
+#: cmd/zsysd/client/version.go:30
+#, c-format
+msgid "zsysctl\t%s"
+msgstr ""
+
+#: cmd/zsysd/client/version.go:57
+#, c-format
+msgid "zsysd\t%s"
 msgstr ""
