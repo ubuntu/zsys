@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eux
+
+if [ "$*" != "boot prepare" ]; then
+    echo "Please use zsysctl command. This is only a script for backward compatibility and will be removed from 20.04"
+    exit 1
+fi
+
+exec /sbin/zsysd boot-prepare
