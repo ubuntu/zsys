@@ -94,6 +94,86 @@ func (m *LogResponse) GetLog() string {
 	return ""
 }
 
+type VersionResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*VersionResponse_Log
+	//	*VersionResponse_Version
+	Reply                isVersionResponse_Reply `protobuf_oneof:"reply"`
+	XXX_NoUnkeyedLiteral struct{}                `json:"-"`
+	XXX_unrecognized     []byte                  `json:"-"`
+	XXX_sizecache        int32                   `json:"-"`
+}
+
+func (m *VersionResponse) Reset()         { *m = VersionResponse{} }
+func (m *VersionResponse) String() string { return proto.CompactTextString(m) }
+func (*VersionResponse) ProtoMessage()    {}
+func (*VersionResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{2}
+}
+
+func (m *VersionResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_VersionResponse.Unmarshal(m, b)
+}
+func (m *VersionResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_VersionResponse.Marshal(b, m, deterministic)
+}
+func (m *VersionResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VersionResponse.Merge(m, src)
+}
+func (m *VersionResponse) XXX_Size() int {
+	return xxx_messageInfo_VersionResponse.Size(m)
+}
+func (m *VersionResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_VersionResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VersionResponse proto.InternalMessageInfo
+
+type isVersionResponse_Reply interface {
+	isVersionResponse_Reply()
+}
+
+type VersionResponse_Log struct {
+	Log string `protobuf:"bytes,1,opt,name=log,proto3,oneof"`
+}
+
+type VersionResponse_Version struct {
+	Version string `protobuf:"bytes,2,opt,name=version,proto3,oneof"`
+}
+
+func (*VersionResponse_Log) isVersionResponse_Reply() {}
+
+func (*VersionResponse_Version) isVersionResponse_Reply() {}
+
+func (m *VersionResponse) GetReply() isVersionResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *VersionResponse) GetLog() string {
+	if x, ok := m.GetReply().(*VersionResponse_Log); ok {
+		return x.Log
+	}
+	return ""
+}
+
+func (m *VersionResponse) GetVersion() string {
+	if x, ok := m.GetReply().(*VersionResponse_Version); ok {
+		return x.Version
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*VersionResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*VersionResponse_Log)(nil),
+		(*VersionResponse_Version)(nil),
+	}
+}
+
 type CreateUserDataRequest struct {
 	User                 string   `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	Homepath             string   `protobuf:"bytes,2,opt,name=homepath,proto3" json:"homepath,omitempty"`
@@ -106,7 +186,7 @@ func (m *CreateUserDataRequest) Reset()         { *m = CreateUserDataRequest{} }
 func (m *CreateUserDataRequest) String() string { return proto.CompactTextString(m) }
 func (*CreateUserDataRequest) ProtoMessage()    {}
 func (*CreateUserDataRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_05865bfaed6eea5d, []int{2}
+	return fileDescriptor_05865bfaed6eea5d, []int{3}
 }
 
 func (m *CreateUserDataRequest) XXX_Unmarshal(b []byte) error {
@@ -153,7 +233,7 @@ func (m *ChangeHomeOnUserDataRequest) Reset()         { *m = ChangeHomeOnUserDat
 func (m *ChangeHomeOnUserDataRequest) String() string { return proto.CompactTextString(m) }
 func (*ChangeHomeOnUserDataRequest) ProtoMessage()    {}
 func (*ChangeHomeOnUserDataRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_05865bfaed6eea5d, []int{3}
+	return fileDescriptor_05865bfaed6eea5d, []int{4}
 }
 
 func (m *ChangeHomeOnUserDataRequest) XXX_Unmarshal(b []byte) error {
@@ -202,7 +282,7 @@ func (m *PrepareBootResponse) Reset()         { *m = PrepareBootResponse{} }
 func (m *PrepareBootResponse) String() string { return proto.CompactTextString(m) }
 func (*PrepareBootResponse) ProtoMessage()    {}
 func (*PrepareBootResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_05865bfaed6eea5d, []int{4}
+	return fileDescriptor_05865bfaed6eea5d, []int{5}
 }
 
 func (m *PrepareBootResponse) XXX_Unmarshal(b []byte) error {
@@ -282,7 +362,7 @@ func (m *CommitBootResponse) Reset()         { *m = CommitBootResponse{} }
 func (m *CommitBootResponse) String() string { return proto.CompactTextString(m) }
 func (*CommitBootResponse) ProtoMessage()    {}
 func (*CommitBootResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_05865bfaed6eea5d, []int{5}
+	return fileDescriptor_05865bfaed6eea5d, []int{6}
 }
 
 func (m *CommitBootResponse) XXX_Unmarshal(b []byte) error {
@@ -351,6 +431,7 @@ func (*CommitBootResponse) XXX_OneofWrappers() []interface{} {
 func init() {
 	proto.RegisterType((*Empty)(nil), "zsys.Empty")
 	proto.RegisterType((*LogResponse)(nil), "zsys.LogResponse")
+	proto.RegisterType((*VersionResponse)(nil), "zsys.VersionResponse")
 	proto.RegisterType((*CreateUserDataRequest)(nil), "zsys.CreateUserDataRequest")
 	proto.RegisterType((*ChangeHomeOnUserDataRequest)(nil), "zsys.ChangeHomeOnUserDataRequest")
 	proto.RegisterType((*PrepareBootResponse)(nil), "zsys.PrepareBootResponse")
@@ -360,27 +441,29 @@ func init() {
 func init() { proto.RegisterFile("zsys.proto", fileDescriptor_05865bfaed6eea5d) }
 
 var fileDescriptor_05865bfaed6eea5d = []byte{
-	// 311 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x92, 0x41, 0x4f, 0xbb, 0x40,
-	0x10, 0xc5, 0x4b, 0xff, 0xed, 0x9f, 0x3a, 0x4d, 0x8c, 0x8e, 0x9a, 0x20, 0x3d, 0xa8, 0x7b, 0xf2,
-	0xd4, 0x34, 0x1a, 0xe3, 0x1d, 0x34, 0x92, 0xa8, 0xd5, 0x90, 0x78, 0xf1, 0xb6, 0xea, 0x04, 0x4c,
-	0x0a, 0xbb, 0xee, 0x6e, 0x63, 0xf0, 0x23, 0xf8, 0xa9, 0x0d, 0x0b, 0x54, 0x1a, 0xf1, 0xe6, 0xed,
-	0xcd, 0xf0, 0x78, 0x0c, 0xbf, 0x19, 0x80, 0x0f, 0x5d, 0xe8, 0xa9, 0x54, 0xc2, 0x08, 0x1c, 0x94,
-	0x9a, 0xb9, 0x30, 0xbc, 0xcc, 0xa4, 0x29, 0xd8, 0x01, 0x8c, 0x6f, 0x44, 0x12, 0x93, 0x96, 0x22,
-	0xd7, 0x84, 0x5b, 0xf0, 0x6f, 0x21, 0x12, 0xcf, 0x39, 0x74, 0x8e, 0x37, 0xe2, 0x52, 0xb2, 0x2b,
-	0xd8, 0x0b, 0x15, 0x71, 0x43, 0x0f, 0x9a, 0xd4, 0x05, 0x37, 0x3c, 0xa6, 0xb7, 0x25, 0x69, 0x83,
-	0x08, 0x83, 0xa5, 0x26, 0x55, 0x7b, 0xad, 0x46, 0x1f, 0x46, 0xa9, 0xc8, 0x48, 0x72, 0x93, 0x7a,
-	0x7d, 0xdb, 0x5f, 0xd5, 0xec, 0x1a, 0x26, 0x61, 0xca, 0xf3, 0x84, 0x22, 0x91, 0xd1, 0x5d, 0xde,
-	0x11, 0x57, 0x5a, 0x9b, 0xb8, 0x52, 0xa3, 0x07, 0x6e, 0x4e, 0xef, 0xa5, 0xbf, 0x4e, 0x6b, 0x4a,
-	0x36, 0x87, 0x9d, 0x7b, 0x45, 0x92, 0x2b, 0x0a, 0x84, 0x30, 0xab, 0xf1, 0xb1, 0x35, 0x7e, 0xd4,
-	0xb3, 0x3f, 0x80, 0x3e, 0xb8, 0xcf, 0xf6, 0xbb, 0x2f, 0x36, 0x64, 0x14, 0xf5, 0xe2, 0xa6, 0x11,
-	0xb8, 0x30, 0x54, 0x24, 0x17, 0x05, 0xbb, 0x05, 0x0c, 0x45, 0x96, 0xbd, 0x9a, 0x3f, 0x89, 0x3b,
-	0xf9, 0xec, 0xc3, 0xe0, 0x51, 0x17, 0x1a, 0x03, 0xd8, 0x5c, 0xa7, 0x87, 0x93, 0xa9, 0x5d, 0x46,
-	0x27, 0x53, 0x7f, 0xbb, 0x7a, 0xd8, 0xda, 0xc8, 0xcc, 0xc1, 0x39, 0xec, 0x76, 0x81, 0xc3, 0xa3,
-	0x3a, 0xe9, 0x77, 0xa8, 0xdd, 0x79, 0xe7, 0x30, 0x6e, 0xb1, 0xc3, 0x71, 0xe5, 0xb1, 0xe7, 0xe0,
-	0xef, 0x57, 0x45, 0x07, 0xdb, 0x99, 0x83, 0x67, 0x00, 0xdf, 0x90, 0xd6, 0xdf, 0xf3, 0xea, 0x59,
-	0x7e, 0x30, 0x9c, 0x39, 0x4f, 0xff, 0xed, 0xe1, 0x9d, 0x7e, 0x05, 0x00, 0x00, 0xff, 0xff, 0x10,
-	0x5a, 0xdc, 0xad, 0x86, 0x02, 0x00, 0x00,
+	// 344 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x92, 0xcb, 0x4f, 0xc2, 0x40,
+	0x10, 0xc6, 0x2d, 0x82, 0xc5, 0x21, 0xf1, 0x31, 0x4a, 0x52, 0xcb, 0x41, 0xed, 0xc9, 0x13, 0x36,
+	0x1a, 0xe3, 0x1d, 0x34, 0x12, 0x1f, 0x68, 0x9a, 0xe8, 0xc1, 0x5b, 0xd5, 0x09, 0x90, 0xd0, 0x6e,
+	0xdd, 0x5d, 0x34, 0xf5, 0x5f, 0xf3, 0x9f, 0x33, 0xfb, 0xe0, 0x51, 0xad, 0xf1, 0xe2, 0x6d, 0x66,
+	0xfa, 0xf5, 0xb7, 0x3b, 0xdf, 0xb7, 0x00, 0x1f, 0x22, 0x17, 0xed, 0x8c, 0x33, 0xc9, 0xb0, 0xaa,
+	0xea, 0xc0, 0x85, 0xda, 0x79, 0x92, 0xc9, 0x3c, 0xd8, 0x85, 0xc6, 0x35, 0x1b, 0x44, 0x24, 0x32,
+	0x96, 0x0a, 0xc2, 0x0d, 0x58, 0x1e, 0xb3, 0x81, 0xe7, 0xec, 0x39, 0x07, 0xab, 0x91, 0x2a, 0x83,
+	0x4b, 0x58, 0x7f, 0x20, 0x2e, 0x46, 0x2c, 0x9d, 0x89, 0x70, 0x41, 0xd4, 0x5b, 0xd2, 0x32, 0xf4,
+	0xc1, 0x7d, 0x33, 0x32, 0xaf, 0x62, 0xe7, 0xd3, 0x41, 0xc7, 0x85, 0x1a, 0xa7, 0x6c, 0x9c, 0x07,
+	0x17, 0xd0, 0xec, 0x72, 0x8a, 0x25, 0xdd, 0x0b, 0xe2, 0x67, 0xb1, 0x8c, 0x23, 0x7a, 0x9d, 0x90,
+	0x90, 0x88, 0x50, 0x9d, 0x08, 0xe2, 0xf6, 0x5c, 0x5d, 0xa3, 0x0f, 0xf5, 0x21, 0x4b, 0x28, 0x8b,
+	0xe5, 0xd0, 0x20, 0xa3, 0x59, 0x1f, 0x5c, 0x41, 0xab, 0x3b, 0x8c, 0xd3, 0x01, 0xf5, 0x58, 0x42,
+	0xb7, 0x69, 0x09, 0x4e, 0x49, 0xa7, 0x38, 0x55, 0xa3, 0x07, 0x6e, 0x4a, 0xef, 0x4a, 0x6f, 0x69,
+	0xd3, 0x36, 0xe8, 0xc3, 0xd6, 0x1d, 0xa7, 0x2c, 0xe6, 0xd4, 0x61, 0x4c, 0xfe, 0xb5, 0xe5, 0xb3,
+	0x3e, 0xf7, 0x45, 0x43, 0xea, 0x6a, 0x4b, 0x3b, 0x98, 0x6f, 0x79, 0x03, 0xd8, 0x65, 0x49, 0x32,
+	0x92, 0xff, 0x82, 0x3b, 0xfa, 0xac, 0x40, 0xf5, 0x51, 0xe4, 0x02, 0x0f, 0xc1, 0xb5, 0x49, 0x60,
+	0xa3, 0xad, 0x13, 0xd5, 0x11, 0xfa, 0x4d, 0xd3, 0x7c, 0x4b, 0x29, 0x74, 0xb0, 0x03, 0x6b, 0x45,
+	0xbb, 0xb1, 0x65, 0xa4, 0xa5, 0x21, 0xf8, 0x9b, 0xe6, 0xe3, 0xc2, 0x73, 0x08, 0x1d, 0xec, 0xc3,
+	0x76, 0x99, 0xd3, 0xb8, 0x6f, 0x49, 0xbf, 0xa7, 0x50, 0xce, 0x3b, 0x85, 0xc6, 0x82, 0xd9, 0xc5,
+	0x45, 0x76, 0x4c, 0x53, 0x12, 0x46, 0xe8, 0xe0, 0x09, 0xc0, 0xdc, 0xd5, 0xe2, 0x7f, 0x9e, 0xbd,
+	0xcb, 0x0f, 0xd3, 0x43, 0xe7, 0x69, 0x45, 0xbf, 0xfa, 0xe3, 0xaf, 0x00, 0x00, 0x00, 0xff, 0xff,
+	0x4d, 0x63, 0x94, 0x5d, 0x03, 0x03, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -395,6 +478,7 @@ const _ = grpc.SupportPackageIsVersion4
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type ZsysClient interface {
+	Version(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_VersionClient, error)
 	CreateUserData(ctx context.Context, in *CreateUserDataRequest, opts ...grpc.CallOption) (Zsys_CreateUserDataClient, error)
 	ChangeHomeOnUserData(ctx context.Context, in *ChangeHomeOnUserDataRequest, opts ...grpc.CallOption) (Zsys_ChangeHomeOnUserDataClient, error)
 	PrepareBoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_PrepareBootClient, error)
@@ -409,8 +493,40 @@ func NewZsysClient(cc *grpc.ClientConn) ZsysClient {
 	return &zsysClient{cc}
 }
 
+func (c *zsysClient) Version(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_VersionClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[0], "/zsys.Zsys/Version", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysVersionClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_VersionClient interface {
+	Recv() (*VersionResponse, error)
+	grpc.ClientStream
+}
+
+type zsysVersionClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysVersionClient) Recv() (*VersionResponse, error) {
+	m := new(VersionResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *zsysClient) CreateUserData(ctx context.Context, in *CreateUserDataRequest, opts ...grpc.CallOption) (Zsys_CreateUserDataClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[0], "/zsys.Zsys/CreateUserData", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[1], "/zsys.Zsys/CreateUserData", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -442,7 +558,7 @@ func (x *zsysCreateUserDataClient) Recv() (*LogResponse, error) {
 }
 
 func (c *zsysClient) ChangeHomeOnUserData(ctx context.Context, in *ChangeHomeOnUserDataRequest, opts ...grpc.CallOption) (Zsys_ChangeHomeOnUserDataClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[1], "/zsys.Zsys/ChangeHomeOnUserData", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[2], "/zsys.Zsys/ChangeHomeOnUserData", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -474,7 +590,7 @@ func (x *zsysChangeHomeOnUserDataClient) Recv() (*LogResponse, error) {
 }
 
 func (c *zsysClient) PrepareBoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_PrepareBootClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[2], "/zsys.Zsys/PrepareBoot", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[3], "/zsys.Zsys/PrepareBoot", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -506,7 +622,7 @@ func (x *zsysPrepareBootClient) Recv() (*PrepareBootResponse, error) {
 }
 
 func (c *zsysClient) CommitBoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_CommitBootClient, error) {
-	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[3], "/zsys.Zsys/CommitBoot", opts...)
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[4], "/zsys.Zsys/CommitBoot", opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -539,6 +655,7 @@ func (x *zsysCommitBootClient) Recv() (*CommitBootResponse, error) {
 
 // ZsysServer is the server API for Zsys service.
 type ZsysServer interface {
+	Version(*Empty, Zsys_VersionServer) error
 	CreateUserData(*CreateUserDataRequest, Zsys_CreateUserDataServer) error
 	ChangeHomeOnUserData(*ChangeHomeOnUserDataRequest, Zsys_ChangeHomeOnUserDataServer) error
 	PrepareBoot(*Empty, Zsys_PrepareBootServer) error
@@ -549,6 +666,9 @@ type ZsysServer interface {
 type UnimplementedZsysServer struct {
 }
 
+func (*UnimplementedZsysServer) Version(req *Empty, srv Zsys_VersionServer) error {
+	return status.Errorf(codes.Unimplemented, "method Version not implemented")
+}
 func (*UnimplementedZsysServer) CreateUserData(req *CreateUserDataRequest, srv Zsys_CreateUserDataServer) error {
 	return status.Errorf(codes.Unimplemented, "method CreateUserData not implemented")
 }
@@ -564,6 +684,27 @@ func (*UnimplementedZsysServer) CommitBoot(req *Empty, srv Zsys_CommitBootServer
 
 func RegisterZsysServer(s *grpc.Server, srv ZsysServer) {
 	s.RegisterService(&_Zsys_serviceDesc, srv)
+}
+
+func _Zsys_Version_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).Version(m, &zsysVersionServer{stream})
+}
+
+type Zsys_VersionServer interface {
+	Send(*VersionResponse) error
+	grpc.ServerStream
+}
+
+type zsysVersionServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysVersionServer) Send(m *VersionResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Zsys_CreateUserData_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -655,6 +796,11 @@ var _Zsys_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ZsysServer)(nil),
 	Methods:     []grpc.MethodDesc{},
 	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Version",
+			Handler:       _Zsys_Version_Handler,
+			ServerStreams: true,
+		},
 		{
 			StreamName:    "CreateUserData",
 			Handler:       _Zsys_CreateUserData_Handler,
