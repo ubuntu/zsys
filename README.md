@@ -67,6 +67,30 @@ zsysctl completion [flags]
   -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
 ```
 
+#### zsysctl version
+
+Returns version of client and server
+
+##### Synopsis
+
+Returns version of client and server
+
+```
+zsysctl version [flags]
+```
+
+##### Options
+
+```
+  -h, --help   help for version
+```
+
+##### Options inherited from parent commands
+
+```
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
 #### zsysd
 
 ZFS SYStem integration daemon
