@@ -1,1 +1,1 @@
-systemd/zsys-commit.service lib/systemd/system/
+systemd/* lib/systemd/system/

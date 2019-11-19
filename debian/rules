@@ -4,6 +4,9 @@
 export GOCACHE=$(shell mktemp -d /tmp/gocache-XXXX)
 export GOFLAGS=-mod=vendor
 
+# Tell go generate to only install on-the-fly assets
+export ZSYS_GENERATE_ONLY_INSTALL_SHARE_PREFIX=$(CURDIR)/debian/zsys/usr/share
+
 %:
 	dh $@ --buildsystem=golang --with=golang
 
@@ -14,5 +17,10 @@ override_dh_auto_clean:
 
 override_dh_auto_install:
 	dh_auto_install -- --no-source
+	# install in /sbin
 	mv debian/zsys/usr/bin/ debian/zsys/sbin
 	rmdir debian/zsys/usr/
+	# create zsysctl command
+	ln -s zsysd debian/zsys/sbin/zsysctl
+	# run go generate for only installed generated assets
+	go generate $(GOFLAGS) ./...
