@@ -2,7 +2,7 @@
 #export DH_VERBOSE = 1
 
 export GOCACHE=$(shell mktemp -d /tmp/gocache-XXXX)
-export GOFLAGS=-mod=vendor
+export GOFLAGS=-ldflags=-X=github.com/ubuntu/zsys/internal/config.Version=$(shell dpkg-parsechangelog -S Version) --mod=vendor
 
 # Tell go generate to only install on-the-fly assets
 export ZSYS_GENERATE_ONLY_INSTALL_SHARE_PREFIX=$(CURDIR)/debian/zsys/usr/share

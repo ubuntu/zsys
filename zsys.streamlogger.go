@@ -60,6 +60,36 @@ func registerZsysServerIdleWithLogs(s *grpc.Server, srv ZsysServerIdleTimeout) {
 }
 
 /*
+ * Zsys.Version()
+ */
+
+// zsysVersionLogStream is a Zsys_VersionServer augmented by its own Context containing the log streamer
+type zsysVersionLogStream struct {
+	Zsys_VersionServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysVersionLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// Version overrides ZsysServer Version, installing a logger first
+func (z *ZsysLogServer) Version(req *Empty, stream Zsys_VersionServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "Version")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.Version(req, &zsysVersionLogStream{
+		Zsys_VersionServer: stream,
+		ctx:                ctx,
+	})
+}
+
+/*
  * Zsys.CreateUserData()
  */
 
@@ -182,6 +212,19 @@ func (z *ZsysLogServer) CommitBoot(req *Empty, stream Zsys_CommitBootServer) err
 /*
  * Extend streams to io.Writer
  */
+
+// Write promote zsysVersionServer to an io.Writer
+func (s *zsysVersionServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&VersionResponse{
+			Reply: &VersionResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
 
 // Write promote zsysCreateUserDataServer to an io.Writer
 func (s *zsysCreateUserDataServer) Write(p []byte) (n int, err error) {

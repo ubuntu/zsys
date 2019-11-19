@@ -17,3 +17,8 @@ const (
 	// DefaultServerIdleTimeout is the default time without a request before the server exits
 	DefaultServerIdleTimeout = time.Minute
 )
+
+var (
+	// Version is the version of the executable
+	Version = "dev"
+)

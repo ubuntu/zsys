@@ -3,6 +3,7 @@ syntax = "proto3";
 package zsys;
 
 service Zsys {
+  rpc Version(Empty) returns (stream VersionResponse);
   rpc CreateUserData(CreateUserDataRequest) returns (stream LogResponse);
   rpc ChangeHomeOnUserData(ChangeHomeOnUserDataRequest) returns (stream LogResponse);
   rpc PrepareBoot(Empty) returns (stream PrepareBootResponse);
@@ -15,6 +16,12 @@ message LogResponse {
   string log = 1;
 }
 
+message VersionResponse {
+  oneof reply {
+    string log = 1;
+    string version = 2;
+  }
+}
 message CreateUserDataRequest {
   string user = 1;
   string homepath = 2;
