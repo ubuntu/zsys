@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	if !generators.InstallOnlyMode() {
+	if generators.InstallOnlyMode() {
 		os.Exit(1)
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-const installVar = "ZSYS_INSTALL_SHARE_PREFIX"
+const installVar = "ZSYS_GENERATE_ONLY_INSTALL_SHARE_PREFIX"
 
 // CleanDirectory removes a directory and recreates it.
 func CleanDirectory(p string) error {
