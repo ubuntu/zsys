@@ -20,7 +20,7 @@ ZFS SYStem integration control zsys daemon
 
 ##### Synopsis
 
-Zfs SYStem tool targetting an enhanced ZOL experience.
+Zfs SYStem tool targeting an enhanced ZOL experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
  user data from system and persistent data, and more.
@@ -97,7 +97,7 @@ ZFS SYStem integration daemon
 
 ##### Synopsis
 
-Zfs SYStem daemon targetting an enhanced ZOL experience.
+Zfs SYStem daemon targeting an enhanced ZOL experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
  user data from system and persistent data, and more.
@@ -146,7 +146,7 @@ zsysd completion [flags]
 
 ### System commands
 
-Those commands are hidden from help and should primarly be used by the system itself.
+Those commands are hidden from help and should primarily be used by the system itself.
 
 #### zsysctl boot
 
