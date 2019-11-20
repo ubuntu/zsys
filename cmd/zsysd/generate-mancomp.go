@@ -137,7 +137,7 @@ func updateREADME(cmds []*cobra.Command) {
 	mustWriteLine(tmp, "### User commands\n")
 	filterCommandMarkdown(user, tmp)
 	mustWriteLine(tmp, "### System commands\n")
-	mustWriteLine(tmp, "Those commands are hidden from help and should primarly be used by the system itself.\n")
+	mustWriteLine(tmp, "Those commands are hidden from help and should primarily be used by the system itself.\n")
 	filterCommandMarkdown(system, tmp)
 
 	// Write footer (skip previously generated content)

@@ -169,7 +169,7 @@ func updatePo(localeDir string) error {
 	return nil
 }
 
-// generateMo generates a locale directory stucture with a mo for each po in localeDir.
+// generateMo generates a locale directory structure with a mo for each po in localeDir.
 func generateMo(in, out string) error {
 	baseLocaleDir := filepath.Join(out, "locale")
 	if err := generators.CleanDirectory(baseLocaleDir); err != nil {
