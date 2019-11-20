@@ -41,6 +41,9 @@ func RegisterServer(srv ZsysServerIdleTimeout) *grpc.Server {
 func unixConnect(socket string) func(addr string, t time.Duration) (net.Conn, error) {
 	return func(addr string, t time.Duration) (net.Conn, error) {
 		unixAddr, err := net.ResolveUnixAddr("unix", socket)
+		if err != nil {
+			return nil, err
+		}
 		conn, err := net.DialUnix("unix", nil, unixAddr)
 		return conn, err
 	}

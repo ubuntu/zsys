@@ -804,7 +804,7 @@ func TestTransactions(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, newState, true)
 					haveChanges = true
 				}
-				state = newState
+				//state = newState Uncomment if adding new element to the transaction
 			}
 
 			// Final transaction states

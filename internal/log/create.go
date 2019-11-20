@@ -39,7 +39,7 @@ func ContextWithLogger(ctx context.Context, requesterID, level string, w io.Writ
 	id := fmt.Sprintf("%s:%s", requesterID, requestID)
 
 	// Get logging level.
-	logLevel := DefaultLevel
+	var logLevel logrus.Level
 	if logLevel, err = logrus.ParseLevel(level); err != nil {
 		logrus.Warningf(i18n.G("invalid log level requested. Using default: %v"), err)
 	}
