@@ -145,7 +145,7 @@ func (s *Server) Listen() error {
 func (s *Server) Stop() {
 	log.Debug(context.Background(), i18n.G("Stopping daemon requested. Wait for active requests to close"))
 	s.grpcserver.GracefulStop()
-	log.Debug(context.Background(), i18n.G("All connexions closed"))
+	log.Debug(context.Background(), i18n.G("All connections closed"))
 }
 
 // TrackRequest prevents the idling timeout to fire up and return the function to reset it.
