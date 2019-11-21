@@ -15,7 +15,7 @@ func TestIsAllowed(t *testing.T) {
 
 	tests := map[string]struct {
 		action authorizer.Action
-		pid    uint32
+		pid    int32
 		uid    uint32
 
 		wantAuthorized  bool

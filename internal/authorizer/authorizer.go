@@ -97,7 +97,7 @@ type authResult struct {
 }
 
 // IsAllowed returns if the user is allowed to perform an operation.
-func (a Authorizer) IsAllowed(ctx context.Context, action Action, pid, uid uint32) bool {
+func (a Authorizer) IsAllowed(ctx context.Context, action Action, pid int32, uid uint32) bool {
 	if uid == 0 {
 		log.Debug(ctx, "Authorized as being administrator")
 		return true
@@ -122,7 +122,7 @@ func (a Authorizer) IsAllowed(ctx context.Context, action Action, pid, uid uint3
 	subject := authSubject{
 		Kind: "unix-process",
 		Details: map[string]dbus.Variant{
-			"pid":        dbus.MakeVariant(pid),
+			"pid":        dbus.MakeVariant(uint32(pid)), // polkit requests an uint32 on dbus
 			"start-time": dbus.MakeVariant(startTime),
 			"uid":        dbus.MakeVariant(uid),
 		},
