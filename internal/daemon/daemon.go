@@ -53,13 +53,17 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("cannot retrieve systemd listeners: %v"), err)
 	}
+
 	var lis net.Listener
 	switch len(listeners) {
 	case 0:
+		oldUmask := syscall.Umask(0111)
+		defer func() { syscall.Umask(oldUmask) }()
 		l, err := net.Listen("unix", socket)
 		if err != nil {
 			return nil, fmt.Errorf(i18n.G("failed to listen on %q: %w"), socket, err)
 		}
+		syscall.Umask(oldUmask)
 		lis = l
 	case 1:
 		socket = ""
