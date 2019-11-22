@@ -54,15 +54,9 @@ func (serverPeerCreds) ServerHandshake(conn net.Conn) (net.Conn, credentials.Aut
 func (serverPeerCreds) ClientHandshake(ctx context.Context, authority string, conn net.Conn) (net.Conn, credentials.AuthInfo, error) {
 	return conn, nil, nil
 }
-func (serverPeerCreds) Info() credentials.ProtocolInfo {
-	return credentials.ProtocolInfo{}
-}
-func (serverPeerCreds) Clone() credentials.TransportCredentials {
-	return nil
-}
-func (serverPeerCreds) OverrideServerName(s string) error {
-	return nil
-}
+func (serverPeerCreds) Info() credentials.ProtocolInfo          { return credentials.ProtocolInfo{} }
+func (serverPeerCreds) Clone() credentials.TransportCredentials { return nil }
+func (serverPeerCreds) OverrideServerName(s string) error       { return nil }
 
 type peerCredsInfo struct {
 	uid uint32
@@ -71,5 +65,5 @@ type peerCredsInfo struct {
 
 // AuthType returns a string encrypting uid and pid of caller.
 func (p peerCredsInfo) AuthType() string {
-	return fmt.Sprintf("%d,%d", p.uid, p.pid)
+	return fmt.Sprintf("uid: %d, pid: %d", p.uid, p.pid)
 }
