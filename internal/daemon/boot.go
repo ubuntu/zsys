@@ -6,6 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/internal/authorizer"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
@@ -19,6 +20,10 @@ const (
 // PrepareBoot consolidates canmount states for early boot.
 // Return if any dataset / machine changed has been done during boot and an error if any encountered.
 func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
+		return err
+	}
+
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
@@ -43,6 +48,10 @@ func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer
 // After this operation, every New() call will get the current and correct system state.
 // Return if any dataset / machine changed has been done during boot commit and an error if any encountered.
 func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
+		return err
+	}
+
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 

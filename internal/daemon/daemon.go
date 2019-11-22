@@ -6,11 +6,13 @@ import (
 	"io/ioutil"
 	"net"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/coreos/go-systemd/activation"
 	"github.com/coreos/go-systemd/daemon"
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/internal/authorizer"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
@@ -30,6 +32,8 @@ type Server struct {
 	socket     string
 	lis        net.Listener
 	grpcserver *grpc.Server
+
+	authorizer *authorizer.Authorizer
 
 	idleTimeout       time.Duration
 	requestsInFlights int
@@ -79,11 +83,18 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		return nil, fmt.Errorf(i18n.G("couldn't scan machines: %v"), err)
 	}
 
+	a, err := authorizer.New()
+	if err != nil {
+		return nil, fmt.Errorf(i18n.G("couldn't create new authorizer: %v"), err)
+	}
+
 	s := &Server{
 		Machines: ms,
 
 		socket: socket,
 		lis:    lis,
+
+		authorizer: a,
 
 		idleTimeout: config.DefaultServerIdleTimeout,
 		newRequest:  make(chan struct{}),
