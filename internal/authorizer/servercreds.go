@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/ubuntu/zsys/internal/i18n"
 	"golang.org/x/sys/unix"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -24,13 +25,13 @@ func (serverPeerCreds) ServerHandshake(conn net.Conn) (net.Conn, credentials.Aut
 	// net.Conn is an interface. Expect only *net.UnixConn types
 	uc, ok := conn.(*net.UnixConn)
 	if !ok {
-		return conn, nil, fmt.Errorf("unexpected socket type")
+		return conn, nil, fmt.Errorf(i18n.G("unexpected socket type"))
 	}
 
 	// Fetches raw network connection from UnixConn
 	raw, err := uc.SyscallConn()
 	if err != nil {
-		return conn, nil, fmt.Errorf("error opening raw connection: %s", err)
+		return conn, nil, fmt.Errorf(i18n.G("error opening raw connection: %s"), err)
 	}
 
 	// The raw.Control() callback does not return an error directly.
@@ -43,10 +44,10 @@ func (serverPeerCreds) ServerHandshake(conn net.Conn) (net.Conn, credentials.Aut
 			unix.SO_PEERCRED)
 	})
 	if err != nil {
-		return conn, nil, fmt.Errorf("GetsockoptUcred() error: %s", err)
+		return conn, nil, fmt.Errorf(i18n.G("GetsockoptUcred() error: %s"), err)
 	}
 	if err2 != nil {
-		return conn, nil, fmt.Errorf("Control() error: %s", err2)
+		return conn, nil, fmt.Errorf(i18n.G("Control() error: %s"), err2)
 	}
 
 	return conn, peerCredsInfo{uid: cred.Uid, pid: cred.Pid}, nil
