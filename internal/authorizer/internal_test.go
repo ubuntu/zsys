@@ -42,8 +42,8 @@ func TestIsAllowed(t *testing.T) {
 			}
 
 			d := DbusMock{
-				isAuthorized:    tc.polkitAuthorize,
-				wantPolkitError: tc.wantPolkitError}
+				IsAuthorized:    tc.polkitAuthorize,
+				WantPolkitError: tc.wantPolkitError}
 			a, err := New(WithAuthority(d), WithRoot("testdata"))
 			if err != nil {
 				t.Fatalf("Failed to create authorizer: %v", err)

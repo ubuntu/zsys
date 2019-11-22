@@ -11,15 +11,21 @@ var (
 	WithRoot      = withRoot
 )
 
+type PeerCredsInfo = peerCredsInfo
+
+func NewTestPeerCredsInfo(uid uint32, pid int32) PeerCredsInfo {
+	return PeerCredsInfo{uid: uid, pid: pid}
+}
+
 type DbusMock struct {
-	isAuthorized    bool
-	wantPolkitError bool
+	IsAuthorized    bool
+	WantPolkitError bool
 }
 
 func (d DbusMock) Call(method string, flags dbus.Flags, args ...interface{}) *dbus.Call {
 	var errPolkit error
 
-	if d.wantPolkitError {
+	if d.WantPolkitError {
 		errPolkit = errors.New("Polkit error")
 	}
 
@@ -27,7 +33,7 @@ func (d DbusMock) Call(method string, flags dbus.Flags, args ...interface{}) *db
 		Err: errPolkit,
 		Body: []interface{}{
 			[]interface{}{
-				d.isAuthorized,
+				d.IsAuthorized,
 				true,
 				map[string]string{
 					"polkit.retains_authorization_after_challenge": "true",
