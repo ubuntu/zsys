@@ -2,6 +2,13 @@ package authorizer
 
 import (
 	"context"
+	"fmt"
+	"io/ioutil"
+	"net"
+	"os"
+	"os/user"
+	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -54,4 +61,76 @@ func TestIsAllowed(t *testing.T) {
 			assert.Equal(t, tc.wantAuthorized, allowed, "isAllowed returned state match expectations")
 		})
 	}
+}
+
+func TestPeerCredsInfoAuthType(t *testing.T) {
+	t.Parallel()
+
+	p := peerCredsInfo{
+		uid: 11111,
+		pid: 22222,
+	}
+	assert.Equal(t, "uid: 11111, pid: 22222", p.AuthType(), "AuthType returns expected uid and pid")
+}
+func TestServerPeerCredsHandshake(t *testing.T) {
+	t.Parallel()
+
+	s := serverPeerCreds{}
+	d, err := ioutil.TempDir(os.TempDir(), "zsystest")
+	if err != nil {
+		t.Fatalf("Failed to create temporary directory: %v", err)
+	}
+	defer os.RemoveAll(d)
+
+	socket := filepath.Join(d, "zsys.sock")
+	l, err := net.Listen("unix", socket)
+	if err != nil {
+		t.Fatalf("Couldn't listen on socket: %v", err)
+	}
+	defer l.Close()
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		unixAddr, err := net.ResolveUnixAddr("unix", socket)
+		if err != nil {
+			t.Fatalf("Couldn't resolve client socket address: %v", err)
+		}
+		conn, err := net.DialUnix("unix", nil, unixAddr)
+		if err != nil {
+			t.Fatalf("Couldn't contact unix socket: %v", err)
+		}
+		defer conn.Close()
+	}()
+
+	conn, err := l.Accept()
+	if err != nil {
+		t.Fatalf("Couldn't accept connexion from client: %v", err)
+	}
+
+	c, i, err := s.ServerHandshake(conn)
+	if err != nil {
+		t.Fatalf("Server handshake failed unexpectedly: %v", err)
+	}
+	if c == nil {
+		t.Error("Received connexion is nil when we expected it not to")
+	}
+
+	user, err := user.Current()
+	if err != nil {
+		t.Fatalf("Couldn't retrieve current user: %v", err)
+	}
+
+	assert.Equal(t, fmt.Sprintf("uid: %s, pid: %d", user.Uid, os.Getpid()),
+		i.AuthType(), "uid or pid received doesn't match what we expected")
+
+	l.Close()
+	wg.Wait()
+}
+func TestServerPeerCredsInvalidSocket(t *testing.T) {
+	t.Parallel()
+
+	s := serverPeerCreds{}
+	s.ServerHandshake(nil)
 }
