@@ -1,3 +1,6 @@
+// Package authorizer deals client authorization based on a definite set of polkit actions.
+// The client uid and pid are obtained via the unix socket (SO_PEERCRED) information,
+// that are attached to the grpc request by the server.
 package authorizer
 
 import (
@@ -20,7 +23,7 @@ type caller interface {
 	Call(method string, flags dbus.Flags, args ...interface{}) *dbus.Call
 }
 
-// Authorizer is an abstrction of polkit authorization.
+// Authorizer is an abstraction of polkit authorization.
 type Authorizer struct {
 	authority caller
 	pid       uint32
