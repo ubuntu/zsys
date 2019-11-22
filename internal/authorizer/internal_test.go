@@ -56,9 +56,9 @@ func TestIsAllowed(t *testing.T) {
 				t.Fatalf("Failed to create authorizer: %v", err)
 			}
 
-			allowed := a.isAllowed(context.Background(), tc.action, tc.pid, tc.uid)
+			errAllowed := a.isAllowed(context.Background(), tc.action, tc.pid, tc.uid)
 
-			assert.Equal(t, tc.wantAuthorized, allowed, "isAllowed returned state match expectations")
+			assert.Equal(t, tc.wantAuthorized, errAllowed == nil, "isAllowed returned state match expectations")
 		})
 	}
 }

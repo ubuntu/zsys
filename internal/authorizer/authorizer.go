@@ -101,46 +101,48 @@ type authResult struct {
 	Details      map[string]string
 }
 
-// IsAllowedFromContext returns if the user is allowed to perform an operation.
+// IsAllowedFromContext returns nil if the user is allowed to perform an operation.
 // The pid and uid are extracted from peerCredsInfo grpc context
-func (a Authorizer) IsAllowedFromContext(ctx context.Context, action Action) bool {
+func (a Authorizer) IsAllowedFromContext(ctx context.Context, action Action) (err error) {
 	log.Debug(ctx, i18n.G("Check if grpc request peer is authorized"))
+
+	defer func() {
+		if err != nil {
+			err = fmt.Errorf(i18n.G("Permission denied: %w"), err)
+		}
+	}()
 
 	p, ok := peer.FromContext(ctx)
 	if !ok {
-		log.Warning(ctx, i18n.G("Context request doesn't have grpc peer creds informations. Denying request."))
-		return false
+		return errors.New(i18n.G("Context request doesn't have grpc peer creds informations."))
 	}
 	pci, ok := p.AuthInfo.(peerCredsInfo)
 	if !ok {
-		log.Warning(ctx, i18n.G("Context request grpc peer creeds information is not a peerCredsInfo. Denying request."))
-		return false
+		return errors.New(i18n.G("Context request grpc peer creeds information is not a peerCredsInfo."))
 	}
 
 	return a.isAllowed(ctx, action, pci.pid, pci.uid)
 }
 
-// isAllowed returns if the user is allowed to perform an operation.
-func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid uint32) bool {
+// isAllowed returns nil if the user is allowed to perform an operation.
+func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid uint32) error {
 	if uid == 0 {
 		log.Debug(ctx, i18n.G("Authorized as being administrator"))
-		return true
+		return nil
 	} else if action == ActionAlwaysAllowed {
 		log.Debug(ctx, i18n.G("Any user always authorized"))
-		return true
+		return nil
 	}
 
 	f, err := os.Open(filepath.Join(a.root, fmt.Sprintf("proc/%d/stat", pid)))
 	if err != nil {
-		log.Errorf(ctx, i18n.G("Couldn't open stat file for process: %v"), err)
-		return false
+		return fmt.Errorf(i18n.G("Couldn't open stat file for process: %v"), err)
 	}
 	defer f.Close()
 
 	startTime, err := getStartTimeFromReader(f)
 	if err != nil {
-		log.Errorf(ctx, i18n.G("Couldn't determine start time of client process: %v"), err)
-		return false
+		return fmt.Errorf(i18n.G("Couldn't determine start time of client process: %v"), err)
 	}
 
 	subject := authSubject{
@@ -158,13 +160,15 @@ func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid
 		"org.freedesktop.PolicyKit1.Authority.CheckAuthorization", dbus.FlagAllowInteractiveAuthorization,
 		subject, string(action), details, checkAllowInteration, "").Store(&result)
 	if err != nil {
-		log.Errorf(ctx, i18n.G("Call to polkit failed: %v"), err)
-		return false
+		return fmt.Errorf(i18n.G("Call to polkit failed: %v"), err)
 	}
 
 	log.Debugf(ctx, i18n.G("Polkit call result, authorized: %t"), result.IsAuthorized)
 
-	return result.IsAuthorized
+	if !result.IsAuthorized {
+		return errors.New(i18n.G("Polkit denied access"))
+	}
+	return nil
 }
 
 // getStartTimeFromReader determines the start time from a process stat file content

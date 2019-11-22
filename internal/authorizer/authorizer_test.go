@@ -46,9 +46,9 @@ func TestIsAllowedFromContext(t *testing.T) {
 				t.Fatalf("Failed to create authorizer: %v", err)
 			}
 
-			allowed := a.IsAllowedFromContext(ctx, tc.action)
+			errAllowed := a.IsAllowedFromContext(ctx, tc.action)
 
-			assert.Equal(t, tc.wantAuthorized, allowed, "IsAllowedFromContext returned state match expectations")
+			assert.Equal(t, tc.wantAuthorized, errAllowed == nil, "IsAllowedFromContext returned state match expectations")
 		})
 	}
 }
@@ -61,8 +61,8 @@ func TestIsAllowedFromContextWithoutPeer(t *testing.T) {
 		t.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	allowed := a.IsAllowedFromContext(context.Background(), authorizer.ActionAlwaysAllowed)
-	assert.Equal(t, false, allowed, "IsAllowedFromContext must deny without peer creds info")
+	errAllowed := a.IsAllowedFromContext(context.Background(), authorizer.ActionAlwaysAllowed)
+	assert.Equal(t, false, errAllowed == nil, "IsAllowedFromContext must deny without peer creds info")
 }
 
 func TestIsAllowedFromContextWithInvalidPeerCreds(t *testing.T) {
@@ -78,8 +78,8 @@ func TestIsAllowedFromContextWithInvalidPeerCreds(t *testing.T) {
 	}
 	ctx := peer.NewContext(context.Background(), &p)
 
-	allowed := a.IsAllowedFromContext(ctx, authorizer.ActionAlwaysAllowed)
-	assert.Equal(t, false, allowed, "IsAllowedFromContext must deny with an unexpected peer creds info type")
+	errAllowed := a.IsAllowedFromContext(ctx, authorizer.ActionAlwaysAllowed)
+	assert.Equal(t, false, errAllowed == nil, "IsAllowedFromContext must deny with an unexpected peer creds info type")
 }
 
 type invalidPeerCredsInfo struct{}
