@@ -43,7 +43,7 @@ msgstr ""
 msgid "%q property isn't an int: "
 msgstr ""
 
-#: internal/daemon/boot.go:71
+#: internal/daemon/boot.go:80
 msgid "%q returned an error: "
 msgstr ""
 
@@ -62,12 +62,20 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/daemon/daemon.go:148
-msgid "All connexions closed"
+#: internal/daemon/daemon.go:163
+msgid "All connections closed"
 msgstr ""
 
 #: internal/zfs/zfs.go:108
 msgid "An error occurred when reverting a Zfs transaction: "
+msgstr ""
+
+#: internal/authorizer/authorizer.go:133
+msgid "Any user always authorized"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:130
+msgid "Authorized as being administrator"
 msgstr ""
 
 #: internal/machines/boot.go:77
@@ -78,7 +86,15 @@ msgstr ""
 msgid "Building new machines list"
 msgstr ""
 
-#: internal/daemon/boot.go:49
+#: internal/authorizer/authorizer.go:163
+msgid "Call to polkit failed: %v"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:107
+msgid "Check if grpc request peer is authorized"
+msgstr ""
+
+#: internal/daemon/boot.go:58
 msgid "Commit current boot state"
 msgstr ""
 
@@ -90,7 +106,20 @@ msgstr ""
 msgid "Committing boot for %q"
 msgstr ""
 
-#: internal/daemon/daemon.go:93
+#: internal/authorizer/authorizer.go:117
+msgid "Context request doesn't have grpc peer creds informations."
+msgstr ""
+
+#: internal/authorizer/authorizer.go:121
+msgid "Context request grpc peer creeds information is not a peerCredsInfo."
+msgstr ""
+
+#: internal/authorizer/servercreds.go:50
+#, c-format
+msgid "Control() error: %s"
+msgstr ""
+
+#: internal/daemon/daemon.go:108
 msgid "Couldn't apply option to server: %v"
 msgstr ""
 
@@ -99,6 +128,14 @@ msgstr ""
 msgid ""
 "Couldn't create new subdatasets from %q. Assuming it has already been "
 "created successfully: %v"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:145
+msgid "Couldn't determine start time of client process: %v"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:139
+msgid "Couldn't open stat file for process: %v"
 msgstr ""
 
 #: cmd/zsysd/daemon/zsysd.go:32
@@ -120,7 +157,7 @@ msgstr ""
 msgid "Create user dataset for %q"
 msgstr ""
 
-#: internal/daemon/userdata.go:22
+#: internal/daemon/userdata.go:27
 msgid "Create user dataset for %q on %q"
 msgstr ""
 
@@ -166,7 +203,12 @@ msgstr ""
 msgid "Generates bash completion scripts"
 msgstr ""
 
-#: internal/daemon/daemon.go:105
+#: internal/authorizer/servercreds.go:47
+#, c-format
+msgid "GetsockoptUcred() error: %s"
+msgstr ""
+
+#: internal/daemon/daemon.go:120
 msgid "Idle timeout expired"
 msgstr ""
 
@@ -184,6 +226,18 @@ msgstr ""
 msgid "Needs a valid user name, got nothing"
 msgstr ""
 
+#: internal/authorizer/authorizer.go:111
+msgid "Permission denied: %w"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:166
+msgid "Polkit call result, authorized: %t"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:169
+msgid "Polkit denied access"
+msgstr ""
+
 #: cmd/zsysd/client/boot.go:28
 msgid ""
 "Prepare boot by ensuring correct system and user datasets are switched on "
@@ -196,7 +250,7 @@ msgid ""
 "and off, synchronously"
 msgstr ""
 
-#: internal/daemon/boot.go:25
+#: internal/daemon/boot.go:30
 msgid "Prepare current boot state"
 msgstr ""
 
@@ -213,7 +267,7 @@ msgstr ""
 msgid "Promoting user datasets"
 msgstr ""
 
-#: internal/daemon/daemon.go:138
+#: internal/daemon/daemon.go:153
 msgid "Ready state sent to systemd"
 msgstr ""
 
@@ -221,11 +275,11 @@ msgstr ""
 msgid "Rename a user's home directory via renaming corresponding user dataset"
 msgstr ""
 
-#: internal/daemon/userdata.go:40
+#: internal/daemon/userdata.go:49
 msgid "Rename home user dataset from %q to %q"
 msgstr ""
 
-#: internal/daemon/daemon.go:155
+#: internal/daemon/daemon.go:170
 #, c-format
 msgid "Reset idle timeout to %s"
 msgstr ""
@@ -234,7 +288,7 @@ msgstr ""
 msgid "Reset user dataset path from %q to %q"
 msgstr ""
 
-#: internal/daemon/version.go:12
+#: internal/daemon/version.go:13
 msgid "Retrieving version of daemon"
 msgstr ""
 
@@ -250,7 +304,7 @@ msgstr ""
 msgid "Reverting user data"
 msgstr ""
 
-#: internal/daemon/daemon.go:132
+#: internal/daemon/daemon.go:147
 #, c-format
 msgid "Serving on %s"
 msgstr ""
@@ -259,7 +313,7 @@ msgstr ""
 msgid "Set latest booted kernel to %q\n"
 msgstr ""
 
-#: internal/daemon/daemon.go:146
+#: internal/daemon/daemon.go:161
 msgid "Stopping daemon requested. Wait for active requests to close"
 msgstr ""
 
@@ -410,7 +464,7 @@ msgstr ""
 msgid "can't use empty string for new home directory"
 msgstr ""
 
-#: internal/daemon/daemon.go:54
+#: internal/daemon/daemon.go:58
 msgid "cannot retrieve systemd listeners: %v"
 msgstr ""
 
@@ -433,7 +487,7 @@ msgstr ""
 msgid "couldn't call Destroy in a transactional context"
 msgstr ""
 
-#: internal/daemon/userdata.go:46
+#: internal/daemon/userdata.go:55
 msgid "couldn't change home userdataset for %q: "
 msgstr ""
 
@@ -441,16 +495,20 @@ msgstr ""
 msgid "couldn't clone %q to %q: "
 msgstr ""
 
-#: internal/daemon/boot.go:56
+#: internal/daemon/boot.go:65
 msgid "couldn't commit: "
 msgstr ""
 
-#: zsys.go:27
+#: zsys.go:28
 msgid "couldn't connect to unix socket %q: %w"
 msgstr ""
 
 #: cmd/zsysd/client/common.go:20 cmd/zsysd/client/common.go:30
 msgid "couldn't connect to zsys daemon: %v"
+msgstr ""
+
+#: internal/daemon/daemon.go:88
+msgid "couldn't create new authorizer: %v"
 msgstr ""
 
 #: internal/machines/boot.go:301
@@ -461,7 +519,7 @@ msgstr ""
 msgid "couldn't create user data embedder dataset: "
 msgstr ""
 
-#: internal/daemon/userdata.go:28
+#: internal/daemon/userdata.go:33
 msgid "couldn't create userdataset for %q: "
 msgstr ""
 
@@ -473,7 +531,7 @@ msgstr ""
 msgid "couldn't destroy %q for cleanup: %v"
 msgstr ""
 
-#: cmd/zsysd/daemon/boot.go:25 internal/daemon/boot.go:32
+#: cmd/zsysd/daemon/boot.go:25 internal/daemon/boot.go:37
 msgid "couldn't ensure boot: "
 msgstr ""
 
@@ -533,7 +591,7 @@ msgstr ""
 msgid "couldn't scan %q for clones"
 msgstr ""
 
-#: internal/daemon/daemon.go:75
+#: internal/daemon/daemon.go:83
 msgid "couldn't scan machines: %v"
 msgstr ""
 
@@ -541,7 +599,7 @@ msgstr ""
 msgid "couldn't send headers: %w"
 msgstr ""
 
-#: internal/daemon/daemon.go:136
+#: internal/daemon/daemon.go:151
 msgid "couldn't send ready notification to systemd while supported: %v"
 msgstr ""
 
@@ -578,11 +636,16 @@ msgstr ""
 msgid "didn't find any existing dataset matching %q"
 msgstr ""
 
+#: internal/authorizer/servercreds.go:34
+#, c-format
+msgid "error opening raw connection: %s"
+msgstr ""
+
 #: internal/streamlogger/client.go:69
 msgid "failed to get header from stream: %w"
 msgstr ""
 
-#: internal/daemon/daemon.go:61
+#: internal/daemon/daemon.go:68
 msgid "failed to listen on %q: %w"
 msgstr ""
 
@@ -651,6 +714,22 @@ msgid ""
 "shouldn't have a snapshot. However %q exists"
 msgstr ""
 
+#: internal/authorizer/authorizer.go:207
+msgid "parsing error: %v"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:199
+msgid "parsing error: ) at the end"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:203
+msgid "parsing error: less fields than required"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:195
+msgid "parsing error: missing )"
+msgstr ""
+
 #. Last used is not a relevant change for signalling a change and justify bootloader rebuild: last-used is not
 #. displayed for current system dataset.
 #: internal/machines/boot.go:169
@@ -669,9 +748,13 @@ msgstr ""
 msgid "unexpected number of @ in dataset name %q"
 msgstr ""
 
-#: internal/daemon/daemon.go:68
+#: internal/daemon/daemon.go:76
 #, c-format
 msgid "unexpected number of systemd socket activation (%d != 1)"
+msgstr ""
+
+#: internal/authorizer/servercreds.go:28
+msgid "unexpected socket type"
 msgstr ""
 
 #: internal/zfs/helpers.go:296
