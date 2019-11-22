@@ -13,6 +13,7 @@ import (
 
 	"github.com/godbus/dbus"
 	"github.com/ubuntu/zsys/internal/log"
+	"google.golang.org/grpc/peer"
 )
 
 type caller interface {
@@ -94,6 +95,25 @@ type authResult struct {
 	IsAuthorized bool
 	IsChallenge  bool
 	Details      map[string]string
+}
+
+// IsAllowedFromContext returns if the user is allowed to perform an operation.
+// The pid and uid are extracted from peerCredsInfo grpc context
+func (a Authorizer) IsAllowedFromContext(ctx context.Context, action Action) bool {
+	log.Debug(ctx, "Check if grpc request peer is authorized")
+
+	p, ok := peer.FromContext(ctx)
+	if !ok {
+		log.Warning(ctx, "Context request doesn't have grpc peer creds informations. Denying request.")
+		return false
+	}
+	pci, ok := p.AuthInfo.(peerCredsInfo)
+	if !ok {
+		log.Warning(ctx, "Context request grpc peer creeds information is not a peerCredsInfo. Denying request.")
+		return false
+	}
+
+	return a.isAllowed(ctx, action, pci.pid, pci.uid)
 }
 
 // isAllowed returns if the user is allowed to perform an operation.
