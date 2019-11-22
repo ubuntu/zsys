@@ -96,8 +96,8 @@ type authResult struct {
 	Details      map[string]string
 }
 
-// IsAllowed returns if the user is allowed to perform an operation.
-func (a Authorizer) IsAllowed(ctx context.Context, action Action, pid int32, uid uint32) bool {
+// isAllowed returns if the user is allowed to perform an operation.
+func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid uint32) bool {
 	if uid == 0 {
 		log.Debug(ctx, "Authorized as being administrator")
 		return true
