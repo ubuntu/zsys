@@ -87,7 +87,7 @@ const (
 type polkitCheckFlags uint32
 
 const (
-	checkAllowInteration polkitCheckFlags = 1
+	checkAllowInteration polkitCheckFlags = 0x01
 )
 
 type authSubject struct {
@@ -153,9 +153,10 @@ func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid
 	}
 
 	var result authResult
+	var details map[string]string
 	err = a.authority.Call(
 		"org.freedesktop.PolicyKit1.Authority.CheckAuthorization", dbus.FlagAllowInteractiveAuthorization,
-		subject, string(action), subject.Details, checkAllowInteration, "").Store(&result)
+		subject, string(action), details, checkAllowInteration, "").Store(&result)
 	if err != nil {
 		log.Errorf(ctx, i18n.G("Call to polkit failed: %v"), err)
 		return false
