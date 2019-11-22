@@ -6,11 +6,13 @@ import (
 	"io/ioutil"
 	"net"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/coreos/go-systemd/activation"
 	"github.com/coreos/go-systemd/daemon"
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/internal/authorizer"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
@@ -30,6 +32,8 @@ type Server struct {
 	socket     string
 	lis        net.Listener
 	grpcserver *grpc.Server
+
+	authorizer *authorizer.Authorizer
 
 	idleTimeout       time.Duration
 	requestsInFlights int
@@ -53,13 +57,17 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("cannot retrieve systemd listeners: %v"), err)
 	}
+
 	var lis net.Listener
 	switch len(listeners) {
 	case 0:
+		oldUmask := syscall.Umask(0111)
+		defer func() { syscall.Umask(oldUmask) }()
 		l, err := net.Listen("unix", socket)
 		if err != nil {
 			return nil, fmt.Errorf(i18n.G("failed to listen on %q: %w"), socket, err)
 		}
+		syscall.Umask(oldUmask)
 		lis = l
 	case 1:
 		socket = ""
@@ -75,11 +83,18 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		return nil, fmt.Errorf(i18n.G("couldn't scan machines: %v"), err)
 	}
 
+	a, err := authorizer.New()
+	if err != nil {
+		return nil, fmt.Errorf(i18n.G("couldn't create new authorizer: %v"), err)
+	}
+
 	s := &Server{
 		Machines: ms,
 
 		socket: socket,
 		lis:    lis,
+
+		authorizer: a,
 
 		idleTimeout: config.DefaultServerIdleTimeout,
 		newRequest:  make(chan struct{}),
@@ -145,7 +160,7 @@ func (s *Server) Listen() error {
 func (s *Server) Stop() {
 	log.Debug(context.Background(), i18n.G("Stopping daemon requested. Wait for active requests to close"))
 	s.grpcserver.GracefulStop()
-	log.Debug(context.Background(), i18n.G("All connexions closed"))
+	log.Debug(context.Background(), i18n.G("All connections closed"))
 }
 
 // TrackRequest prevents the idling timeout to fire up and return the function to reset it.

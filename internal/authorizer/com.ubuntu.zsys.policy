@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1.0/policyconfig.dtd">
+<policyconfig>
+
+  <vendor>Zsys</vendor>
+  <vendor_url>http://ubuntu.com</vendor_url>
+
+  <action id="com.ubuntu.zsys.manage-service">
+    <description gettext-domain="zsys">Manage zsys service</description>
+    <message gettext-domain="zsys">Authorization is required to manage zsysd (stop, refresh, ...)</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.ubuntu.zsys.system-list">
+    <description gettext-domain="zsys">Read system information</description>
+    <message gettext-domain="zsys">Authorization is required to perform system read operations</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.ubuntu.zsys.system-write">
+    <description gettext-domain="zsys">Write system information</description>
+    <message gettext-domain="zsys">Authorization is required to perform system write operations</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.ubuntu.zsys.user-write-self">
+    <description gettext-domain="zsys">Write user information for self</description>
+    <message gettext-domain="zsys">Authorization is required to perform user write operations on own user's datasets</message>
+    <defaults>
+      <allow_any>yes</allow_any>
+      <allow_inactive>yes</allow_inactive>
+      <allow_active>yes</allow_active>
+    </defaults>
+  </action>
+
+  <action id="com.ubuntu.zsys.user-write-others">
+    <description gettext-domain="zsys">Write user information for others</description>
+    <message gettext-domain="zsys">Authorization is required to perform user write operations on other user's datasets</message>
+    <defaults>
+      <allow_any>auth_admin</allow_any>
+      <allow_inactive>auth_admin</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+  </action>
+
+</policyconfig>

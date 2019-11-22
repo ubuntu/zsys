@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"github.com/ubuntu/zsys/internal/authorizer"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 	"google.golang.org/grpc"
@@ -32,7 +33,7 @@ func NewZsysUnixSocketClient(socket string, level logrus.Level) (*ZsysLogClient,
 
 // RegisterServer registers a ZsysServer after creating the grpc server which it returns.
 func RegisterServer(srv ZsysServerIdleTimeout) *grpc.Server {
-	s := grpc.NewServer(grpc.StreamInterceptor(streamlogger.ServerIdleTimeoutInterceptor))
+	s := grpc.NewServer(grpc.StreamInterceptor(streamlogger.ServerIdleTimeoutInterceptor), authorizer.WithUnixPeerCreds())
 	registerZsysServerIdleWithLogs(s, srv)
 	return s
 }

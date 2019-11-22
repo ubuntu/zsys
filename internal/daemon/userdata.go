@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/ubuntu/zsys"
+	"github.com/ubuntu/zsys/internal/authorizer"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
@@ -14,6 +15,10 @@ import (
 // if the user already exists for a dataset attached to the current system, set its mountpoint to homepath.
 // This is called by zsys grpc request, once the server is registered
 func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsys_CreateUserDataServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
+		return err
+	}
+
 	user := req.GetUser()
 	homepath := req.GetHomepath()
 	s.RWRequest.Lock()
@@ -32,6 +37,10 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 
 // ChangeHomeOnUserData tries to find an existing dataset matching home as a valid mountpoint and rename it to newhome
 func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, stream zsys.Zsys_ChangeHomeOnUserDataServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
+		return err
+	}
+
 	home := req.GetHome()
 	newHome := req.GetNewHome()
 	s.RWRequest.Lock()
