@@ -97,16 +97,3 @@ func (l *i18n) setLocale(loc string) {
 
 	l.Catalog = l.translations.Locale(loc)
 }
-
-// https://www.gnu.org/software/gettext/manual/html_node/Plural-forms.html
-// (search for 1000)
-func ngn(d int) uint32 {
-	const max = 1000000
-	if d < 0 {
-		d = -d
-	}
-	if d > max {
-		return uint32((d % max) + max)
-	}
-	return uint32(d)
-}
