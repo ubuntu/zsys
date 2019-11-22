@@ -69,6 +69,7 @@ func New(options ...func(*Authorizer)) (*Authorizer, error) {
 // Action is an polkit action
 type Action string
 
+//go:generate go run ../generators/copy.go com.ubuntu.zsys.policy polkit-1/actions ../../generated
 const (
 	// ActionAlwaysAllowed is a no-op bypassing any user or dbus checks.
 	ActionAlwaysAllowed Action = "always-allowed"
