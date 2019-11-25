@@ -29,6 +29,15 @@ func TestServerStartStop(t *testing.T) {
 
 	s.Stop()
 }
+
+func TestServerFailingOption(t *testing.T) {
+	t.Parallel()
+
+	if _, err := daemon.New("foo", daemon.FailingOption()); err == nil {
+		t.Error("expected an error but got none")
+	}
+}
+
 func TestServerStartListenStop(t *testing.T) {
 	//t.Parallel()
 
