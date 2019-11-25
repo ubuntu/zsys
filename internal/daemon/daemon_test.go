@@ -24,7 +24,7 @@ func TestServerStartStop(t *testing.T) {
 
 	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"))
 	if err != nil {
-		t.Fatalf("expected no error but got: %v", err)
+		t.Errorf("expected no error but got: %v", err)
 	}
 
 	s.Stop()
@@ -54,7 +54,7 @@ func TestServerStartListenStop(t *testing.T) {
 		t.Fatalf("server shouldn't have timed out but did")
 	case err := <-errs:
 		if err != nil {
-			t.Fatalf("got an error from the server but expected none: %v", err)
+			t.Errorf("got an error from the server but expected none: %v", err)
 		}
 	}
 }
@@ -81,7 +81,7 @@ func TestServerDontTimeoutOnRequest(t *testing.T) {
 	select {
 	case <-time.After(1000 * time.Millisecond):
 	case <-errs:
-		t.Fatalf("server exited prematurily: we had a request in flight. Exited with %v", errs)
+		t.Errorf("server exited prematurily: we had a request in flight. Exited with %v", errs)
 	}
 	reqDone()
 
@@ -112,11 +112,11 @@ func TestServerDontTimeoutWithMultipleRequests(t *testing.T) {
 }
 
 func TestServerCannotCreateSocket(t *testing.T) {
-	//t.Parallel()
+	t.Parallel()
 
 	_, err := daemon.New("/path/does/not/exist/daemon_test.sock")
 	if err == nil {
-		t.Fatalf("expected an error but got none")
+		t.Error("expected an error but got none")
 	}
 }
 
@@ -177,7 +177,7 @@ func TestServerSocketActivation(t *testing.T) {
 				s.Stop()
 			}()
 			if err := s.Listen(); err != nil {
-				t.Fatalf("expected to start listening but couldn't: %v", err)
+				t.Errorf("expected to start listening but couldn't: %v", err)
 			}
 
 		})
@@ -227,9 +227,9 @@ func TestServerSdNotifier(t *testing.T) {
 
 			err = s.Listen()
 			if tc.wantErr && err == nil {
-				t.Fatal("expected an error but none")
+				t.Error("expected an error but none")
 			} else if !tc.wantErr && err != nil {
-				t.Fatalf("expected no error but got: %v", err)
+				t.Errorf("expected no error but got: %v", err)
 			}
 
 		})
@@ -242,10 +242,10 @@ func assertServerTimeout(t *testing.T, s *daemon.Server, errs chan error) {
 	select {
 	case <-time.After(time.Second):
 		s.Stop()
-		t.Fatalf("server should have timed out, but it didn't")
+		t.Errorf("server should have timed out, but it didn't")
 	case err := <-errs:
 		if err != nil {
-			t.Fatal(err)
+			t.Error(err)
 		}
 	}
 }
