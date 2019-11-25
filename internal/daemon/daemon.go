@@ -33,22 +33,44 @@ type Server struct {
 	lis        net.Listener
 	grpcserver *grpc.Server
 
-	authorizer *authorizer.Authorizer
-
-	idlerTimeout idler
+	// Those elements could be mocked in tests
+	authorizer        *authorizer.Authorizer
+	idlerTimeout      idler
 }
 
-// IdleTimeout changes server default idle timeout
-func IdleTimeout(timeout time.Duration) func(s *Server) error {
-	return func(s *Server) error {
-		s.idlerTimeout = newIdler(timeout)
+/*
+ * Daemon options
+ * These options and helpers are augmenting the daemon struct to make the code testable with
+ * mock authorizer, systemd, timeout adjustments.
+ */
+
+// WithIdleTimeout changes server default idle timeout
+func WithIdleTimeout(timeout time.Duration) func(o *options) error {
+	return func(o *options) error {
+		o.timeout = timeout
 		return nil
 	}
 }
 
+type options struct {
+	timeout                   time.Duration
+	authorizer                *authorizer.Authorizer
+}
+
+type option func(*options) error
+
 // New returns an new, initialized daemon server, which handles systemd activation
 // socket is ignored if we are using socket activation.
-func New(socket string, options ...func(s *Server) error) (*Server, error) {
+func New(socket string, opts ...option) (*Server, error) {
+	args := options{
+		timeout:                   config.DefaultServerIdleTimeout,
+	}
+	for _, o := range opts {
+		if err := o(&args); err != nil {
+			log.Warningf(context.Background(), i18n.G("Couldn't apply option to server: %v"), err)
+		}
+	}
+
 	// systemd socket activation or local creation
 	listeners, err := activation.Listeners()
 	if err != nil {
@@ -78,9 +100,11 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		return nil, fmt.Errorf(i18n.G("couldn't scan machines: %v"), err)
 	}
 
-	a, err := authorizer.New()
-	if err != nil {
-		return nil, fmt.Errorf(i18n.G("couldn't create new authorizer: %v"), err)
+	if args.authorizer == nil {
+		args.authorizer, err = authorizer.New()
+		if err != nil {
+			return nil, fmt.Errorf(i18n.G("couldn't create new authorizer: %v"), err)
+		}
 	}
 
 	s := &Server{
@@ -89,18 +113,13 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		socket: socket,
 		lis:    lis,
 
-		authorizer: a,
+		authorizer:        args.authorizer,
+		systemdSdNotifier: args.systemdSdNotifier,
 
-		idlerTimeout: newIdler(config.DefaultServerIdleTimeout),
+		idlerTimeout: newIdler(args.timeout),
 	}
 	grpcserver := zsys.RegisterServer(s)
 	s.grpcserver = grpcserver
-
-	for _, option := range options {
-		if err := option(s); err != nil {
-			log.Warningf(context.Background(), i18n.G("Couldn't apply option to server: %v"), err)
-		}
-	}
 
 	// Handle idle timeout
 	go s.idlerTimeout.start(s)

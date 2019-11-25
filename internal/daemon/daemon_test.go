@@ -126,7 +126,7 @@ func assertServerTimeout(t *testing.T, s *daemon.Server, errs chan error) {
 func startDaemonAndListen(t *testing.T, dir string, timeout time.Duration) (*daemon.Server, chan error) {
 	t.Helper()
 
-	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.IdleTimeout(timeout))
+	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.WithIdleTimeout(timeout))
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
