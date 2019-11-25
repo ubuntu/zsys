@@ -35,6 +35,7 @@ type Server struct {
 
 	// Those elements could be mocked in tests
 	authorizer        *authorizer.Authorizer
+	systemdSdNotifier func(unsetEnvironment bool, state string) (bool, error)
 	idlerTimeout      idler
 }
 
@@ -55,6 +56,8 @@ func WithIdleTimeout(timeout time.Duration) func(o *options) error {
 type options struct {
 	timeout                   time.Duration
 	authorizer                *authorizer.Authorizer
+	systemdActivationListener func() ([]net.Listener, error)
+	systemdSdNotifier         func(unsetEnvironment bool, state string) (bool, error)
 }
 
 type option func(*options) error
@@ -64,6 +67,8 @@ type option func(*options) error
 func New(socket string, opts ...option) (*Server, error) {
 	args := options{
 		timeout:                   config.DefaultServerIdleTimeout,
+		systemdActivationListener: activation.Listeners,
+		systemdSdNotifier:         daemon.SdNotify,
 	}
 	for _, o := range opts {
 		if err := o(&args); err != nil {
@@ -72,7 +77,7 @@ func New(socket string, opts ...option) (*Server, error) {
 	}
 
 	// systemd socket activation or local creation
-	listeners, err := activation.Listeners()
+	listeners, err := args.systemdActivationListener()
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("cannot retrieve systemd listeners: %v"), err)
 	}
@@ -134,7 +139,7 @@ func (s *Server) Listen() error {
 	log.Infof(context.Background(), i18n.G("Serving on %s"), s.lis.Addr().String())
 
 	// systemd activation
-	if sent, err := daemon.SdNotify(false, "READY=1"); err != nil {
+	if sent, err := s.systemdSdNotifier(false, "READY=1"); err != nil {
 		return fmt.Errorf(i18n.G("couldn't send ready notification to systemd while supported: %v"), err)
 	} else if sent {
 		log.Debug(context.Background(), i18n.G("Ready state sent to systemd"))
