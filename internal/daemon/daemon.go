@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/coreos/go-systemd/activation"
@@ -58,13 +58,11 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 	var lis net.Listener
 	switch len(listeners) {
 	case 0:
-		oldUmask := syscall.Umask(0111)
-		defer func() { syscall.Umask(oldUmask) }()
 		l, err := net.Listen("unix", socket)
 		if err != nil {
 			return nil, fmt.Errorf(i18n.G("failed to listen on %q: %w"), socket, err)
 		}
-		syscall.Umask(oldUmask)
+		os.Chmod(socket, 0666)
 		lis = l
 	case 1:
 		socket = ""
