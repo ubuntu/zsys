@@ -1,4 +1,4 @@
-zsys (0.3) UNRELEASED; urgency=medium
+zsys (0.3) focal; urgency=medium
 
   * Daemon/client split, communicating via unix sockets. Most notable changes:
     - new client command with zsysctl. Daemon is zsysd.
