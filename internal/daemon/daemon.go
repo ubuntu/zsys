@@ -35,16 +35,13 @@ type Server struct {
 
 	authorizer *authorizer.Authorizer
 
-	idleTimeout       time.Duration
-	requestsInFlights int
-	newRequest        chan struct{}
-	reset             chan struct{}
+	idlerTimeout idler
 }
 
 // IdleTimeout changes server default idle timeout
-func IdleTimeout(t time.Duration) func(s *Server) error {
+func IdleTimeout(timeout time.Duration) func(s *Server) error {
 	return func(s *Server) error {
-		s.idleTimeout = t
+		s.idlerTimeout = newIdler(timeout)
 		return nil
 	}
 }
@@ -96,9 +93,7 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 
 		authorizer: a,
 
-		idleTimeout: config.DefaultServerIdleTimeout,
-		newRequest:  make(chan struct{}),
-		reset:       make(chan struct{}),
+		idlerTimeout: newIdler(config.DefaultServerIdleTimeout),
 	}
 	grpcserver := zsys.RegisterServer(s)
 	s.grpcserver = grpcserver
@@ -110,32 +105,7 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 	}
 
 	// Handle idle timeout
-	go func() {
-		timeout := time.NewTimer(s.idleTimeout)
-
-	out:
-		for {
-			select {
-			case <-timeout.C:
-				log.Debug(context.Background(), i18n.G("Idle timeout expired"))
-				break out
-			case <-s.newRequest:
-				s.requestsInFlights++
-				// Stop can return false if the timeout has fired OR if it's already stopped. Use requestsInFlights
-				// to only drain the timeout channel if the timeout has already fired.
-				if s.requestsInFlights == 1 && !timeout.Stop() {
-					<-timeout.C
-				}
-			case <-s.reset:
-				s.requestsInFlights--
-				if s.requestsInFlights > 0 {
-					continue
-				}
-				timeout.Reset(s.idleTimeout)
-			}
-		}
-		s.Stop()
-	}()
+	go s.idlerTimeout.start(s)
 
 	return s, nil
 }
@@ -165,10 +135,10 @@ func (s *Server) Stop() {
 
 // TrackRequest prevents the idling timeout to fire up and return the function to reset it.
 func (s *Server) TrackRequest() func() {
-	s.newRequest <- struct{}{}
+	s.idlerTimeout.addRequest()
 	return func() {
-		log.Debugf(context.Background(), i18n.G("Reset idle timeout to %s"), s.idleTimeout)
-		s.reset <- struct{}{}
+		log.Debugf(context.Background(), i18n.G("Reset idle timeout to %s"), s.idlerTimeout.timeout)
+		s.idlerTimeout.endRequest()
 	}
 }
 
