@@ -3,7 +3,6 @@ package zfs_test
 import (
 	"context"
 	"errors"
-	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -50,7 +49,7 @@ func TestCreate(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -129,7 +128,7 @@ func TestScan(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -194,7 +193,7 @@ func TestSnapshot(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -276,7 +275,7 @@ func TestClone(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -347,7 +346,7 @@ func TestPromote(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -436,7 +435,7 @@ func TestDestroy(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -534,7 +533,7 @@ func TestSetProperty(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -630,7 +629,7 @@ func TestTransactions(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -850,7 +849,7 @@ func TestNewTransaction(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -942,7 +941,7 @@ func TestNewWithAutoCancel(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
@@ -991,7 +990,7 @@ func TestDoneCheckErrOnNoneAutoCancel(t *testing.T) {
 
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := tempDir(t)
+			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			fPools := newFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"))
@@ -1134,20 +1133,6 @@ func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Data
 	got = transformToReproducibleDatasetSlice(t, ta, got, includePrivate).DS
 
 	datasetsNotEquals(t, want, got, includePrivate)
-}
-
-func tempDir(t *testing.T) (string, func()) {
-	t.Helper()
-
-	dir, err := ioutil.TempDir("", "zsystest-")
-	if err != nil {
-		t.Fatal("can't create temporary directory", err)
-	}
-	return dir, func() {
-		if err = os.RemoveAll(dir); err != nil {
-			t.Error("can't clean temporary directory", err)
-		}
-	}
 }
 
 // timeAsserter ensures that dates will be between a start and end time
