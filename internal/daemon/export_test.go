@@ -1,6 +1,7 @@
 package daemon
 
 import (
+	"errors"
 	"net"
 )
 
@@ -15,5 +16,11 @@ func WithSystemdSdNotifier(f func(unsetEnvironment bool, state string) (bool, er
 	return func(o *options) error {
 		o.systemdSdNotifier = f
 		return nil
+	}
+}
+
+func FailingOption() func(o *options) error {
+	return func(o *options) error {
+		return errors.New("failing option")
 	}
 }
