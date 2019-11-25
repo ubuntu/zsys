@@ -1,7 +1,9 @@
 package daemon_test
 
 import (
+	"errors"
 	"fmt"
+	"net"
 	"path/filepath"
 	"testing"
 	"time"
@@ -106,6 +108,122 @@ func TestServerCannotCreateSocket(t *testing.T) {
 	_, err := daemon.New("/path/does/not/exist/daemon_test.sock")
 	if err == nil {
 		t.Fatalf("expected an error but got none")
+	}
+}
+
+func TestServerSocketActivation(t *testing.T) {
+
+	tests := map[string]struct {
+		sockets      []string
+		listenerFail bool
+
+		wantErr bool
+	}{
+		"success with one socket":    {sockets: []string{"sock1"}},
+		"fail when Listeners() fail": {listenerFail: true, wantErr: true},
+		"fail with many sockets":     {sockets: []string{"socket1", "socket2"}, wantErr: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			var listeners []net.Listener
+			for _, socket := range tc.sockets {
+				l, err := net.Listen("unix", filepath.Join(dir, socket))
+				if err != nil {
+					t.Fatalf("couldn't create unix socket: %v", err)
+				}
+				defer l.Close()
+				listeners = append(listeners, l)
+			}
+
+			var f func() ([]net.Listener, error)
+			if len(tc.sockets) == 0 {
+				if !tc.listenerFail {
+					t.Fatal("expected listenerFail is true and got false")
+				}
+				f = func() ([]net.Listener, error) {
+					return nil, errors.New("systemd activation error")
+				}
+			} else {
+				f = func() ([]net.Listener, error) {
+					return listeners, nil
+				}
+			}
+
+			s, err := daemon.New("foo", daemon.WithSystemdActivationListener(f))
+			if tc.wantErr && err == nil {
+				t.Fatal("expected an error but none")
+			} else if !tc.wantErr && err != nil {
+				t.Fatalf("expected no error but got: %v", err)
+			}
+			if err != nil {
+				return
+			}
+
+			go func() {
+				time.Sleep(10 * time.Millisecond)
+				s.Stop()
+			}()
+			if err := s.Listen(); err != nil {
+				t.Fatalf("expected to start listening but couldn't: %v", err)
+			}
+
+		})
+	}
+}
+
+func TestServerSdNotifier(t *testing.T) {
+
+	tests := map[string]struct {
+		sent         bool
+		notifierFail bool
+
+		wantErr bool
+	}{
+		"send signal":                         {sent: true},
+		"doesn't fail when not under systemd": {sent: false},
+		"fail when notifier fails":            {notifierFail: true, wantErr: true},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			l, err := net.Listen("unix", filepath.Join(dir, "socket"))
+			if err != nil {
+				t.Fatalf("couldn't create unix socket: %v", err)
+			}
+			defer l.Close()
+
+			s, err := daemon.New("foo",
+				daemon.WithSystemdActivationListener(func() ([]net.Listener, error) { return []net.Listener{l}, nil }),
+				daemon.WithSystemdSdNotifier(func(unsetEnvironment bool, state string) (bool, error) {
+					if tc.notifierFail {
+						return false, errors.New("systemd notifier error")
+					}
+					return tc.sent, nil
+				}))
+			if !tc.wantErr && err != nil {
+				t.Fatalf("expected no error but got: %v", err)
+			}
+
+			go func() {
+				time.Sleep(10 * time.Millisecond)
+				s.Stop()
+			}()
+
+			err = s.Listen()
+			if tc.wantErr && err == nil {
+				t.Fatal("expected an error but none")
+			} else if !tc.wantErr && err != nil {
+				t.Fatalf("expected no error but got: %v", err)
+			}
+
+		})
 	}
 }
 
