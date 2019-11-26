@@ -1,3 +1,11 @@
+zsys (0.3.3) focal; urgency=medium
+
+  * Track number of requests in flights during dbus tests
+    This is the easiest way to avoid data race. Hard to reproduce locally
+    due to fallback to your system local bus.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 26 Nov 2019 15:01:10 +0100
+
 zsys (0.3.2) focal; urgency=medium
 
   * Fix a race in dbus test mock spawning when running tests detected on some
