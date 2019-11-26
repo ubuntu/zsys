@@ -1,3 +1,11 @@
+zsys (0.3.1) focal; urgency=medium
+
+  * Depends on go 1.12 as go 1.13 package doesn't provide the correct
+    alternatives. The only drawback will be %w displayed when wrapping errors.
+  * Fix tests using a local system dbus.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 26 Nov 2019 12:29:15 +0100
+
 zsys (0.3) focal; urgency=medium
 
   * Daemon/client split, communicating via unix sockets. Most notable changes:
