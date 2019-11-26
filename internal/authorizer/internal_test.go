@@ -139,16 +139,20 @@ func TestServerPeerCredsInvalidSocket(t *testing.T) {
 }
 
 var (
-	sdbus     sync.Once
-	wg        sync.WaitGroup
-	dbusReady = make(chan struct{})
+	sdbus sync.Once
+
+	mu sync.RWMutex
+	wg sync.WaitGroup
 )
 
 func StartLocalSystemBus(t *testing.T) func() {
 	t.Helper()
-	cleanupFunc := func() { wg.Done() }
+	mu.Lock()
+	defer mu.Unlock()
 
 	wg.Add(1)
+	cleanupFunc := func() { wg.Done() }
+
 	sdbus.Do(func() {
 		dir, cleanup := testutils.TempDir(t)
 		savedDbusSystemAddress := os.Getenv("DBUS_SYSTEM_BUS_ADDRESS")
@@ -184,10 +188,13 @@ func StartLocalSystemBus(t *testing.T) func() {
 		if err := os.Setenv("DBUS_SYSTEM_BUS_ADDRESS", string(dbusAddr)); err != nil {
 			t.Fatalf("couldn't set DBUS_SYSTEM_BUS_ADDRESS: %v", err)
 		}
-		close(dbusReady)
 
 		cleanupFunc = func() {
+			mu.Lock()
+			defer mu.Unlock()
 			wg.Done()
+
+			// Wait for all others tests to be done to cleanup properly
 			wg.Wait()
 
 			stopDbus()
@@ -198,13 +205,10 @@ func StartLocalSystemBus(t *testing.T) func() {
 			}
 			cleanup()
 
-			// don't take new additional requests
-			dbusReady = make(chan struct{})
+			// Restore dbus system launcher
 			sdbus = sync.Once{}
 		}
 	})
 
-	// Ensure every parallel tests wait for first one to be ready
-	<-dbusReady
 	return cleanupFunc
 }
