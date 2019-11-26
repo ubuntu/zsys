@@ -11,6 +11,7 @@ import (
 
 func TestIsAllowedFromContext(t *testing.T) {
 	t.Parallel()
+	defer authorizer.StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
 		action authorizer.Action
@@ -55,6 +56,7 @@ func TestIsAllowedFromContext(t *testing.T) {
 
 func TestIsAllowedFromContextWithoutPeer(t *testing.T) {
 	t.Parallel()
+	defer authorizer.StartLocalSystemBus(t)()
 
 	a, err := authorizer.New()
 	if err != nil {
@@ -67,6 +69,7 @@ func TestIsAllowedFromContextWithoutPeer(t *testing.T) {
 
 func TestIsAllowedFromContextWithInvalidPeerCreds(t *testing.T) {
 	t.Parallel()
+	defer authorizer.StartLocalSystemBus(t)()
 
 	a, err := authorizer.New()
 	if err != nil {

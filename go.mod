@@ -5,7 +5,7 @@ go 1.13
 require (
 	github.com/bicomsystems/go-libzfs v0.2.2-0.20190807094932-e50663fa5901
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
-	github.com/godbus/dbus v4.1.0+incompatible
+	github.com/godbus/dbus/v5 v5.0.3
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.2-0.20191028172631-481baca67f93
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
