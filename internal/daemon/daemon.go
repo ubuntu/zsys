@@ -72,7 +72,7 @@ func New(socket string, opts ...option) (*Server, error) {
 	}
 	for _, o := range opts {
 		if err := o(&args); err != nil {
-			log.Warningf(context.Background(), i18n.G("Couldn't apply option to server: %v"), err)
+			return nil, fmt.Errorf(i18n.G("Couldn't apply option to server: %v"), err)
 		}
 	}
 
