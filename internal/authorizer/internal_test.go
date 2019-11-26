@@ -149,9 +149,7 @@ func StartLocalSystemBus(t *testing.T) func() {
 	t.Helper()
 	mu.Lock()
 	defer mu.Unlock()
-
 	wg.Add(1)
-	cleanupFunc := func() { wg.Done() }
 
 	sdbus.Do(func() {
 		dir, cleanup := testutils.TempDir(t)
@@ -189,12 +187,10 @@ func StartLocalSystemBus(t *testing.T) func() {
 			t.Fatalf("couldn't set DBUS_SYSTEM_BUS_ADDRESS: %v", err)
 		}
 
-		cleanupFunc = func() {
+		go func() {
 			mu.Lock()
 			defer mu.Unlock()
-			wg.Done()
-
-			// Wait for all others tests to be done to cleanup properly
+			// Wait for all tests that started to be done to cleanup properly
 			wg.Wait()
 
 			stopDbus()
@@ -207,8 +203,8 @@ func StartLocalSystemBus(t *testing.T) func() {
 
 			// Restore dbus system launcher
 			sdbus = sync.Once{}
-		}
+		}()
 	})
 
-	return cleanupFunc
+	return func() { wg.Done() }
 }
