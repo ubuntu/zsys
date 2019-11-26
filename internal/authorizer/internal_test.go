@@ -139,8 +139,9 @@ func TestServerPeerCredsInvalidSocket(t *testing.T) {
 }
 
 var (
-	sdbus sync.Once
-	wg    sync.WaitGroup
+	sdbus     sync.Once
+	wg        sync.WaitGroup
+	dbusReady = make(chan struct{})
 )
 
 func StartLocalSystemBus(t *testing.T) func() {
@@ -183,6 +184,7 @@ func StartLocalSystemBus(t *testing.T) func() {
 		if err := os.Setenv("DBUS_SYSTEM_BUS_ADDRESS", string(dbusAddr)); err != nil {
 			t.Fatalf("couldn't set DBUS_SYSTEM_BUS_ADDRESS: %v", err)
 		}
+		close(dbusReady)
 
 		cleanupFunc = func() {
 			wg.Done()
@@ -195,8 +197,14 @@ func StartLocalSystemBus(t *testing.T) func() {
 				t.Errorf("couldn't restore DBUS_SYSTEM_BUS_ADDRESS: %v", err)
 			}
 			cleanup()
+
+			// don't take new additional requests
+			dbusReady = make(chan struct{})
+			sdbus = sync.Once{}
 		}
 	})
 
+	// Ensure every parallel tests wait for first one to be ready
+	<-dbusReady
 	return cleanupFunc
 }
