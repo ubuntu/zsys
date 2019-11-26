@@ -4,10 +4,11 @@ Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: debhelper (>= 11),
                dh-golang,
-               golang-1.13-go,
+               golang-go,
                libzfslinux-dev,
                zfsutils-linux,
                grub2-common,
+               dbus,
 Standards-Version: 4.1.3
 XS-Go-Import-Path: github.com/ubuntu/zsys
 Homepage: https://github.com/ubuntu/zsys
