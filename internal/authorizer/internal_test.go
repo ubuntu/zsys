@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ubuntu/zsys/internal/testutils"
@@ -141,15 +142,16 @@ func TestServerPeerCredsInvalidSocket(t *testing.T) {
 var (
 	sdbus sync.Once
 
-	mu sync.RWMutex
-	wg sync.WaitGroup
+	mu             sync.Mutex
+	nbRunningTests uint
 )
 
 func StartLocalSystemBus(t *testing.T) func() {
 	t.Helper()
+
 	mu.Lock()
 	defer mu.Unlock()
-	wg.Add(1)
+	nbRunningTests++
 
 	sdbus.Do(func() {
 		dir, cleanup := testutils.TempDir(t)
@@ -188,23 +190,35 @@ func StartLocalSystemBus(t *testing.T) func() {
 		}
 
 		go func() {
-			mu.Lock()
-			defer mu.Unlock()
-			// Wait for all tests that started to be done to cleanup properly
-			wg.Wait()
+			for {
+				time.Sleep(time.Second)
+				mu.Lock()
 
-			stopDbus()
-			cmd.Wait()
+				// Wait for all tests that started to be done to cleanup properly
+				if nbRunningTests != 0 {
+					mu.Unlock()
+					continue
+				}
 
-			if err := os.Setenv("DBUS_SYSTEM_BUS_ADDRESS", savedDbusSystemAddress); err != nil {
-				t.Errorf("couldn't restore DBUS_SYSTEM_BUS_ADDRESS: %v", err)
+				stopDbus()
+				cmd.Wait()
+
+				if err := os.Setenv("DBUS_SYSTEM_BUS_ADDRESS", savedDbusSystemAddress); err != nil {
+					t.Errorf("couldn't restore DBUS_SYSTEM_BUS_ADDRESS: %v", err)
+				}
+				cleanup()
+
+				// Restore dbus system launcher
+				sdbus = sync.Once{}
+				mu.Unlock()
+				break
 			}
-			cleanup()
-
-			// Restore dbus system launcher
-			sdbus = sync.Once{}
 		}()
 	})
 
-	return func() { wg.Done() }
+	return func() {
+		mu.Lock()
+		defer mu.Unlock()
+		nbRunningTests--
+	}
 }
