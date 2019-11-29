@@ -922,54 +922,6 @@ func TestNewTransaction(t *testing.T) {
 	}
 }
 
-func TestNewWithAutoCancel(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
-
-	tests := map[string]struct {
-		err error
-	}{
-		"Everything pass":                {},
-		"Error automatically rollbacked": {err: errors.New("an error")},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			dir, cleanup := testutils.TempDir(t)
-			defer cleanup()
-
-			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"))
-			defer fPools.create(dir)()
-
-			z := zfs.NewWithAutoCancel(context.Background())
-			defer z.Done()
-
-			// Scan initial state for no-op
-			initState, err := z.Scan()
-			if err != nil {
-				t.Fatalf("couldn't get initial state: %v", err)
-			}
-
-			if err := z.Create("rpool/New", "/", "on"); err != nil {
-				t.Fatalf("didn't expect a failure but got: %v", err)
-			}
-
-			z.DoneCheckErr(&tc.err)
-
-			finaleState, err := z.Scan()
-			if err != nil {
-				t.Fatalf("couldn't get initial state: %v", err)
-			}
-
-			// auto cancel should have reverted everything
-			if tc.err != nil {
-				assertDatasetsEquals(t, ta, initState, finaleState, true)
-				return
-			}
-			assertDatasetsNotEquals(t, ta, initState, finaleState, true)
-		})
-	}
-}
 */
 
 func TestTransaction(t *testing.T) {
@@ -1075,26 +1027,6 @@ func TestInvalidatedTransactionByCancel(t *testing.T) {
 }
 
 /*
-func TestCheckZfsWithCancelContext(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.WithValue(context.Background(), "foo", "bar")
-	z, cancel := zfs.NewWithCancel(ctx)
-	defer cancel()
-	defer z.Done()
-
-	assert.Equal(t, "bar", ctx.Value("foo"), "Context created WithCancel has value property from parents")
-}
-
-func TestCheckZfsWithAutoCancelContext(t *testing.T) {
-	t.Parallel()
-
-	ctx := context.WithValue(context.Background(), "foo", "bar")
-	z := zfs.NewWithAutoCancel(ctx)
-	defer z.DoneCheckErr(nil)
-
-	assert.Equal(t, "bar", ctx.Value("foo"), "Context created WithAutoCancel has value property from parents")
-}
 
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
 // DataSlices.

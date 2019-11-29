@@ -229,55 +229,6 @@ func (t *nestedTransaction) Done(err *error) {
 - we create accessors (method) for each datasets, which handle isSnapshot() and more
 */
 
-// It can handle transactions if the context passed to the constructor is cancellable (timeout, deadline or cancel).
-// We finally need to call Done() to end a transaction. This object shouldn't be reused then.
-// If cancel() on the context is called before Done(), we'll rollback the changes.
-// Some multi-zfs-calls functions will create a subtransaction and try to rollback those in-flight changes in case of error.
-/*type Zfs struct {
-	ctx context.Context
-
-	cancel context.CancelFunc
-	commit chan struct{}
-	done   chan struct{}
-
-	reverts []func() error
-}
-
-// New returns a new zfs system handler.
-func New(ctx context.Context, options ...func(*Zfs)) *Zfs {
-	z := Zfs{
-		ctx:    ctx,
-		commit: make(chan struct{}),
-		done:   make(chan struct{}),
-	}
-	for _, options := range options {
-		options(&z)
-	}
-
-	ready := make(chan struct{})
-
-	// cancel transactions when context is cancelled before any commit
-	go func() {
-		close(ready)
-		select {
-		case <-z.ctx.Done():
-			log.Debugf(z.ctx, i18n.G("ZFS: reverting all in progress zfs transactions"))
-			for i := len(z.reverts) - 1; i >= 0; i-- {
-				if err := z.reverts[i](); err != nil {
-					log.Warningf(z.ctx, i18n.G("An error occurred when reverting a Zfs transaction: ")+config.ErrorFormat, err)
-				}
-			}
-			z.reverts = nil
-		case <-z.commit:
-		}
-		z.done <- struct{}{}
-	}()
-	// wait for teardown goroutine to start
-	<-ready
-
-	return &z
-}*/
-
 // Create creates a dataset for that path.
 /*func (z *Zfs) Create(path, mountpoint, canmount string) error {
 	log.Debugf(z.ctx, i18n.G("ZFS: trying to Create %q with mountpoint %q"), path, mountpoint)
