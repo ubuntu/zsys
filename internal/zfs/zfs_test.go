@@ -3,17 +3,9 @@ package zfs_test
 import (
 	"context"
 	"errors"
-	"os"
 	"os/user"
-	"path/filepath"
-	"sort"
-	"syscall"
 	"testing"
-	"time"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/k0kubun/pp"
 	"github.com/stretchr/testify/assert"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
@@ -22,9 +14,10 @@ import (
 
 func init() {
 	testutils.InstallUpdateFlag()
-	config.SetVerboseMode(1)
+	config.SetVerboseMode(2)
 }
 
+/*
 func TestCreate(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
@@ -977,55 +970,111 @@ func TestNewWithAutoCancel(t *testing.T) {
 		})
 	}
 }
+*/
 
-func TestDoneCheckErrOnNoneAutoCancel(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+func TestTransaction(t *testing.T) {
+	t.Parallel()
 
 	tests := map[string]struct {
-		err error
+		cancelCtxCalled         bool
+		cancelTransactionCalled bool
+		cancelJustAfterDone     bool
+		doneDone                bool
+		revertError             bool
+
+		want string
 	}{
-		"Called with nil error": {},
-		"Error when called on non nil error as we don't have a zfs auto cancel object": {err: errors.New("an error")},
+		"Done without cancel": {},
+
+		"Cancel with transaction cancelFunc":    {cancelTransactionCalled: true, want: "reverted"},
+		"Cancel with parent context cancelFunc": {cancelCtxCalled: true, want: "reverted"},
+
+		"Cancel just after done is a no-op": {cancelJustAfterDone: true},
+		"Done just after done is a no-op":   {doneDone: true},
+		"Revert error is logged":            {cancelTransactionCalled: true, revertError: true},
 	}
 
 	for name, tc := range tests {
+		tc := tc
 		t.Run(name, func(t *testing.T) {
-			dir, cleanup := testutils.TempDir(t)
-			defer cleanup()
+			t.Parallel()
+			z, err := zfs.New(context.Background())
+			if err != nil {
+				t.Fatalf("couldn't create base ZFS object: %v", err)
+			}
+			ctx := context.Background()
+			var cancelCtx context.CancelFunc
+			if tc.cancelCtxCalled {
+				ctx, cancelCtx = context.WithCancel(ctx)
+				defer cancelCtx()
+			}
 
-			fPools := newFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"))
-			defer fPools.create(dir)()
+			var result string
 
-			z := zfs.New(context.Background())
-			defer z.Done()
+			trans, cancel := z.NewTransaction(ctx)
+			trans.RegisterRevert(func() error {
+				if tc.revertError {
+					return errors.New("Revert returned an error")
+				}
+				result = "reverted"
+				return nil
+			})
 
-			func() {
-				defer func() {
-					hasPaniced := recover()
-					if tc.err != nil && hasPaniced == nil {
-						t.Fatal("did expect to panic on calling DoneCheckErr with a non nil error")
-					} else if tc.err == nil && hasPaniced != nil {
-						t.Fatalf("didn't expect to panic on calling DoneCheckErr with nil error")
-					}
-				}()
+			if tc.cancelCtxCalled {
+				// cancel transaction via parent context cancel
+				cancelCtx()
+			} else if tc.cancelTransactionCalled {
+				// cancel transaction via transaction context cancel
+				cancel()
+			}
 
-				z.DoneCheckErr(&tc.err)
-			}()
+			trans.Done()
+			if tc.cancelJustAfterDone {
+				cancel()
+			}
 
+			assert.Equal(t, tc.want, result, "result is not the expected value")
+
+			if tc.doneDone {
+				trans.Done()
+				assert.Equal(t, tc.want, result, "result is not the expected value after second done")
+			}
 		})
 	}
 }
 
-func TestCheckZfsContext(t *testing.T) {
+func TestInvalidatedTransactionByDone(t *testing.T) {
 	t.Parallel()
 
-	ctx := context.Background()
-	z := zfs.New(ctx)
-	defer z.Done()
+	z, err := zfs.New(context.Background())
+	if err != nil {
+		t.Fatalf("couldn't create base ZFS object: %v", err)
+	}
+	trans, _ := z.NewTransaction(context.Background())
+	assert.NotPanics(t, trans.CheckValid, "transaction should be valid")
 
-	assert.Equal(t, ctx, z.Context(), "Basic ZFS store current context")
+	trans.Done()
+
+	assert.Panics(t, trans.CheckValid, "transaction should be invalidated")
+}
+func TestInvalidatedTransactionByCancel(t *testing.T) {
+	t.Parallel()
+
+	z, err := zfs.New(context.Background())
+	if err != nil {
+		t.Fatalf("couldn't create base ZFS object: %v", err)
+	}
+	trans, cancel := z.NewTransaction(context.Background())
+	defer trans.Done()
+	assert.NotPanics(t, trans.CheckValid, "transaction should be valid")
+
+	cancel()
+	trans.CancelPurged()
+
+	assert.Panics(t, trans.CheckValid, "transaction should be invalidated")
 }
 
+/*
 func TestCheckZfsWithCancelContext(t *testing.T) {
 	t.Parallel()
 
@@ -1160,6 +1209,7 @@ func (ta timeAsserter) assertAndReplaceCreationTimeInRange(t *testing.T, ds []*z
 		}
 	}
 }
+*/
 
 // skipOnZFSPermissionDenied skips the tests if the current user can't create zfs pools, datasets…
 func skipOnZFSPermissionDenied(t *testing.T) {

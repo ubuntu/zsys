@@ -1,9 +1,18 @@
 package zfs
 
-import (
-	"encoding/json"
-)
+func (t *Transaction) RegisterRevert(f func() error) {
+	t.registerRevert(f)
+}
 
+func (t *Transaction) CheckValid() {
+	t.checkValid()
+}
+
+func (t *Transaction) CancelPurged() {
+	<-t.done
+}
+
+/*
 // DatasetSlice enables sorting a slice of Dataset elements.
 // This is the element saved and compared against.
 type DatasetSlice struct {
@@ -54,3 +63,4 @@ func (s *DatasetSlice) UnmarshalJSON(b []byte) error {
 
 	return nil
 }
+*/

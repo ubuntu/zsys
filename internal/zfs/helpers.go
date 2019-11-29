@@ -1,14 +1,15 @@
 package zfs
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
 	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
+	"github.com/ubuntu/zsys/internal/log"
 )
 
 // local cache of properties, refreshed on Scan()
@@ -162,42 +163,33 @@ func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
 	return &dp, nil
 }
 
-// collectDatasets returns a Dataset tuple of all its properties and children
-func collectDatasets(d libzfs.Dataset) []Dataset {
-	var results []Dataset
-	var collectErr error
-
-	defer func() {
-		if collectErr != nil {
-			log.Printf(fmt.Sprintf(i18n.G("couldn't load dataset: %s\n"), config.ErrorFormat), collectErr)
-		}
-	}()
-
+// newDatasetTree returns a Dataset and a populated tree of all its children
+func newDatasetTree(ctx context.Context, d libzfs.Dataset, p *Dataset, allDatasets *map[string]*Dataset) *Dataset {
 	// Skip non file system or snapshot datasets
 	if d.Type == libzfs.DatasetTypeVolume || d.Type == libzfs.DatasetTypeBookmark {
 		return nil
 	}
 
-	name := d.Properties[libzfs.DatasetPropName].Value
-
-	props, err := getDatasetProp(d)
-	if err != nil {
-		collectErr = fmt.Errorf(i18n.G("can't get dataset properties for %q: ")+config.ErrorFormat, name, err)
-		return nil
+	node := Dataset{
+		Name:   d.Properties[libzfs.DatasetPropName].Value,
+		parent: p,
 	}
+	log.Debugf(ctx, i18n.G("New dataset found: %q"), node.Name)
 
-	results = append(results,
-		Dataset{
-			Name:        name,
-			IsSnapshot:  d.IsSnapshot(),
-			DatasetProp: *props,
-		})
-
+	var children []*Dataset
 	for _, dc := range d.Children {
-		results = append(results, collectDatasets(dc)...)
+		c := newDatasetTree(ctx, dc, &node, allDatasets)
+		if c == nil {
+			continue
+		}
+		children = append(children, c)
 	}
+	node.children = children
 
-	return results
+	// Populate direct access map
+	(*allDatasets)[node.Name] = &node
+
+	return &node
 }
 
 // splitSnapshotName return base and trailing names
