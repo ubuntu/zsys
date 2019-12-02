@@ -3,9 +3,17 @@ package zfs_test
 import (
 	"context"
 	"errors"
+	"os"
 	"os/user"
+	"path/filepath"
+	"sort"
+	"syscall"
 	"testing"
+	"time"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/k0kubun/pp"
 	"github.com/stretchr/testify/assert"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
@@ -15,6 +23,74 @@ import (
 func init() {
 	testutils.InstallUpdateFlag()
 	config.SetVerboseMode(2)
+}
+
+func TestNew(t *testing.T) {
+	skipOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		def     string
+		mounted string
+
+		wantErr bool
+	}{
+		"One pool, N datasets, N children":                                         {def: "one_pool_n_datasets_n_children.yaml"},
+		"One pool, N datasets, N children, N snapshots":                            {def: "one_pool_n_datasets_n_children_n_snapshots.yaml"},
+		"One pool, N datasets, N children, N snapshots, intermediate canmount=off": {def: "one_pool_n_datasets_n_children_n_snapshots_canmount_off.yaml"},
+		"One pool, one dataset":                                                    {def: "one_pool_one_dataset.yaml"},
+		"One pool, one dataset, different mountpoints":                             {def: "one_pool_one_dataset_different_mountpoints.yaml"},
+		"One pool, one dataset, no property":                                       {def: "one_pool_one_dataset_no_property.yaml"},
+		"One pool, one dataset, with bootfsdatasets property":                      {def: "one_pool_one_dataset_with_bootfsdatasets.yaml"},
+		"One pool, one dataset, with bootfsdatasets property, multiple elems":      {def: "one_pool_one_dataset_with_bootfsdatasets_multiple.yaml"},
+		"One pool, one dataset, with lastused property":                            {def: "one_pool_one_dataset_with_lastused.yaml"},
+		"One pool, one dataset, with lastbootedkernel property":                    {def: "one_pool_one_dataset_with_lastbootedkernel.yaml"},
+		"One pool, with canmount as default":                                       {def: "one_pool_dataset_with_canmount_default.yaml"},
+		"One pool, N datasets":                                                     {def: "one_pool_n_datasets.yaml"},
+		"One pool, one dataset, one snapshot":                                      {def: "one_pool_one_dataset_one_snapshot.yaml"},
+		"One pool, one dataset, canmount=noauto":                                   {def: "one_pool_one_dataset_canmount_noauto.yaml"},
+		"One pool, N datasets, one snapshot":                                       {def: "one_pool_n_datasets_one_snapshot.yaml"},
+		"One pool non-root mpoint, N datasets no mountpoint":                       {def: "one_pool_with_nonroot_mountpoint_n_datasets_no_mountpoint.yaml"},
+		"Two pools, N datasets":                                                    {def: "two_pools_n_datasets.yaml"},
+		"Two pools, N datasets, N snapshots":                                       {def: "two_pools_n_datasets_n_snapshots.yaml"},
+		"One mounted dataset":                                                      {def: "one_pool_n_datasets_n_children.yaml", mounted: "rpool/ROOT/ubuntu"},
+		"Snapshot user properties differs from parent dataset":                     {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml"},
+		"Snapshot with unset user properties inherits from parent dataset":         {def: "one_pool_n_datasets_n_children_n_snapshots_with_unset_user_properties.yaml"},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			ta := timeAsserter(time.Now())
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			defer fPools.create(dir)()
+
+			if tc.mounted != "" {
+				temp := filepath.Join(dir, "tempmount")
+				if err := os.MkdirAll(temp, 0755); err != nil {
+					t.Fatalf("couldn't create temporary mount point directory %q: %v", temp, err)
+				}
+				// zfs will unmount it when exporting the pool
+				if err := syscall.Mount(tc.mounted, temp, "zfs", 0, "zfsutil"); err != nil {
+					t.Fatalf("couldn't prepare and mount %q: %v", tc.mounted, err)
+				}
+			}
+
+			z, err := zfs.New(context.Background())
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			assertDatasetsToGolden(t, ta, z.Datasets(), false)
+		})
+	}
 }
 
 /*
@@ -83,76 +159,6 @@ func TestCreate(t *testing.T) {
 				return
 			}
 			assertDatasetsToGolden(t, ta, got, true)
-		})
-	}
-}
-
-func TestScan(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
-
-	tests := map[string]struct {
-		def     string
-		mounted string
-
-		wantErr bool
-	}{
-		"One pool, N datasets, N children":                                         {def: "one_pool_n_datasets_n_children.yaml"},
-		"One pool, N datasets, N children, N snapshots":                            {def: "one_pool_n_datasets_n_children_n_snapshots.yaml"},
-		"One pool, N datasets, N children, N snapshots, intermediate canmount=off": {def: "one_pool_n_datasets_n_children_n_snapshots_canmount_off.yaml"},
-		"One pool, one dataset":                                                    {def: "one_pool_one_dataset.yaml"},
-		"One pool, one dataset, different mountpoints":                             {def: "one_pool_one_dataset_different_mountpoints.yaml"},
-		"One pool, one dataset, no property":                                       {def: "one_pool_one_dataset_no_property.yaml"},
-		"One pool, one dataset, with bootfsdatasets property":                      {def: "one_pool_one_dataset_with_bootfsdatasets.yaml"},
-		"One pool, one dataset, with bootfsdatasets property, multiple elems":      {def: "one_pool_one_dataset_with_bootfsdatasets_multiple.yaml"},
-		"One pool, one dataset, with lastused property":                            {def: "one_pool_one_dataset_with_lastused.yaml"},
-		"One pool, one dataset, with lastbootedkernel property":                    {def: "one_pool_one_dataset_with_lastbootedkernel.yaml"},
-		"One pool, with canmount as default":                                       {def: "one_pool_dataset_with_canmount_default.yaml"},
-		"One pool, N datasets":                                                     {def: "one_pool_n_datasets.yaml"},
-		"One pool, one dataset, one snapshot":                                      {def: "one_pool_one_dataset_one_snapshot.yaml"},
-		"One pool, one dataset, canmount=noauto":                                   {def: "one_pool_one_dataset_canmount_noauto.yaml"},
-		"One pool, N datasets, one snapshot":                                       {def: "one_pool_n_datasets_one_snapshot.yaml"},
-		"One pool non-root mpoint, N datasets no mountpoint":                       {def: "one_pool_with_nonroot_mountpoint_n_datasets_no_mountpoint.yaml"},
-		"Two pools, N datasets":                                                    {def: "two_pools_n_datasets.yaml"},
-		"Two pools, N datasets, N snapshots":                                       {def: "two_pools_n_datasets_n_snapshots.yaml"},
-		"One mounted dataset":                                                      {def: "one_pool_n_datasets_n_children.yaml", mounted: "rpool/ROOT/ubuntu"},
-		"Snapshot user properties differs from parent dataset":                     {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml"},
-		"Snapshot with unset user properties inherits from parent dataset":         {def: "one_pool_n_datasets_n_children_n_snapshots_with_unset_user_properties.yaml"},
-	}
-
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			dir, cleanup := testutils.TempDir(t)
-			defer cleanup()
-
-			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
-			defer fPools.create(dir)()
-
-			if tc.mounted != "" {
-				temp := filepath.Join(dir, "tempmount")
-				if err := os.MkdirAll(temp, 0755); err != nil {
-					t.Fatalf("couldn't create temporary mount point directory %q: %v", temp, err)
-				}
-				// zfs will unmount it when exporting the pool
-				if err := syscall.Mount(tc.mounted, temp, "zfs", 0, "zfsutil"); err != nil {
-					t.Fatalf("couldn't prepare and mount %q: %v", tc.mounted, err)
-				}
-			}
-
-			z := zfs.New(context.Background())
-			defer z.Done()
-			got, err := z.Scan()
-			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				return
-			}
-			if tc.wantErr {
-				t.Fatal("expected an error but got none")
-			}
-
-			assertDatasetsToGolden(t, ta, got, false)
 		})
 	}
 }
@@ -1026,8 +1032,6 @@ func TestInvalidatedTransactionByCancel(t *testing.T) {
 	assert.Panics(t, trans.CheckValid, "transaction should be invalidated")
 }
 
-/*
-
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
 // DataSlices.
 func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) zfs.DatasetSlice {
@@ -1058,7 +1062,7 @@ func datasetsEquals(t *testing.T, want, got []zfs.Dataset, includePrivate bool) 
 	if includePrivate {
 		privateOpt = cmp.AllowUnexported(zfs.DatasetProp{})
 	}
-	if diff := cmp.Diff(want, got, privateOpt); diff != "" {
+	if diff := cmp.Diff(want, got, cmpopts.IgnoreUnexported(zfs.Dataset{}), privateOpt); diff != "" {
 		t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
 	}
 }
@@ -1072,7 +1076,7 @@ func datasetsNotEquals(t *testing.T, want, got []zfs.Dataset, includePrivate boo
 	if includePrivate {
 		privateOpt = cmp.AllowUnexported(zfs.DatasetProp{})
 	}
-	if diff := cmp.Diff(want, got, privateOpt); diff == "" {
+	if diff := cmp.Diff(want, got, cmpopts.IgnoreUnexported(zfs.Dataset{}), privateOpt); diff == "" {
 		t.Error("datasets are equals where we expected not to:", pp.Sprint(want))
 	}
 }
@@ -1141,7 +1145,6 @@ func (ta timeAsserter) assertAndReplaceCreationTimeInRange(t *testing.T, ds []*z
 		}
 	}
 }
-*/
 
 // skipOnZFSPermissionDenied skips the tests if the current user can't create zfs pools, datasets…
 func skipOnZFSPermissionDenied(t *testing.T) {
