@@ -37,10 +37,12 @@ type fakePool struct {
 		BootfsDatasets   string    `yaml:"bootfs_datasets"`
 		Snapshots        []struct {
 			Name             string
-			ZsysBootfs       string    `yaml:"zsys_bootfs"`
-			LastUsed         time.Time `yaml:"last_used"`
-			LastBootedKernel string    `yaml:"last_booted_kernel"`
-			BootfsDatasets   string    `yaml:"bootfs_datasets"`
+			Mountpoint       string
+			CanMount         string
+			ZsysBootfs       string `yaml:"zsys_bootfs"`
+			LastBootedKernel string `yaml:"last_booted_kernel"`
+			BootfsDatasets   string `yaml:"bootfs_datasets"`
+			// LastUsed         time.Time `yaml:"last_used"` Last used will be snapshot creation time, so "now" in tests
 		}
 	}
 }
@@ -195,11 +197,14 @@ func (fpools fakePools) create(path string) func() {
 							fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)
 							os.Exit(1)
 						}
+						if s.Mountpoint != "" {
+							d.SetUserProperty(zfs.SnapshotMountpointProp, s.Mountpoint)
+						}
+						if s.CanMount != "" {
+							d.SetUserProperty(zfs.SnapshotCanmountProp, s.CanMount)
+						}
 						if s.ZsysBootfs != "" {
 							d.SetUserProperty(zfs.BootfsProp, s.ZsysBootfs)
-						}
-						if !s.LastUsed.IsZero() {
-							d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(s.LastUsed.Unix(), 10))
 						}
 						if s.LastBootedKernel != "" {
 							d.SetUserProperty(zfs.LastBootedKernelProp, s.LastBootedKernel)
