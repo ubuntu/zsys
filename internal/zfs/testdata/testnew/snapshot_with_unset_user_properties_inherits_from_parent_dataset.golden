@@ -29,10 +29,11 @@
       "Name": "rpool/ROOT/ubuntu/inherit@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/inherit",
-      "CanMount": "off",
+      "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 2000000000,
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
-      "BootfsDatasets": "something"
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "BootfsDatasets": "something else"
    },
    {
       "Name": "rpool/ROOT/ubuntu/overriden",
@@ -47,7 +48,7 @@
       "Name": "rpool/ROOT/ubuntu/overriden@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/overriden",
-      "CanMount": "off",
+      "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-4.0.0-0-generic",

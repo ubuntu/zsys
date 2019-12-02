@@ -9,7 +9,13 @@ pools:
         canmount: on
         snapshots:
           - name: snap_r1
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
           - name: snap_r2
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
   - name: bpool
     datasets:
       - name: BOOT
@@ -20,4 +26,10 @@ pools:
         canmount: on
         snapshots:
           - name: snap_b1
+            zsys_bootfs: yes:local
+            mountpoint: /boot:local
+            canmount: on:local
           - name: snap_b2
+            zsys_bootfs: yes:local
+            mountpoint: /boot:local
+            canmount: on:local
