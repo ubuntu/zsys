@@ -22,16 +22,22 @@ const (
 	LastBootedKernelProp = zsysPrefix + "last-booted-kernel"
 	// CanmountProp string value
 	CanmountProp = "canmount"
+	// SnapshotCanmountProp is the equivalent to CanmountProp, but as a user property to store on zsys snapshot
+	SnapshotCanmountProp = zsysPrefix + CanmountProp
 	// MountPointProp string value
 	MountPointProp = "mountpoint"
+	// SnapshotMountpointProp is the equivalent to MountPointProp, but as a user property to store on zsys snapshot
+	SnapshotMountpointProp = zsysPrefix + MountPointProp
 )
 
 // Dataset is the abstraction of a physical dataset and exposes only properties that must are accessible by the user.
 type Dataset struct {
 	// Name of the dataset.
-	Name string
+	Name       string
+	IsSnapshot bool `json:",omitempty"`
+	DatasetProp
 
-	parent   *Dataset
+	//parent   *Dataset
 	children []*Dataset
 	d        *libzfs.Dataset
 }
@@ -63,6 +69,7 @@ type DatasetProp struct {
 // datasetSources list sources some properties for a given dataset
 type datasetSources struct {
 	Mountpoint       string `json:",omitempty"`
+	CanMount         string `json:",omitempty"`
 	BootFS           string `json:",omitempty"`
 	LastUsed         string `json:",omitempty"`
 	LastBootedKernel string `json:",omitempty"`
@@ -98,7 +105,10 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 
 	var children []*Dataset
 	for _, d := range ds {
-		c := newDatasetTree(ctx, d, z.root, &z.allDatasets)
+		c, err := newDatasetTree(ctx, &d, &z.allDatasets)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't scan all datasets: %v", err)
+		}
 		if c == nil {
 			continue
 		}
@@ -107,6 +117,31 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	z.root.children = children
 
 	return &z, nil
+}
+
+// Datasets returns all datasets on the system, where parent will always be before children.
+func (z Zfs) Datasets() []Dataset {
+	ds := make(chan *Dataset)
+
+	var collectChildren func(d *Dataset)
+	collectChildren = func(d *Dataset) {
+		if d != z.root {
+			ds <- d
+		}
+		for _, n := range d.children {
+			collectChildren(n)
+		}
+		if d == z.root {
+			close(ds)
+		}
+	}
+	go collectChildren(z.root)
+
+	r := make([]Dataset, 0, len(z.allDatasets))
+	for d := range ds {
+		r = append(r, *d)
+	}
+	return r
 }
 
 // Transaction is a particular transaction on a Zfs state
@@ -259,6 +294,7 @@ func (t *nestedTransaction) Done(err *error) {
 	return nil
 }
 
+/*
 // Snapshot creates a new snapshot for dataset (and children if recursive is true) with the given name.
 func (t *Transaction) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot error) {
 	t.checkValid()
@@ -408,6 +444,21 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 	name := d.Properties[libzfs.DatasetPropName].Value
 	parentName := name[:strings.LastIndex(name, "@")]
 
+	/* FIXME: this is taken from getDatasetProp().
+	 * We will access directly the parent properties we are interested in here.
+	 *
+
+			parentName = name[:strings.LastIndex(name, "@")]
+			p, ok := datasetPropertiesCache[parentName]
+			if ok != true {
+				return nil, fmt.Errorf(i18n.G("couldn't find %q in cache for getting properties of snapshot %q"), parentName, name)
+			}
+			mountpoint = p.Mountpoint
+			sources.Mountpoint = p.sources.Mountpoint
+			canMount = p.CanMount
+
+*/
+/*
 	// Get properties from snapshot and parents.
 	srcProps, err := getDatasetProp(d)
 	if err != nil {

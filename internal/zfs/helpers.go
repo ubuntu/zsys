@@ -12,173 +12,182 @@ import (
 	"github.com/ubuntu/zsys/internal/log"
 )
 
-// local cache of properties, refreshed on Scan()
-var datasetPropertiesCache map[string]*DatasetProp
-
-// getDatasetsProp returns all properties for a given dataset and the source of them.
+// RefreshProperties refreshes all the properties for a given dataset and the source of them.
 // for snapshots, we'll take the parent dataset for the mount properties.
-func getDatasetProp(d libzfs.Dataset) (*DatasetProp, error) {
+func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset) error {
 	sources := datasetSources{}
-	name := d.Properties[libzfs.DatasetPropName].Value
-
 	isSnapshot := d.IsSnapshot()
-	var parentName string
+	name := d.Properties[libzfs.DatasetPropName].Value
 
 	var mounted bool
 	var mountpoint, canMount string
 
+	// On snapshots, take mount* properties from stored user property on dataset
 	if isSnapshot {
-		parentName = name[:strings.LastIndex(name, "@")]
-		p, ok := datasetPropertiesCache[parentName]
-		if ok != true {
-			return nil, fmt.Errorf(i18n.G("couldn't find %q in cache for getting properties of snapshot %q"), parentName, name)
-		}
-		mountpoint = p.Mountpoint
-		sources.Mountpoint = p.sources.Mountpoint
-		canMount = p.CanMount
-	} else {
-		mp, err := d.GetProperty(libzfs.DatasetPropMountpoint)
+		var srcMountpoint, srcCanMount string
+		var err error
+
+		mountpoint, srcMountpoint, err = getUserPropertyFromSys(ctx, SnapshotMountpointProp, d)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get mountpoint: ")+config.ErrorFormat, err)
+			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, SnapshotMountpointProp, err)
 		}
-		if mp.Source != "none" {
-			sources.Mountpoint = mp.Source
+		sources.Mountpoint = srcMountpoint
+
+		canMount, srcCanMount, err = getUserPropertyFromSys(ctx, SnapshotCanmountProp, d)
+		if err != nil {
+			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid  %q property: %v"), name, SnapshotCanmountProp, err)
 		}
+		sources.CanMount = srcCanMount
+	} else {
+		mp := d.Properties[libzfs.DatasetPropMountpoint]
 
 		p, err := d.Pool()
 		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get associated pool: ")+config.ErrorFormat, err)
+			return fmt.Errorf(i18n.G("can't get associated pool: ")+config.ErrorFormat, err)
 		}
-		poolRoot, err := p.GetProperty(libzfs.PoolPropAltroot)
-		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get altroot for associated pool: ")+config.ErrorFormat, err)
-		}
-		mountpoint = strings.TrimPrefix(mp.Value, poolRoot.Value)
+		poolRoot := p.Properties[libzfs.PoolPropAltroot].Value
+		mountpoint = strings.TrimPrefix(mp.Value, poolRoot)
 		if mountpoint == "" {
 			mountpoint = "/"
 		}
-
-		cm, err := d.GetProperty(libzfs.DatasetPropCanmount)
-		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get canmount property: ")+config.ErrorFormat, err)
+		srcMountpoint := "local"
+		if mp.Source != "local" {
+			srcMountpoint = "inherited"
 		}
+		sources.Mountpoint = srcMountpoint
+
+		cm := d.Properties[libzfs.DatasetPropCanmount]
 		canMount = cm.Value
-
-		mountedp, err := d.GetProperty(libzfs.DatasetPropMounted)
-		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get mounted: ")+config.ErrorFormat, err)
+		srcCanMount := "local"
+		if cm.Source != "local" {
+			srcCanMount = "inherited"
 		}
+		sources.CanMount = srcCanMount
+
+		mountedp := d.Properties[libzfs.DatasetPropMounted]
 		if mountedp.Value == "yes" {
 			mounted = true
 		}
 	}
 
-	// libzfs is accessing the property itself like this. There are issues when we do the check regularly with "no error"
-	// returned, or dataset doesn't exists…
 	origin := d.Properties[libzfs.DatasetPropOrigin].Value
 
-	bfs, err := d.GetUserProperty(BootfsProp)
+	bfs, srcBootFS, err := getUserPropertyFromSys(ctx, BootfsProp, d)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.G("can't get bootfs property: ")+config.ErrorFormat, err)
+		return err
 	}
-	var bootfs bool
-	// Only consider local, explicitly set bootfs as meaningful
-	if bfs.Source == "local" || (parentName != "" && parentName == bfs.Source) {
-		if bfs.Value == "yes" {
-			bootfs = true
-		}
-		sources.BootFS = bfs.Source
+	var bootFS bool
+	if bfs == "yes" {
+		bootFS = true
 	}
+	sources.BootFS = srcBootFS
 
-	var lu libzfs.Property
-	if !d.IsSnapshot() {
-		lu, err = d.GetUserProperty(LastUsedProp)
+	var lu, srcLastUsed string
+	if !isSnapshot {
+		lu, srcLastUsed, err = getUserPropertyFromSys(ctx, LastUsedProp, d)
 		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get %q property: ")+config.ErrorFormat, LastUsedProp, err)
+			return err
 		}
 	} else {
-		lu, err = d.GetProperty(libzfs.DatasetPropCreation)
-		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get creation property: ")+config.ErrorFormat, err)
-		}
+		lu = d.Properties[libzfs.DatasetPropCreation].Value
 	}
-	if lu.Source != "none" {
-		sources.LastUsed = lu.Source
+	if lu == "" {
+		lu = "0"
 	}
-	if lu.Value == "-" {
-		lu.Value = "0"
-	}
-	lastused, err := strconv.Atoi(lu.Value)
+	lastUsed, err := strconv.Atoi(lu)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+		return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
 	}
+	sources.LastUsed = srcLastUsed
 
-	lbk, err := d.GetUserProperty(LastBootedKernelProp)
+	lastBootedKernel, srcLastBootedKernel, err := getUserPropertyFromSys(ctx, LastBootedKernelProp, d)
 	if err != nil {
-		return nil, fmt.Errorf(i18n.G("can't get %q property: ")+config.ErrorFormat, LastBootedKernelProp, err)
+		return err
 	}
-	lastBootedKernel := lbk.Value
-	if lastBootedKernel == "-" {
-		lastBootedKernel = ""
-	}
-	if lbk.Source != "none" {
-		sources.LastBootedKernel = lbk.Source
-	}
+	sources.LastBootedKernel = srcLastBootedKernel
 
-	// TOREMOVE in 20.04 once compatible ubiquity is uploaded
-	// Temporary compatibility harness for old org.zsys prefix
-	var BootfsDatasets string
-	for _, userdataTag := range []string{BootfsDatasetsProp, strings.Replace(BootfsDatasetsProp, "com.ubuntu", "org", -1)} {
-		sDataset, err := d.GetUserProperty(userdataTag)
-		if err != nil {
-			return nil, fmt.Errorf(i18n.G("can't get %q property: ")+config.ErrorFormat, userdataTag, err)
-		}
-		BootfsDatasets = sDataset.Value
-		if BootfsDatasets == "-" {
-			BootfsDatasets = ""
-		}
-		if sDataset.Source != "none" {
-			sources.BootfsDatasets = sDataset.Source
-		}
-		// Prefer new tag name
-		if BootfsDatasets != "" {
-			break
-		}
+	bootfsDatasets, srcBootfsDatasets, err := getUserPropertyFromSys(ctx, BootfsDatasetsProp, d)
+	if err != nil {
+		return err
 	}
+	sources.BootfsDatasets = srcBootfsDatasets
 
-	dp := DatasetProp{
+	dataset.DatasetProp = DatasetProp{
 		Mountpoint:       mountpoint,
 		CanMount:         canMount,
 		Mounted:          mounted,
-		BootFS:           bootfs,
-		LastUsed:         lastused,
+		BootFS:           bootFS,
+		LastUsed:         lastUsed,
 		LastBootedKernel: lastBootedKernel,
-		BootfsDatasets:   BootfsDatasets,
+		BootfsDatasets:   bootfsDatasets,
 		Origin:           origin,
 		sources:          sources,
 	}
+	return nil
+}
 
-	datasetPropertiesCache[name] = &dp
+// getUserPropertyFromSys returns the value of a user property and its source from the underlying
+// ZFS system dataset state.
+// It also sanitize the sources to only return "local" or "inherited".
+func getUserPropertyFromSys(ctx context.Context, prop string, d *libzfs.Dataset) (value, source string, err error) {
+	name := d.Properties[libzfs.DatasetPropName].Value
 
-	return &dp, nil
+	p, err := d.GetUserProperty(prop)
+	if err != nil {
+		return "", "", fmt.Errorf(i18n.G("can't get %q property: ")+config.ErrorFormat, prop, err)
+	}
+
+	// User property doesn't exist for this dataset
+	// On undefined user property sources, ZFS returns "-" but the API returns "none" check both for safety
+	if p.Value == "-" && (p.Source == "-" || p.Source == "none") {
+		return "", "", nil
+	}
+
+	if d.IsSnapshot() {
+		idx := strings.LastIndex(p.Value, ":")
+		if idx < 0 {
+			log.Warningf(ctx, i18n.G("%q isn't a 'value:source' format type for %q"), prop, name)
+			return
+		}
+		log.Debugf(ctx, "property %q on snapshot %q: %q", prop, name, value)
+		value = p.Value[:idx]
+		source = p.Value[idx+1:]
+	} else {
+		value = p.Value
+		source = p.Source
+		log.Debugf(ctx, "property %q on dataset %q: value: %q source: %q", prop, name, value, source)
+	}
+
+	if source != "local" {
+		source = "inherited"
+	}
+
+	return value, source, nil
 }
 
 // newDatasetTree returns a Dataset and a populated tree of all its children
-func newDatasetTree(ctx context.Context, d libzfs.Dataset, p *Dataset, allDatasets *map[string]*Dataset) *Dataset {
+func newDatasetTree(ctx context.Context, d *libzfs.Dataset, allDatasets *map[string]*Dataset) (*Dataset, error) {
 	// Skip non file system or snapshot datasets
 	if d.Type == libzfs.DatasetTypeVolume || d.Type == libzfs.DatasetTypeBookmark {
-		return nil
+		return nil, nil
 	}
 
+	name := d.Properties[libzfs.DatasetPropName].Value
+	log.Debugf(ctx, i18n.G("New dataNew dataset found: %q"), name)
 	node := Dataset{
-		Name:   d.Properties[libzfs.DatasetPropName].Value,
-		parent: p,
+		Name:       name,
+		IsSnapshot: d.IsSnapshot(),
 	}
-	log.Debugf(ctx, i18n.G("New dataset found: %q"), node.Name)
+	if err := node.RefreshProperties(ctx, d); err != nil {
+		return nil, fmt.Errorf("couldn't refresh properties of %q: %v", node.Name, err)
+	}
 
 	var children []*Dataset
 	for _, dc := range d.Children {
-		c := newDatasetTree(ctx, dc, &node, allDatasets)
+		c, err := newDatasetTree(ctx, &dc, allDatasets)
+		if err != nil {
+			return nil, fmt.Errorf("couldn't scan dataset: %v", err)
+		}
 		if c == nil {
 			continue
 		}
@@ -189,7 +198,7 @@ func newDatasetTree(ctx context.Context, d libzfs.Dataset, p *Dataset, allDatase
 	// Populate direct access map
 	(*allDatasets)[node.Name] = &node
 
-	return &node
+	return &node, nil
 }
 
 // splitSnapshotName return base and trailing names
