@@ -55,6 +55,7 @@ func TestNew(t *testing.T) {
 		"One mounted dataset":                                                      {def: "one_pool_n_datasets_n_children.yaml", mounted: "rpool/ROOT/ubuntu"},
 		"Snapshot user properties differs from parent dataset":                     {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml"},
 		"Snapshot with unset user properties inherits from parent dataset":         {def: "one_pool_n_datasets_n_children_n_snapshots_with_unset_user_properties.yaml"},
+		"Snapshot without any users properties are still loaded":                   {def: "one_pool_one_dataset_one_snapshot_without_user_properties.yaml"},
 	}
 
 	for name, tc := range tests {
