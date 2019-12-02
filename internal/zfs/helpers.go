@@ -142,14 +142,18 @@ func getUserPropertyFromSys(ctx context.Context, prop string, d *libzfs.Dataset)
 	if p.Value == "-" && (p.Source == "-" || p.Source == "none") {
 		return "", "", nil
 	}
+	// The user property isn't set explicitely on the snapshot (inherited from non snapshot parent): ignore it.
+	if d.IsSnapshot() && p.Source != "local" {
+		return "", "", nil
+	}
 
 	if d.IsSnapshot() {
+		log.Debugf(ctx, "property %q on snapshot %q: %q", prop, name, value)
 		idx := strings.LastIndex(p.Value, ":")
 		if idx < 0 {
 			log.Warningf(ctx, i18n.G("%q isn't a 'value:source' format type for %q"), prop, name)
 			return
 		}
-		log.Debugf(ctx, "property %q on snapshot %q: %q", prop, name, value)
 		value = p.Value[:idx]
 		source = p.Value[idx+1:]
 	} else {
