@@ -3,6 +3,11 @@
       "Name": "rpool",
       "Mountpoint": "/home/foo",
       "CanMount": "on",
-      "BootfsDatasets": "rpool/ROOT/ubuntu_42:rpool/ROOT/ubuntu_43"
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42:rpool/ROOT/ubuntu_43",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootfsDatasets": "local"
+      }
    }
 ]

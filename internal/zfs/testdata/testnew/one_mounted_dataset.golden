@@ -2,12 +2,20 @@
    {
       "Name": "rpool",
       "Mountpoint": "/",
-      "CanMount": "off"
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local"
+      }
    },
    {
       "Name": "rpool/ROOT",
       "Mountpoint": "/ROOT",
-      "CanMount": "off"
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local"
+      }
    },
    {
       "Name": "rpool/ROOT/ubuntu",
@@ -15,33 +23,62 @@
       "CanMount": "on",
       "Mounted": true,
       "BootFS": true,
-      "LastUsed": 1555555555
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "local"
+      }
    },
    {
       "Name": "rpool/ROOT/ubuntu/opt",
       "Mountpoint": "/opt",
       "CanMount": "on",
       "BootFS": true,
-      "LastUsed": 1555555555
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited"
+      }
    },
    {
       "Name": "rpool/ROOT/ubuntu/var",
       "Mountpoint": "/var",
       "CanMount": "on",
       "BootFS": true,
-      "LastUsed": 1555555555
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited"
+      }
    },
    {
       "Name": "rpool/ROOT/ubuntu/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "on",
       "BootFS": true,
-      "LastUsed": 1555555555
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited"
+      }
    },
    {
       "Name": "rpool/ROOT/ubuntu2",
       "Mountpoint": "/",
       "CanMount": "on",
-      "LastUsed": 1544444444
+      "LastUsed": 1544444444,
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "LastUsed": "local"
+      }
    }
 ]

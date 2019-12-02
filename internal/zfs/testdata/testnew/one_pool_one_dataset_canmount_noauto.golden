@@ -3,6 +3,11 @@
       "Name": "rpool",
       "Mountpoint": "/home/foo",
       "CanMount": "noauto",
-      "LastUsed": 1555555555
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "LastUsed": "local"
+      }
    }
 ]

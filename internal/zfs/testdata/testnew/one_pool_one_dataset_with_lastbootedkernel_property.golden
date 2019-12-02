@@ -3,6 +3,11 @@
       "Name": "rpool",
       "Mountpoint": "/home/foo",
       "CanMount": "on",
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "LastBootedKernel": "local"
+      }
    }
 ]

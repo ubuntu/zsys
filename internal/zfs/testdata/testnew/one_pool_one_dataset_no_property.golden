@@ -2,6 +2,10 @@
    {
       "Name": "rpool",
       "Mountpoint": "/",
-      "CanMount": "off"
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local"
+      }
    }
 ]

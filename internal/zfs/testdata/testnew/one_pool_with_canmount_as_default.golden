@@ -2,11 +2,19 @@
    {
       "Name": "rpool",
       "Mountpoint": "/",
-      "CanMount": "off"
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local"
+      }
    },
    {
       "Name": "rpool/ubuntu",
       "Mountpoint": "/ubuntu",
-      "CanMount": "on"
+      "CanMount": "on",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "inherited"
+      }
    }
 ]

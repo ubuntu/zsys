@@ -4,11 +4,18 @@
       "Mountpoint": "/",
       "CanMount": "on",
       "BootFS": true,
-      "LastUsed": 1555555555
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "local"
+      }
    },
    {
       "Name": "rpool@snap1",
       "IsSnapshot": true,
-      "LastUsed": 2000000000
+      "LastUsed": 2000000000,
+      "Sources": {}
    }
 ]
