@@ -89,7 +89,7 @@ func TestNew(t *testing.T) {
 				t.Fatal("expected an error but got none")
 			}
 
-			assertDatasetsToGolden(t, ta, z.Datasets(), false)
+			assertDatasetsToGolden(t, ta, z.Datasets())
 		})
 	}
 }
@@ -156,10 +156,10 @@ func TestCreate(t *testing.T) {
 
 			// check we didn't change anything on error
 			if tc.wantErr {
-				assertDatasetsEquals(t, ta, initState, got, true)
+				assertDatasetsEquals(t, ta, initState, got)
 				return
 			}
-			assertDatasetsToGolden(t, ta, got, true)
+			assertDatasetsToGolden(t, ta, got)
 		})
 	}
 }
@@ -227,10 +227,10 @@ func TestSnapshot(t *testing.T) {
 			}
 
 			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got, true)
+				assertDatasetsEquals(t, ta, initState, got)
 				return
 			}
-			assertDatasetsToGolden(t, ta, got, true)
+			assertDatasetsToGolden(t, ta, got)
 		})
 	}
 }
@@ -309,10 +309,10 @@ func TestClone(t *testing.T) {
 			}
 
 			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got, true)
+				assertDatasetsEquals(t, ta, initState, got)
 				return
 			}
-			assertDatasetsToGolden(t, ta, got, true)
+			assertDatasetsToGolden(t, ta, got)
 		})
 	}
 }
@@ -398,10 +398,10 @@ func TestPromote(t *testing.T) {
 			}
 
 			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got, true)
+				assertDatasetsEquals(t, ta, initState, got)
 				return
 			}
-			assertDatasetsToGolden(t, ta, got, true)
+			assertDatasetsToGolden(t, ta, got)
 		})
 	}
 }
@@ -487,10 +487,10 @@ func TestDestroy(t *testing.T) {
 			}
 
 			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got, true)
+				assertDatasetsEquals(t, ta, initState, got)
 				return
 			}
-			assertDatasetsToGolden(t, ta, got, true)
+			assertDatasetsToGolden(t, ta, got)
 		})
 	}
 }
@@ -569,10 +569,10 @@ func TestSetProperty(t *testing.T) {
 			}
 
 			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got, true)
+				assertDatasetsEquals(t, ta, initState, got)
 				return
 			}
-			assertDatasetsToGolden(t, ta, got, true)
+			assertDatasetsToGolden(t, ta, got)
 		})
 	}
 }
@@ -665,9 +665,9 @@ func TestTransactions(t *testing.T) {
 					t.Fatalf("couldn't get state after create: %v", errScan)
 				}
 				if err != nil {
-					assertDatasetsEquals(t, ta, state, newState, true)
+					assertDatasetsEquals(t, ta, state, newState)
 				} else {
-					assertDatasetsNotEquals(t, ta, state, newState, true)
+					assertDatasetsNotEquals(t, ta, state, newState)
 					haveChanges = true
 				}
 				state = newState
@@ -692,9 +692,9 @@ func TestTransactions(t *testing.T) {
 					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
 				if err != nil {
-					assertDatasetsEquals(t, ta, state, newState, true)
+					assertDatasetsEquals(t, ta, state, newState)
 				} else {
-					assertDatasetsNotEquals(t, ta, state, newState, true)
+					assertDatasetsNotEquals(t, ta, state, newState)
 					haveChanges = true
 				}
 				state = newState
@@ -718,9 +718,9 @@ func TestTransactions(t *testing.T) {
 					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
 				if err != nil {
-					assertDatasetsEquals(t, ta, state, newState, true)
+					assertDatasetsEquals(t, ta, state, newState)
 				} else {
-					assertDatasetsNotEquals(t, ta, state, newState, true)
+					assertDatasetsNotEquals(t, ta, state, newState)
 					haveChanges = true
 				}
 				state = newState
@@ -760,9 +760,9 @@ func TestTransactions(t *testing.T) {
 					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
 				if err != nil {
-					assertDatasetsEquals(t, ta, state, newState, true)
+					assertDatasetsEquals(t, ta, state, newState)
 				} else {
-					assertDatasetsNotEquals(t, ta, state, newState, true)
+					assertDatasetsNotEquals(t, ta, state, newState)
 					haveChanges = true
 				}
 				state = newState
@@ -777,7 +777,7 @@ func TestTransactions(t *testing.T) {
 				if errScan != nil {
 					t.Fatalf("couldn't get state after destruction: %v", errScan)
 				}
-				assertDatasetsEquals(t, ta, state, newState, true)
+				assertDatasetsEquals(t, ta, state, newState)
 				return
 			}
 
@@ -798,9 +798,9 @@ func TestTransactions(t *testing.T) {
 					t.Fatalf("couldn't get state after snapshot: %v", errScan)
 				}
 				if err != nil {
-					assertDatasetsEquals(t, ta, state, newState, true)
+					assertDatasetsEquals(t, ta, state, newState)
 				} else {
-					assertDatasetsNotEquals(t, ta, state, newState, true)
+					assertDatasetsNotEquals(t, ta, state, newState)
 					haveChanges = true
 				}
 				//state = newState Uncomment if adding new element to the transaction
@@ -820,9 +820,9 @@ func TestTransactions(t *testing.T) {
 
 			// Done: should have commit the current state and be different from initial one
 			if haveChanges {
-				assertDatasetsNotEquals(t, ta, initState, finalState, true)
+				assertDatasetsNotEquals(t, ta, initState, finalState)
 			} else {
-				assertDatasetsEquals(t, ta, initState, finalState, true)
+				assertDatasetsEquals(t, ta, initState, finalState)
 			}
 		})
 	}
@@ -900,9 +900,9 @@ func TestNewTransaction(t *testing.T) {
 
 			// check that an error in the recursive snapshot call has always been reverted (having a cancellable or non cancellable transactions)
 			if tc.errSnapshot {
-				assertDatasetsEquals(t, ta, intermediateState, afterSnapshotState, true)
+				assertDatasetsEquals(t, ta, intermediateState, afterSnapshotState)
 			} else {
-				assertDatasetsNotEquals(t, ta, intermediateState, afterSnapshotState, true)
+				assertDatasetsNotEquals(t, ta, intermediateState, afterSnapshotState)
 			}
 
 			if tc.cancellable && tc.cancel {
@@ -920,11 +920,11 @@ func TestNewTransaction(t *testing.T) {
 
 			// cancel should have reverted everything, including snapshot transaction if didn't fail
 			if !tc.cancelAfterDone && tc.cancellable && tc.cancel {
-				assertDatasetsEquals(t, ta, initState, finaleState, true)
+				assertDatasetsEquals(t, ta, initState, finaleState)
 				return
 			}
 			// no cancel or cancel after Done is too late: we should have changes
-			assertDatasetsNotEquals(t, ta, initState, finaleState, true)
+			assertDatasetsNotEquals(t, ta, initState, finaleState)
 		})
 	}
 }
@@ -1035,7 +1035,7 @@ func TestInvalidatedTransactionByCancel(t *testing.T) {
 
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
 // DataSlices.
-func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) zfs.DatasetSlice {
+func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset) zfs.DatasetSlice {
 	t.Helper()
 
 	// Ensure datasets were created at expected range time and replace them with magic time.
@@ -1049,76 +1049,69 @@ func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zf
 	ta.assertAndReplaceCreationTimeInRange(t, ds)
 
 	// Sort the golden file order to be reproducible.
-	gotForGolden := zfs.DatasetSlice{DS: got, IncludePrivate: includePrivate}
+	gotForGolden := zfs.DatasetSlice{DS: got}
 	sort.Sort(gotForGolden)
 	return gotForGolden
 }
 
 // datasetsEquals prints a diff if datasets aren't equals and fails the test
-func datasetsEquals(t *testing.T, want, got []zfs.Dataset, includePrivate bool) {
+func datasetsEquals(t *testing.T, want, got []zfs.Dataset) {
 	t.Helper()
 
 	// Actual diff assertion.
-	privateOpt := cmpopts.IgnoreUnexported(zfs.DatasetProp{})
-	if includePrivate {
-		privateOpt = cmp.AllowUnexported(zfs.DatasetProp{})
-	}
-	if diff := cmp.Diff(want, got, cmpopts.IgnoreUnexported(zfs.Dataset{}), privateOpt); diff != "" {
+	if diff := cmp.Diff(want, got,
+		cmpopts.IgnoreUnexported(zfs.Dataset{}),
+		cmp.AllowUnexported(zfs.DatasetProp{})); diff != "" {
 		t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
 	}
 }
 
 // datasetsNotEquals prints the struct if datasets are equals and fails the test
-func datasetsNotEquals(t *testing.T, want, got []zfs.Dataset, includePrivate bool) {
+func datasetsNotEquals(t *testing.T, want, got []zfs.Dataset) {
 	t.Helper()
 
 	// Actual diff assertion.
-	privateOpt := cmpopts.IgnoreUnexported(zfs.DatasetProp{})
-	if includePrivate {
-		privateOpt = cmp.AllowUnexported(zfs.DatasetProp{})
-	}
-	if diff := cmp.Diff(want, got, cmpopts.IgnoreUnexported(zfs.Dataset{}), privateOpt); diff == "" {
+	if diff := cmp.Diff(want, got,
+		cmpopts.IgnoreUnexported(zfs.Dataset{}),
+		cmp.AllowUnexported(zfs.DatasetProp{})); diff == "" {
 		t.Error("datasets are equals where we expected not to:", pp.Sprint(want))
 	}
 }
 
 // assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
 // to a golden file.
-// We can optionnally include private fields in the comparison and saving.
-func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset, includePrivate bool) {
+func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset) {
 	t.Helper()
 
-	gotForGolden := transformToReproducibleDatasetSlice(t, ta, got, includePrivate)
+	gotForGolden := transformToReproducibleDatasetSlice(t, ta, got)
 	got = gotForGolden.DS
 
 	// Get expected dataset list from golden file, update as needed.
-	wantFromGolden := zfs.DatasetSlice{IncludePrivate: includePrivate}
+	wantFromGolden := zfs.DatasetSlice{}
 	testutils.LoadFromGoldenFile(t, gotForGolden, &wantFromGolden)
 	want := []zfs.Dataset(wantFromGolden.DS)
 
-	datasetsEquals(t, want, got, includePrivate)
+	datasetsEquals(t, want, got)
 }
 
 // assertDatasetsEquals compares 2 slices of datasets, after ensuring they can be reproducible.
-// We can optionnally include private fields in the comparison.
-func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset, includePrivate bool) {
+func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset) {
 	t.Helper()
 
-	want = transformToReproducibleDatasetSlice(t, ta, want, includePrivate).DS
-	got = transformToReproducibleDatasetSlice(t, ta, got, includePrivate).DS
+	want = transformToReproducibleDatasetSlice(t, ta, want).DS
+	got = transformToReproducibleDatasetSlice(t, ta, got).DS
 
-	datasetsEquals(t, want, got, includePrivate)
+	datasetsEquals(t, want, got)
 }
 
 // assertDatasetsNotEquals compares 2 slices of datasets, ater ensuring they can be reproducible.
-// We can optionnally include private fields in the comparison.
-func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset, includePrivate bool) {
+func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset) {
 	t.Helper()
 
-	want = transformToReproducibleDatasetSlice(t, ta, want, includePrivate).DS
-	got = transformToReproducibleDatasetSlice(t, ta, got, includePrivate).DS
+	want = transformToReproducibleDatasetSlice(t, ta, want).DS
+	got = transformToReproducibleDatasetSlice(t, ta, got).DS
 
-	datasetsNotEquals(t, want, got, includePrivate)
+	datasetsNotEquals(t, want, got)
 }
 
 // timeAsserter ensures that dates will be between a start and end time

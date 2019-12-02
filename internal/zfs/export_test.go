@@ -39,9 +39,7 @@ func (s DatasetSlice) MarshalJSON() ([]byte, error) {
 	var dws []DatasetWithSource
 	for _, d := range s.DS {
 		datasetWS := DatasetWithSource{Dataset: d}
-		if s.IncludePrivate {
-			datasetWS.Sources = &datasetWS.sources
-		}
+		datasetWS.Sources = &datasetWS.sources
 		dws = append(dws, datasetWS)
 	}
 
@@ -58,9 +56,7 @@ func (s *DatasetSlice) UnmarshalJSON(b []byte) error {
 
 	for _, dw := range dws {
 		d := dw.Dataset
-		if s.IncludePrivate {
-			d.sources = *dw.Sources
-		}
+		d.sources = *dw.Sources
 		s.DS = append(s.DS, d)
 	}
 
