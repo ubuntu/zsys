@@ -8,6 +8,7 @@
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootFS": "local",
          "LastUsed": "local",
          "LastBootedKernel": "local"
@@ -17,12 +18,15 @@
       "Name": "rpool/dataset",
       "Mountpoint": "/home/foo",
       "CanMount": "off",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "local",
-         "LastUsed": "rpool",
-         "LastBootedKernel": "rpool"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited",
+         "LastBootedKernel": "inherited"
       }
    }
 ]

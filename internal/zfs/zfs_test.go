@@ -94,7 +94,6 @@ func TestNew(t *testing.T) {
 	}
 }
 
-/*
 func TestCreate(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
@@ -125,45 +124,40 @@ func TestCreate(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New(context.Background())
-			defer z.Done()
-			// Scan initial state for no-op
-			var initState []zfs.Dataset
-			if tc.wantErr {
-				var err error
-				initState, err = z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get initial state: %v", err)
-				}
-			}
-
-			err := z.Create(tc.path, tc.mountpoint, tc.canmount)
-
+			z, err := zfs.New(context.Background())
 			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				// we don't return because we want to check that on error, Create() is a no-op
+				t.Fatalf("expected no error but got: %v", err)
 			}
-			if err == nil && tc.wantErr {
+			initState := z.Datasets()
+			trans, _ := z.NewTransaction(context.Background())
+			defer trans.Done()
+
+			err = trans.Create(tc.path, tc.mountpoint, tc.canmount)
+
+			if err != nil && !tc.wantErr {
+				t.Fatalf("expected no error but got: %v", err)
+			} else if err == nil && tc.wantErr {
 				t.Fatal("expected an error but got none")
 			}
 
-			got, err := z.Scan()
+			// check we didn't change anything on error
 			if err != nil {
-				t.Fatalf("couldn't get final state: %v", err)
+				assertDatasetsEquals(t, ta, initState, z.Datasets())
+			} else {
+				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
-			// check we didn't change anything on error
-			if tc.wantErr {
-				assertDatasetsEquals(t, ta, initState, got)
-				return
+			// We should always have New() returning the same state than we manually updated
+			newZ, err := zfs.New(context.Background())
+			if err != nil {
+				t.Fatalf("expected no error but got: %v", err)
 			}
-			assertDatasetsToGolden(t, ta, got)
+			assertDatasetsEquals(t, ta, z.Datasets(), newZ.Datasets())
 		})
 	}
 }
 
+/*
 func TestSnapshot(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
