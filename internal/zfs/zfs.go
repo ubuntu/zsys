@@ -651,7 +651,7 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 // Note that destruction can't be rollbacked as filesystem content can't be recreated, so we don't accept them
 // in a transactional Zfs element.
 func (nt *NoTransaction) Destroy(name string) error {
-	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy %q"), name)
+	log.Debugf(nt.ctx, i18n.G("ZFS: request destruction of %q"), name)
 	d, err := nt.Zfs.findDatasetByName(name)
 	if err != nil {
 		return fmt.Errorf(i18n.G("can't get dataset to destroy %q: ")+config.ErrorFormat, name, err)
@@ -661,7 +661,16 @@ func (nt *NoTransaction) Destroy(name string) error {
 		return fmt.Errorf(i18n.G("couldn't destroy %q due to clones: %v"), name, err)
 	}
 
-	if err := nt.destroyRecursive(d); err != nil {
+	var parentName, snapName string
+	target := d
+	if d.IsSnapshot {
+		parentName, snapName = splitSnapshotName(d.Name)
+		target, err = nt.Zfs.findDatasetByName(parentName)
+		if err != nil {
+			return fmt.Errorf(i18n.G("cannot find parent for %q: %v"), d.Name, err)
+		}
+	}
+	if err := nt.destroyRecursive(target, snapName); err != nil {
 		return fmt.Errorf(i18n.G("couldn't destroy %q and its children: %v"), name, err)
 	}
 
@@ -669,26 +678,45 @@ func (nt *NoTransaction) Destroy(name string) error {
 }
 
 // destroyRecursive destroys and unreference dataset objects, starting with children.
-func (nt *NoTransaction) destroyRecursive(d *Dataset) error {
-
-	// Destroy children
+func (nt *NoTransaction) destroyRecursive(d *Dataset, snapName string) error {
 	for _, dc := range d.children {
-		if err := nt.destroyRecursive(dc); err != nil {
+		if err := nt.destroyRecursive(dc, snapName); err != nil {
 			return fmt.Errorf(i18n.G("stop destroying dataset on %q, cannot destroy child: %v"), d.Name, err)
 		}
 	}
+
+	target := d
+	var err error
+	if snapName != "" {
+		if target, err = nt.Zfs.findDatasetByName(d.Name + "@" + snapName); err != nil {
+			log.Debugf(nt.ctx, i18n.G("no existing snapshot %q: ")+config.ErrorFormat, d.Name+"@"+snapName, err)
+			return nil
+		}
+	}
+
+	return nt.destroyOne(target)
+}
+
+// destroyOne destroys only given dataset. If it has children, those should be cleaned up first.
+func (nt *NoTransaction) destroyOne(d *Dataset) error {
+	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy %q"), d.Name)
 
 	// Destroy myself
 	if err := d.dZFS.Destroy(false); err != nil {
 		return fmt.Errorf(i18n.G("cannot destroy dataset %q: %v"), d.Name, err)
 	}
-	d.dZFS.Close()
+	defer d.dZFS.Close()
 
 	// Unattach from parent children
-	parent, err := nt.Zfs.findDatasetByName(filepath.Dir(d.Name))
+	parentName := filepath.Dir(d.Name)
+	if d.IsSnapshot {
+		parentName, _ = splitSnapshotName(d.Name)
+	}
+	parent, err := nt.Zfs.findDatasetByName(parentName)
 	if err != nil {
 		return fmt.Errorf(i18n.G("cannot find parent for %s: %v"), d.Name, err)
 	}
+
 	i := -1
 	for idx, dc := range parent.children {
 		if dc.Name == d.Name {
