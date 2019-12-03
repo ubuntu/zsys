@@ -291,31 +291,44 @@ func (t *nestedTransaction) Done(err *error) {
 */
 
 // Create creates a dataset for that path.
-/*func (z *Zfs) Create(path, mountpoint, canmount string) error {
-	log.Debugf(z.ctx, i18n.G("ZFS: trying to Create %q with mountpoint %q"), path, mountpoint)
+func (t *Transaction) Create(path, mountpoint, canmount string) error {
+	t.checkValid()
+
+	log.Debugf(t.ctx, i18n.G("ZFS: trying to Create %q with mountpoint %q"), path, mountpoint)
+
 	props := make(map[libzfs.Prop]libzfs.Property)
 	if mountpoint != "" {
 		props[libzfs.DatasetPropMountpoint] = libzfs.Property{Value: mountpoint}
 	}
 	props[libzfs.DatasetPropCanmount] = libzfs.Property{Value: canmount}
 
-	d, err := libzfs.DatasetCreate(path, libzfs.DatasetTypeFilesystem, props)
+	dZFS, err := libzfs.DatasetCreate(path, libzfs.DatasetTypeFilesystem, props)
 	if err != nil {
 		return fmt.Errorf(i18n.G("can't create %q: %v"), path, err)
 	}
-	defer d.Close()
 
-	z.registerRevert(func() error {
-		d, err := libzfs.DatasetOpen(path)
-		if err != nil {
-			return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), path, err)
-		}
-		defer d.Close()
-		if err := d.Destroy(false); err != nil {
+	d := Dataset{
+		Name:       path,
+		IsSnapshot: false,
+		dZFS:       &dZFS,
+	}
+	t.registerRevert(func() error {
+		nt := t.Zfs.NewNoTransaction(t.ctx)
+		if err := nt.Destroy(d.Name); err != nil {
 			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), path, err)
 		}
 		return nil
 	})
+	if err := d.RefreshProperties(t.ctx, &dZFS); err != nil {
+		return fmt.Errorf(i18n.G("couldn't fetch property of newly created dataset: %v"), err)
+	}
+	t.Zfs.allDatasets[d.Name] = &d
+
+	parent, err := t.Zfs.findDatasetByName(filepath.Dir(d.Name))
+	if err != nil {
+		return fmt.Errorf(i18n.G("cannot find parent for %s: %v"), d.Name, err)
+	}
+	parent.children = append(parent.children, &d)
 
 	return nil
 }
