@@ -147,12 +147,7 @@ func TestCreate(t *testing.T) {
 				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
-			// We should always have New() returning the same state than we manually updated
-			newZ, err := zfs.New(context.Background())
-			if err != nil {
-				t.Fatalf("expected no error but got: %v", err)
-			}
-			assertDatasetsEquals(t, ta, z.Datasets(), newZ.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
 }
@@ -1050,7 +1045,7 @@ func datasetsEquals(t *testing.T, want, got []zfs.Dataset) {
 	if diff := cmp.Diff(want, got,
 		cmpopts.IgnoreUnexported(zfs.Dataset{}),
 		cmp.AllowUnexported(zfs.DatasetProp{})); diff != "" {
-		t.Errorf("Scan() mismatch (-want +got):\n%s", diff)
+		t.Errorf("Datasets mismatch (-want +got):\n%s", diff)
 	}
 }
 
@@ -1066,7 +1061,7 @@ func datasetsNotEquals(t *testing.T, want, got []zfs.Dataset) {
 	}
 }
 
-// assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Scan() for instance
+// assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Datasets() for instance
 // to a golden file.
 func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset) {
 	t.Helper()
