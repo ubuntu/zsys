@@ -101,7 +101,6 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("can't list datasets: %v"), err)
 	}
-	defer libzfs.DatasetCloseAll(ds)
 
 	var children []*Dataset
 	for _, d := range ds {
@@ -230,7 +229,8 @@ func (z *Zfs) findDatasetByName(path string) (*Dataset, error) {
 // Done signal that the transaction has ended and the object can't be reused.
 // This should be called to release underlying resources.
 func (t *Transaction) Done() {
-	log.Debugf(t.ctx, i18n.G("ZFS: committing transaction"))
+	log.Debugf(t.ctx, i18n.G("ZFS: ending transaction"))
+	defer func() { log.Debugf(t.ctx, i18n.G("ZFS: transaction done")) }()
 
 	// If cancel() was called before Done(), ensure we have proceeded the revert functions.
 	select {
@@ -277,7 +277,8 @@ func (t *nestedTransaction) Done(err *error) {
 	defer t.Transaction.Done()
 	if *err != nil {
 		// revert all in progress transactions
-		log.Debugf(t.ctx, i18n.G("ZFS: an error occured, cancelling nested transaction"))
+		log.Debugf(t.ctx, i18n.G("ZFS: an error occured: %v"), *err)
+		log.Debugf(t.ctx, i18n.G("ZFS: Cancelling nested transaction"))
 		t.cancel()
 		return
 	}
@@ -310,7 +311,7 @@ func (t *Transaction) Create(path, mountpoint, canmount string) error {
 	t.registerRevert(func() error {
 		nt := t.Zfs.NewNoTransaction(t.ctx)
 		if err := nt.Destroy(d.Name); err != nil {
-			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), path, err)
+			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), d.Name, err)
 		}
 		return nil
 	})

@@ -181,6 +181,7 @@ func newDatasetTree(ctx context.Context, dZFS *libzfs.Dataset, allDatasets *map[
 	node := Dataset{
 		Name:       name,
 		IsSnapshot: dZFS.IsSnapshot(),
+		dZFS:       dZFS,
 	}
 	if err := node.RefreshProperties(ctx, dZFS); err != nil {
 		return nil, fmt.Errorf("couldn't refresh properties of %q: %v", node.Name, err)
