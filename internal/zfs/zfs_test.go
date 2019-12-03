@@ -157,7 +157,6 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-/*
 func TestSnapshot(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
@@ -193,42 +192,37 @@ func TestSnapshot(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New(context.Background())
-			defer z.Done()
-			// Scan initial state for no-op
-			var initState []zfs.Dataset
-			var err error
-			initState, err = z.Scan()
+			z, err := zfs.New(context.Background())
 			if err != nil {
-				t.Fatalf("couldn't get initial state: %v", err)
+				t.Fatalf("expected no error but got: %v", err)
 			}
+			initState := z.Datasets()
+			trans, _ := z.NewTransaction(context.Background())
+			defer trans.Done()
 
-			err = z.Snapshot(tc.snapshotName, tc.datasetName, tc.recursive)
+			err = trans.Snapshot(tc.snapshotName, tc.datasetName, tc.recursive)
 
-			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				// we don't return because we want to check that on error, Snapshot() is a no-op
-			}
-			if err == nil && tc.wantErr {
+			if err != nil && !tc.wantErr {
+				t.Fatalf("expected no error but got: %v", err)
+			} else if err == nil && tc.wantErr {
 				t.Fatal("expected an error but got none")
 			}
 
-			got, err := z.Scan()
-			if err != nil {
-				t.Fatalf("couldn't get final state: %v", err)
+			// check we didn't change anything on error
+			if tc.isNoOp {
+				assertDatasetsEquals(t, ta, initState, z.Datasets())
 			}
 
-			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got)
-				return
+			if err == nil && !tc.isNoOp {
+				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
-			assertDatasetsToGolden(t, ta, got)
+
+			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
 }
 
+/*
 func TestClone(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
@@ -1106,6 +1100,17 @@ func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Data
 	got = transformToReproducibleDatasetSlice(t, ta, got).DS
 
 	datasetsNotEquals(t, want, got)
+}
+
+func assertIdempotentWithNew(t *testing.T, ta timeAsserter, want []zfs.Dataset) {
+	t.Helper()
+
+	// We should always have New() returning the same state than we manually updated
+	newZ, err := zfs.New(context.Background())
+	if err != nil {
+		t.Fatalf("expected no error but got: %v", err)
+	}
+	assertDatasetsEquals(t, ta, want, newZ.Datasets())
 }
 
 // timeAsserter ensures that dates will be between a start and end time

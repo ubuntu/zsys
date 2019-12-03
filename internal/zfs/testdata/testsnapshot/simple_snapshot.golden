@@ -8,6 +8,7 @@
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootFS": "local",
          "LastUsed": "local",
          "LastBootedKernel": "local"
@@ -23,6 +24,7 @@
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootFS": "local",
          "LastBootedKernel": "local"
       }
