@@ -285,11 +285,6 @@ func (t *nestedTransaction) Done(err *error) {
 	t.parent.reverts = append(t.parent.reverts, t.reverts...)
 }
 
-/* NOTES from brainstorming:
-- we stock on snapshot lastbootedkernel and bootfs user property on snapshot to ensure that after a clone, we restore them (reboot with exact kernel version and same bootfs properties)
-- we create accessors (method) for each datasets, which handle isSnapshot() and more
-*/
-
 // Create creates a dataset for that path.
 func (t *Transaction) Create(path, mountpoint, canmount string) error {
 	t.checkValid()
