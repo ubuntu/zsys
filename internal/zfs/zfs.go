@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/config"
@@ -322,40 +323,23 @@ func (t *Transaction) Create(path, mountpoint, canmount string) error {
 
 	parent, err := t.Zfs.findDatasetByName(filepath.Dir(d.Name))
 	if err != nil {
-		return fmt.Errorf(i18n.G("cannot find parent for %s: %v"), d.Name, err)
+		return fmt.Errorf(i18n.G("cannot find parent for %q: %v"), d.Name, err)
 	}
 	parent.children = append(parent.children, &d)
 
 	return nil
 }
 
-/*
 // Snapshot creates a new snapshot for dataset (and children if recursive is true) with the given name.
 func (t *Transaction) Snapshot(snapName, datasetName string, recursive bool) (errSnapshot error) {
 	t.checkValid()
 
 	log.Debugf(t.ctx, i18n.G("ZFS: trying to snapshot %q, recursive: %v"), datasetName, recursive)
 
-	/*
-		API call:
-			t, cancel := {zfs}.Transaction(ctx)
-				defer t.Done()
-
-			    ...
-				if err := t.Snapshot(); err != nil {
-					cancel()
-				}
-				if err := t.Clone(); err != nil {
-					cancel()
-				}*/
-
-////
-
-/*	d, err := libzfs.DatasetOpen(datasetName)
+	d, err := t.Zfs.findDatasetByName(datasetName)
 	if err != nil {
-		return fmt.Errorf(i18n.G("couldn't open %q: %v"), datasetName, err)
+		return fmt.Errorf(i18n.G("cannot find %q: %v"), datasetName, err)
 	}
-	defer d.Close()
 
 	nestedT := t.newNestedTransaction()
 	defer nestedT.Done(&errSnapshot)
@@ -367,67 +351,75 @@ func (t *Transaction) Snapshot(snapName, datasetName string, recursive bool) (er
 
 // snapshotRecursive recursively try snapshotting all children and store "revert" operations by cleaning newly
 // created datasets.
-func (t *nestedTransaction) snapshotRecursive(d libzfs.Dataset, snapName string, recursive bool) error {
-	datasetName := d.Properties[libzfs.DatasetPropName].Value
-
-	// Get properties from parent snapshot.
-	srcProps, err := getDatasetProp(d)
-	if err != nil {
-		return fmt.Errorf(i18n.G("can't get dataset properties for %q: ")+config.ErrorFormat, datasetName, err)
-	}
+func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, recursive bool) error {
+	// Get properties from parent of snapshot.
+	srcProps := parent.DatasetProp
 
 	props := make(map[libzfs.Prop]libzfs.Property)
-	n := datasetName + "@" + snapName
-	ds, err := libzfs.DatasetSnapshot(n, false, props)
+
+	dZFS, err := libzfs.DatasetSnapshot(parent.Name+"@"+snapName, false, props)
 	if err != nil {
-		return fmt.Errorf(i18n.G("couldn't snapshot %q: %v"), datasetName, err)
+		return fmt.Errorf(i18n.G("couldn't snapshot %q: %v"), parent.Name, err)
 	}
-	defer ds.Close()
+
+	d := Dataset{
+		Name:       parent.Name + "@" + snapName,
+		IsSnapshot: true,
+		dZFS:       &dZFS,
+	}
 	t.registerRevert(func() error {
-		d, err := libzfs.DatasetOpen(n)
-		if err != nil {
-			return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), n, err)
-		}
-		defer d.Close()
-		if err := d.Destroy(false); err != nil {
-			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), n, err)
+		nt := t.Zfs.NewNoTransaction(t.ctx)
+		if err := nt.destroyOne(&d); err != nil {
+			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), d.Name, err)
 		}
 		return nil
 	})
 
 	// Set user properties that we couldn't set before creating the snapshot dataset.
 	// We don't set LastUsed here as Creation time will be used.
-	if srcProps.sources.BootFS == "local" {
-		bootfsValue := "no"
-		if srcProps.BootFS {
-			bootfsValue = "yes"
+	bootFS := "no"
+	if srcProps.BootFS {
+		bootFS = "yes"
+	}
+	userPropertiesToSet := map[string]string{
+		SnapshotMountpointProp: srcProps.Mountpoint + ":" + srcProps.sources.Mountpoint,
+		SnapshotCanmountProp:   srcProps.CanMount + ":" + srcProps.sources.CanMount,
+		BootfsProp:             bootFS + ":" + srcProps.sources.BootFS,
+		LastBootedKernelProp:   srcProps.LastBootedKernel + ":" + srcProps.sources.LastBootedKernel,
+		BootfsDatasetsProp:     srcProps.BootfsDatasets + ":" + srcProps.sources.BootfsDatasets,
+	}
+	for prop, value := range userPropertiesToSet {
+		// Only set values that are not empty on parent
+		if strings.HasPrefix(value, ":") {
+			continue
 		}
-		if err := ds.SetUserProperty(BootfsProp, bootfsValue); err != nil {
-			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, BootfsProp, n, err)
+		if err := dZFS.SetUserProperty(prop, value); err != nil {
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, prop, value, d.Name, err)
 		}
 	}
-	if srcProps.sources.BootfsDatasets == "local" {
-		if err := ds.SetUserProperty(BootfsDatasetsProp, srcProps.BootfsDatasets); err != nil {
-			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, BootfsDatasetsProp, n, err)
-		}
+
+	if err := d.RefreshProperties(t.ctx, &dZFS); err != nil {
+		return fmt.Errorf(i18n.G("couldn't fetch property of newly created snapshot: %v"), err)
 	}
-	if srcProps.sources.LastBootedKernel == "local" {
-		if err := ds.SetUserProperty(LastBootedKernelProp, srcProps.LastBootedKernel); err != nil {
-			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, LastBootedKernelProp, n, err)
-		}
-	}
+	t.Zfs.allDatasets[d.Name] = &d
+	parent.children = append(parent.children, &d)
 
 	if !recursive {
 		return nil
 	}
 
-	// Take snapshots on non snapshot dataset children
-	return recurseFileSystemDatasets(d,
-		func(next libzfs.Dataset) error {
-			return t.snapshotRecursive(next, snapName, true)
-		})
+	for _, dc := range parent.children {
+		if dc.IsSnapshot {
+			continue
+		}
+		if err := t.snapshotRecursive(dc, snapName, recursive); err != nil {
+			return fmt.Errorf(i18n.G("stop snapshotting dataset for %q: %v"), parent.Name, err)
+		}
+	}
+	return nil
 }
 
+/*
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
 func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
