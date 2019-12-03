@@ -3,6 +3,7 @@ package zfs
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/config"
@@ -156,14 +157,26 @@ type Transaction struct {
 	lastNestedTransaction *Transaction
 }
 
-// autoTransaction is a particular transaction on a Zfs state
+// nestedTransaction is an internal transaction on a Zfs state which has a parent.
+// It can autorevert on Done(&err) what the nested transaction has processed.
 type nestedTransaction struct {
 	*Transaction
 
 	parent *Transaction
 }
 
-// NewTransaction create a new Zfs handler for a transaction, based on a Zfs object.
+// NoTransaction is a dummy container for no transaction on a ZFS system
+type NoTransaction struct {
+	*Zfs
+	ctx context.Context
+}
+
+// NewNoTransaction creates a new Zfs handler where operations can't be cancelled, based on a ZFS object.
+func (z *Zfs) NewNoTransaction(ctx context.Context) *NoTransaction {
+	return &NoTransaction{Zfs: z, ctx: ctx}
+}
+
+// NewTransaction creates a new Zfs handler for a transaction, based on a Zfs object.
 // It returns a cancelFunc that is automatically purged on <Transaction>.Done().
 // If ctx is a cancellable or if CancelFunc is called before <Transaction>.Done(),
 // the transaction will revert any in progress zfs changes.
@@ -198,6 +211,20 @@ func (z *Zfs) NewTransaction(ctx context.Context) (*Transaction, context.CancelF
 	}()
 
 	return &t, cancel
+}
+
+// findDatasetByName returns given dataset from path, handling special case of dataset
+// not found in hashmap and virtual root dataset.
+func (z *Zfs) findDatasetByName(path string) (*Dataset, error) {
+	d, exists := z.allDatasets[path]
+	if !exists {
+		if path == "." {
+			d = z.root
+		} else {
+			return nil, fmt.Errorf(i18n.G("couldn't find dataset %q in cache"), path)
+		}
+	}
+	return d, nil
 }
 
 // Done signal that the transaction has ended and the object can't be reused.
@@ -608,31 +635,69 @@ func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
 		func(next libzfs.Dataset) error {
 			return z.promoteRecursive(next)
 		})
-}
+}*/
 
 // Destroy recursively all children, including dataset named "name".
 // If the dataset is a snapshot, navigate through the hierarchy to delete all dataset with the same snapshot name.
 // Note that destruction can't be rollbacked as filesystem content can't be recreated, so we don't accept them
 // in a transactional Zfs element.
-func (z *Zfs) Destroy(name string) error {
-	log.Debugf(z.ctx, i18n.G("ZFS: trying to destroy %q"), name)
-	if z.ctx.Done() != nil {
-		return fmt.Errorf(i18n.G("couldn't call Destroy in a transactional context"))
-	}
-
-	d, err := libzfs.DatasetOpen(name)
+func (nt *NoTransaction) Destroy(name string) error {
+	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy %q"), name)
+	d, err := nt.Zfs.findDatasetByName(name)
 	if err != nil {
-		return fmt.Errorf(i18n.G("can't get dataset %q: ")+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("can't get dataset to destroy %q: ")+config.ErrorFormat, name, err)
 	}
-	defer d.Close()
 
-	if err := checkNoClone(&d); err != nil {
+	if err := d.checkNoClone(); err != nil {
 		return fmt.Errorf(i18n.G("couldn't destroy %q due to clones: %v"), name, err)
 	}
 
-	return d.DestroyRecursive()
+	if err := nt.destroyRecursive(d); err != nil {
+		return fmt.Errorf(i18n.G("couldn't destroy %q and its children: %v"), name, err)
+	}
+
+	return nil
 }
 
+// destroyRecursive destroys and unreference dataset objects, starting with children.
+func (nt *NoTransaction) destroyRecursive(d *Dataset) error {
+
+	// Destroy children
+	for _, dc := range d.children {
+		if err := nt.destroyRecursive(dc); err != nil {
+			return fmt.Errorf(i18n.G("stop destroying dataset on %q, cannot destroy child: %v"), d.Name, err)
+		}
+	}
+
+	// Destroy myself
+	if err := d.dZFS.Destroy(false); err != nil {
+		return fmt.Errorf(i18n.G("cannot destroy dataset %q: %v"), d.Name, err)
+	}
+	d.dZFS.Close()
+
+	// Unattach from parent children
+	parent, err := nt.Zfs.findDatasetByName(filepath.Dir(d.Name))
+	if err != nil {
+		return fmt.Errorf(i18n.G("cannot find parent for %s: %v"), d.Name, err)
+	}
+	i := -1
+	for idx, dc := range parent.children {
+		if dc.Name == d.Name {
+			i = idx
+			break
+		}
+	}
+	if i != -1 {
+		parent.children = append(parent.children[:i], parent.children[i+1:]...)
+	}
+
+	// Delete from main list of dataset
+	delete(nt.Zfs.allDatasets, d.Name)
+
+	return nil
+}
+
+/*
 // SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
