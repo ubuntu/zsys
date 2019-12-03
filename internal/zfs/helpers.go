@@ -14,10 +14,10 @@ import (
 
 // RefreshProperties refreshes all the properties for a given dataset and the source of them.
 // for snapshots, we'll take the parent dataset for the mount properties.
-func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset) error {
+func (d *Dataset) RefreshProperties(ctx context.Context, dZFS *libzfs.Dataset) error {
 	sources := datasetSources{}
-	isSnapshot := d.IsSnapshot()
-	name := d.Properties[libzfs.DatasetPropName].Value
+	isSnapshot := dZFS.IsSnapshot()
+	name := dZFS.Properties[libzfs.DatasetPropName].Value
 
 	var mounted bool
 	var mountpoint, canMount string
@@ -27,21 +27,21 @@ func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset
 		var srcMountpoint, srcCanMount string
 		var err error
 
-		mountpoint, srcMountpoint, err = getUserPropertyFromSys(ctx, SnapshotMountpointProp, d)
+		mountpoint, srcMountpoint, err = getUserPropertyFromSys(ctx, SnapshotMountpointProp, dZFS)
 		if err != nil {
 			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, SnapshotMountpointProp, err)
 		}
 		sources.Mountpoint = srcMountpoint
 
-		canMount, srcCanMount, err = getUserPropertyFromSys(ctx, SnapshotCanmountProp, d)
+		canMount, srcCanMount, err = getUserPropertyFromSys(ctx, SnapshotCanmountProp, dZFS)
 		if err != nil {
 			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid  %q property: %v"), name, SnapshotCanmountProp, err)
 		}
 		sources.CanMount = srcCanMount
 	} else {
-		mp := d.Properties[libzfs.DatasetPropMountpoint]
+		mp := dZFS.Properties[libzfs.DatasetPropMountpoint]
 
-		p, err := d.Pool()
+		p, err := dZFS.Pool()
 		if err != nil {
 			return fmt.Errorf(i18n.G("can't get associated pool: ")+config.ErrorFormat, err)
 		}
@@ -56,7 +56,7 @@ func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset
 		}
 		sources.Mountpoint = srcMountpoint
 
-		cm := d.Properties[libzfs.DatasetPropCanmount]
+		cm := dZFS.Properties[libzfs.DatasetPropCanmount]
 		canMount = cm.Value
 		srcCanMount := "local"
 		if cm.Source != "local" {
@@ -64,15 +64,15 @@ func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset
 		}
 		sources.CanMount = srcCanMount
 
-		mountedp := d.Properties[libzfs.DatasetPropMounted]
+		mountedp := dZFS.Properties[libzfs.DatasetPropMounted]
 		if mountedp.Value == "yes" {
 			mounted = true
 		}
 	}
 
-	origin := d.Properties[libzfs.DatasetPropOrigin].Value
+	origin := dZFS.Properties[libzfs.DatasetPropOrigin].Value
 
-	bfs, srcBootFS, err := getUserPropertyFromSys(ctx, BootfsProp, d)
+	bfs, srcBootFS, err := getUserPropertyFromSys(ctx, BootfsProp, dZFS)
 	if err != nil {
 		return err
 	}
@@ -84,12 +84,12 @@ func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset
 
 	var lu, srcLastUsed string
 	if !isSnapshot {
-		lu, srcLastUsed, err = getUserPropertyFromSys(ctx, LastUsedProp, d)
+		lu, srcLastUsed, err = getUserPropertyFromSys(ctx, LastUsedProp, dZFS)
 		if err != nil {
 			return err
 		}
 	} else {
-		lu = d.Properties[libzfs.DatasetPropCreation].Value
+		lu = dZFS.Properties[libzfs.DatasetPropCreation].Value
 	}
 	if lu == "" {
 		lu = "0"
@@ -100,19 +100,19 @@ func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset
 	}
 	sources.LastUsed = srcLastUsed
 
-	lastBootedKernel, srcLastBootedKernel, err := getUserPropertyFromSys(ctx, LastBootedKernelProp, d)
+	lastBootedKernel, srcLastBootedKernel, err := getUserPropertyFromSys(ctx, LastBootedKernelProp, dZFS)
 	if err != nil {
 		return err
 	}
 	sources.LastBootedKernel = srcLastBootedKernel
 
-	bootfsDatasets, srcBootfsDatasets, err := getUserPropertyFromSys(ctx, BootfsDatasetsProp, d)
+	bootfsDatasets, srcBootfsDatasets, err := getUserPropertyFromSys(ctx, BootfsDatasetsProp, dZFS)
 	if err != nil {
 		return err
 	}
 	sources.BootfsDatasets = srcBootfsDatasets
 
-	dataset.DatasetProp = DatasetProp{
+	d.DatasetProp = DatasetProp{
 		Mountpoint:       mountpoint,
 		CanMount:         canMount,
 		Mounted:          mounted,
@@ -129,10 +129,10 @@ func (dataset *Dataset) RefreshProperties(ctx context.Context, d *libzfs.Dataset
 // getUserPropertyFromSys returns the value of a user property and its source from the underlying
 // ZFS system dataset state.
 // It also sanitize the sources to only return "local" or "inherited".
-func getUserPropertyFromSys(ctx context.Context, prop string, d *libzfs.Dataset) (value, source string, err error) {
-	name := d.Properties[libzfs.DatasetPropName].Value
+func getUserPropertyFromSys(ctx context.Context, prop string, dZFS *libzfs.Dataset) (value, source string, err error) {
+	name := dZFS.Properties[libzfs.DatasetPropName].Value
 
-	p, err := d.GetUserProperty(prop)
+	p, err := dZFS.GetUserProperty(prop)
 	if err != nil {
 		return "", "", fmt.Errorf(i18n.G("can't get %q property: ")+config.ErrorFormat, prop, err)
 	}
@@ -143,11 +143,11 @@ func getUserPropertyFromSys(ctx context.Context, prop string, d *libzfs.Dataset)
 		return "", "", nil
 	}
 	// The user property isn't set explicitely on the snapshot (inherited from non snapshot parent): ignore it.
-	if d.IsSnapshot() && p.Source != "local" {
+	if dZFS.IsSnapshot() && p.Source != "local" {
 		return "", "", nil
 	}
 
-	if d.IsSnapshot() {
+	if dZFS.IsSnapshot() {
 		log.Debugf(ctx, "property %q on snapshot %q: %q", prop, name, value)
 		idx := strings.LastIndex(p.Value, ":")
 		if idx < 0 {
@@ -170,24 +170,24 @@ func getUserPropertyFromSys(ctx context.Context, prop string, d *libzfs.Dataset)
 }
 
 // newDatasetTree returns a Dataset and a populated tree of all its children
-func newDatasetTree(ctx context.Context, d *libzfs.Dataset, allDatasets *map[string]*Dataset) (*Dataset, error) {
+func newDatasetTree(ctx context.Context, dZFS *libzfs.Dataset, allDatasets *map[string]*Dataset) (*Dataset, error) {
 	// Skip non file system or snapshot datasets
-	if d.Type == libzfs.DatasetTypeVolume || d.Type == libzfs.DatasetTypeBookmark {
+	if dZFS.Type == libzfs.DatasetTypeVolume || dZFS.Type == libzfs.DatasetTypeBookmark {
 		return nil, nil
 	}
 
-	name := d.Properties[libzfs.DatasetPropName].Value
+	name := dZFS.Properties[libzfs.DatasetPropName].Value
 	log.Debugf(ctx, i18n.G("New dataNew dataset found: %q"), name)
 	node := Dataset{
 		Name:       name,
-		IsSnapshot: d.IsSnapshot(),
+		IsSnapshot: dZFS.IsSnapshot(),
 	}
-	if err := node.RefreshProperties(ctx, d); err != nil {
+	if err := node.RefreshProperties(ctx, dZFS); err != nil {
 		return nil, fmt.Errorf("couldn't refresh properties of %q: %v", node.Name, err)
 	}
 
 	var children []*Dataset
-	for _, dc := range d.Children {
+	for _, dc := range dZFS.Children {
 		c, err := newDatasetTree(ctx, &dc, allDatasets)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan dataset: %v", err)

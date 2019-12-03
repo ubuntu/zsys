@@ -37,9 +37,8 @@ type Dataset struct {
 	IsSnapshot bool `json:",omitempty"`
 	DatasetProp
 
-	//parent   *Dataset
 	children []*Dataset
-	d        *libzfs.Dataset
+	dZFS     *libzfs.Dataset
 }
 
 // DatasetProp abstracts some properties for a given dataset
