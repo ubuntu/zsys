@@ -56,6 +56,7 @@ func TestNew(t *testing.T) {
 		"Snapshot user properties differs from parent dataset":                     {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml"},
 		"Snapshot with unset user properties inherits from parent dataset":         {def: "one_pool_n_datasets_n_children_n_snapshots_with_unset_user_properties.yaml"},
 		"Snapshot without any users properties are still loaded":                   {def: "one_pool_one_dataset_one_snapshot_without_user_properties.yaml"},
+		"Layout with none, default properties and snapshot":                        {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml"},
 	}
 
 	for name, tc := range tests {
