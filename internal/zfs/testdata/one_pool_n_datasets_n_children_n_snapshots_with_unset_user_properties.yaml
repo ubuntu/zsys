@@ -21,7 +21,7 @@ pools:
           - name: snap_r1
             zsys_bootfs: yes:inherited
             mountpoint: /inherit:inherited
-            canmount: on:inherited
+            canmount: on:default
             last_booted_kernel: vmlinuz-5.0.0-0-generic:inherited
             bootfs_datasets: something else:inherited
       - name: ROOT/ubuntu/overriden
@@ -33,6 +33,6 @@ pools:
           - name: snap_r1
             zsys_bootfs: yes:local
             mountpoint: /overriden:inherited
-            canmount: on:inherited
+            canmount: on:default
             last_booted_kernel: vmlinuz-4.0.0-0-generic:local
             bootfs_datasets: something else on dataset:local

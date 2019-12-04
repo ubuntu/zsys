@@ -13,8 +13,7 @@
       "Mountpoint": "/ubuntu",
       "CanMount": "on",
       "Sources": {
-         "Mountpoint": "inherited",
-         "CanMount": "inherited"
+         "Mountpoint": "inherited"
       }
    }
 ]

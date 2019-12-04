@@ -60,7 +60,6 @@
       "BootfsDatasets": "something else",
       "Sources": {
          "Mountpoint": "inherited",
-         "CanMount": "inherited",
          "BootFS": "inherited",
          "LastBootedKernel": "inherited",
          "BootfsDatasets": "inherited"
@@ -94,7 +93,6 @@
       "BootfsDatasets": "something else on dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "CanMount": "inherited",
          "BootFS": "local",
          "LastBootedKernel": "local",
          "BootfsDatasets": "local"

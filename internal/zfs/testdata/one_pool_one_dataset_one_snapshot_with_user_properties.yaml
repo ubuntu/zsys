@@ -12,6 +12,6 @@ pools:
           - name: snap1
             zsys_bootfs: yes:local
             mountpoint: /:inherited
-            canmount: on:inherited
+            canmount: on:default
             last_booted_kernel: vmlinuz-5.0.0-0-generic:local
             bootfs_datasets: something else:local

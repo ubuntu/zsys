@@ -26,7 +26,6 @@
       "BootfsDatasets": "something else",
       "Sources": {
          "Mountpoint": "inherited",
-         "CanMount": "inherited",
          "BootFS": "local",
          "LastBootedKernel": "local",
          "BootfsDatasets": "local"
