@@ -1103,7 +1103,7 @@ func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Data
 	datasetsNotEquals(t, want, got)
 }
 
-func assertIdempotentWithNew(t *testing.T, ta timeAsserter, want []zfs.Dataset) {
+func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Dataset) {
 	t.Helper()
 
 	// We should always have New() returning the same state than we manually updated
@@ -1111,7 +1111,7 @@ func assertIdempotentWithNew(t *testing.T, ta timeAsserter, want []zfs.Dataset) 
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
-	assertDatasetsEquals(t, ta, want, newZ.Datasets())
+	assertDatasetsEquals(t, ta, newZ.Datasets(), inMemory)
 }
 
 // timeAsserter ensures that dates will be between a start and end time

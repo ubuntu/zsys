@@ -125,7 +125,7 @@ func TestNestedTransactionParentCancelledBeforeDone(t *testing.T) {
 	var errNested error
 	nested.Done(&errNested)
 	trans.Done()
-	assert.Equal(t, "reverted from nested", resultFromNested, "done after fcommitail is a no-op on nested")
+	assert.Equal(t, "reverted from nested", resultFromNested, "done after fail is a no-op on nested")
 	assert.Equal(t, "reverted from parent", resultFromParent, "done after fail is a no-op on parent")
 
 }
