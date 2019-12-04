@@ -3,6 +3,7 @@ package zfs
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -16,28 +17,24 @@ import (
 // for snapshots, we'll take the parent dataset for the mount properties.
 func (d *Dataset) RefreshProperties(ctx context.Context, dZFS *libzfs.Dataset) error {
 	sources := datasetSources{}
-	isSnapshot := dZFS.IsSnapshot()
 	name := dZFS.Properties[libzfs.DatasetPropName].Value
 
 	var mounted bool
 	var mountpoint, canMount string
-
+	var sourceMountPoint, sourceCanMount string
 	// On snapshots, take mount* properties from stored user property on dataset
-	if isSnapshot {
-		var srcMountpoint, srcCanMount string
+	if d.IsSnapshot {
 		var err error
 
-		mountpoint, srcMountpoint, err = getUserPropertyFromSys(ctx, SnapshotMountpointProp, dZFS)
+		mountpoint, sourceMountPoint, err = getUserPropertyFromSys(ctx, SnapshotMountpointProp, dZFS)
 		if err != nil {
 			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, SnapshotMountpointProp, err)
 		}
-		sources.Mountpoint = srcMountpoint
 
-		canMount, srcCanMount, err = getUserPropertyFromSys(ctx, SnapshotCanmountProp, dZFS)
+		canMount, sourceCanMount, err = getUserPropertyFromSys(ctx, SnapshotCanmountProp, dZFS)
 		if err != nil {
 			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid  %q property: %v"), name, SnapshotCanmountProp, err)
 		}
-		sources.CanMount = srcCanMount
 	} else {
 		mp := dZFS.Properties[libzfs.DatasetPropMountpoint]
 
@@ -50,24 +47,37 @@ func (d *Dataset) RefreshProperties(ctx context.Context, dZFS *libzfs.Dataset) e
 		if mountpoint == "" {
 			mountpoint = "/"
 		}
-		srcMountpoint := "local"
-		if mp.Source != "local" {
-			srcMountpoint = "inherited"
-		}
-		sources.Mountpoint = srcMountpoint
+		sourceMountPoint = mp.Source
 
 		cm := dZFS.Properties[libzfs.DatasetPropCanmount]
 		canMount = cm.Value
-		srcCanMount := "local"
-		if cm.Source != "local" {
-			srcCanMount = "inherited"
-		}
-		sources.CanMount = srcCanMount
+		sourceCanMount = cm.Source
 
 		mountedp := dZFS.Properties[libzfs.DatasetPropMounted]
 		if mountedp.Value == "yes" {
 			mounted = true
 		}
+	}
+	switch sourceMountPoint {
+	case "local":
+		sources.Mountpoint = "local"
+	case "default":
+		sources.Mountpoint = ""
+	default:
+		sources.Mountpoint = "inherited"
+	}
+
+	switch sourceCanMount {
+	case "local":
+		sources.CanMount = "local"
+	case "default":
+		sources.CanMount = ""
+	default:
+		// this shouldn't happen on non snapshot
+		if !d.IsSnapshot {
+			log.Warningf(ctx, i18n.G("CanMount property for %q has an unexpected source: %q"), name, sourceCanMount)
+		}
+		sources.CanMount = ""
 	}
 
 	origin := dZFS.Properties[libzfs.DatasetPropOrigin].Value
@@ -83,7 +93,7 @@ func (d *Dataset) RefreshProperties(ctx context.Context, dZFS *libzfs.Dataset) e
 	sources.BootFS = srcBootFS
 
 	var lu, srcLastUsed string
-	if !isSnapshot {
+	if !d.IsSnapshot {
 		lu, srcLastUsed, err = getUserPropertyFromSys(ctx, LastUsedProp, dZFS)
 		if err != nil {
 			return err
@@ -162,7 +172,7 @@ func getUserPropertyFromSys(ctx context.Context, prop string, dZFS *libzfs.Datas
 		log.Debugf(ctx, "property %q on dataset %q: value: %q source: %q", prop, name, value, source)
 	}
 
-	if source != "local" {
+	if source != "local" && source != "default" {
 		source = "inherited"
 	}
 
