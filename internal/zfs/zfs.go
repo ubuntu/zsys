@@ -726,35 +726,33 @@ func (nt *NoTransaction) destroyOne(d *Dataset) error {
 	return nil
 }
 
-/*
-// SetProperty to given dataset if it was a local/none/snapshot directly inheriting from parent value.
+// SetProperty to given dataset if it was locally set or none directly inheriting from parent value.
 // force does it even if the property was inherited.
 // For zfs properties, only a fix set is supported. Right now: "canmount"
-func (z *Zfs) SetProperty(name, value, datasetName string, force bool) error {
-	log.Debugf(z.ctx, i18n.G("ZFS: trying to set %q=%q on %q"), name, value, datasetName)
-	d, err := libzfs.DatasetOpen(datasetName)
+func (t *Transaction) SetProperty(name, value, datasetName string, force bool) error {
+	log.Debugf(t.ctx, i18n.G("ZFS: trying to set %q=%q on %q"), name, value, datasetName)
+	d, err := t.Zfs.findDatasetByName(datasetName)
 	if err != nil {
-		return fmt.Errorf(i18n.G("can't get dataset %q: ")+config.ErrorFormat, datasetName, err)
-	}
-	defer d.Close()
-
-	if d.IsSnapshot() {
-		return fmt.Errorf(i18n.G("can't set a property %q on %q: the dataset a snapshot"), name, datasetName)
+		return fmt.Errorf(i18n.G("can't get dataset to change property on %q: ")+config.ErrorFormat, datasetName, err)
 	}
 
-	prop, err := getProperty(d, name)
-	if err != nil {
-		return fmt.Errorf(i18n.G("can't get dataset property %q for %q: ")+config.ErrorFormat, name, datasetName, err)
+	if d.IsSnapshot {
+		value = fmt.Sprintf("%s:local", value)
 	}
-	if !force && prop.Source != "local" && prop.Source != "default" && prop.Source != "none" && prop.Source != "" {
-		log.Debugf(z.ctx, i18n.G("ZFS: can't set property %q=%q for %q as not a local property (%q)"), name, value, datasetName, prop.Source)
+
+	origV, origS := d.getPropertyFromName(name)
+
+	if !force && origS != "local" && origS != "" {
+		log.Info(t.ctx, i18n.G("ZFS: can't set property %q=%q for %q as not a local property (%q)"), name, value, datasetName, origS)
 		return nil
 	}
-	if err = setProperty(d, name, value); err != nil {
+
+	if err = d.setProperty(name, value, "local"); err != nil {
 		return fmt.Errorf(i18n.G("can't set dataset property %q=%q for %q: ")+config.ErrorFormat, name, value, datasetName, err)
 	}
-	z.registerRevert(func() error { return z.SetProperty(name, prop.Value, datasetName, force) })
+	// Note: the revert will not exactly ensure we are back to the same state for propertie
+	// as we can't run "inherit" on dataset when origS != local
+	t.registerRevert(func() error { return d.setProperty(name, origV, origS) })
 
 	return nil
 }
-*/

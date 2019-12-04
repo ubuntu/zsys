@@ -271,45 +271,185 @@ func (d *Dataset) checkNoClone() error {
 	return nil
 }
 
-// getProperty abstracts getting from a zfs or user property. It returns the property object.
-func getProperty(d libzfs.Dataset, name string) (libzfs.Property, error) {
-	// TODO: or use getDatasetProp() and cache on Scan() to always have "none" checked.
-	var prop libzfs.Property
-	if !strings.Contains(name, ":") {
-		propName, err := stringToProp(name)
-		if err != nil {
-			return prop, err
-		}
-		return d.GetProperty(propName)
-	}
-
-	return d.GetUserProperty(name)
+// getPropertyFromName abstracts getting from a zfs or user property from a name.
+// It returns the value and our simplified source (local or inherited).
+func (d *Dataset) getPropertyFromName(name string) (value, source string) {
+	_, _, v, s := d.stringToProp(name)
+	return *v, *s
 }
 
-// setProperty abstracts setting  value to a zfs or user property from a zfs or user property.
-func setProperty(d libzfs.Dataset, name, value string) error {
-	if !strings.Contains(name, ":") {
-		propName, err := stringToProp(name)
-		if err != nil {
-			return err
+// setProperty abstracts setting value to a zfs native or user property.
+// It refreshes the local object.
+// Note: source isn't taken into account from inheriting on the ZFS dataset
+func (d *Dataset) setProperty(name, value, source string) (err error) {
+	np, up, destV, destS := d.stringToProp(name)
+
+	// TODO: go-libzfs doesn't support "inherited" (C.zfs_prop_inherit).
+	// If source isn't local, we should rather revert to "inherit" which isn't possible atm.
+	// if source == "inherited" …
+
+	// libzfs.Prop is a literal (int) and cannot be created empty and compared directly
+	var empty libzfs.Prop
+	if np != empty {
+		err = d.dZFS.SetProperty(np, value)
+	} else {
+		v := value
+		// we set value:source for values on snapshots to retain original state
+		if d.IsSnapshot {
+			v = fmt.Sprintf("%s:%s", value, source)
 		}
-		return d.SetProperty(propName, value)
+		err = d.dZFS.SetUserProperty(up, v)
 	}
-	return d.SetUserProperty(name, value)
+
+	if err != nil {
+		return err
+	}
+
+	// In case we change the mountpoint, we need to translate the whole hierarchy for childre.
+	// Store initial mountpoint path.
+	var oldMountPoint string
+	// Refresh local values on dataset object
+	switch name {
+	case BootfsProp:
+		var bootFS bool
+		if value == "yes" {
+			bootFS = true
+		}
+		d.BootFS = bootFS
+	case LastUsedProp:
+		if value == "" {
+			*destV = "0"
+		}
+		lastUsed, err := strconv.Atoi(*destV)
+		if err != nil {
+			return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+		}
+		d.LastUsed = lastUsed
+	case MountPointProp:
+		oldMountPoint = *destV
+		fallthrough
+	default:
+		*destV = value
+	}
+	*destS = source
+
+	// Refresh all children that inherits from this property.
+	children := make(chan *Dataset)
+	var getInheritedChildren func(d *Dataset)
+	getInheritedChildren = func(d *Dataset) {
+		for _, c := range d.children {
+			np, _, _, destS := c.stringToProp(name)
+			// We ignore snapshots from inheritance: we only take user properties (even for canmount or mountpoint)
+			// that we have frozen when taking our own snapshots. The other properties will ofc be changed, but
+			// we don't care about them in our local cache.
+			if c.IsSnapshot {
+				continue
+			}
+			// Only take inherited properties OR
+			// default user property (unset user property)
+			if *destS != "inherited" && !(*destS == "" && np == empty) {
+				continue
+			}
+			children <- c
+			getInheritedChildren(c)
+		}
+	}
+	go func() {
+		getInheritedChildren(d)
+		close(children)
+	}()
+
+	for c := range children {
+		fmt.Println("changing", c.Name)
+		np, _, destV, destS := c.stringToProp(name)
+
+		// Native dataset: we need to refresh dZFS Properties (user properties aren't cached)
+		if np != empty {
+			c.dZFS.Properties[np] = libzfs.Property{
+				Value:  value,
+				Source: c.dZFS.Properties[np].Source,
+			}
+		}
+
+		// Refresh dataset object
+		switch name {
+		case BootfsProp:
+			var bootFS bool
+			if value == "yes" {
+				bootFS = true
+			}
+			c.BootFS = bootFS
+		case LastUsedProp:
+			if value == "" {
+				value = "0"
+			}
+			lastUsed, err := strconv.Atoi(value)
+			if err != nil {
+				// Shouldn't happen: it's been already checked above from main dataset
+				panic(fmt.Sprintf("%q property isn't an int: %v, while it has already been checked for main dataset and passed", LastUsedProp, err))
+			}
+			c.LastUsed = lastUsed
+		case MountPointProp:
+			*destV = filepath.Join(value, strings.TrimPrefix(*destV, oldMountPoint))
+		default:
+			*destV = value
+		}
+		*destS = "inherited"
+	}
+
+	return err
 }
 
-// stringToProp converts a string to a validated zfs property (user properties aren't supported here).
-func stringToProp(name string) (libzfs.Prop, error) {
-	var prop libzfs.Prop
+// stringToProp converts a string our object properties.
+// proZfs is empty for user properties. We get pointer on both Dataset object prop and our source
+func (d *Dataset) stringToProp(name string) (nativeProp libzfs.Prop, userProp string, value, simplifiedSource *string) {
+	userProp = name
 	switch name {
 	case CanmountProp:
-		prop = libzfs.DatasetPropCanmount
+		if !d.IsSnapshot {
+			nativeProp = libzfs.DatasetPropCanmount
+		} else {
+			// this should have been called with SnapshotCanmountProp, but map it for the user
+			userProp = SnapshotCanmountProp
+		}
+		fallthrough
+	case SnapshotCanmountProp:
+		value = &d.CanMount
+		simplifiedSource = &d.sources.CanMount
 	case MountPointProp:
-		prop = libzfs.DatasetPropMountpoint
+		if !d.IsSnapshot {
+			nativeProp = libzfs.DatasetPropMountpoint
+		} else {
+			// this should have been called with SnapshotMountpointProp, but map it for the user
+			userProp = SnapshotMountpointProp
+		}
+		value = &d.Mountpoint
+		simplifiedSource = &d.sources.Mountpoint
+	case SnapshotMountpointProp:
+		value = &d.Mountpoint
+		simplifiedSource = &d.sources.Mountpoint
+	// Bootfs and LastUsed are non string. Return a local string
+	case BootfsProp:
+		bootfs := "yes"
+		if !d.BootFS {
+			bootfs = "no"
+		}
+		value = &bootfs
+		simplifiedSource = &d.sources.BootFS
+	case LastUsedProp:
+		lu := strconv.Itoa(d.LastUsed)
+		value = &lu
+		simplifiedSource = &d.sources.LastUsed
+	case BootfsDatasetsProp:
+		value = &d.BootfsDatasets
+		simplifiedSource = &d.sources.BootfsDatasets
+	case LastBootedKernelProp:
+		value = &d.LastBootedKernel
+		simplifiedSource = &d.sources.LastBootedKernel
 	default:
-		return prop, fmt.Errorf(i18n.G("unsupported property %q"), name)
+		panic(fmt.Sprintf("unsupported property %q", name))
 	}
-	return prop, nil
+	return nativeProp, userProp, value, simplifiedSource
 }
 
 type datasetFuncRecursive func(d libzfs.Dataset) error
