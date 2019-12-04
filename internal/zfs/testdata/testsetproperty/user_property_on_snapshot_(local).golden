@@ -1,0 +1,34 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "LastUsed": 1555555555,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "BootfsDatasets": "something",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "local",
+         "LastBootedKernel": "local",
+         "BootfsDatasets": "local"
+      }
+   },
+   {
+      "Name": "rpool@snap1",
+      "IsSnapshot": true,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "BootfsDatasets": "SetProperty Value:local",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "BootFS": "local",
+         "LastBootedKernel": "local",
+         "BootfsDatasets": "local"
+      }
+   }
+]

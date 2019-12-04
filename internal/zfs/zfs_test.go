@@ -478,6 +478,7 @@ func TestDestroy(t *testing.T) {
 		})
 	}
 }
+*/
 
 func TestSetProperty(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
@@ -489,14 +490,15 @@ func TestSetProperty(t *testing.T) {
 		dataset       string
 		force         bool
 
-		wantErr bool
-		isNoOp  bool
+		wantErr   bool
+		wantPanic bool
+		isNoOp    bool
 	}{
 		"User property (local)":         {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		"Authorized property (local)":   {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
 		"Authorized property (default)": {def: "one_pool_dataset_with_canmount_default.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool/ubuntu"},
-		"User property (none)":          {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
-		// There is no authorized properties that can be "none" for now
+		"User property (none)":          {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.LastBootedKernelProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		// There is no authorized native properties that can be "none"
 
 		// Canmount prop is already checked in authorized
 		"Mountpoint property": {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.MountPointProp, propertyValue: "/foo", dataset: "rpool"},
@@ -505,14 +507,19 @@ func TestSetProperty(t *testing.T) {
 		"User property (inherit but forced)": {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var", force: true},
 		// There is no authorized properties that can be inherited
 
-		"Property on snapshot (parent local)":                   {def: "one_pool_one_dataset_one_snapshot_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1", wantErr: true, isNoOp: true},
-		"Property on snapshot (parent none)":                    {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1", wantErr: true, isNoOp: true},
-		"Property on snapshot (parent inherit)":                 {def: "one_pool_n_datasets_n_children_n_snapshots_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", wantErr: true, isNoOp: true},
-		"User property on snapshot (parent inherit but forced)": {def: "one_pool_n_datasets_n_children_n_snapshots_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var@snap_v1", wantErr: true, isNoOp: true, force: true},
+		// Property inheritance tests
+		"Inherit on authorized property (local)":         {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.MountPointProp, propertyValue: "/newroot", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Don't inherit on authorized property (default)": {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Inherit on user property (local)":               {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "New value", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Inherit on user property (none)":                {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.LastBootedKernelProp, propertyValue: "New value", dataset: "rpool/ROOT/ubuntu_1234"},
 
-		"Unauthorized property":                          {def: "one_pool_one_dataset.yaml", propertyName: "snapdir", propertyValue: "/setproperty/value", dataset: "rpool", wantErr: true, isNoOp: true},
-		"Dataset doesn't exists":                         {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
-		"Authorized property on snapshot doesn't exists": {def: "one_pool_one_dataset_one_snapshot.yaml", propertyName: zfs.CanmountProp, propertyValue: "yes", dataset: "rpool@snap1", wantErr: true, isNoOp: true},
+		"User property on snapshot (local)":              {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (none)":               {def: "one_pool_one_dataset_one_snapshot_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (inherit)":            {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1"},
+		"User property on snapshot (inherit but forced)": {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1", force: true},
+
+		"Unauthorized property":  {def: "one_pool_one_dataset.yaml", propertyName: "snapdir", propertyValue: "/setproperty/value", dataset: "rpool", wantPanic: true},
+		"Dataset doesn't exists": {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -523,44 +530,42 @@ func TestSetProperty(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New(context.Background())
-			defer z.Done()
-			// Scan initial state for no-op
-			var initState []zfs.Dataset
-			if tc.isNoOp {
-				var err error
-				initState, err = z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get initial state: %v", err)
-				}
-			}
-
-			err := z.SetProperty(tc.propertyName, tc.propertyValue, tc.dataset, tc.force)
-
+			z, err := zfs.New(context.Background())
 			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				// we don't return because we want to check that on error, SetProperty() is a no-op
+				t.Fatalf("expected no error but got: %v", err)
 			}
-			if err == nil && tc.wantErr {
+			initState := z.Datasets()
+			trans, _ := z.NewTransaction(context.Background())
+			defer trans.Done()
+
+			if tc.wantPanic {
+				assert.Panics(t, func() { trans.SetProperty(tc.propertyName, tc.propertyValue, tc.dataset, tc.force) }, "Panic was expected but didn't happen")
+				return
+			}
+
+			err = trans.SetProperty(tc.propertyName, tc.propertyValue, tc.dataset, tc.force)
+
+			if err != nil && !tc.wantErr {
+				t.Fatalf("expected no error but got: %v", err)
+			} else if err == nil && tc.wantErr {
 				t.Fatal("expected an error but got none")
 			}
 
-			got, err := z.Scan()
-			if err != nil {
-				t.Fatalf("couldn't get final state: %v", err)
+			// check we didn't change anything on error
+			if tc.isNoOp {
+				assertDatasetsEquals(t, ta, initState, z.Datasets())
 			}
 
-			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got)
-				return
+			if err == nil && !tc.isNoOp {
+				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
-			assertDatasetsToGolden(t, ta, got)
+
+			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
 }
 
+/*
 func TestTransactions(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
