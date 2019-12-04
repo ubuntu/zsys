@@ -104,8 +104,8 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	}
 
 	var children []*Dataset
-	for _, d := range ds {
-		c, err := newDatasetTree(ctx, &d, &z.allDatasets)
+	for i := range ds {
+		c, err := newDatasetTree(ctx, &ds[i], &z.allDatasets)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan all datasets: %v", err)
 		}

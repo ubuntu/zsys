@@ -188,8 +188,8 @@ func newDatasetTree(ctx context.Context, dZFS *libzfs.Dataset, allDatasets *map[
 	}
 
 	var children []*Dataset
-	for _, dc := range dZFS.Children {
-		c, err := newDatasetTree(ctx, &dc, allDatasets)
+	for i := range dZFS.Children {
+		c, err := newDatasetTree(ctx, &dZFS.Children[i], allDatasets)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan dataset: %v", err)
 		}
