@@ -460,3 +460,57 @@ func (d *Dataset) stringToProp(name string) (nativeProp libzfs.Prop, userProp st
 	}
 	return nativeProp, userProp, value, simplifiedSource
 }
+
+// inverseOrigin inverses on the Dataset object themselves the dependence hierarchy.
+// It refreshes the global hierarchy as well, as snapshots are migrating.
+
+func (t *nestedTransaction) inverseOrigin(oldOrigDataset, newOrigDataset *Dataset) error {
+	baseSnapshot, err := t.Zfs.findDatasetByName(newOrigDataset.Origin)
+	if err != nil {
+		return fmt.Errorf(i18n.G("cannot find base snapshot %q: %v"), newOrigDataset.Origin, err)
+	}
+
+	// Collect all snapshots to migrate to newOrigDataset
+	var snapshotsToMigrate []*Dataset
+	for i := range oldOrigDataset.children {
+		c := oldOrigDataset.children[i]
+		if !c.IsSnapshot {
+			continue
+		}
+		if c.LastUsed > baseSnapshot.LastUsed {
+			continue
+		}
+		snapshotsToMigrate = append(snapshotsToMigrate, c)
+	}
+
+	for i := range snapshotsToMigrate {
+		s := snapshotsToMigrate[i]
+		oldName := s.Name
+		_, n := splitSnapshotName(oldName)
+
+		s.Name = newOrigDataset.Name + "@" + n
+		// Add new child to promoted dataset
+		newOrigDataset.children = append(newOrigDataset.children, s)
+
+		// Find and remove child from demoted dataset
+		j := -1
+		for j = range oldOrigDataset.children {
+			if oldOrigDataset.children[j] == s {
+				break
+			}
+		}
+		if j < 0 {
+			return fmt.Errorf(i18n.G("cannot find old snapshot name %q on %q"), oldName, oldOrigDataset.Name)
+		}
+		oldOrigDataset.children = append(oldOrigDataset.children[:j], oldOrigDataset.children[j+1:]...)
+
+		// Refresh our global map
+		t.Zfs.allDatasets[s.Name] = s
+		delete(t.Zfs.allDatasets, oldName)
+	}
+
+	oldOrigDataset.Origin = baseSnapshot.Name
+	newOrigDataset.Origin = ""
+
+	return nil
+}

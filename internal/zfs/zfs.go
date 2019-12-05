@@ -587,68 +587,82 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 	return nil
 }
 
-/*
 // Promote recursively all children, including dataset named "name".
 // If the hierarchy is partially promoted, promote the missing one and be no-op for the rest.
-func (z *Zfs) Promote(name string) (errPromote error) {
-	log.Debugf(z.ctx, i18n.G("ZFS: trying to promote %q"), name)
-	d, err := libzfs.DatasetOpen(name)
-	if err != nil {
-		return fmt.Errorf(i18n.G("can't get dataset %q: ")+config.ErrorFormat, name, err)
-	}
-	defer d.Close()
+func (t *Transaction) Promote(name string) (errPromote error) {
+	t.checkValid()
+	log.Debugf(t.ctx, i18n.G("ZFS: trying to promote %q"), name)
 
-	if d.IsSnapshot() {
+	d, err := t.Zfs.findDatasetByName(name)
+	if err != nil {
+		return fmt.Errorf(i18n.G("cannot find %q: %v"), name, err)
+	}
+
+	if d.IsSnapshot {
 		return fmt.Errorf(i18n.G("can't promote %q: it's a snapshot"), name)
 	}
 
-	subz, done := z.newTransaction()
-	defer done(&errPromote)
+	nestedT := t.newNestedTransaction()
+	defer nestedT.Done(&errPromote)
 
-	originParent, snapshotName := splitSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
-	// Only check integrity for non promoted elements
-	// Otherwise, promoting is a no-op or will repromote children
-	if len(originParent) > 0 {
-		parent, err := libzfs.DatasetOpen(originParent)
+	// Already promoted dataset
+	if d.Origin != "" {
+		origDatasetName, snapshotName := splitSnapshotName(d.Origin)
+		parentOrigin, err := t.Zfs.findDatasetByName(origDatasetName)
 		if err != nil {
-			return fmt.Errorf(i18n.G("can't get parent dataset of %q: ")+config.ErrorFormat, name, err)
+			return fmt.Errorf(i18n.G("cannot find %q: %v"), origDatasetName, err)
 		}
-		defer parent.Close()
-		if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
+
+		if err := parentOrigin.checkSnapshotHierarchyIntegrity(snapshotName, true); err != nil {
 			return fmt.Errorf(i18n.G("integrity check failed: %v"), err)
 		}
 	}
-
-	return subz.promoteRecursive(d)
+	return nestedT.promoteRecursive(d)
 }
 
-func (z *Zfs) promoteRecursive(d libzfs.Dataset) error {
-	name := d.Properties[libzfs.DatasetPropName].Value
+func (t *nestedTransaction) promoteRecursive(d *Dataset) error {
+	log.Debugf(t.ctx, i18n.G("trying to promote %q"), d.Name)
+	origin := d.Origin
 
-	origin, _ := splitSnapshotName(d.Properties[libzfs.DatasetPropOrigin].Value)
 	// Only promote if not promoted yet.
-	if len(origin) > 0 {
-		if err := d.Promote(); err != nil {
-			return fmt.Errorf(i18n.G("couldn't promote %q: ")+config.ErrorFormat, name, err)
-		}
-		z.registerRevert(func() error {
-			origD, err := libzfs.DatasetOpen(origin)
-			if err != nil {
-				return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), origin, err)
-			}
-			defer origD.Close()
-			if err := origD.Promote(); err != nil {
-				return fmt.Errorf(i18n.G("couldn't promote %q for cleanup: %v"), origin, err)
-			}
-			return nil
-		})
+	if origin == "" {
+		return nil
 	}
 
-	return recurseFileSystemDatasets(d,
-		func(next libzfs.Dataset) error {
-			return z.promoteRecursive(next)
-		})
-}*/
+	origDatasetName, _ := splitSnapshotName(origin)
+	origD, err := t.Zfs.findDatasetByName(origDatasetName)
+	if err != nil {
+		return fmt.Errorf(i18n.G("cannot find %q: %v"), origin, err)
+	}
+
+	if err := d.dZFS.Promote(); err != nil {
+		return fmt.Errorf(i18n.G("couldn't promote %q: ")+config.ErrorFormat, d.Name, err)
+	}
+	t.registerRevert(func() error {
+		if err := origD.dZFS.Promote(); err != nil {
+			return fmt.Errorf(i18n.G("couldn't promote %q for cleanup: %v"), origin, err)
+		}
+		if err := t.inverseOrigin(d, origD); err != nil {
+			return fmt.Errorf(i18n.G("couldn't reset our internal origin and layout cache for cleanup: %v"), err)
+		}
+
+		return nil
+	})
+
+	if err := t.inverseOrigin(origD, d); err != nil {
+		return fmt.Errorf(i18n.G("couldn't refresh our internal origin and layout cache: %v"), err)
+	}
+
+	for i, c := range d.children {
+		if c.IsSnapshot {
+			continue
+		}
+		if err := t.promoteRecursive(d.children[i]); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // Destroy recursively all children, including dataset named "name".
 // If the dataset is a snapshot, navigate through the hierarchy to delete all dataset with the same snapshot name.
