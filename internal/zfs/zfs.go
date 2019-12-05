@@ -720,10 +720,12 @@ func (nt *NoTransaction) destroyOne(d *Dataset) error {
 	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy %q"), d.Name)
 
 	// Destroy myself
-	if err := d.dZFS.Destroy(false); err != nil {
+	// WOKAROUND: use of DestroyRecursive on leaf
+	// To prevent go-libzfs to preventing us from destroying the parent, clear parent's children object as
+	// Destroy doesn't dereference parent's child.
+	if err := d.dZFS.DestroyRecursive(); err != nil {
 		return fmt.Errorf(i18n.G("cannot destroy dataset %q: %v"), d.Name, err)
 	}
-	defer d.dZFS.Close()
 
 	// Unattach from parent children
 	parentName := filepath.Dir(d.Name)
@@ -748,6 +750,21 @@ func (nt *NoTransaction) destroyOne(d *Dataset) error {
 
 	// Delete from main list of dataset
 	delete(nt.Zfs.allDatasets, d.Name)
+
+	// WOKAROUND
+	// To prevent go-libzfs to preventing us from destroying the parent, clear parent's children object as
+	// Destroy doesn't dereference parent's child.
+	/*i = -1
+	var c libzfs.Dataset
+	for i, c = range parent.dZFS.Children {
+		if c.Properties[libzfs.DatasetPropName].Value == d.Name {
+			break
+		}
+	}
+	if i < 0 {
+		return fmt.Errorf(i18n.G("cannot find %q as child of parent %q"), d.Name, parent.Name)
+	}
+	parent.dZFS.Children = append(parent.dZFS.Children[:i], parent.dZFS.Children[i+1:]...)*/
 
 	return nil
 }
