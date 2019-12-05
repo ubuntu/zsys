@@ -15,6 +15,7 @@ import (
 
 // RefreshProperties refreshes all the properties for a given dataset and the source of them.
 // for snapshots, we'll take the parent dataset for the mount properties.
+// TODO: dZFS maybe useless (part of d.dZFS)
 func (d *Dataset) RefreshProperties(ctx context.Context, dZFS *libzfs.Dataset) error {
 	sources := datasetSources{}
 	name := dZFS.Properties[libzfs.DatasetPropName].Value
@@ -458,21 +459,4 @@ func (d *Dataset) stringToProp(name string) (nativeProp libzfs.Prop, userProp st
 		panic(fmt.Sprintf("unsupported property %q", name))
 	}
 	return nativeProp, userProp, value, simplifiedSource
-}
-
-type datasetFuncRecursive func(d libzfs.Dataset) error
-
-// recurseFileSystemDatasets takes all children of d, and if it's not a snpashot, run f() over there while
-// returning an error if raised on any children.
-func recurseFileSystemDatasets(d libzfs.Dataset, f datasetFuncRecursive) error {
-	for _, cd := range d.Children {
-		if cd.IsSnapshot() {
-			continue
-		}
-
-		if err := f(cd); err != nil {
-			return err
-		}
-	}
-	return nil
 }
