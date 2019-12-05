@@ -218,7 +218,6 @@ func TestSnapshot(t *testing.T) {
 	}
 }
 
-/*
 func TestClone(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
@@ -265,42 +264,36 @@ func TestClone(t *testing.T) {
 			ta := timeAsserter(time.Now())
 			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
 			defer fPools.create(dir)()
-			z := zfs.New(context.Background())
-			defer z.Done()
-			// Scan initial state for no-op
-			var initState []zfs.Dataset
-			var err error
-			initState, err = z.Scan()
+			z, err := zfs.New(context.Background())
 			if err != nil {
-				t.Fatalf("couldn't get initial state: %v", err)
+				t.Fatalf("expected no error but got: %v", err)
 			}
+			initState := z.Datasets()
+			trans, _ := z.NewTransaction(context.Background())
+			defer trans.Done()
 
-			err = z.Clone(tc.dataset, tc.suffix, tc.skipBootfs, tc.recursive)
+			err = trans.Clone(tc.dataset, tc.suffix, tc.skipBootfs, tc.recursive)
 
-			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				// we don't return because we want to check that on error, Clone() is a no-op
-			}
-			if err == nil && tc.wantErr {
+			if err != nil && !tc.wantErr {
+				t.Fatalf("expected no error but got: %v", err)
+			} else if err == nil && tc.wantErr {
 				t.Fatal("expected an error but got none")
 			}
 
-			got, err := z.Scan()
-			if err != nil {
-				t.Fatalf("couldn't get final state: %v", err)
-			}
-
 			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got)
+				assertDatasetsEquals(t, ta, initState, z.Datasets())
 				return
 			}
-			assertDatasetsToGolden(t, ta, got)
+			if err == nil && !tc.isNoOp {
+				assertDatasetsToGolden(t, ta, z.Datasets())
+			}
+
+			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
 }
 
+/*
 func TestPromote(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 

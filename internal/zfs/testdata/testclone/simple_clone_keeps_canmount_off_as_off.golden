@@ -4,7 +4,8 @@
       "Mountpoint": "/",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "local"
+         "Mountpoint": "local",
+         "CanMount": "local"
       }
    },
    {
@@ -12,17 +13,19 @@
       "Mountpoint": "/ROOT",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "inherited"
+         "Mountpoint": "inherited",
+         "CanMount": "local"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu",
       "Mountpoint": "/",
-      "CanMount": "off",
+      "CanMount": "on",
       "BootFS": true,
       "LastUsed": 1555555555,
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootFS": "local",
          "LastUsed": "local"
       }
@@ -36,7 +39,8 @@
       "LastUsed": 2000000000,
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "rpool/ROOT/ubuntu"
+         "CanMount": "local",
+         "BootFS": "local"
       }
    },
    {
@@ -47,6 +51,7 @@
       "Origin": "rpool/ROOT/ubuntu@snap1",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootFS": "local"
       }
    }
