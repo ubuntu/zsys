@@ -419,27 +419,27 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 	return nil
 }
 
-/*
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
-func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
-	log.Debugf(z.ctx, i18n.G("ZFS: trying to clone %q"), name)
+func (t *Transaction) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
+	t.checkValid()
+
+	log.Debugf(t.ctx, i18n.G("ZFS: trying to clone %q"), name)
 	if suffix == "" {
 		return fmt.Errorf(i18n.G("no suffix was provided for cloning"))
 	}
 
-	d, err := libzfs.DatasetOpen(name)
+	d, err := t.Zfs.findDatasetByName(name)
 	if err != nil {
-		return fmt.Errorf(i18n.G("%q doesn't exist: %v"), name, err)
+		return fmt.Errorf(i18n.G("cannot find %q: %v"), name, err)
 	}
-	defer d.Close()
 
-	if !d.IsSnapshot() {
+	if !d.IsSnapshot {
 		return fmt.Errorf(i18n.G("%q isn't a snapshot"), name)
 	}
 
-	subz, done := z.newTransaction()
-	defer done(&errClone)
+	nestedT := t.newNestedTransaction()
+	defer nestedT.Done(&errClone)
 
 	rootName, snapshotName := splitSnapshotName(name)
 
@@ -451,50 +451,28 @@ func (z *Zfs) Clone(name, suffix string, skipBootfs, recursive bool) (errClone e
 	}
 	newRootName += "_" + suffix
 
-	parent, err := libzfs.DatasetOpen(d.Properties[libzfs.DatasetPropName].Value[:strings.LastIndex(name, "@")])
+	parent, err := t.Zfs.findDatasetByName(rootName)
 	if err != nil {
-		return fmt.Errorf(i18n.G("can't get parent dataset of %q: ")+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("cannot find parent for %q: %v"), name, err)
 	}
-	defer parent.Close()
+
 	if recursive {
-		if err := checkSnapshotHierarchyIntegrity(parent, snapshotName, true); err != nil {
+		if err := parent.checkSnapshotHierarchyIntegrity(snapshotName, true); err != nil {
 			return fmt.Errorf(i18n.G("integrity check failed: %v"), err)
 		}
 	}
-
-	return subz.cloneRecursive(d, snapshotName, rootName, newRootName, skipBootfs, recursive)
+	return nestedT.cloneRecursive(*d, snapshotName, rootName, newRootName, skipBootfs, recursive)
 }
 
 // cloneRecursive recursively clones all children and store "revert" operations by cleaning newly
 // created datasets.
-func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootName string, skipBootfs, recursive bool) error {
-	name := d.Properties[libzfs.DatasetPropName].Value
-	parentName := name[:strings.LastIndex(name, "@")]
-
-	/* FIXME: this is taken from getDatasetProp().
-	 * We will access directly the parent properties we are interested in here.
-	 *
-
-			parentName = name[:strings.LastIndex(name, "@")]
-			p, ok := datasetPropertiesCache[parentName]
-			if ok != true {
-				return nil, fmt.Errorf(i18n.G("couldn't find %q in cache for getting properties of snapshot %q"), parentName, name)
-			}
-			mountpoint = p.Mountpoint
-			sources.Mountpoint = p.sources.Mountpoint
-			canMount = p.CanMount
-
-*/
-/*
-	// Get properties from snapshot and parents.
-	srcProps, err := getDatasetProp(d)
-	if err != nil {
-		return fmt.Errorf(i18n.G("can't get dataset properties for %q: ")+config.ErrorFormat, name, err)
-	}
-
-	datasetRelPath := strings.TrimPrefix(strings.TrimSuffix(name, "@"+snapshotName), rootName)
-	if (!skipBootfs && srcProps.BootFS) || !srcProps.BootFS {
-		if err := z.cloneDataset(d, newRootName+datasetRelPath, *srcProps, parentName); err != nil {
+func (t *nestedTransaction) cloneRecursive(d Dataset, snapshotName, rootName, newRootName string, skipBootfs, recursive bool) error {
+	if (!skipBootfs && d.BootFS) || !d.BootFS {
+		// Calculate new name of the dataset
+		// eg. rpool/ROOT/ubuntu_11111/var@snap1 -> rpool/ROOT/ubuntu_22222/var
+		destPath := strings.Replace(strings.TrimSuffix(d.Name, "@"+snapshotName), rootName, newRootName, 1)
+		log.Debugf(t.ctx, "Trying to clone %q to %q", d.Name, destPath)
+		if err := t.cloneDataset(d, destPath); err != nil {
 			return err
 		}
 	}
@@ -504,78 +482,112 @@ func (z *Zfs) cloneRecursive(d libzfs.Dataset, snapshotName, rootName, newRootNa
 	}
 
 	// Handle other datasets (children of parent) which may have snapshots
-	parent, err := libzfs.DatasetOpen(parentName)
+	parentName, _ := splitSnapshotName(d.Name)
+	parent, err := t.Zfs.findDatasetByName(parentName)
 	if err != nil {
-		return fmt.Errorf(i18n.G("can't get parent dataset of %q: ")+config.ErrorFormat, name, err)
+		return fmt.Errorf(i18n.G("cannot find parent for %q: %v"), d.Name, err)
 	}
-	defer parent.Close()
 
-	return recurseFileSystemDatasets(parent,
-		func(next libzfs.Dataset) error {
-			// Look for childrens filesystem datasets having a corresponding snapshot
-			found, snapD := next.FindSnapshotName("@" + snapshotName)
-			if !found {
-				return nil
+	for _, sibling := range parent.children {
+		if sibling.IsSnapshot {
+			continue
+		}
+		for _, c := range sibling.children {
+			if !strings.HasSuffix(c.Name, "@"+snapshotName) {
+				continue
 			}
-
-			return z.cloneRecursive(snapD, snapshotName, rootName, newRootName, skipBootfs, true)
-		})
-}
-
-func (z *Zfs) cloneDataset(d libzfs.Dataset, target string, srcProps DatasetProp, parentName string) error {
-	props := make(map[libzfs.Prop]libzfs.Property)
-	if srcProps.sources.Mountpoint == "local" {
-		props[libzfs.DatasetPropMountpoint] = libzfs.Property{
-			Value:  srcProps.Mountpoint,
-			Source: srcProps.sources.Mountpoint,
+			if err := t.cloneRecursive(*c, snapshotName, rootName, newRootName, skipBootfs, true); err != nil {
+				return fmt.Errorf("couldn't clone %q: %v", c.Name, err)
+			}
 		}
 	}
-
-	// CanMount is always local
-	if srcProps.CanMount == "on" {
-		// don't mount new cloned dataset on top of parent.
-		srcProps.CanMount = "noauto"
-	}
-	props[libzfs.DatasetPropCanmount] = libzfs.Property{
-		Value:  srcProps.CanMount,
-		Source: "local",
-	}
-
-	cd, err := d.Clone(target, props)
-	if err != nil {
-		name := d.Properties[libzfs.DatasetPropName].Value
-		return fmt.Errorf(i18n.G("couldn't clone %q to %q: ")+config.ErrorFormat, name, target, err)
-	}
-	defer cd.Close()
-	z.registerRevert(func() error {
-		d, err := libzfs.DatasetOpen(target)
-		if err != nil {
-			return fmt.Errorf(i18n.G("couldn't open %q for cleanup: %v"), target, err)
-		}
-		defer d.Close()
-		if err := d.Destroy(false); err != nil {
-			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), target, err)
-		}
-		return nil
-	})
-
-	// Set user properties that we couldn't set before creating the dataset. Based this for local
-	// or source == parentName (as it will be local)
-	if srcProps.sources.BootFS == "local" || srcProps.sources.BootFS == parentName {
-		bootfsValue := "no"
-		if srcProps.BootFS {
-			bootfsValue = "yes"
-		}
-		if err := cd.SetUserProperty(BootfsProp, bootfsValue); err != nil {
-			return fmt.Errorf(i18n.G("couldn't set user property %q to %q: ")+config.ErrorFormat, BootfsProp, target, err)
-		}
-	}
-	// We don't set BootfsDatasets as this property can't be translated to new datasets
-	// We don't set LastUsed on purpose as the dataset isn't used yet
 
 	return nil
 }
 
+func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
+	props := make(map[libzfs.Prop]libzfs.Property)
+
+	if d.sources.Mountpoint == "local" {
+		props[libzfs.DatasetPropMountpoint] = libzfs.Property{
+			Value:  d.Mountpoint,
+			Source: "local",
+		}
+	}
+
+	// We want CanMount on -> noauto (don't mount new cloned dataset on top of parent)
+	// Otherwise, only set explicitely local property
+	if d.sources.CanMount == "local" || d.CanMount == "on" {
+		value := d.CanMount
+		if value == "on" {
+			// don't mount new cloned dataset on top of parent.
+			value = "noauto"
+		}
+		props[libzfs.DatasetPropCanmount] = libzfs.Property{
+			Value:  value,
+			Source: "local",
+		}
+	}
+
+	newZFSDataset, err := d.dZFS.Clone(target, props)
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't clone %q to %q: ")+config.ErrorFormat, d.Name, target, err)
+	}
+
+	newDataset := Dataset{
+		Name:       target,
+		IsSnapshot: false,
+		dZFS:       &newZFSDataset,
+	}
+	t.registerRevert(func() error {
+		nt := t.Zfs.NewNoTransaction(t.ctx)
+		if err := nt.Destroy(newDataset.Name); err != nil {
+			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), newDataset.Name, err)
+		}
+		return nil
+	})
+	t.Zfs.allDatasets[newDataset.Name] = &newDataset
+
+	parent, err := t.Zfs.findDatasetByName(filepath.Dir(newDataset.Name))
+	if err != nil {
+		return fmt.Errorf(i18n.G("cannot find parent for %q: %v"), newDataset.Name, err)
+	}
+	parent.children = append(parent.children, &newDataset)
+
+	// Set user properties that we couldn't set before creating the snapshot dataset.
+	// We don't set LastUsed here as Creation time will be used.
+	/*
+	   We don't set BootfsDatasets right away, as we can have multiple cases:
+	   - associate new user datasets with a newly created bootfs dataset
+	   - associate new user datasets with the existing bootfs dataset (only reverting user datasets, on demand).
+	     In that case, we should deassociate older user datasets and reassociate new ones.
+	   Those operations are thus for the higher level caller, as part of the same transaction.
+	*/
+	if d.sources.BootFS == "local" {
+		bootFS := "no"
+		if d.BootFS {
+			bootFS = "yes"
+		}
+		if err := newDataset.dZFS.SetUserProperty(BootfsProp, bootFS); err != nil {
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, BootfsProp, bootFS, newDataset.Name, err)
+		}
+	}
+
+	if d.sources.LastBootedKernel == "local" {
+		if err := newDataset.dZFS.SetUserProperty(LastBootedKernelProp, d.LastBootedKernel); err != nil {
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, LastBootedKernelProp, d.LastBootedKernel, newDataset.Name, err)
+		}
+
+	}
+
+	if err := newDataset.RefreshProperties(t.ctx, &newZFSDataset); err != nil {
+		return fmt.Errorf(i18n.G("couldn't fetch property of newly created dataset: %v"), err)
+	}
+
+	return nil
+}
+
+/*
 // Promote recursively all children, including dataset named "name".
 // If the hierarchy is partially promoted, promote the missing one and be no-op for the rest.
 func (z *Zfs) Promote(name string) (errPromote error) {
