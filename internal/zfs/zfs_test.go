@@ -308,7 +308,6 @@ func TestClone(t *testing.T) {
 	}
 }
 
-/*
 func TestPromote(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
 
@@ -342,61 +341,53 @@ func TestPromote(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withWaitBetweenSnapshots())
 			defer fPools.create(dir)()
-			z := zfs.New(context.Background())
-			defer z.Done()
-			_, err := z.Scan() // Needed for cache
+			z, err := zfs.New(context.Background())
 			if err != nil {
-				t.Fatalf("couldn't get initial state: %v", err)
+				t.Fatalf("expected no error but got: %v", err)
 			}
+
+			// Scan initial state for no-op
+			trans, _ := z.NewTransaction(context.Background())
+			defer trans.Done()
+
 			if tc.cloneFrom != "" {
-				err := z.Clone(tc.cloneFrom, "5678", false, !tc.cloneOnlyOne)
+				err := trans.Clone(tc.cloneFrom, "5678", false, !tc.cloneOnlyOne)
 				if err != nil {
 					t.Fatalf("couldn't setup testbed when cloning: %v", err)
 				}
 			}
 			if tc.alreadyPromoted != "" {
-				err := z.Promote(tc.alreadyPromoted)
+				err := trans.Promote(tc.alreadyPromoted)
 				if err != nil {
 					t.Fatalf("couldn't setup testbed when prepromoting %q: %v", tc.alreadyPromoted, err)
 				}
 			}
-			// Scan initial state for no-op
-			var initState []zfs.Dataset
-			if tc.isNoOp {
-				var err error
-				initState, err = z.Scan()
-				if err != nil {
-					t.Fatalf("couldn't get initial state: %v", err)
-				}
-			}
+			initState := z.Datasets()
 
-			err = z.Promote(tc.dataset)
+			err = trans.Promote(tc.dataset)
 
-			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				// we don't return because we want to check that on error, Clone() is a no-op
-			}
-			if err == nil && tc.wantErr {
+			if err != nil && !tc.wantErr {
+				t.Fatalf("expected no error but got: %v", err)
+			} else if err == nil && tc.wantErr {
 				t.Fatal("expected an error but got none")
 			}
 
-			got, err := z.Scan()
-			if err != nil {
-				t.Fatalf("couldn't get final state: %v", err)
-			}
-
 			if tc.isNoOp {
-				assertDatasetsEquals(t, ta, initState, got)
+				assertDatasetsEquals(t, ta, initState, z.Datasets())
 				return
 			}
-			assertDatasetsToGolden(t, ta, got)
+			if err == nil && !tc.isNoOp {
+				assertDatasetsToGolden(t, ta, z.Datasets())
+			}
+
+			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
 }
+
+/*
 
 func TestDestroy(t *testing.T) {
 	skipOnZFSPermissionDenied(t)
