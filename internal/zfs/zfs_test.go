@@ -231,15 +231,30 @@ func TestClone(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		// TODO: Test case with user properties changed between snapshot and parent (with children inheriting)
 		"Simple clone":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678"},
 		"Recursive clone": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
 		"Simple clone ignore missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678"},
 
-		"Simple clone keeps canmount off as off":                      {def: "one_pool_n_datasets_one_snapshot_with_canmount_off.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
-		"Simple clone keeps canmount noauto as noauto":                {def: "one_pool_n_datasets_one_snapshot_with_canmount_noauto.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
-		"Simple clone set canmount on to noauto":                      {def: "one_pool_n_datasets_one_snapshot.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+		"Simple clone keeps canmount off as off":               {def: "one_pool_n_datasets_one_snapshot_with_canmount_off.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+		"Simple clone keeps canmount noauto as noauto":         {def: "one_pool_n_datasets_one_snapshot_with_canmount_noauto.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+		"Simple clone set canmount on to noauto":               {def: "one_pool_n_datasets_one_snapshot.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+		"Simple clone ignore canmount set to noauto (default)": {def: "one_pool_n_datasets_one_snapshot_with_canmount_noauto_default.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+
 		"Simple clone on non root local mountpoint keeps mountpoints": {def: "one_pool_n_datasets_one_snapshot_non_root.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
+
+		"Simple clone set bootfs (local)":                {def: "one_pool_n_datasets_n_snapshots_with_bootfs_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_local", suffix: "5678"},
+		"Recursive clone set bootfs ignored (inherited)": {def: "one_pool_n_datasets_n_snapshots_with_bootfs_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_inherited", suffix: "5678", recursive: true},
+		"Simple clone set bootfs ignored (default)":      {def: "one_pool_n_datasets_n_snapshots_with_bootfs_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_default", suffix: "5678"},
+
+		"Simple clone set lastbootedkernel (local)":                {def: "one_pool_n_datasets_n_snapshots_with_lastbootedkernel_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_local", suffix: "5678"},
+		"Recursive clone set lastbootedkernel ignored (inherited)": {def: "one_pool_n_datasets_n_snapshots_with_lastbootedkernel_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_inherited", suffix: "5678", recursive: true},
+		"Simple clone set lastbootedkernel ignored (default)":      {def: "one_pool_n_datasets_n_snapshots_with_lastbootedkernel_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_default", suffix: "5678"},
+
+		"Recursive clone bootfsdataset ignored (local and inherited)":                {def: "one_pool_n_datasets_n_snapshots_with_bootfsdataset_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_local_inherited", suffix: "5678", recursive: true},
+		"Simple clone bootfsdataset ignored (default)":                {def: "one_pool_n_datasets_n_snapshots_with_bootfsdataset_n_sources.yaml", dataset: "rpool/ROOT/ubuntu2@snap_default", suffix: "5678"},
+
+		"Recursive clone lastused ignored (local and inherited)":                {def: "one_pool_n_datasets_n_snapshots_with_lastused_n_sources.yaml", dataset: "rpool/ROOT/ubuntu@snap_local_inherited", suffix: "5678", recursive: true},
+		"Simple clone lastused ignored (default)":                {def: "one_pool_n_datasets_n_snapshots_with_lastused_n_sources.yaml", dataset: "rpool/ROOT/ubuntu2@snap_default", suffix: "5678"},
 
 		"Simple clone on dataset without suffix":    {def: "layout1__one_pool_n_datasets_n_snapshots_without_suffix.yaml", dataset: "rpool/ROOT/ubuntu@snap_r1", suffix: "5678"},
 		"Recursive clone on dataset without suffix": {def: "layout1__one_pool_n_datasets_n_snapshots_without_suffix.yaml", dataset: "rpool/ROOT/ubuntu@snap_r1", suffix: "5678", recursive: true},
