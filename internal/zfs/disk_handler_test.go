@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"testing"
 	"time"
@@ -35,17 +36,23 @@ type fakePool struct {
 		LastUsed         time.Time `yaml:"last_used"`
 		LastBootedKernel string    `yaml:"last_booted_kernel"`
 		BootfsDatasets   string    `yaml:"bootfs_datasets"`
-		Snapshots        []struct {
-			Name             string
-			Mountpoint       string
-			CanMount         string
-			ZsysBootfs       string `yaml:"zsys_bootfs"`
-			LastBootedKernel string `yaml:"last_booted_kernel"`
-			BootfsDatasets   string `yaml:"bootfs_datasets"`
-			// LastUsed         time.Time `yaml:"last_used"` Last used will be snapshot creation time, so "now" in tests
-		}
+		Snapshots        orderedSnapshots
 	}
 }
+
+type orderedSnapshots []struct {
+	Name             string
+	Mountpoint       string
+	CanMount         string
+	ZsysBootfs       string `yaml:"zsys_bootfs"`
+	LastBootedKernel string `yaml:"last_booted_kernel"`
+	BootfsDatasets   string `yaml:"bootfs_datasets"`
+	// LastUsed         time.Time `yaml:"last_used"` Last used will be snapshot creation time, so "now" in tests
+}
+
+func (s orderedSnapshots) Len() int           { return len(s) }
+func (s orderedSnapshots) Less(i, j int) bool { return s[i].Name < s[j].Name }
+func (s orderedSnapshots) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 
 var (
 	keepPool = flag.Bool("keep-pool", false, "don't destroy pool and temporary folders for it. Don't run multiple tests with this flag.")
@@ -190,6 +197,7 @@ func (fpools fakePools) create(path string) func() {
 						d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
 					}
 
+					sort.Sort(dataset.Snapshots)
 					for _, s := range dataset.Snapshots {
 						props := make(map[libzfs.Prop]libzfs.Property)
 						d, err := libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
