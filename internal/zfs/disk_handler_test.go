@@ -20,6 +20,7 @@ const mB = 1024 * 1024
 
 type fakePools struct {
 	Pools          []fakePool
+	waitBetweenSnapshots bool
 	t              *testing.T
 	tempPools      []string
 	tempMountpaths []string
@@ -58,8 +59,14 @@ var (
 	keepPool = flag.Bool("keep-pool", false, "don't destroy pool and temporary folders for it. Don't run multiple tests with this flag.")
 )
 
+func withWaitBetweenSnapshots() func(*fakePools) {
+	return func(f *fakePools) {
+		f.waitBetweenSnapshots = true
+	}
+}
+
 // newFakePools returns a fakePools from a yaml file
-func newFakePools(t *testing.T, path string) fakePools {
+func newFakePools(t *testing.T, path string, opts ...func(*fakePools)) fakePools {
 	pools := fakePools{t: t}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -67,6 +74,10 @@ func newFakePools(t *testing.T, path string) fakePools {
 	}
 	if err = yaml.Unmarshal(b, &pools); err != nil {
 		t.Fatal("couldn't unmarshal device list", err)
+	}
+
+	for _, o := range opts {
+		o(&pools)
 	}
 
 	return pools
@@ -199,6 +210,11 @@ func (fpools fakePools) create(path string) func() {
 
 					sort.Sort(dataset.Snapshots)
 					for _, s := range dataset.Snapshots {
+						// Dataset creation time have second granularity. As we want for some tests reproducible
+						// snapshot orders (like promotion), we need then to ensure we create them at an expected rate.
+						if fpools.waitBetweenSnapshots {
+							time.Sleep(time.Second)
+						}
 						props := make(map[libzfs.Prop]libzfs.Property)
 						d, err := libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
 						if err != nil {
