@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"sync"
 	"testing"
 	"time"
 
@@ -19,12 +20,12 @@ import (
 const mB = 1024 * 1024
 
 type fakePools struct {
-	Pools          []fakePool
+	Pools                []fakePool
 	waitBetweenSnapshots bool
-	t              *testing.T
-	tempPools      []string
-	tempMountpaths []string
-	tempFiles      []string
+	t                    *testing.T
+	tempPools            []string
+	tempMountpaths       []string
+	tempFiles            []string
 }
 
 type fakePool struct {
@@ -125,6 +126,7 @@ func (fpools fakePools) cleanup() {
 
 // create on disk mock pools as files
 func (fpools fakePools) create(path string) func() {
+	snapshotWG := sync.WaitGroup{}
 	for _, fpool := range fpools.Pools {
 		func() {
 			// Create device as file on disk
@@ -168,51 +170,53 @@ func (fpools fakePools) create(path string) func() {
 			defer pool.Close()
 
 			for _, dataset := range fpool.Datasets {
-				func() {
-					datasetName := fpool.Name + "/" + dataset.Name
-					var d libzfs.Dataset
-					if dataset.Name == "." {
-						datasetName = fpool.Name
-						d, err = libzfs.DatasetOpen(datasetName)
-						if err != nil {
-							fpools.Fatalf("couldn't open dataset %q: %v", datasetName, err)
-						}
-					} else {
-						props := make(map[libzfs.Prop]libzfs.Property)
-						d, err = libzfs.DatasetCreate(datasetName, libzfs.DatasetTypeFilesystem, props)
-						if err != nil {
-							fpools.Fatalf("couldn't create dataset %q: %v", datasetName, err)
-						}
+				datasetName := fpool.Name + "/" + dataset.Name
+				var d libzfs.Dataset
+				if dataset.Name == "." {
+					datasetName = fpool.Name
+					d, err = libzfs.DatasetOpen(datasetName)
+					if err != nil {
+						fpools.Fatalf("couldn't open dataset %q: %v", datasetName, err)
 					}
-					defer d.Close()
-					if dataset.Mountpoint != "" {
-						d.SetProperty(libzfs.DatasetPropMountpoint, dataset.Mountpoint)
+				} else {
+					props := make(map[libzfs.Prop]libzfs.Property)
+					d, err = libzfs.DatasetCreate(datasetName, libzfs.DatasetTypeFilesystem, props)
+					if err != nil {
+						fpools.Fatalf("couldn't create dataset %q: %v", datasetName, err)
 					}
-					if dataset.CanMount == "" {
-						dataset.CanMount = "off"
-					}
-					if dataset.CanMount != "-" {
-						d.SetProperty(libzfs.DatasetPropCanmount, dataset.CanMount)
-					}
+				}
+				if dataset.Mountpoint != "" {
+					d.SetProperty(libzfs.DatasetPropMountpoint, dataset.Mountpoint)
+				}
+				if dataset.CanMount == "" {
+					dataset.CanMount = "off"
+				}
+				if dataset.CanMount != "-" {
+					d.SetProperty(libzfs.DatasetPropCanmount, dataset.CanMount)
+				}
 
-					if dataset.ZsysBootfs != "" {
-						d.SetUserProperty(zfs.BootfsProp, dataset.ZsysBootfs)
-					}
-					if !dataset.LastUsed.IsZero() {
-						d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(dataset.LastUsed.Unix(), 10))
-					}
-					if dataset.LastBootedKernel != "" {
-						d.SetUserProperty(zfs.LastBootedKernelProp, dataset.LastBootedKernel)
-					}
-					if dataset.BootfsDatasets != "" {
-						d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
-					}
+				if dataset.ZsysBootfs != "" {
+					d.SetUserProperty(zfs.BootfsProp, dataset.ZsysBootfs)
+				}
+				if !dataset.LastUsed.IsZero() {
+					d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(dataset.LastUsed.Unix(), 10))
+				}
+				if dataset.LastBootedKernel != "" {
+					d.SetUserProperty(zfs.LastBootedKernelProp, dataset.LastBootedKernel)
+				}
+				if dataset.BootfsDatasets != "" {
+					d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
+				}
+				d.Close()
 
-					sort.Sort(dataset.Snapshots)
-					for _, s := range dataset.Snapshots {
+				snapshotWG.Add(1)
+				go func(snapshots orderedSnapshots) {
+					defer snapshotWG.Done()
+					sort.Sort(snapshots)
+					for i, s := range snapshots {
 						// Dataset creation time have second granularity. As we want for some tests reproducible
 						// snapshot orders (like promotion), we need then to ensure we create them at an expected rate.
-						if fpools.waitBetweenSnapshots {
+						if fpools.waitBetweenSnapshots && i > 0 {
 							time.Sleep(time.Second)
 						}
 						props := make(map[libzfs.Prop]libzfs.Property)
@@ -238,9 +242,10 @@ func (fpools fakePools) create(path string) func() {
 						}
 						d.Close()
 					}
-				}()
+				}(dataset.Snapshots)
 			}
 		}()
 	}
+	snapshotWG.Wait()
 	return fpools.cleanup
 }
