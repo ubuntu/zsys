@@ -16,7 +16,7 @@ import (
 // RefreshProperties refreshes all the properties for a given dataset and the source of them.
 // for snapshots, we'll take the parent dataset for the mount properties.
 // TODO: dZFS maybe useless (part of d.dZFS)
-func (d *Dataset) RefreshProperties(ctx context.Context, dZFS libzfs.Dataset) error {
+func (d *Dataset) refreshProperties(ctx context.Context, dZFS libzfs.Dataset) error {
 	sources := datasetSources{}
 	name := dZFS.Properties[libzfs.DatasetPropName].Value
 
@@ -196,7 +196,7 @@ func newDatasetTree(ctx context.Context, dZFS libzfs.Dataset, allDatasets *map[s
 		IsSnapshot: dZFS.IsSnapshot(),
 		dZFS:       dZFS,
 	}
-	if err := node.RefreshProperties(ctx, dZFS); err != nil {
+	if err := node.refreshProperties(ctx, dZFS); err != nil {
 		log.Warningf(ctx, i18n.G("couldn't refresh properties of %q: %v"), node.Name, err)
 	}
 
