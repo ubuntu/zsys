@@ -317,7 +317,7 @@ func (t *Transaction) Create(path, mountpoint, canmount string) error {
 		return nil
 	})
 	if err := d.RefreshProperties(t.ctx, dZFS); err != nil {
-		return fmt.Errorf(i18n.G("couldn't fetch property of newly created dataset: %v"), err)
+		log.Warningf(t.ctx, i18n.G("couldn't fetch property of newly created dataset: %v"), err)
 	}
 	t.Zfs.allDatasets[d.Name] = &d
 
@@ -401,7 +401,7 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 	}
 
 	if err := d.RefreshProperties(t.ctx, dZFS); err != nil {
-		return fmt.Errorf(i18n.G("couldn't fetch property of newly created snapshot: %v"), err)
+		log.Warningf(t.ctx, i18n.G("couldn't fetch property of newly created snapshot: %v"), err)
 	}
 	t.Zfs.allDatasets[d.Name] = &d
 	parent.children = append(parent.children, &d)
@@ -585,7 +585,7 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 	}
 
 	if err := newDataset.RefreshProperties(t.ctx, newZFSDataset); err != nil {
-		return fmt.Errorf(i18n.G("couldn't fetch property of newly created dataset: %v"), err)
+		log.Warningf(t.ctx, i18n.G("couldn't fetch property of newly created dataset: %v"), err)
 	}
 
 	return nil

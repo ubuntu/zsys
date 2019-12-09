@@ -63,7 +63,8 @@ func (d *Dataset) RefreshProperties(ctx context.Context, dZFS libzfs.Dataset) er
 	case "local":
 		sources.Mountpoint = "local"
 	case "default":
-		sources.Mountpoint = ""
+		log.Warningf(ctx, i18n.G("MountPoint property for %q has an unexpected source: %q"), name, sourceMountPoint)
+		fallthrough
 	default:
 		sources.Mountpoint = "inherited"
 	}
@@ -85,7 +86,7 @@ func (d *Dataset) RefreshProperties(ctx context.Context, dZFS libzfs.Dataset) er
 
 	bfs, srcBootFS, err := getUserPropertyFromSys(ctx, BootfsProp, dZFS)
 	if err != nil {
-		return err
+		log.Warningf(ctx, i18n.G("can't read bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
 	}
 	var bootFS bool
 	if bfs == "yes" {
@@ -97,7 +98,7 @@ func (d *Dataset) RefreshProperties(ctx context.Context, dZFS libzfs.Dataset) er
 	if !d.IsSnapshot {
 		lu, srcLastUsed, err = getUserPropertyFromSys(ctx, LastUsedProp, dZFS)
 		if err != nil {
-			return err
+			log.Warningf(ctx, i18n.G("can't read source of LastUsed property, ignoring:")+config.ErrorFormat, err)
 		}
 	} else {
 		lu = dZFS.Properties[libzfs.DatasetPropCreation].Value
@@ -107,19 +108,20 @@ func (d *Dataset) RefreshProperties(ctx context.Context, dZFS libzfs.Dataset) er
 	}
 	lastUsed, err := strconv.Atoi(lu)
 	if err != nil {
-		return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+		log.Warningf(ctx, i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+		srcLastUsed = ""
 	}
 	sources.LastUsed = srcLastUsed
 
 	lastBootedKernel, srcLastBootedKernel, err := getUserPropertyFromSys(ctx, LastBootedKernelProp, dZFS)
 	if err != nil {
-		return err
+		log.Warningf(ctx, i18n.G("can't read lastBootedKernel property, ignoring: ")+config.ErrorFormat, err)
 	}
 	sources.LastBootedKernel = srcLastBootedKernel
 
 	bootfsDatasets, srcBootfsDatasets, err := getUserPropertyFromSys(ctx, BootfsDatasetsProp, dZFS)
 	if err != nil {
-		return err
+		log.Warningf(ctx, i18n.G("can't read bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
 	}
 	sources.BootfsDatasets = srcBootfsDatasets
 
@@ -195,7 +197,7 @@ func newDatasetTree(ctx context.Context, dZFS libzfs.Dataset, allDatasets *map[s
 		dZFS:       dZFS,
 	}
 	if err := node.RefreshProperties(ctx, dZFS); err != nil {
-		return nil, fmt.Errorf("couldn't refresh properties of %q: %v", node.Name, err)
+		log.Warningf(ctx, i18n.G("couldn't refresh properties of %q: %v"), node.Name, err)
 	}
 
 	var children []*Dataset
