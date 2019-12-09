@@ -23,3 +23,5 @@ require (
 	google.golang.org/grpc v1.24.0
 	gopkg.in/yaml.v2 v2.2.2
 )
+
+replace github.com/bicomsystems/go-libzfs => github.com/ubuntu/go-libzfs v0.2.2-0.20191206162817-0cd45ea96669
