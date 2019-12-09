@@ -502,17 +502,18 @@ func (t *nestedTransaction) inverseOrigin(oldOrigDataset, newOrigDataset *Datase
 		// Add new child to promoted dataset
 		newOrigDataset.children = append(newOrigDataset.children, s)
 
-		// Find and remove child from demoted dataset
-		j := -1
-		for j = range oldOrigDataset.children {
-			if oldOrigDataset.children[j] == s {
-				break
-			}
+		// Find and remove child from demoted dataset (using new name)
+		if err := oldOrigDataset.removeChild(s.Name); err != nil {
+			return fmt.Errorf(i18n.G("cannot remove snapshot %q on old dataset %q: %v"), oldName, oldOrigDataset.Name, err)
 		}
-		if j < 0 {
-			return fmt.Errorf(i18n.G("cannot find old snapshot name %q on %q"), oldName, oldOrigDataset.Name)
+
+		// this snapshot dZFS handler can't be renamed or refreshed to its new resource snapshot name. Close it.
+		s.dZFS.Close()
+
+		s.dZFS, err = libzfs.DatasetOpen(s.Name)
+		if err != nil {
+			return fmt.Errorf("cannot open new snapshot %q: %v", s.Name, err)
 		}
-		oldOrigDataset.children = append(oldOrigDataset.children[:j], oldOrigDataset.children[j+1:]...)
 
 		// Refresh our global map
 		t.Zfs.allDatasets[s.Name] = s
@@ -522,5 +523,28 @@ func (t *nestedTransaction) inverseOrigin(oldOrigDataset, newOrigDataset *Datase
 	oldOrigDataset.Origin = baseSnapshot.Name
 	newOrigDataset.Origin = ""
 
+	return nil
+}
+
+// removeChild on our Dataset object
+func (d *Dataset) removeChild(name string) error {
+	i := -1
+	for idx, dc := range d.children {
+		if dc.Name == name {
+			i = idx
+			break
+		}
+	}
+
+	if i < 0 {
+		return fmt.Errorf(i18n.G("cannot find %q as child of parent %q"), name, d.Name)
+	}
+
+	if i < len(d.children)-1 {
+		copy(d.children[i:], d.children[i+1:])
+	}
+	// avoid memory leak by having a pointer reachable by underlying array
+	d.children[len(d.children)-1] = nil
+	d.children = d.children[:len(d.children)-1]
 	return nil
 }

@@ -541,7 +541,7 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 	}
 	t.registerRevert(func() error {
 		nt := t.Zfs.NewNoTransaction(t.ctx)
-		if err := nt.Destroy(newDataset.Name); err != nil {
+		if err := nt.destroyOne(&newDataset); err != nil {
 			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), newDataset.Name, err)
 		}
 		return nil
@@ -606,17 +606,30 @@ func (t *Transaction) Promote(name string) (errPromote error) {
 	defer nestedT.Done(&errPromote)
 
 	// Already promoted dataset
-	if d.Origin != "" {
-		origDatasetName, snapshotName := splitSnapshotName(d.Origin)
-		parentOrigin, err := t.Zfs.findDatasetByName(origDatasetName)
-		if err != nil {
-			return fmt.Errorf(i18n.G("cannot find %q: %v"), origDatasetName, err)
-		}
-
-		if err := parentOrigin.checkSnapshotHierarchyIntegrity(snapshotName, true); err != nil {
-			return fmt.Errorf(i18n.G("integrity check failed: %v"), err)
-		}
+	if d.Origin == "" {
+		return nil
 	}
+
+	origDatasetName, snapshotName := splitSnapshotName(d.Origin)
+	parentOrigin, err := t.Zfs.findDatasetByName(origDatasetName)
+	if err != nil {
+		return fmt.Errorf(i18n.G("cannot find %q: %v"), origDatasetName, err)
+	}
+
+	if err := parentOrigin.checkSnapshotHierarchyIntegrity(snapshotName, true); err != nil {
+		return fmt.Errorf(i18n.G("integrity check failed: %v"), err)
+	}
+
+	nestedT.registerRevert(func() error {
+		// Create our own "temporary" transaction to not attach to main one
+		tempT, _ := t.Zfs.NewTransaction(context.Background())
+		defer tempT.Done()
+		if err := tempT.Promote(origDatasetName); err != nil {
+			return fmt.Errorf(i18n.G("couldn't promote %q for cleanup: %v"), origDatasetName, err)
+		}
+		return nil
+	})
+
 	return nestedT.promoteRecursive(d)
 }
 
@@ -638,16 +651,9 @@ func (t *nestedTransaction) promoteRecursive(d *Dataset) error {
 	if err := d.dZFS.Promote(); err != nil {
 		return fmt.Errorf(i18n.G("couldn't promote %q: ")+config.ErrorFormat, d.Name, err)
 	}
-	t.registerRevert(func() error {
-		if err := origD.dZFS.Promote(); err != nil {
-			return fmt.Errorf(i18n.G("couldn't promote %q for cleanup: %v"), origin, err)
-		}
-		if err := t.inverseOrigin(d, origD); err != nil {
-			return fmt.Errorf(i18n.G("couldn't reset our internal origin and layout cache for cleanup: %v"), err)
-		}
-
-		return nil
-	})
+	if err := origD.dZFS.ReloadProperties(); err != nil {
+		return fmt.Errorf(i18n.G("couldn't refresh properties for %q: ")+config.ErrorFormat, origD.Name, err)
+	}
 
 	if err := t.inverseOrigin(origD, d); err != nil {
 		return fmt.Errorf(i18n.G("couldn't refresh our internal origin and layout cache: %v"), err)
@@ -697,7 +703,10 @@ func (nt *NoTransaction) Destroy(name string) error {
 
 // destroyRecursive destroys and unreference dataset objects, starting with children.
 func (nt *NoTransaction) destroyRecursive(d *Dataset, snapName string) error {
-	for _, dc := range d.children {
+	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy recursively %q @ %q"), d.Name, snapName)
+	copied := make([]*Dataset, len(d.children))
+	copy(copied, d.children)
+	for _, dc := range copied {
 		if err := nt.destroyRecursive(dc, snapName); err != nil {
 			return fmt.Errorf(i18n.G("stop destroying dataset on %q, cannot destroy child: %v"), d.Name, err)
 		}
@@ -719,13 +728,16 @@ func (nt *NoTransaction) destroyRecursive(d *Dataset, snapName string) error {
 func (nt *NoTransaction) destroyOne(d *Dataset) error {
 	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy %q"), d.Name)
 
+	// As d.dZFS doesn't have any children, do the check for children ourselves.
+	if len(d.children) > 0 {
+		return fmt.Errorf("can't destroy %q as it has children", d.Name)
+	}
+
 	// Destroy myself
-	// WOKAROUND: use of DestroyRecursive on leaf
-	// To prevent go-libzfs to preventing us from destroying the parent, clear parent's children object as
-	// Destroy doesn't dereference parent's child.
-	if err := d.dZFS.DestroyRecursive(); err != nil {
+	if err := d.dZFS.Destroy(false); err != nil {
 		return fmt.Errorf(i18n.G("cannot destroy dataset %q: %v"), d.Name, err)
 	}
+	d.dZFS.Close()
 
 	// Unattach from parent children
 	parentName := filepath.Dir(d.Name)
@@ -736,35 +748,13 @@ func (nt *NoTransaction) destroyOne(d *Dataset) error {
 	if err != nil {
 		return fmt.Errorf(i18n.G("cannot find parent for %s: %v"), d.Name, err)
 	}
-
-	i := -1
-	for idx, dc := range parent.children {
-		if dc.Name == d.Name {
-			i = idx
-			break
-		}
-	}
-	if i != -1 {
-		parent.children = append(parent.children[:i], parent.children[i+1:]...)
+	if err := parent.removeChild(d.Name); err != nil {
+		log.Warningf(nt.ctx, "%v", err)
+		return nil
 	}
 
 	// Delete from main list of dataset
 	delete(nt.Zfs.allDatasets, d.Name)
-
-	// WOKAROUND
-	// To prevent go-libzfs to preventing us from destroying the parent, clear parent's children object as
-	// Destroy doesn't dereference parent's child.
-	/*i = -1
-	var c libzfs.Dataset
-	for i, c = range parent.dZFS.Children {
-		if c.Properties[libzfs.DatasetPropName].Value == d.Name {
-			break
-		}
-	}
-	if i < 0 {
-		return fmt.Errorf(i18n.G("cannot find %q as child of parent %q"), d.Name, parent.Name)
-	}
-	parent.dZFS.Children = append(parent.dZFS.Children[:i], parent.dZFS.Children[i+1:]...)*/
 
 	return nil
 }
