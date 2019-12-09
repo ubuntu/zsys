@@ -16,7 +16,7 @@ import (
 // RefreshProperties refreshes all the properties for a given dataset and the source of them.
 // for snapshots, we'll take the parent dataset for the mount properties.
 // TODO: dZFS maybe useless (part of d.dZFS)
-func (d *Dataset) RefreshProperties(ctx context.Context, dZFS *libzfs.Dataset) error {
+func (d *Dataset) RefreshProperties(ctx context.Context, dZFS libzfs.Dataset) error {
 	sources := datasetSources{}
 	name := dZFS.Properties[libzfs.DatasetPropName].Value
 
@@ -140,7 +140,7 @@ func (d *Dataset) RefreshProperties(ctx context.Context, dZFS *libzfs.Dataset) e
 // getUserPropertyFromSys returns the value of a user property and its source from the underlying
 // ZFS system dataset state.
 // It also sanitize the sources to only return "local" or "inherited".
-func getUserPropertyFromSys(ctx context.Context, prop string, dZFS *libzfs.Dataset) (value, source string, err error) {
+func getUserPropertyFromSys(ctx context.Context, prop string, dZFS libzfs.Dataset) (value, source string, err error) {
 	name := dZFS.Properties[libzfs.DatasetPropName].Value
 
 	p, err := dZFS.GetUserProperty(prop)
@@ -181,7 +181,7 @@ func getUserPropertyFromSys(ctx context.Context, prop string, dZFS *libzfs.Datas
 }
 
 // newDatasetTree returns a Dataset and a populated tree of all its children
-func newDatasetTree(ctx context.Context, dZFS *libzfs.Dataset, allDatasets *map[string]*Dataset) (*Dataset, error) {
+func newDatasetTree(ctx context.Context, dZFS libzfs.Dataset, allDatasets *map[string]*Dataset) (*Dataset, error) {
 	// Skip non file system or snapshot datasets
 	if dZFS.Type == libzfs.DatasetTypeVolume || dZFS.Type == libzfs.DatasetTypeBookmark {
 		return nil, nil
@@ -200,7 +200,15 @@ func newDatasetTree(ctx context.Context, dZFS *libzfs.Dataset, allDatasets *map[
 
 	var children []*Dataset
 	for i := range dZFS.Children {
-		c, err := newDatasetTree(ctx, &dZFS.Children[i], allDatasets)
+		// WARNING: We are using a single Dataset reference to avoid desync between libzfs.Dataset state and our
+		// internal dZFS elements. libzfs.Dataset doesn't handle Children properly and don't have a way to reach
+		// out to other datasets, like parents, without a full rescan.
+		// We are using our own dZFS as the primary reference object. As we always copy the libzfs.Dataset object,
+		// we are using the same Dataset.list internal C reference pointer, having thus only one dataset in C cache.
+		// This is why we don't .Close() libzfs Datasets after the copy, as it references the same underlying pointed
+		// element.
+		// For security, Children are removed from libzfs in caller.
+		c, err := newDatasetTree(ctx, dZFS.Children[i], allDatasets)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan dataset: %v", err)
 		}
@@ -210,6 +218,7 @@ func newDatasetTree(ctx context.Context, dZFS *libzfs.Dataset, allDatasets *map[
 		children = append(children, c)
 	}
 	node.children = children
+	node.dZFS.Children = nil
 
 	// Populate direct access map
 	(*allDatasets)[node.Name] = &node
@@ -264,6 +273,7 @@ func (d Dataset) checkSnapshotHierarchyIntegrity(snapshotName string, snapshotOn
 
 // checkNoClone checks that the hierarchy has no clone.
 func (d *Dataset) checkNoClone() error {
+	// TODO: this reopens the pool entirely, so can be a little bit slow. Could be reimplemented ourselves.
 	clones, err := d.dZFS.Clones()
 	if err != nil {
 		return fmt.Errorf(i18n.G("couldn't scan %q for clones"), d.Name)

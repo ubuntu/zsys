@@ -40,7 +40,7 @@ type Dataset struct {
 	DatasetProp
 
 	children []*Dataset
-	dZFS     *libzfs.Dataset
+	dZFS     libzfs.Dataset
 }
 
 // DatasetProp abstracts some properties for a given dataset
@@ -98,14 +98,14 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	}
 
 	// scan all datasets that are currently imported on the system
-	ds, err := libzfs.DatasetOpenAll()
+	dsZFS, err := libzfs.DatasetOpenAll()
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("can't list datasets: %v"), err)
 	}
 
 	var children []*Dataset
-	for i := range ds {
-		c, err := newDatasetTree(ctx, &ds[i], &z.allDatasets)
+	for _, dZFS := range dsZFS {
+		c, err := newDatasetTree(ctx, dZFS, &z.allDatasets)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan all datasets: %v", err)
 		}
@@ -307,7 +307,7 @@ func (t *Transaction) Create(path, mountpoint, canmount string) error {
 	d := Dataset{
 		Name:       path,
 		IsSnapshot: false,
-		dZFS:       &dZFS,
+		dZFS:       dZFS,
 	}
 	t.registerRevert(func() error {
 		nt := t.Zfs.NewNoTransaction(t.ctx)
@@ -316,7 +316,7 @@ func (t *Transaction) Create(path, mountpoint, canmount string) error {
 		}
 		return nil
 	})
-	if err := d.RefreshProperties(t.ctx, &dZFS); err != nil {
+	if err := d.RefreshProperties(t.ctx, dZFS); err != nil {
 		return fmt.Errorf(i18n.G("couldn't fetch property of newly created dataset: %v"), err)
 	}
 	t.Zfs.allDatasets[d.Name] = &d
@@ -365,7 +365,7 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 	d := Dataset{
 		Name:       parent.Name + "@" + snapName,
 		IsSnapshot: true,
-		dZFS:       &dZFS,
+		dZFS:       dZFS,
 	}
 	t.registerRevert(func() error {
 		nt := t.Zfs.NewNoTransaction(t.ctx)
@@ -398,7 +398,7 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 		}
 	}
 
-	if err := d.RefreshProperties(t.ctx, &dZFS); err != nil {
+	if err := d.RefreshProperties(t.ctx, dZFS); err != nil {
 		return fmt.Errorf(i18n.G("couldn't fetch property of newly created snapshot: %v"), err)
 	}
 	t.Zfs.allDatasets[d.Name] = &d
@@ -537,7 +537,7 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 	newDataset := Dataset{
 		Name:       target,
 		IsSnapshot: false,
-		dZFS:       &newZFSDataset,
+		dZFS:       newZFSDataset,
 	}
 	t.registerRevert(func() error {
 		nt := t.Zfs.NewNoTransaction(t.ctx)
@@ -580,7 +580,7 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 
 	}
 
-	if err := newDataset.RefreshProperties(t.ctx, &newZFSDataset); err != nil {
+	if err := newDataset.RefreshProperties(t.ctx, newZFSDataset); err != nil {
 		return fmt.Errorf(i18n.G("couldn't fetch property of newly created dataset: %v"), err)
 	}
 
