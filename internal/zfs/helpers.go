@@ -34,7 +34,7 @@ func (d *Dataset) refreshProperties(ctx context.Context, dZFS libzfs.Dataset) er
 
 		canMount, sourceCanMount, err = getUserPropertyFromSys(ctx, SnapshotCanmountProp, dZFS)
 		if err != nil {
-			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid  %q property: %v"), name, SnapshotCanmountProp, err)
+			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, SnapshotCanmountProp, err)
 		}
 	} else {
 		mp := dZFS.Properties[libzfs.DatasetPropMountpoint]
@@ -213,9 +213,6 @@ func newDatasetTree(ctx context.Context, dZFS libzfs.Dataset, allDatasets *map[s
 		c, err := newDatasetTree(ctx, dZFS.Children[i], allDatasets)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan dataset: %v", err)
-		}
-		if c == nil {
-			continue
 		}
 		children = append(children, c)
 	}

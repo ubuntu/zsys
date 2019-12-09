@@ -109,9 +109,6 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan all datasets: %v", err)
 		}
-		if c == nil {
-			continue
-		}
 		children = append(children, c)
 	}
 	z.root.children = children
@@ -218,11 +215,10 @@ func (z *Zfs) NewTransaction(ctx context.Context) (*Transaction, context.CancelF
 func (z *Zfs) findDatasetByName(path string) (*Dataset, error) {
 	d, exists := z.allDatasets[path]
 	if !exists {
-		if path == "." {
-			d = z.root
-		} else {
+		if path != "." {
 			return nil, fmt.Errorf(i18n.G("couldn't find dataset %q in cache"), path)
 		}
+		d = z.root
 	}
 	return d, nil
 }
