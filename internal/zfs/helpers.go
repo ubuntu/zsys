@@ -319,6 +319,17 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 		if d.IsSnapshot {
 			v = fmt.Sprintf("%s:%s", value, source)
 		}
+
+		// Ensure LastUsedProp is valid before setting it
+		if name == LastUsedProp {
+			if value == "" {
+				value = "0"
+			}
+			if _, err := strconv.Atoi(value); err != nil {
+				return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+			}
+		}
+
 		err = d.dZFS.SetUserProperty(up, v)
 	}
 
@@ -338,12 +349,9 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 		}
 		d.BootFS = bootFS
 	case LastUsedProp:
-		if value == "" {
-			*destV = "0"
-		}
-		lastUsed, err := strconv.Atoi(*destV)
+		lastUsed, err := strconv.Atoi(value)
 		if err != nil {
-			return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+			panic(fmt.Sprintf("%q property isn't an int: %v, while it has already been checked for main dataset and passed", LastUsedProp, err))
 		}
 		d.LastUsed = lastUsed
 	case MountPointProp:
@@ -400,9 +408,6 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 			}
 			c.BootFS = bootFS
 		case LastUsedProp:
-			if value == "" {
-				value = "0"
-			}
 			lastUsed, err := strconv.Atoi(value)
 			if err != nil {
 				// Shouldn't happen: it's been already checked above from main dataset
