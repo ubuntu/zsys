@@ -574,21 +574,21 @@ func TestTransactionsWithZFS(t *testing.T) {
 		"Snapshot only, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true, cancel: true}, // cancel is a no-op as it errored
 		"Snapshot only, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doSnapshot: true, shouldErr: true},
 
-		"Clone only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doClone: true, cancel: true},
-		"Clone only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doClone: true},
+		"Clone only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doClone: true},
+		"Clone only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doClone: true, cancel: true},
 		// We unfortunately can't do those because we can't fail in the middle of Clone(), after some modification were done
 		// The 2 failures are: either the dataset exists with suffix (won't clone anything) or missing intermediate snapshot
 		// (won't even start cloning).
 		// Avoid special casing the test code for no benefits.
-		//"Clone only, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true, cancel: true},
-		//"Clone only, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true},
+		"Clone only, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true, cancel: true},
+		"Clone only, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doClone: true, shouldErr: true},
 
-		"Promote only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doPromote: true, cancel: true},
-		"Promote only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doPromote: true},
+		"Promote only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doPromote: true},
+		"Promote only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doPromote: true, cancel: true},
 		// We unfortunately can't do those because we can't fail in the middle of Promote(), after some modification were done
 
-		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, cancel: true},
-		"SetProperty only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
+		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
+		"SetProperty only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, cancel: true},
 		// We unfortunately can't do those because we can't fail in the middle of SetProperty(), after some modification were done
 
 		// Destroy can't be in transactions
