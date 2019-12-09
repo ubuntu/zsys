@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k0kubun/pp"
@@ -31,6 +32,8 @@ func TestNew(t *testing.T) {
 	tests := map[string]struct {
 		def     string
 		mounted string
+
+		setInvalidLastUsed string
 
 		wantErr bool
 	}{
@@ -57,6 +60,8 @@ func TestNew(t *testing.T) {
 		"Snapshot with unset user properties inherits from parent dataset":         {def: "one_pool_n_datasets_n_children_n_snapshots_with_unset_user_properties.yaml"},
 		"Snapshot without any users properties are still loaded":                   {def: "one_pool_one_dataset_one_snapshot_without_user_properties.yaml"},
 		"Layout with none, default properties and snapshot":                        {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml"},
+		"One pool, one dataset with invalid lastUsed":                              {def: "one_pool_one_dataset.yaml", setInvalidLastUsed: "rpool"},
+		"One pool, one dataset, one snapshot no source on user property":           {def: "one_pool_one_dataset_one_snapshot_no_source_on_userproperty.yaml"},
 	}
 
 	for name, tc := range tests {
@@ -76,6 +81,16 @@ func TestNew(t *testing.T) {
 				// zfs will unmount it when exporting the pool
 				if err := syscall.Mount(tc.mounted, temp, "zfs", 0, "zfsutil"); err != nil {
 					t.Fatalf("couldn't prepare and mount %q: %v", tc.mounted, err)
+				}
+			}
+
+			if tc.setInvalidLastUsed != "" {
+				d, err := libzfs.DatasetOpen(tc.setInvalidLastUsed)
+				if err != nil {
+					t.Fatalf("couldn't open %q to set invalid LastUsed: %v", tc.setInvalidLastUsed, err)
+				}
+				if err := d.SetUserProperty(zfs.LastUsedProp, "invalid"); err != nil {
+					t.Fatalf("couldn't set invalid LastUsed on %q: %v", tc.setInvalidLastUsed, err)
 				}
 			}
 
@@ -269,6 +284,7 @@ func TestClone(t *testing.T) {
 
 		"Snapshot doesn't exists":         {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@doesntexists", suffix: "5678", wantErr: true, isNoOp: true},
 		"Dataset doesn't exists":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist@something", suffix: "5678", wantErr: true, isNoOp: true},
+		"Not a snapshot":                  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", suffix: "5678", wantErr: true, isNoOp: true},
 		"No suffix provided":              {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
 		"Suffixed dataset already exists": {def: "layout1_with_bootfs_already_cloned.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", wantErr: true, isNoOp: true},
 		"Clone on root fails":             {def: "one_pool_one_dataset_one_snapshot.yaml", dataset: "rpool@snap1", suffix: "5678", wantErr: true, isNoOp: true},
@@ -510,6 +526,12 @@ func TestSetProperty(t *testing.T) {
 		"User property on snapshot (none)":               {def: "one_pool_one_dataset_one_snapshot_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
 		"User property on snapshot (inherit)":            {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1"},
 		"User property on snapshot (inherit but forced)": {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1", force: true},
+		"SnapshotMountpointProp is MountPointProp":       {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.SnapshotMountpointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1", force: true},
+
+		"LastUsed with children":            {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.LastUsedProp, propertyValue: "42", dataset: "rpool"},
+		"LastUsed is not a number":          {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.LastUsedProp, propertyValue: "not a number", dataset: "rpool", wantErr: true, isNoOp: true},
+		"LastUsed is inherited by children": {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.LastUsedProp, propertyValue: "42", dataset: "rpool/ROOT/ubuntu"},
+		"LastUsed set empty":                {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.LastUsedProp, propertyValue: "", dataset: "rpool/ROOT/ubuntu"},
 
 		"Unauthorized property":  {def: "one_pool_one_dataset.yaml", propertyName: "snapdir", propertyValue: "/setproperty/value", dataset: "rpool", wantPanic: true},
 		"Dataset doesn't exists": {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
