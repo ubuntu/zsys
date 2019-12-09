@@ -323,8 +323,9 @@ func TestPromote(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"Promote with snapshots on origin":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1"},
-		"Promote missing some leaf snapshots": {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1"},
+		"Promote with snapshots on origin":              {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1"},
+		"Promote missing some leaf snapshots":           {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1"},
+		"Promote with snapshots and ancestor snapshots": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r2"},
 
 		"Promote already promoted hierarchy":  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", isNoOp: true},
 		"Root of hierarchy already promoted":  {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_5678", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678"},
@@ -589,7 +590,8 @@ func TestTransactionsWithZFS(t *testing.T) {
 
 		"SetProperty only, success, Done":   {def: "layout1_for_transactions_tests.yaml", doSetProperty: true},
 		"SetProperty only, success, Cancel": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, cancel: true},
-		// We unfortunately can't do those because we can't fail in the middle of SetProperty(), after some modification were done
+		"SetProperty only, fail, Cancel":    {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, shouldErr: true, cancel: true},
+		"SetProperty only, fail, No cancel": {def: "layout1_for_transactions_tests.yaml", doSetProperty: true, shouldErr: true},
 
 		// Destroy can't be in transactions
 
