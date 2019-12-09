@@ -379,7 +379,6 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 	}()
 
 	for c := range children {
-		fmt.Println("changing", c.Name)
 		np, _, destV, destS := c.stringToProp(name)
 
 		// Native dataset: we need to refresh dZFS Properties (user properties aren't cached)
@@ -473,7 +472,6 @@ func (d *Dataset) stringToProp(name string) (nativeProp libzfs.Prop, userProp st
 
 // inverseOrigin inverses on the Dataset object themselves the dependence hierarchy.
 // It refreshes the global hierarchy as well, as snapshots are migrating.
-
 func (t *nestedTransaction) inverseOrigin(oldOrigDataset, newOrigDataset *Dataset) error {
 	baseSnapshot, err := t.Zfs.findDatasetByName(newOrigDataset.Origin)
 	if err != nil {
@@ -495,6 +493,7 @@ func (t *nestedTransaction) inverseOrigin(oldOrigDataset, newOrigDataset *Datase
 
 	for i := range snapshotsToMigrate {
 		s := snapshotsToMigrate[i]
+
 		oldName := s.Name
 		_, n := splitSnapshotName(oldName)
 

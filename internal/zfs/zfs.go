@@ -352,6 +352,8 @@ func (t *Transaction) Snapshot(snapName, datasetName string, recursive bool) (er
 // snapshotRecursive recursively try snapshotting all children and store "revert" operations by cleaning newly
 // created datasets.
 func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, recursive bool) error {
+	log.Debugf(t.ctx, i18n.G("Trying to snapshot %q"), parent.Name)
+
 	// Get properties from parent of snapshot.
 	srcProps := parent.DatasetProp
 
@@ -506,6 +508,8 @@ func (t *nestedTransaction) cloneRecursive(d Dataset, snapshotName, rootName, ne
 }
 
 func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
+	log.Debugf(t.ctx, i18n.G("Trying to clone %q"), d.Name)
+
 	props := make(map[libzfs.Prop]libzfs.Property)
 
 	if d.sources.Mountpoint == "local" {
@@ -634,7 +638,7 @@ func (t *Transaction) Promote(name string) (errPromote error) {
 }
 
 func (t *nestedTransaction) promoteRecursive(d *Dataset) error {
-	log.Debugf(t.ctx, i18n.G("trying to promote %q"), d.Name)
+	log.Debugf(t.ctx, i18n.G("Trying to promote %q"), d.Name)
 	origin := d.Origin
 
 	// Only promote if not promoted yet.
