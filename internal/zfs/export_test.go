@@ -2,6 +2,7 @@ package zfs
 
 import (
 	"encoding/json"
+	"testing"
 )
 
 func (t *Transaction) RegisterRevert(f func() error) {
@@ -61,4 +62,13 @@ func (s *DatasetSlice) UnmarshalJSON(b []byte) error {
 	}
 
 	return nil
+}
+
+// AssertNoZFSChildren checks that every dataset of a zfs object doesnt have any child.
+func AssertNoZFSChildren(t *testing.T, z *Zfs) {
+	for _, d := range z.allDatasets {
+		if len(d.dZFS.Children) > 0 {
+			t.Errorf("%q has %d children left: %v", d.Name, len(d.dZFS.Children), d.dZFS.Children)
+		}
+	}
 }

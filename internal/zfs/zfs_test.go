@@ -90,6 +90,7 @@ func TestNew(t *testing.T) {
 				t.Fatal("expected an error but got none")
 			}
 
+			zfs.AssertNoZFSChildren(t, z)
 			assertDatasetsToGolden(t, ta, z.Datasets())
 		})
 	}
@@ -148,6 +149,7 @@ func TestCreate(t *testing.T) {
 				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
+			zfs.AssertNoZFSChildren(t, z)
 			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
@@ -213,6 +215,7 @@ func TestSnapshot(t *testing.T) {
 				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
+			zfs.AssertNoZFSChildren(t, z)
 			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
@@ -303,6 +306,7 @@ func TestClone(t *testing.T) {
 				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
+			zfs.AssertNoZFSChildren(t, z)
 			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
@@ -383,6 +387,7 @@ func TestPromote(t *testing.T) {
 				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
+			zfs.AssertNoZFSChildren(t, z)
 			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
@@ -462,6 +467,7 @@ func TestDestroy(t *testing.T) {
 				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
+			zfs.AssertNoZFSChildren(t, z)
 			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
@@ -547,6 +553,7 @@ func TestSetProperty(t *testing.T) {
 				assertDatasetsToGolden(t, ta, z.Datasets())
 			}
 
+			zfs.AssertNoZFSChildren(t, z)
 			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
@@ -756,6 +763,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 			} else {
 				assertDatasetsEquals(t, ta, initState, z.Datasets())
 			}
+			zfs.AssertNoZFSChildren(t, z)
 			assertIdempotentWithNew(t, ta, z.Datasets())
 		})
 	}
