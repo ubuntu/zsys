@@ -1,16 +1,8 @@
 package machines_test
 
 import (
-	"context"
-	"testing"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/k0kubun/pp"
 	"github.com/ubuntu/zsys/internal/config"
-	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/testutils"
-	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 func init() {
@@ -18,6 +10,7 @@ func init() {
 	config.SetVerboseMode(1)
 }
 
+/*
 func TestNew(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
@@ -702,3 +695,4 @@ func getDefaultValue(v, defaultVal string) string {
 
 	return v
 }
+*/
