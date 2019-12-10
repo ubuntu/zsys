@@ -210,6 +210,11 @@ func (z *Zfs) NewTransaction(ctx context.Context) (*Transaction, context.CancelF
 	return &t, cancel
 }
 
+// Context returns the current context of the transaction
+func (t *Transaction) Context() context.Context {
+	return t.ctx
+}
+
 // findDatasetByName returns given dataset from path, handling special case of dataset
 // not found in hashmap and virtual root dataset.
 func (z *Zfs) findDatasetByName(path string) (*Dataset, error) {
