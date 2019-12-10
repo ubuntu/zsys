@@ -32,6 +32,31 @@ const (
 	SnapshotMountpointProp = zsysPrefix + MountPointProp
 )
 
+type libzfsInterface interface {
+	DatasetOpenAll() (datasets []dZFSInterface, err error)
+	DatasetOpen(name string) (d dZFSInterface, err error)
+	DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (d dZFSInterface, err error)
+	DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (rd dZFSInterface, err error)
+}
+
+type dZFSInterface interface {
+	dZFSChildren() *[]libzfs.Dataset
+	Children() []dZFSInterface
+	Clone(target string, props map[libzfs.Prop]libzfs.Property) (rd dZFSInterface, err error)
+	Clones() (clones []string, err error)
+	Close()
+	Destroy(Defer bool) (err error)
+	GetUserProperty(p string) (prop libzfs.Property, err error)
+	IsSnapshot() (ok bool)
+	Pool() (p libzfs.Pool, err error)
+	Promote() (err error)
+	Properties() *map[libzfs.Prop]libzfs.Property
+	ReloadProperties() (err error)
+	SetUserProperty(prop, value string) error
+	SetProperty(p libzfs.Prop, value string) error
+	Type() libzfs.DatasetType
+}
+
 // Dataset is the abstraction of a physical dataset and exposes only properties that must are accessible by the user.
 type Dataset struct {
 	// Name of the dataset.
@@ -40,7 +65,7 @@ type Dataset struct {
 	DatasetProp
 
 	children []*Dataset
-	dZFS     libzfs.Dataset
+	dZFS     dZFSInterface
 }
 
 // DatasetProp abstracts some properties for a given dataset
@@ -83,6 +108,8 @@ type Zfs struct {
 	// root is a virtual dataset to which all top dataset of all pools are attached
 	root        *Dataset
 	allDatasets map[string]*Dataset
+
+	libzfs libzfsInterface
 }
 
 // New returns a new zfs system handler.
@@ -92,13 +119,14 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	z := Zfs{
 		root:        &Dataset{Name: "/"},
 		allDatasets: make(map[string]*Dataset),
+		libzfs:      &libZFSAdapter{},
 	}
 	for _, options := range options {
 		options(&z)
 	}
 
 	// scan all datasets that are currently imported on the system
-	dsZFS, err := libzfs.DatasetOpenAll()
+	dsZFS, err := z.libzfs.DatasetOpenAll()
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("can't list datasets: %v"), err)
 	}
@@ -300,7 +328,7 @@ func (t *Transaction) Create(path, mountpoint, canmount string) error {
 	}
 	props[libzfs.DatasetPropCanmount] = libzfs.Property{Value: canmount}
 
-	dZFS, err := libzfs.DatasetCreate(path, libzfs.DatasetTypeFilesystem, props)
+	dZFS, err := t.Zfs.libzfs.DatasetCreate(path, libzfs.DatasetTypeFilesystem, props)
 	if err != nil {
 		return fmt.Errorf(i18n.G("can't create %q: %v"), path, err)
 	}
@@ -317,7 +345,7 @@ func (t *Transaction) Create(path, mountpoint, canmount string) error {
 		}
 		return nil
 	})
-	if err := d.refreshProperties(t.ctx, dZFS); err != nil {
+	if err := d.refreshProperties(t.ctx); err != nil {
 		log.Warningf(t.ctx, i18n.G("couldn't fetch property of newly created dataset: %v"), err)
 	}
 	t.Zfs.allDatasets[d.Name] = &d
@@ -360,7 +388,7 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 
 	props := make(map[libzfs.Prop]libzfs.Property)
 
-	dZFS, err := libzfs.DatasetSnapshot(parent.Name+"@"+snapName, false, props)
+	dZFS, err := t.Zfs.libzfs.DatasetSnapshot(parent.Name+"@"+snapName, false, props)
 	if err != nil {
 		return fmt.Errorf(i18n.G("couldn't snapshot %q: %v"), parent.Name, err)
 	}
@@ -401,7 +429,7 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 		}
 	}
 
-	if err := d.refreshProperties(t.ctx, dZFS); err != nil {
+	if err := d.refreshProperties(t.ctx); err != nil {
 		log.Warningf(t.ctx, i18n.G("couldn't fetch property of newly created snapshot: %v"), err)
 	}
 	t.Zfs.allDatasets[d.Name] = &d
@@ -585,7 +613,7 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 
 	}
 
-	if err := newDataset.refreshProperties(t.ctx, newZFSDataset); err != nil {
+	if err := newDataset.refreshProperties(t.ctx); err != nil {
 		log.Warningf(t.ctx, i18n.G("couldn't fetch property of newly created dataset: %v"), err)
 	}
 
