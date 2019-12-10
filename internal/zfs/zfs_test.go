@@ -862,6 +862,33 @@ func TestTransaction(t *testing.T) {
 	}
 }
 
+func TestTransactionContextIsSubContext(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	z, err := zfs.New(ctx)
+	if err != nil {
+		t.Fatalf("couldn't create base ZFS object: %v", err)
+	}
+	trans, _ := z.NewTransaction(ctx)
+	defer trans.Done()
+
+	// We cancel parent ctx, transaction context (child) should be cancelled
+	cancel()
+	<-ctx.Done()
+
+	select {
+	case _, open := <-trans.Context().Done():
+		if open {
+			t.Error("child context isn't closed as parent is cancelled, but we received a value")
+		}
+	default:
+		t.Error("child context isn't closed as parent is cancelled")
+	}
+}
+
 func TestInvalidatedTransactionByDone(t *testing.T) {
 	t.Parallel()
 
