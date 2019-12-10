@@ -17,14 +17,13 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/machines"
-	"github.com/ubuntu/zsys/internal/zfs"
 	"google.golang.org/grpc"
 )
 
 // Server is used to implement zsys.ZsysServer.
 type Server struct {
 	// Machines scanned
-	Machines *machines.Machines
+	Machines machines.Machines
 
 	// Requests mutex
 	RWRequest sync.RWMutex
@@ -98,11 +97,13 @@ func New(socket string, opts ...option) (*Server, error) {
 		return nil, fmt.Errorf(i18n.G("unexpected number of systemd socket activation (%d != 1)"), len(listeners))
 	}
 
-	z := zfs.New(context.Background())
-	defer z.Done()
-	ms, err := getMachines(z)
+	cmdline, err := procCmdline()
 	if err != nil {
-		return nil, fmt.Errorf(i18n.G("couldn't scan machines: %v"), err)
+		return nil, fmt.Errorf(i18n.G("couldn't parse kernel command line: %v"), err)
+	}
+	ms, err := machines.New(context.Background(), cmdline)
+	if err != nil {
+		return nil, fmt.Errorf(i18n.G("couldn't create a new machine: %v"), err)
 	}
 
 	if args.authorizer == nil {
@@ -162,21 +163,6 @@ func (s *Server) TrackRequest() func() {
 		log.Debugf(context.Background(), i18n.G("Reset idle timeout to %s"), s.idlerTimeout.timeout)
 		s.idlerTimeout.endRequest()
 	}
-}
-
-// getMachines returns all scanned machines on the current system
-func getMachines(z *zfs.Zfs) (*machines.Machines, error) {
-	ds, err := z.Scan()
-	if err != nil {
-		return nil, err
-	}
-	cmdline, err := procCmdline()
-	if err != nil {
-		return nil, err
-	}
-	ms := machines.New(z.Context(), ds, cmdline)
-
-	return &ms, nil
 }
 
 // procCmdline returns kernel command line

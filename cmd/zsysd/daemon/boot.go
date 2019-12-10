@@ -8,19 +8,19 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/machines"
-	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 func syncBootPrepare() (err error) {
-	z := zfs.NewWithAutoCancel(context.Background())
-	defer z.DoneCheckErr(&err)
-
-	ms, err := getMachines(z)
+	cmdline, err := procCmdline()
 	if err != nil {
-		return err
+		return fmt.Errorf(i18n.G("couldn't parse kernel command line: %v"), err)
+	}
+	ms, err := machines.New(context.Background(), cmdline)
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't create a new machine: %v"), err)
 	}
 
-	changed, err := ms.EnsureBoot(z)
+	changed, err := ms.EnsureBoot(context.Background())
 	if err != nil {
 		return fmt.Errorf(i18n.G("couldn't ensure boot: ")+config.ErrorFormat, err)
 	}
@@ -32,21 +32,6 @@ func syncBootPrepare() (err error) {
 	}
 
 	return nil
-}
-
-// getMachines returns all scanned machines on the current system
-func getMachines(z *zfs.Zfs) (*machines.Machines, error) {
-	ds, err := z.Scan()
-	if err != nil {
-		return nil, err
-	}
-	cmdline, err := procCmdline()
-	if err != nil {
-		return nil, err
-	}
-	ms := machines.New(z.Context(), ds, cmdline)
-
-	return &ms, nil
 }
 
 // procCmdline returns kernel command line

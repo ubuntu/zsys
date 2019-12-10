@@ -10,7 +10,6 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
-	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 const (
@@ -29,10 +28,7 @@ func (s *Server) PrepareBoot(req *zsys.Empty, stream zsys.Zsys_PrepareBootServer
 
 	log.Infof(stream.Context(), i18n.G("Prepare current boot state"))
 
-	z := zfs.NewWithAutoCancel(stream.Context())
-	defer z.DoneCheckErr(&err)
-
-	changed, err := s.Machines.EnsureBoot(z)
+	changed, err := s.Machines.EnsureBoot(stream.Context())
 	if err != nil {
 		return fmt.Errorf(i18n.G("couldn't ensure boot: ")+config.ErrorFormat, err)
 	}
@@ -57,10 +53,7 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 
 	log.Infof(stream.Context(), i18n.G("Commit current boot state"))
 
-	z := zfs.NewWithAutoCancel(stream.Context())
-	defer z.DoneCheckErr(&err)
-
-	changed, err := s.Machines.Commit(z)
+	changed, err := s.Machines.Commit(stream.Context())
 	if err != nil {
 		return fmt.Errorf(i18n.G("couldn't commit: ")+config.ErrorFormat, err)
 	}
