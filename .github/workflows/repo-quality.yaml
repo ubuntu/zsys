@@ -125,13 +125,13 @@ jobs:
           sudo modprobe zfs
       - name: Run tests
         run: |
-          sudo go test -coverprofile=coverage.txt -covermode=atomic ./...
+          sudo go test -coverprofile=coverage.txt -covermode=atomic ./... -with-system-zfs
       - name: Run tests (with race detector)
         run: |
-          sudo go test -race ./...
+          sudo go test -race ./... -with-system-zfs
       - name: Run benchkmarks
         run: |
-          sudo go test -bench -run=Benchmark ./...
+          sudo go test -bench -run=Benchmark ./... -with-system-zfs
       - name: Upload coverage
         uses: codecov/codecov-action@v1.0.3
         with:
