@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	libzfs "github.com/bicomsystems/go-libzfs"
+	libzfsorig "github.com/bicomsystems/go-libzfs"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k0kubun/pp"
@@ -71,7 +71,8 @@ func TestNew(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
 			defer fPools.create(dir)()
 
 			if tc.mounted != "" {
@@ -79,10 +80,22 @@ func TestNew(t *testing.T) {
 				if err := os.MkdirAll(temp, 0755); err != nil {
 					t.Fatalf("couldn't create temporary mount point directory %q: %v", temp, err)
 				}
-				// zfs will unmount it when exporting the pool
-				if err := syscall.Mount(tc.mounted, temp, "zfs", 0, "zfsutil"); err != nil {
-					t.Fatalf("couldn't prepare and mount %q: %v", tc.mounted, err)
+				if !isLibZFSMock(libzfs) {
+					// zfs will unmount it when exporting the pool
+					if err := syscall.Mount(tc.mounted, temp, "zfs", 0, "zfsutil"); err != nil {
+						t.Fatalf("couldn't prepare and mount %q: %v", tc.mounted, err)
+					}
+				} else {
+
+					d, err := libzfs.DatasetOpen(tc.mounted)
+					if err != nil {
+						t.Fatalf("couldn't open dataset %q", tc.mounted)
+					}
+					if err := d.SetProperty(libzfsorig.DatasetPropMounted, "yes"); err != nil {
+						t.Fatalf("couldn't set mounted attribute on %q", tc.mounted)
+					}
 				}
+
 			}
 
 			if tc.setInvalidLastUsed != "" {
@@ -95,7 +108,7 @@ func TestNew(t *testing.T) {
 				}
 			}
 
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -140,9 +153,10 @@ func TestCreate(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
 			defer fPools.create(dir)()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -166,7 +180,7 @@ func TestCreate(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
 }
@@ -204,9 +218,10 @@ func TestSnapshot(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
 			defer fPools.create(dir)()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -232,7 +247,7 @@ func TestSnapshot(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
 }
@@ -297,9 +312,10 @@ func TestClone(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
 			defer fPools.create(dir)()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -324,7 +340,7 @@ func TestClone(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
 }
@@ -363,9 +379,10 @@ func TestPromote(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withWaitBetweenSnapshots())
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withWaitBetweenSnapshots(), withLibZFS(libzfs))
 			defer fPools.create(dir)()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -405,7 +422,7 @@ func TestPromote(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
 }
@@ -443,9 +460,10 @@ func TestDestroy(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withWaitBetweenSnapshots())
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withWaitBetweenSnapshots(), withLibZFS(libzfs))
 			defer fPools.create(dir)()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -485,7 +503,7 @@ func TestDestroy(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
 }
@@ -544,9 +562,10 @@ func TestSetProperty(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
 			defer fPools.create(dir)()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -577,7 +596,7 @@ func TestSetProperty(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
 }
@@ -637,9 +656,10 @@ func TestTransactionsWithZFS(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def))
+			libzfs := getLibZFS(t)
+			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
 			defer fPools.create(dir)()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -787,7 +807,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 				assertDatasetsEquals(t, ta, initState, z.Datasets())
 			}
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets())
+			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
 }
@@ -1002,11 +1022,11 @@ func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Data
 	datasetsNotEquals(t, want, got)
 }
 
-func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Dataset) {
+func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Dataset, libzfs zfs.LibZFSInterface) {
 	t.Helper()
 
 	// We should always have New() returning the same state than we manually updated
-	newZ, err := zfs.New(context.Background())
+	newZ, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
@@ -1056,4 +1076,19 @@ func failOnZFSPermissionDenied(t *testing.T) {
 	if u.Uid != "0" {
 		t.Fatalf("you don't have permissions to interact with system zfs")
 	}
+}
+
+func getLibZFS(t *testing.T) libZFSInterface {
+	t.Helper()
+
+	if !testutils.UseSystemZFS() {
+		mock := zfs.NewLibZFSMock()
+		return &mock
+	}
+	return &zfs.LibZFSAdapter{}
+}
+
+func isLibZFSMock(l libZFSInterface) bool {
+	_, ok := l.(*zfs.LibZFSMock)
+	return ok
 }
