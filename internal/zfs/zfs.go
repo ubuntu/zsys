@@ -32,7 +32,7 @@ const (
 	SnapshotMountpointProp = zsysPrefix + MountPointProp
 )
 
-type libzfsInterface interface {
+type libZFSInterface interface {
 	DatasetOpenAll() (datasets []dZFSInterface, err error)
 	DatasetOpen(name string) (d dZFSInterface, err error)
 	DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (d dZFSInterface, err error)
@@ -109,7 +109,14 @@ type Zfs struct {
 	root        *Dataset
 	allDatasets map[string]*Dataset
 
-	libzfs libzfsInterface
+	libzfs libZFSInterface
+}
+
+// WithLibZFS allows overriding default libzfs implementations with a mock
+func WithLibZFS(libzfs libZFSInterface) func(*Zfs) {
+	return func(z *Zfs) {
+		z.libzfs = libzfs
+	}
 }
 
 // New returns a new zfs system handler.
