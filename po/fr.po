@@ -21,29 +21,33 @@ msgstr ""
 msgid "\t%v\n"
 msgstr ""
 
-#: internal/zfs/zfs.go:358
-msgid "%q doesn't exist: %v"
+#: internal/zfs/helpers.go:281
+msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
-#: internal/zfs/helpers.go:249
-msgid "%q has some clones when it shouldn't"
-msgstr ""
-
-#: internal/machines/userdata.go:178
+#: internal/machines/userdata.go:159
 msgid ""
 "%q is already associated to %q, which is for a different user name (%q) than "
 "%q"
 msgstr ""
 
-#: internal/zfs/zfs.go:363
+#: internal/zfs/helpers.go:167
+msgid "%q isn't a 'value:source' format type for %q"
+msgstr ""
+
+#: internal/zfs/zfs.go:478
 msgid "%q isn't a snapshot"
 msgstr ""
 
-#: internal/zfs/helpers.go:112
+#: internal/zfs/helpers.go:32 internal/zfs/helpers.go:37
+msgid "%q isn't a zsys snapshot with a valid %q property: %v"
+msgstr ""
+
+#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:326
 msgid "%q property isn't an int: "
 msgstr ""
 
-#: internal/daemon/boot.go:80
+#: internal/daemon/boot.go:73
 msgid "%q returned an error: "
 msgstr ""
 
@@ -62,39 +66,43 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/daemon/daemon.go:163
+#: internal/daemon/daemon.go:156
 msgid "All connections closed"
 msgstr ""
 
-#: internal/zfs/zfs.go:108
+#: internal/zfs/zfs.go:240
 msgid "An error occurred when reverting a Zfs transaction: "
 msgstr ""
 
-#: internal/authorizer/authorizer.go:133
+#: internal/authorizer/authorizer.go:134
 msgid "Any user always authorized"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:130
+#: internal/authorizer/authorizer.go:131
 msgid "Authorized as being administrator"
 msgstr ""
 
-#: internal/machines/boot.go:77
+#: internal/machines/boot.go:43
 msgid "Booting on snapshot: %q cloned to %q\n"
 msgstr ""
 
-#: internal/machines/machines.go:58
+#: internal/machines/machines.go:75
 msgid "Building new machines list"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:163
+#: internal/authorizer/authorizer.go:164
 msgid "Call to polkit failed: %v"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:107
+#: internal/zfs/helpers.go:80
+msgid "CanMount property for %q has an unexpected source: %q"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:108
 msgid "Check if grpc request peer is authorized"
 msgstr ""
 
-#: internal/daemon/boot.go:58
+#: internal/daemon/boot.go:54
 msgid "Commit current boot state"
 msgstr ""
 
@@ -102,15 +110,15 @@ msgstr ""
 msgid "Commit system and user datasets states as a successful boot"
 msgstr ""
 
-#: internal/machines/boot.go:147
+#: internal/machines/boot.go:101
 msgid "Committing boot for %q"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:117
+#: internal/authorizer/authorizer.go:118
 msgid "Context request doesn't have grpc peer creds informations."
 msgstr ""
 
-#: internal/authorizer/authorizer.go:121
+#: internal/authorizer/authorizer.go:122
 msgid "Context request grpc peer creeds information is not a peerCredsInfo."
 msgstr ""
 
@@ -119,32 +127,27 @@ msgstr ""
 msgid "Control() error: %s"
 msgstr ""
 
-#: internal/daemon/daemon.go:108
+#: internal/daemon/daemon.go:74 internal/machines/machines.go:81
 msgid "Couldn't apply option to server: %v"
 msgstr ""
 
 #. TODO: transaction fix (as it's now set in error)
-#: internal/machines/boot.go:275
+#: internal/machines/boot.go:227
 msgid ""
 "Couldn't create new subdatasets from %q. Assuming it has already been "
 "created successfully: %v"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:145
+#: internal/authorizer/authorizer.go:146
 msgid "Couldn't determine start time of client process: %v"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:139
+#: internal/authorizer/authorizer.go:140
 msgid "Couldn't open stat file for process: %v"
 msgstr ""
 
 #: cmd/zsysd/daemon/zsysd.go:32
 msgid "Couldn't register grpc server: %v"
-msgstr ""
-
-#. don't fail if Scan is failing, as the dataset was created
-#: internal/machines/userdata.go:198
-msgid "Couldn't rescan after committing boot: "
 msgstr ""
 
 #: cmd/zsysd/client/userdata.go:25
@@ -153,27 +156,27 @@ msgid ""
 "creation"
 msgstr ""
 
-#: internal/machines/userdata.go:55
+#: internal/machines/userdata.go:43
 msgid "Create user dataset for %q"
 msgstr ""
 
-#: internal/daemon/userdata.go:27
+#: internal/daemon/userdata.go:26
 msgid "Create user dataset for %q on %q"
 msgstr ""
 
-#: internal/machines/boot.go:141
+#: internal/machines/boot.go:92
 msgid "Current machine isn't Zsys, nothing to commit on boot"
 msgstr ""
 
-#: internal/machines/userdata.go:38
+#: internal/machines/userdata.go:22
 msgid "Current machine isn't Zsys, nothing to create"
 msgstr ""
 
-#: internal/machines/boot.go:66
+#: internal/machines/boot.go:29
 msgid "Current machine isn't Zsys, nothing to do on boot"
 msgstr ""
 
-#: internal/machines/userdata.go:128
+#: internal/machines/userdata.go:105
 msgid "Current machine isn't Zsys, nothing to modify"
 msgstr ""
 
@@ -189,7 +192,7 @@ msgstr ""
 msgid "Display if any zfs datasets have been modified to boot"
 msgstr ""
 
-#: internal/machines/boot.go:72
+#: internal/machines/boot.go:38
 msgid "Ensure boot on %q"
 msgstr ""
 
@@ -208,33 +211,41 @@ msgstr ""
 msgid "GetsockoptUcred() error: %s"
 msgstr ""
 
-#: internal/daemon/daemon.go:120
+#: internal/daemon/timeout.go:43
 msgid "Idle timeout expired"
 msgstr ""
 
-#: internal/machines/boot.go:260
+#: internal/zfs/helpers.go:66
+msgid "MountPoint property for %q has an unexpected source: %q"
+msgstr ""
+
+#: internal/machines/boot.go:212
 msgid ""
 "Mounted clone bootFS dataset created by initramfs doesn't have a valid "
 "_suffix (at least .*_<onechar>): %q"
 msgstr ""
 
-#: internal/machines/userdata.go:45
+#: internal/machines/userdata.go:28
 msgid "Needs a valid home path, got nothing"
 msgstr ""
 
-#: internal/machines/userdata.go:42
+#: internal/machines/userdata.go:25
 msgid "Needs a valid user name, got nothing"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:111
+#: internal/zfs/helpers.go:193
+msgid "New dataNew dataset found: %q"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:112
 msgid "Permission denied: %w"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:166
+#: internal/authorizer/authorizer.go:167
 msgid "Polkit call result, authorized: %t"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:169
+#: internal/authorizer/authorizer.go:170
 msgid "Polkit denied access"
 msgstr ""
 
@@ -250,24 +261,24 @@ msgid ""
 "and off, synchronously"
 msgstr ""
 
-#: internal/daemon/boot.go:30
+#: internal/daemon/boot.go:29
 msgid "Prepare current boot state"
 msgstr ""
 
-#: internal/machines/boot.go:390
+#: internal/machines/boot.go:342
 msgid "Promoting dataset: %q"
 msgstr ""
 
-#: internal/machines/boot.go:196
+#: internal/machines/boot.go:154
 msgid "Promoting system datasets"
 msgstr ""
 
 #. Promotion needed for system and user datasets
-#: internal/machines/boot.go:190
+#: internal/machines/boot.go:147
 msgid "Promoting user datasets"
 msgstr ""
 
-#: internal/daemon/daemon.go:153
+#: internal/daemon/daemon.go:146
 msgid "Ready state sent to systemd"
 msgstr ""
 
@@ -275,20 +286,20 @@ msgstr ""
 msgid "Rename a user's home directory via renaming corresponding user dataset"
 msgstr ""
 
-#: internal/daemon/userdata.go:49
+#: internal/daemon/userdata.go:45
 msgid "Rename home user dataset from %q to %q"
 msgstr ""
 
-#: internal/daemon/daemon.go:170
+#: internal/daemon/daemon.go:163
 #, c-format
 msgid "Reset idle timeout to %s"
 msgstr ""
 
-#: internal/machines/userdata.go:138
+#: internal/machines/userdata.go:117
 msgid "Reset user dataset path from %q to %q"
 msgstr ""
 
-#: internal/daemon/version.go:13
+#: internal/daemon/version.go:17
 msgid "Retrieving version of daemon"
 msgstr ""
 
@@ -296,42 +307,60 @@ msgstr ""
 msgid "Returns version of client and server"
 msgstr ""
 
-#: internal/machines/userdata.go:191
+#: internal/machines/userdata.go:172
 msgid "Reusing %q as matching user name or old mountpoint"
 msgstr ""
 
-#: internal/machines/boot.go:284
+#: internal/machines/boot.go:236
 msgid "Reverting user data"
 msgstr ""
 
-#: internal/daemon/daemon.go:147
+#: internal/daemon/daemon.go:140
 #, c-format
 msgid "Serving on %s"
 msgstr ""
 
-#: internal/machines/boot.go:179
+#: internal/machines/boot.go:135
 msgid "Set latest booted kernel to %q\n"
 msgstr ""
 
-#: internal/daemon/daemon.go:161
+#: internal/daemon/daemon.go:154
 msgid "Stopping daemon requested. Wait for active requests to close"
 msgstr ""
 
-#: internal/machines/boot.go:328
+#: internal/machines/boot.go:280
 msgid "Switch dataset %q to mount %q"
 msgstr ""
 
-#: internal/machines/boot.go:370
+#: internal/machines/boot.go:322
 msgid "Tag current user dataset: %q"
 msgstr ""
 
-#: internal/machines/userdata.go:162
+#: internal/zfs/zfs.go:296
+msgid ""
+"The ZFS transaction object has already been used and Done() was called. It "
+"can't be reused"
+msgstr ""
+
+#: internal/machines/userdata.go:143
 msgid ""
 "Trying to check if there is a user or home directory already attached to "
 "this machine"
 msgstr ""
 
-#: internal/machines/boot.go:354
+#: internal/zfs/zfs.go:560
+msgid "Trying to clone %q"
+msgstr ""
+
+#: internal/zfs/zfs.go:690
+msgid "Trying to promote %q"
+msgstr ""
+
+#: internal/zfs/zfs.go:393
+msgid "Trying to snapshot %q"
+msgstr ""
+
+#: internal/machines/boot.go:306
 msgid "Untagging user dataset: %q"
 msgstr ""
 
@@ -347,133 +376,159 @@ msgstr ""
 msgid "ZFS SYStem integration daemon"
 msgstr ""
 
-#: internal/zfs/zfs.go:594
+#: internal/zfs/zfs.go:320
+msgid "ZFS: Cancelling nested transaction"
+msgstr ""
+
+#. revert all in progress transactions
+#: internal/zfs/zfs.go:319
+msgid "ZFS: an error occured: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:833
 msgid "ZFS: can't set property %q=%q for %q as not a local property (%q)"
 msgstr ""
 
-#: internal/zfs/zfs.go:212
-msgid "ZFS: committing transaction"
+#: internal/zfs/zfs.go:271
+msgid "ZFS: ending transaction"
 msgstr ""
 
-#: internal/zfs/zfs.go:105
+#: internal/zfs/zfs.go:126
+msgid "ZFS: new scan"
+msgstr ""
+
+#: internal/zfs/zfs.go:732
+msgid "ZFS: request destruction of %q"
+msgstr ""
+
+#: internal/zfs/zfs.go:236
 msgid "ZFS: reverting all in progress zfs transactions"
 msgstr ""
 
-#: internal/zfs/zfs.go:250
-msgid "ZFS: scan requested"
+#: internal/zfs/zfs.go:272
+msgid "ZFS: transaction done"
 msgstr ""
 
-#: internal/zfs/zfs.go:220
+#: internal/zfs/zfs.go:332
 msgid "ZFS: trying to Create %q with mountpoint %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:351
+#: internal/zfs/zfs.go:467
 msgid "ZFS: trying to clone %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:556
+#: internal/zfs/zfs.go:783
 msgid "ZFS: trying to destroy %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:492
+#: internal/zfs/zfs.go:760
+msgid "ZFS: trying to destroy recursively %q @ %q"
+msgstr ""
+
+#: internal/zfs/zfs.go:647
 msgid "ZFS: trying to promote %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:578
+#: internal/zfs/zfs.go:820
 msgid "ZFS: trying to set %q=%q on %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:270
+#: internal/zfs/zfs.go:375
 msgid "ZFS: trying to snapshot %q, recursive: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:229
+#: internal/zfs/zfs.go:342
 msgid "can't create %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:96 internal/zfs/helpers.go:117
-#: internal/zfs/helpers.go:133
+#: internal/zfs/helpers.go:150
 msgid "can't get %q property: "
 msgstr ""
 
-#: internal/zfs/helpers.go:53
-msgid "can't get altroot for associated pool: "
-msgstr ""
-
-#: internal/zfs/helpers.go:49
+#: internal/zfs/helpers.go:44
 msgid "can't get associated pool: "
 msgstr ""
 
-#: internal/zfs/helpers.go:81
-msgid "can't get bootfs property: "
+#: internal/zfs/zfs.go:823
+msgid "can't get dataset to change property on %q: "
 msgstr ""
 
-#: internal/zfs/helpers.go:62
-msgid "can't get canmount property: "
+#: internal/zfs/zfs.go:735
+msgid "can't get dataset to destroy %q: "
 msgstr ""
 
-#: internal/zfs/helpers.go:101
-msgid "can't get creation property: "
-msgstr ""
-
-#: internal/zfs/zfs.go:495 internal/zfs/zfs.go:563 internal/zfs/zfs.go:581
-msgid "can't get dataset %q: "
-msgstr ""
-
-#: internal/zfs/helpers.go:185 internal/zfs/zfs.go:293 internal/zfs/zfs.go:402
-msgid "can't get dataset properties for %q: "
-msgstr ""
-
-#: internal/zfs/zfs.go:591
-msgid "can't get dataset property %q for %q: "
-msgstr ""
-
-#: internal/zfs/helpers.go:68
-msgid "can't get mounted: "
-msgstr ""
-
-#: internal/zfs/helpers.go:41
-msgid "can't get mountpoint: "
-msgstr ""
-
-#: internal/zfs/zfs.go:381 internal/zfs/zfs.go:419 internal/zfs/zfs.go:512
-msgid "can't get parent dataset of %q: "
-msgstr ""
-
-#: internal/zfs/zfs.go:253
+#: internal/zfs/zfs.go:140
 msgid "can't list datasets: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:500
+#: internal/zfs/zfs.go:655
 msgid "can't promote %q: it's a snapshot"
 msgstr ""
 
-#: internal/zfs/zfs.go:586
-msgid "can't set a property %q on %q: the dataset a snapshot"
+#: internal/zfs/helpers.go:89 internal/zfs/helpers.go:124
+msgid "can't read bootfsdataset property, ignoring: "
 msgstr ""
 
-#: internal/zfs/zfs.go:598
+#: internal/zfs/helpers.go:118
+msgid "can't read lastBootedKernel property, ignoring: "
+msgstr ""
+
+#: internal/zfs/helpers.go:101
+msgid "can't read source of LastUsed property, ignoring:"
+msgstr ""
+
+#: internal/zfs/zfs.go:838
 msgid "can't set dataset property %q=%q for %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:132
+#: internal/machines/userdata.go:108
 msgid "can't use empty string for existing home directory"
 msgstr ""
 
-#: internal/machines/userdata.go:135
+#: internal/machines/userdata.go:111
 msgid "can't use empty string for new home directory"
 msgstr ""
 
-#: internal/daemon/daemon.go:58
+#: internal/zfs/zfs.go:792
+msgid "cannot destroy dataset %q: %v"
+msgstr ""
+
+#: internal/zfs/helpers.go:545
+msgid "cannot find %q as child of parent %q"
+msgstr ""
+
+#: internal/zfs/zfs.go:379 internal/zfs/zfs.go:474 internal/zfs/zfs.go:651
+#: internal/zfs/zfs.go:669 internal/zfs/zfs.go:701
+msgid "cannot find %q: %v"
+msgstr ""
+
+#: internal/zfs/helpers.go:483
+msgid "cannot find base snapshot %q: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:364 internal/zfs/zfs.go:507 internal/zfs/zfs.go:539
+#: internal/zfs/zfs.go:606 internal/zfs/zfs.go:748
+msgid "cannot find parent for %q: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:803
+msgid "cannot find parent for %s: %v"
+msgstr ""
+
+#: internal/zfs/helpers.go:511
+msgid "cannot remove snapshot %q on old dataset %q: %v"
+msgstr ""
+
+#: internal/daemon/daemon.go:81
 msgid "cannot retrieve systemd listeners: %v"
 msgstr ""
 
-#: internal/machines/boot.go:272
+#: internal/machines/boot.go:224
 msgid "cloning %q"
 msgstr ""
 
-#: internal/machines/boot.go:309 internal/machines/boot.go:377
-#: internal/machines/userdata.go:104
+#: internal/machines/boot.go:261 internal/machines/boot.go:329
+#: internal/machines/userdata.go:90
 msgid "couldn't add %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -483,19 +538,15 @@ msgstr ""
 msgid "couldn't attach a logger to request: %w"
 msgstr ""
 
-#: internal/zfs/zfs.go:558
-msgid "couldn't call Destroy in a transactional context"
-msgstr ""
-
-#: internal/daemon/userdata.go:55
+#: internal/daemon/userdata.go:48
 msgid "couldn't change home userdataset for %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:457
+#: internal/zfs/zfs.go:587
 msgid "couldn't clone %q to %q: "
 msgstr ""
 
-#: internal/daemon/boot.go:65
+#: internal/daemon/boot.go:58
 msgid "couldn't commit: "
 msgstr ""
 
@@ -507,132 +558,135 @@ msgstr ""
 msgid "couldn't connect to zsys daemon: %v"
 msgstr ""
 
-#: internal/daemon/daemon.go:88
+#: cmd/zsysd/daemon/boot.go:20 internal/daemon/daemon.go:106
+msgid "couldn't create a new machine: %v"
+msgstr ""
+
+#: internal/daemon/daemon.go:112
 msgid "couldn't create new authorizer: %v"
 msgstr ""
 
-#: internal/machines/boot.go:301
+#: internal/machines/boot.go:253
 msgid "couldn't create new user datasets from %q: %v"
 msgstr ""
 
-#: internal/machines/userdata.go:93
+#: internal/machines/userdata.go:77
 msgid "couldn't create user data embedder dataset: "
 msgstr ""
 
-#: internal/daemon/userdata.go:33
+#: internal/daemon/userdata.go:29
 msgid "couldn't create userdataset for %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:568
+#: internal/zfs/zfs.go:752
+msgid "couldn't destroy %q and its children: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:739
 msgid "couldn't destroy %q due to clones: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:240 internal/zfs/zfs.go:310 internal/zfs/zfs.go:467
+#: internal/zfs/zfs.go:353 internal/zfs/zfs.go:413 internal/zfs/zfs.go:598
 msgid "couldn't destroy %q for cleanup: %v"
 msgstr ""
 
-#: cmd/zsysd/daemon/boot.go:25 internal/daemon/boot.go:37
+#: cmd/zsysd/daemon/boot.go:25 internal/daemon/boot.go:33
 msgid "couldn't ensure boot: "
 msgstr ""
 
-#: internal/zfs/helpers.go:33
-msgid "couldn't find %q in cache for getting properties of snapshot %q"
+#: internal/zfs/zfs.go:358 internal/zfs/zfs.go:637
+msgid "couldn't fetch property of newly created dataset: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:442
+msgid "couldn't fetch property of newly created snapshot: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:261
+msgid "couldn't find dataset %q in cache"
 msgstr ""
 
 #: internal/log/create.go:35 internal/streamlogger/client.go:28
 msgid "couldn't generate request id, setting to %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:172
-#, c-format
-msgid "couldn't load dataset: %s\n"
+#: cmd/zsysd/daemon/boot.go:16 internal/daemon/daemon.go:102
+msgid "couldn't parse kernel command line: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:236 internal/zfs/zfs.go:306 internal/zfs/zfs.go:463
-#: internal/zfs/zfs.go:535
-msgid "couldn't open %q for cleanup: %v"
-msgstr ""
-
-#: internal/zfs/zfs.go:273
-msgid "couldn't open %q: %v"
-msgstr ""
-
-#: internal/zfs/zfs.go:539
+#: internal/zfs/zfs.go:681
 msgid "couldn't promote %q for cleanup: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:530
+#: internal/zfs/zfs.go:705
 msgid "couldn't promote %q: "
 msgstr ""
 
-#: internal/machines/boot.go:392
+#: internal/machines/boot.go:344
 msgid "couldn't promote dataset %q: "
 msgstr ""
 
-#: internal/machines/boot.go:356
+#: internal/zfs/zfs.go:713
+msgid "couldn't refresh our internal origin and layout cache: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:709
+msgid "couldn't refresh properties for %q: "
+msgstr ""
+
+#: internal/zfs/helpers.go:200
+msgid "couldn't refresh properties of %q: %v"
+msgstr ""
+
+#: internal/machines/boot.go:308
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
-#. don't fail if Scan is failing, as the dataset was created
-#: internal/machines/boot.go:206 internal/machines/userdata.go:116
-msgid "couldn't rescan after committing boot: "
-msgstr ""
-
-#: internal/machines/boot.go:90 internal/machines/boot.go:126
-msgid "couldn't rescan after modifying boot: "
-msgstr ""
-
-#. don't fail if Scan is failing, as the dataset was created
-#: internal/machines/userdata.go:72
-msgid "couldn't rescan for checking empty USERDATA: "
-msgstr ""
-
-#: internal/zfs/helpers.go:246
+#: internal/zfs/helpers.go:278
 msgid "couldn't scan %q for clones"
 msgstr ""
 
-#: internal/daemon/daemon.go:83
-msgid "couldn't scan machines: %v"
+#: internal/machines/machines.go:92
+msgid "couldn't scan zfs filesystem"
 msgstr ""
 
 #: internal/streamlogger/server.go:57
 msgid "couldn't send headers: %w"
 msgstr ""
 
-#: internal/daemon/daemon.go:151
+#: internal/daemon/daemon.go:144
 msgid "couldn't send ready notification to systemd while supported: %v"
 msgstr ""
 
-#: internal/machines/boot.go:185
+#: internal/machines/boot.go:142
 msgid "couldn't set last booted kernel to %q "
 msgstr ""
 
-#: internal/machines/boot.go:172 internal/machines/userdata.go:109
+#: internal/machines/boot.go:128 internal/machines/userdata.go:96
 msgid "couldn't set last used time to %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:193
+#: internal/machines/userdata.go:174
 msgid "couldn't set new home %q to %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:323 internal/zfs/zfs.go:328 internal/zfs/zfs.go:333
-#: internal/zfs/zfs.go:480
-msgid "couldn't set user property %q to %q: "
+#: internal/zfs/zfs.go:437 internal/zfs/zfs.go:625 internal/zfs/zfs.go:631
+msgid "couldn't set user property %q to %q for %v: "
 msgstr ""
 
-#: internal/zfs/zfs.go:300
+#: internal/zfs/zfs.go:402
 msgid "couldn't snapshot %q: %v"
 msgstr ""
 
-#: internal/machines/boot.go:330
+#: internal/machines/boot.go:282
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
-#: internal/machines/machines.go:123
+#: internal/machines/machines.go:156
 msgid "current machines scanning layout:\n"
 msgstr ""
 
-#: internal/machines/userdata.go:145
+#: internal/machines/userdata.go:126
 msgid "didn't find any existing dataset matching %q"
 msgstr ""
 
@@ -645,21 +699,21 @@ msgstr ""
 msgid "failed to get header from stream: %w"
 msgstr ""
 
-#: internal/daemon/daemon.go:68
+#: internal/daemon/daemon.go:89
 msgid "failed to listen on %q: %w"
 msgstr ""
 
-#: internal/machines/machines.go:203 internal/machines/machines.go:227
+#: internal/machines/machines.go:236 internal/machines/machines.go:260
 msgid "ignoring %q as couldn't assert if it's a child: "
 msgstr ""
 
-#: internal/machines/machines.go:162
+#: internal/machines/machines.go:195
 msgid ""
 "ignoring %q: either an orphan clone or not a boot, user or system datasets "
 "and canmount isn't on"
 msgstr ""
 
-#: internal/zfs/zfs.go:386 internal/zfs/zfs.go:516
+#: internal/zfs/zfs.go:512 internal/zfs/zfs.go:673
 msgid "integrity check failed: %v"
 msgstr ""
 
@@ -696,6 +750,10 @@ msgstr ""
 msgid "new incoming request %s() for %q"
 msgstr ""
 
+#: internal/zfs/zfs.go:773
+msgid "no existing snapshot %q: "
+msgstr ""
+
 #: internal/log/create.go:63
 msgid "no request ID attached to this context"
 msgstr ""
@@ -704,36 +762,44 @@ msgstr ""
 msgid "no request ID found on server header"
 msgstr ""
 
-#: internal/zfs/zfs.go:353
+#: internal/zfs/zfs.go:469
 msgid "no suffix was provided for cloning"
 msgstr ""
 
-#: internal/zfs/helpers.go:228
+#: internal/zfs/helpers.go:258
 msgid ""
 "parent of %q doesn't have a snapshot named %q. Every of its children "
 "shouldn't have a snapshot. However %q exists"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:207
+#: internal/authorizer/authorizer.go:208
 msgid "parsing error: %v"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:199
+#: internal/authorizer/authorizer.go:200
 msgid "parsing error: ) at the end"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:203
+#: internal/authorizer/authorizer.go:204
 msgid "parsing error: less fields than required"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:195
+#: internal/authorizer/authorizer.go:196
 msgid "parsing error: missing )"
 msgstr ""
 
 #. Last used is not a relevant change for signalling a change and justify bootloader rebuild: last-used is not
 #. displayed for current system dataset.
-#: internal/machines/boot.go:169
+#: internal/machines/boot.go:124
 msgid "set current time to %q"
+msgstr ""
+
+#: internal/zfs/zfs.go:765
+msgid "stop destroying dataset on %q, cannot destroy child: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:456
+msgid "stop snapshotting dataset for %q: %v"
 msgstr ""
 
 #: internal/streamlogger/server.go:47
@@ -748,17 +814,13 @@ msgstr ""
 msgid "unexpected number of @ in dataset name %q"
 msgstr ""
 
-#: internal/daemon/daemon.go:76
+#: internal/daemon/daemon.go:97
 #, c-format
 msgid "unexpected number of systemd socket activation (%d != 1)"
 msgstr ""
 
 #: internal/authorizer/servercreds.go:28
 msgid "unexpected socket type"
-msgstr ""
-
-#: internal/zfs/helpers.go:296
-msgid "unsupported property %q"
 msgstr ""
 
 #: cmd/zsysd/client/version.go:30
