@@ -4,6 +4,14 @@ import libzfs "github.com/bicomsystems/go-libzfs"
 
 type libZFSAdapter struct{}
 
+func (libZFSAdapter) PoolOpen(name string) (pool libzfs.Pool, err error) {
+	return libzfs.PoolOpen(name)
+}
+
+func (libZFSAdapter) PoolCreate(name string, vdev libzfs.VDevTree, features map[string]string, props libzfs.PoolProperties, fsprops libzfs.DatasetProperties) (pool libzfs.Pool, err error) {
+	return libzfs.PoolCreate(name, vdev, features, props, fsprops)
+}
+
 func (l libZFSAdapter) DatasetOpenAll() (datasets []dZFSInterface, err error) {
 	ds, err := libzfs.DatasetOpenAll()
 	if err != nil {
