@@ -3,9 +3,12 @@
       "Name": "rpool",
       "Mountpoint": "/home/foo",
       "CanMount": "on",
-      "BootfsDatasets": "SetProperty Value",
+      "LastBootedKernel": "SetProperty Value",
+      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
+         "LastBootedKernel": "local",
          "BootfsDatasets": "local"
       }
    }

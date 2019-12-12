@@ -1,0 +1,11 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/boot",
+      "CanMount": "on",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local"
+      }
+   }
+]

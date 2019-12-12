@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/coreos/go-systemd/activation"
@@ -17,14 +17,13 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/machines"
-	"github.com/ubuntu/zsys/internal/zfs"
 	"google.golang.org/grpc"
 )
 
 // Server is used to implement zsys.ZsysServer.
 type Server struct {
 	// Machines scanned
-	Machines *machines.Machines
+	Machines machines.Machines
 
 	// Requests mutex
 	RWRequest sync.RWMutex
@@ -33,27 +32,51 @@ type Server struct {
 	lis        net.Listener
 	grpcserver *grpc.Server
 
-	authorizer *authorizer.Authorizer
-
-	idleTimeout       time.Duration
-	requestsInFlights int
-	newRequest        chan struct{}
-	reset             chan struct{}
+	// Those elements could be mocked in tests
+	authorizer        *authorizer.Authorizer
+	systemdSdNotifier func(unsetEnvironment bool, state string) (bool, error)
+	idlerTimeout      idler
 }
 
-// IdleTimeout changes server default idle timeout
-func IdleTimeout(t time.Duration) func(s *Server) error {
-	return func(s *Server) error {
-		s.idleTimeout = t
+/*
+ * Daemon options
+ * These options and helpers are augmenting the daemon struct to make the code testable with
+ * mock authorizer, systemd, timeout adjustments.
+ */
+
+// WithIdleTimeout changes server default idle timeout
+func WithIdleTimeout(timeout time.Duration) func(o *options) error {
+	return func(o *options) error {
+		o.timeout = timeout
 		return nil
 	}
 }
 
+type options struct {
+	timeout                   time.Duration
+	authorizer                *authorizer.Authorizer
+	systemdActivationListener func() ([]net.Listener, error)
+	systemdSdNotifier         func(unsetEnvironment bool, state string) (bool, error)
+}
+
+type option func(*options) error
+
 // New returns an new, initialized daemon server, which handles systemd activation
 // socket is ignored if we are using socket activation.
-func New(socket string, options ...func(s *Server) error) (*Server, error) {
+func New(socket string, opts ...option) (*Server, error) {
+	args := options{
+		timeout:                   config.DefaultServerIdleTimeout,
+		systemdActivationListener: activation.Listeners,
+		systemdSdNotifier:         daemon.SdNotify,
+	}
+	for _, o := range opts {
+		if err := o(&args); err != nil {
+			return nil, fmt.Errorf(i18n.G("Couldn't apply option to server: %v"), err)
+		}
+	}
+
 	// systemd socket activation or local creation
-	listeners, err := activation.Listeners()
+	listeners, err := args.systemdActivationListener()
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("cannot retrieve systemd listeners: %v"), err)
 	}
@@ -61,13 +84,11 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 	var lis net.Listener
 	switch len(listeners) {
 	case 0:
-		oldUmask := syscall.Umask(0111)
-		defer func() { syscall.Umask(oldUmask) }()
 		l, err := net.Listen("unix", socket)
 		if err != nil {
 			return nil, fmt.Errorf(i18n.G("failed to listen on %q: %w"), socket, err)
 		}
-		syscall.Umask(oldUmask)
+		os.Chmod(socket, 0666)
 		lis = l
 	case 1:
 		socket = ""
@@ -76,16 +97,20 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		return nil, fmt.Errorf(i18n.G("unexpected number of systemd socket activation (%d != 1)"), len(listeners))
 	}
 
-	z := zfs.New(context.Background())
-	defer z.Done()
-	ms, err := getMachines(z)
+	cmdline, err := procCmdline()
 	if err != nil {
-		return nil, fmt.Errorf(i18n.G("couldn't scan machines: %v"), err)
+		return nil, fmt.Errorf(i18n.G("couldn't parse kernel command line: %v"), err)
+	}
+	ms, err := machines.New(context.Background(), cmdline)
+	if err != nil {
+		return nil, fmt.Errorf(i18n.G("couldn't create a new machine: %v"), err)
 	}
 
-	a, err := authorizer.New()
-	if err != nil {
-		return nil, fmt.Errorf(i18n.G("couldn't create new authorizer: %v"), err)
+	if args.authorizer == nil {
+		args.authorizer, err = authorizer.New()
+		if err != nil {
+			return nil, fmt.Errorf(i18n.G("couldn't create new authorizer: %v"), err)
+		}
 	}
 
 	s := &Server{
@@ -94,48 +119,16 @@ func New(socket string, options ...func(s *Server) error) (*Server, error) {
 		socket: socket,
 		lis:    lis,
 
-		authorizer: a,
+		authorizer:        args.authorizer,
+		systemdSdNotifier: args.systemdSdNotifier,
 
-		idleTimeout: config.DefaultServerIdleTimeout,
-		newRequest:  make(chan struct{}),
-		reset:       make(chan struct{}),
+		idlerTimeout: newIdler(args.timeout),
 	}
 	grpcserver := zsys.RegisterServer(s)
 	s.grpcserver = grpcserver
 
-	for _, option := range options {
-		if err := option(s); err != nil {
-			log.Warningf(context.Background(), i18n.G("Couldn't apply option to server: %v"), err)
-		}
-	}
-
 	// Handle idle timeout
-	go func() {
-		timeout := time.NewTimer(s.idleTimeout)
-
-	out:
-		for {
-			select {
-			case <-timeout.C:
-				log.Debug(context.Background(), i18n.G("Idle timeout expired"))
-				break out
-			case <-s.newRequest:
-				s.requestsInFlights++
-				// Stop can return false if the timeout has fired OR if it's already stopped. Use requestsInFlights
-				// to only drain the timeout channel if the timeout has already fired.
-				if s.requestsInFlights == 1 && !timeout.Stop() {
-					<-timeout.C
-				}
-			case <-s.reset:
-				s.requestsInFlights--
-				if s.requestsInFlights > 0 {
-					continue
-				}
-				timeout.Reset(s.idleTimeout)
-			}
-		}
-		s.Stop()
-	}()
+	go s.idlerTimeout.start(s)
 
 	return s, nil
 }
@@ -147,7 +140,7 @@ func (s *Server) Listen() error {
 	log.Infof(context.Background(), i18n.G("Serving on %s"), s.lis.Addr().String())
 
 	// systemd activation
-	if sent, err := daemon.SdNotify(false, "READY=1"); err != nil {
+	if sent, err := s.systemdSdNotifier(false, "READY=1"); err != nil {
 		return fmt.Errorf(i18n.G("couldn't send ready notification to systemd while supported: %v"), err)
 	} else if sent {
 		log.Debug(context.Background(), i18n.G("Ready state sent to systemd"))
@@ -165,26 +158,11 @@ func (s *Server) Stop() {
 
 // TrackRequest prevents the idling timeout to fire up and return the function to reset it.
 func (s *Server) TrackRequest() func() {
-	s.newRequest <- struct{}{}
+	s.idlerTimeout.addRequest()
 	return func() {
-		log.Debugf(context.Background(), i18n.G("Reset idle timeout to %s"), s.idleTimeout)
-		s.reset <- struct{}{}
+		log.Debugf(context.Background(), i18n.G("Reset idle timeout to %s"), s.idlerTimeout.timeout)
+		s.idlerTimeout.endRequest()
 	}
-}
-
-// getMachines returns all scanned machines on the current system
-func getMachines(z *zfs.Zfs) (*machines.Machines, error) {
-	ds, err := z.Scan()
-	if err != nil {
-		return nil, err
-	}
-	cmdline, err := procCmdline()
-	if err != nil {
-		return nil, err
-	}
-	ms := machines.New(z.Context(), ds, cmdline)
-
-	return &ms, nil
 }
 
 // procCmdline returns kernel command line

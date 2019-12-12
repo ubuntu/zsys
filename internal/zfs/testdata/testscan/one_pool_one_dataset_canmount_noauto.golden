@@ -1,8 +1,0 @@
-[
-   {
-      "Name": "rpool",
-      "Mountpoint": "/home/foo",
-      "CanMount": "noauto",
-      "LastUsed": 1555555555
-   }
-]

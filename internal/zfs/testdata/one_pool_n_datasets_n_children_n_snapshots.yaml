@@ -9,10 +9,16 @@ pools:
         canmount: on
         snapshots:
           - name: snap_r1
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
       - name: ROOT/ubuntu/var
         canmount: on
         snapshots:
           - name: snap_v1
+            zsys_bootfs: yes:inherited
+            mountpoint: /var:inherited
+            canmount: on:local
       - name: ROOT/ubuntu/var/lib
         zsys_bootfs: no
         canmount: on
@@ -24,4 +30,8 @@ pools:
         canmount: on
         snapshots:
           - name: snap_u1
+            mountpoint: /:local
+            canmount: on:local
           - name: snap_u2
+            mountpoint: /:local
+            canmount: on:local

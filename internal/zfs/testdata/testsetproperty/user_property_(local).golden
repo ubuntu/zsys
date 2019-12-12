@@ -6,6 +6,7 @@
       "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootfsDatasets": "local"
       }
    }

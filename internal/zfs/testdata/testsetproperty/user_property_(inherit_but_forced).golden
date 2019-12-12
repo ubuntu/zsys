@@ -4,7 +4,8 @@
       "Mountpoint": "/",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "local"
+         "Mountpoint": "local",
+         "CanMount": "local"
       }
    },
    {
@@ -12,7 +13,8 @@
       "Mountpoint": "/ROOT",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "inherited"
+         "Mountpoint": "inherited",
+         "CanMount": "local"
       }
    },
    {
@@ -24,6 +26,7 @@
       "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootFS": "local",
          "LastUsed": "local",
          "BootfsDatasets": "local"
@@ -33,23 +36,29 @@
       "Name": "rpool/ROOT/ubuntu/opt",
       "Mountpoint": "/opt",
       "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "inherited",
-         "LastUsed": "rpool/ROOT/ubuntu",
-         "BootfsDatasets": "rpool/ROOT/ubuntu"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu/var",
       "Mountpoint": "/var",
       "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "inherited",
-         "LastUsed": "rpool/ROOT/ubuntu",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited",
          "BootfsDatasets": "local"
       }
    },
@@ -57,12 +66,15 @@
       "Name": "rpool/ROOT/ubuntu/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "inherited",
-         "LastUsed": "rpool/ROOT/ubuntu",
-         "BootfsDatasets": "rpool/ROOT/ubuntu/var"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -72,6 +84,7 @@
       "LastUsed": 1544444444,
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "LastUsed": "local"
       }
    }

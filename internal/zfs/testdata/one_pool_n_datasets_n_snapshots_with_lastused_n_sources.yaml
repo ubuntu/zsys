@@ -1,0 +1,22 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: ROOT
+      - name: ROOT/ubuntu
+        zsys_bootfs: yes
+        last_used: 2019-04-18T02:45:55+00:00
+        mountpoint: /
+        canmount: on
+        snapshots:
+          - name: snap_local_inherited
+            last_used: 2019-04-18T02:45:55+00:00:local
+      - name: ROOT/ubuntu/inherited
+        snapshots:
+        - name: snap_local_inherited
+          last_used: 2019-04-18T02:45:55+00:00:inherited
+      - name: ROOT/ubuntu2
+        snapshots:
+        - name: snap_default
+          last_used: 2019-04-18T02:45:55+00:00:default
+
+

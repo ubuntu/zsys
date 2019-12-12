@@ -1,8 +1,0 @@
-[
-   {
-      "Name": "rpool",
-      "Mountpoint": "/home/foo",
-      "CanMount": "on",
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-   }
-]

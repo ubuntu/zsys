@@ -11,6 +11,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ubuntu/zsys/internal/i18n"
+	_ "github.com/ubuntu/zsys/internal/testutils"
 )
 
 const (

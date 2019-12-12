@@ -2,6 +2,7 @@ package machines
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"strings"
 	"time"
@@ -22,6 +23,8 @@ type Machines struct {
 	nextState         *State
 	allSystemDatasets []zfs.Dataset
 	allUsersDatasets  []zfs.Dataset
+
+	z *zfs.Zfs
 }
 
 // Machine is a group of Main and its History children statees
@@ -53,17 +56,47 @@ const (
 	userdatasetsContainerName = "/userdata/"
 )
 
+// WithLibZFS allows overriding default libzfs implementations with a mock
+func WithLibZFS(libzfs zfs.LibZFSInterface) func(o *options) error {
+	return func(o *options) error {
+		o.libzfs = libzfs
+		return nil
+	}
+}
+
+type options struct {
+	libzfs zfs.LibZFSInterface
+}
+
+type option func(*options) error
+
 // New detects and generate machines elems
-func New(ctx context.Context, ds []zfs.Dataset, cmdline string) Machines {
+func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) {
 	log.Info(ctx, i18n.G("Building new machines list"))
+	args := options{
+		libzfs: &zfs.LibZFSAdapter{},
+	}
+	for _, o := range opts {
+		if err := o(&args); err != nil {
+			return Machines{}, fmt.Errorf(i18n.G("Couldn't apply option to server: %v"), err)
+		}
+	}
+
 	machines := Machines{
 		all:     make(map[string]*Machine),
 		cmdline: cmdline,
 	}
 
+	z, err := zfs.New(ctx, zfs.WithLibZFS(args.libzfs))
+	if err != nil {
+		return Machines{}, fmt.Errorf(i18n.G("couldn't scan zfs filesystem"), err)
+	}
+	machines.z = z
+
 	// We are going to transform the origin of datasets, get a copy first
-	datasets := make([]zfs.Dataset, len(ds))
-	copy(datasets, ds)
+	zDatasets := machines.z.Datasets()
+	datasets := make([]zfs.Dataset, len(zDatasets))
+	copy(datasets, zDatasets)
 
 	// Sort datasets so that children datasets are after their parents.
 	sortedDataset := sortedDataset(datasets)
@@ -122,7 +155,7 @@ func New(ctx context.Context, ds []zfs.Dataset, cmdline string) Machines {
 
 	log.Debugf(ctx, i18n.G("current machines scanning layout:\n"+pp.Sprint(machines)))
 
-	return machines
+	return machines, nil
 }
 
 // triageDatasets attach main system datasets to machines and returns other types of datasets for later triage/attachment.

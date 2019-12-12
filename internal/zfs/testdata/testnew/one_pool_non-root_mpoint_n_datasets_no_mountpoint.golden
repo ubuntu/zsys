@@ -1,0 +1,31 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/boot",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/BOOT",
+      "Mountpoint": "/boot/BOOT",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/BOOT/ubuntu",
+      "Mountpoint": "/boot/BOOT/ubuntu",
+      "CanMount": "on",
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "LastUsed": "local"
+      }
+   }
+]

@@ -1,0 +1,106 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT",
+      "Mountpoint": "/ROOT",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu",
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": true,
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu/subdataset",
+      "Mountpoint": "/subdataset",
+      "CanMount": "off",
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu/subdataset@snap_inherited",
+      "IsSnapshot": true,
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "BootFS": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu@snap_default",
+      "IsSnapshot": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "BootFS": "default"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu@snap_inherited",
+      "IsSnapshot": true,
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "BootFS": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu@snap_local",
+      "IsSnapshot": true,
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "BootFS": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678",
+      "Mountpoint": "/ROOT/ubuntu_5678",
+      "CanMount": "on",
+      "BootFS": true,
+      "Origin": "rpool/ROOT/ubuntu@snap_inherited",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "BootFS": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678/subdataset",
+      "Mountpoint": "/ROOT/ubuntu_5678/subdataset",
+      "CanMount": "on",
+      "BootFS": true,
+      "Origin": "rpool/ROOT/ubuntu/subdataset@snap_inherited",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "BootFS": "inherited"
+      }
+   }
+]

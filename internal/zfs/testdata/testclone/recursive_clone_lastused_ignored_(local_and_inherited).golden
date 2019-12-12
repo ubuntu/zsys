@@ -1,0 +1,97 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT",
+      "Mountpoint": "/ROOT",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu",
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": true,
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastUsed": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu/inherited",
+      "Mountpoint": "/inherited",
+      "CanMount": "off",
+      "BootFS": true,
+      "LastUsed": 1555555555,
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu/inherited@snap_local_inherited",
+      "IsSnapshot": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu2",
+      "Mountpoint": "/ROOT/ubuntu2",
+      "CanMount": "off",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu2@snap_default",
+      "IsSnapshot": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu@snap_local_inherited",
+      "IsSnapshot": true,
+      "LastUsed": 2000000000,
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678",
+      "Mountpoint": "/ROOT/ubuntu_5678",
+      "CanMount": "on",
+      "Origin": "rpool/ROOT/ubuntu@snap_local_inherited",
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678/inherited",
+      "Mountpoint": "/ROOT/ubuntu_5678/inherited",
+      "CanMount": "on",
+      "Origin": "rpool/ROOT/ubuntu/inherited@snap_local_inherited",
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   }
+]

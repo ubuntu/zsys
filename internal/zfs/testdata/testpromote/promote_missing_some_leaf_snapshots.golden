@@ -4,7 +4,8 @@
       "Mountpoint": "/",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "local"
+         "Mountpoint": "local",
+         "CanMount": "local"
       }
    },
    {
@@ -12,7 +13,8 @@
       "Mountpoint": "/ROOT",
       "CanMount": "off",
       "Sources": {
-         "Mountpoint": "inherited"
+         "Mountpoint": "inherited",
+         "CanMount": "local"
       }
    },
    {
@@ -25,6 +27,7 @@
       "Origin": "rpool/ROOT/ubuntu_5678@snap_r1",
       "Sources": {
          "Mountpoint": "local",
+         "CanMount": "local",
          "BootFS": "local",
          "LastUsed": "local",
          "BootfsDatasets": "local"
@@ -34,13 +37,16 @@
       "Name": "rpool/ROOT/ubuntu_1234/opt",
       "Mountpoint": "/opt",
       "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Origin": "rpool/ROOT/ubuntu_5678/opt@snap_r1",
       "Sources": {
          "Mountpoint": "inherited",
-         "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -48,24 +54,32 @@
       "IsSnapshot": true,
       "Mountpoint": "/opt",
       "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "BootfsDatasets": "rpool/path/to/otherdataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_1234/var",
       "Mountpoint": "/var",
       "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 1555555555,
       "BootfsDatasets": "rpool/path/to/dataset",
       "Origin": "rpool/ROOT/ubuntu_5678/var@snap_r1",
       "Sources": {
          "Mountpoint": "inherited",
-         "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -77,9 +91,10 @@
       "Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap_r1",
       "Sources": {
          "Mountpoint": "inherited",
+         "CanMount": "local",
          "BootFS": "local",
-         "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "LastUsed": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -90,8 +105,10 @@
       "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "LastUsed": "rpool/ROOT/ubuntu_1234",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastUsed": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -100,10 +117,14 @@
       "Mountpoint": "/var/lib/apt",
       "CanMount": "on",
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "BootfsDatasets": "rpool/path/to/otherdataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -112,11 +133,14 @@
       "Mountpoint": "/var/lib",
       "CanMount": "on",
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "BootfsDatasets": "rpool/path/to/otherdataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_1234/var/lib",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -124,11 +148,16 @@
       "IsSnapshot": true,
       "Mountpoint": "/var",
       "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "BootfsDatasets": "rpool/path/to/otherdataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
@@ -138,11 +167,14 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/dataset",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "BootfsDatasets": "rpool/path/to/otherdataset",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "rpool/ROOT/ubuntu_1234",
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "local",
+         "BootfsDatasets": "local"
       }
    },
    {
@@ -150,77 +182,117 @@
       "Mountpoint": "/",
       "CanMount": "noauto",
       "BootFS": true,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "local"
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "local"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/opt",
       "Mountpoint": "/opt",
       "CanMount": "noauto",
+      "BootFS": true,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
-         "Mountpoint": "inherited"
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/opt@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/opt",
-      "CanMount": "noauto",
+      "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
-         "Mountpoint": "inherited"
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/var",
       "Mountpoint": "/var",
       "CanMount": "noauto",
+      "BootFS": true,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
-         "Mountpoint": "inherited"
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "noauto",
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "local"
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/var/lib@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/var/lib",
-      "CanMount": "noauto",
+      "CanMount": "on",
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootFS": "rpool/ROOT/ubuntu_5678/var/lib"
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678/var@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/var",
-      "CanMount": "noauto",
+      "CanMount": "on",
+      "BootFS": true,
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
-         "Mountpoint": "inherited"
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited",
+         "BootfsDatasets": "inherited"
       }
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/",
-      "CanMount": "noauto",
+      "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
-         "BootFS": "rpool/ROOT/ubuntu_5678"
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "local",
+         "BootfsDatasets": "local"
       }
    }
 ]

@@ -9,3 +9,6 @@ pools:
         canmount: on
         snapshots:
           - name: snap1
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local

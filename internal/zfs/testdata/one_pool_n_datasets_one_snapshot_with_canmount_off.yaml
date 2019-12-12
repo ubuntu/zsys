@@ -6,6 +6,9 @@ pools:
         zsys_bootfs: yes
         last_used: 2019-04-18T02:45:55+00:00
         mountpoint: /
-        canmount: off
+        canmount: on
         snapshots:
           - name: snap1
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: off:local

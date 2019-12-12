@@ -15,38 +15,26 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
-// ZfsSetPropertyScanCreater can only Create, Scan and SetProperty on datasets
-type ZfsSetPropertyScanCreater interface {
-	Create(path, mountpoint, canmount string) error
-	zfsScanner
-	zfsPropertySetter
-	Context() context.Context
-}
-
-// zfsSetPropertyScanner can only SetProperty and Scan
-type zfsSetPropertyScanner interface {
-	zfsScanner
-	zfsPropertySetter
-	Context() context.Context
-}
-
 // CreateUserData creates a new dataset for homepath and attach to current system.
 // It creates intermediates user datasets if needed.
-func (ms *Machines) CreateUserData(z ZfsSetPropertyScanCreater, user, homepath string) error {
-	ctx := z.Context()
+func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) error {
 	if !ms.current.isZsys() {
 		return errors.New(i18n.G("Current machine isn't Zsys, nothing to create"))
 	}
-
 	if user == "" {
 		return errors.New(i18n.G("Needs a valid user name, got nothing"))
 	}
 	if homepath == "" {
 		return errors.New(i18n.G("Needs a valid home path, got nothing"))
 	}
+
+	t, cancel := ms.z.NewTransaction(ctx)
+	defer t.Done()
+
 	// If there this user already attached to this machine: retarget home
-	reused, err := ms.tryReuseUserDataSet(ctx, user, "", homepath, z)
+	reused, err := ms.tryReuseUserDataSet(t, user, "", homepath)
 	if err != nil {
+		cancel()
 		return err
 	} else if reused {
 		return nil
@@ -66,12 +54,7 @@ func (ms *Machines) CreateUserData(z ZfsSetPropertyScanCreater, user, homepath s
 
 	// If there is still none found, check if there is only USERDATA with no user under it as it won't shows up in machines
 	if userdatasetRoot == "" {
-		ds, err := z.Scan()
-		if err != nil {
-			// don't fail if Scan is failing, as the dataset was created
-			return fmt.Errorf(i18n.G("couldn't rescan for checking empty USERDATA: ")+config.ErrorFormat, err)
-		}
-		for _, d := range ds {
+		for _, d := range ms.z.Datasets() {
 			if strings.HasSuffix(strings.ToLower(d.Name)+"/", userdatasetsContainerName) {
 				userdatasetRoot = d.Name
 				break
@@ -89,45 +72,38 @@ func (ms *Machines) CreateUserData(z ZfsSetPropertyScanCreater, user, homepath s
 		userdatasetRoot = filepath.Join(p, "USERDATA")
 
 		// Create parent USERDATA
-		if err := z.Create(userdatasetRoot, "/", "off"); err != nil {
+		if err := t.Create(userdatasetRoot, "/", "off"); err != nil {
+			cancel()
 			return fmt.Errorf(i18n.G("couldn't create user data embedder dataset: ")+config.ErrorFormat, err)
 		}
 	}
 
 	userdataset := filepath.Join(userdatasetRoot, fmt.Sprintf("%s_%s", user, generateID(6)))
-	if err := z.Create(userdataset, homepath, "on"); err != nil {
+	if err := t.Create(userdataset, homepath, "on"); err != nil {
+		cancel()
 		return err
 	}
 
 	// Tag to associate with current system and lastUsed
-	if err := z.SetProperty(zfs.BootfsDatasetsProp, ms.current.ID, userdataset, false); err != nil {
+	if err := t.SetProperty(zfs.BootfsDatasetsProp, ms.current.ID, userdataset, false); err != nil {
+		cancel()
 		return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, ms.current.ID, userdataset, err)
 	}
 
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
-	if err := z.SetProperty(zfs.LastUsedProp, currentTime, userdataset, false); err != nil {
+	if err := t.SetProperty(zfs.LastUsedProp, currentTime, userdataset, false); err != nil {
+		cancel()
 		return fmt.Errorf(i18n.G("couldn't set last used time to %q: ")+config.ErrorFormat, currentTime, err)
-	}
-
-	// Rescan datasets, with new user datasets
-	ds, err := z.Scan()
-	if err != nil {
-		// don't fail if Scan is failing, as the dataset was created
-		log.Warningf(ctx, i18n.G("couldn't rescan after committing boot: ")+config.ErrorFormat, err)
-	} else {
-		*ms = New(ctx, ds, ms.cmdline)
 	}
 
 	return nil
 }
 
 // ChangeHomeOnUserData tries to find an existing dataset matching home as a valid mountpoint and rename it to newhome
-func (ms *Machines) ChangeHomeOnUserData(z ZfsSetPropertyScanCreater, home, newHome string) error {
-	ctx := z.Context()
+func (ms *Machines) ChangeHomeOnUserData(ctx context.Context, home, newHome string) error {
 	if !ms.current.isZsys() {
 		return errors.New(i18n.G("Current machine isn't Zsys, nothing to modify"))
 	}
-
 	if home == "" {
 		return fmt.Errorf(i18n.G("can't use empty string for existing home directory"))
 	}
@@ -135,13 +111,18 @@ func (ms *Machines) ChangeHomeOnUserData(z ZfsSetPropertyScanCreater, home, newH
 		return fmt.Errorf(i18n.G("can't use empty string for new home directory"))
 	}
 
+	t, cancel := ms.z.NewTransaction(ctx)
+	defer t.Done()
+
 	log.Infof(ctx, i18n.G("Reset user dataset path from %q to %q"), home, newHome)
-	found, err := ms.tryReuseUserDataSet(ctx, "", home, newHome, z)
+	found, err := ms.tryReuseUserDataSet(t, "", home, newHome)
 	if err != nil {
+		cancel()
 		return err
 	}
 
 	if !found {
+		cancel()
 		return fmt.Errorf(i18n.G("didn't find any existing dataset matching %q"), home)
 	}
 	return nil
@@ -158,8 +139,8 @@ func getUserDatasetPath(path string) string {
 
 // tryReuseUserDataSet tries to match an existing user dataset for the current machine.
 // user match is used first, if empty, it will try to match old home directory.
-func (ms *Machines) tryReuseUserDataSet(ctx context.Context, user string, oldhome, newhome string, z zfsSetPropertyScanner) (bool, error) {
-	log.Debugf(ctx, i18n.G("Trying to check if there is a user or home directory already attached to this machine"))
+func (ms *Machines) tryReuseUserDataSet(t *zfs.Transaction, user string, oldhome, newhome string) (bool, error) {
+	log.Debugf(t.Context(), i18n.G("Trying to check if there is a user or home directory already attached to this machine"))
 
 	// If there this user or home already attached to this machine: retarget home
 	for _, d := range ms.current.UserDatasets {
@@ -188,16 +169,9 @@ func (ms *Machines) tryReuseUserDataSet(ctx context.Context, user string, oldhom
 
 		// We'll reuse that dataset
 		if match {
-			log.Infof(ctx, i18n.G("Reusing %q as matching user name or old mountpoint"), d.Name)
-			if err := z.SetProperty(zfs.MountPointProp, newhome, d.Name, false); err != nil {
+			log.Infof(t.Context(), i18n.G("Reusing %q as matching user name or old mountpoint"), d.Name)
+			if err := t.SetProperty(zfs.MountPointProp, newhome, d.Name, false); err != nil {
 				return false, fmt.Errorf(i18n.G("couldn't set new home %q to %q: ")+config.ErrorFormat, newhome, d.Name, err)
-			}
-			ds, err := z.Scan()
-			if err != nil {
-				// don't fail if Scan is failing, as the dataset was created
-				log.Warningf(ctx, i18n.G("Couldn't rescan after committing boot: ")+config.ErrorFormat, err)
-			} else {
-				*ms = New(ctx, ds, ms.cmdline)
 			}
 			return true, nil
 		}

@@ -1,7 +1,0 @@
-[
-   {
-      "Name": "rpool",
-      "Mountpoint": "/boot",
-      "CanMount": "on"
-   }
-]
