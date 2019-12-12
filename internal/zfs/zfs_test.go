@@ -22,8 +22,6 @@ import (
 )
 
 func init() {
-	testutils.InstallUpdateFlag()
-	testutils.InstallWithSystemZFSFlag()
 	config.SetVerboseMode(2)
 }
 

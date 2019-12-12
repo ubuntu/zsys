@@ -15,7 +15,6 @@ import (
 )
 
 func init() {
-	testutils.InstallUpdateFlag()
 	config.SetVerboseMode(1)
 }
 
