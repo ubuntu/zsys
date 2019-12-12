@@ -482,12 +482,23 @@ func (t *Transaction) Clone(name, suffix string, skipBootfs, recursive bool) (er
 	rootName, snapshotName := splitSnapshotName(name)
 
 	// Reformat the name with the new uuid and clone now the dataset.
+	// pool/ROOT/ubuntu -> pool/ROOT/ubuntu_5678
+	// pool/ROOT/ubuntu_ -> pool/ROOT/ubuntu_5678
+	// pool/ROOT/ubuntu_1234 -> pool/ROOT/ubuntu_5678
+	// pool/ROOT/ubuntu_1234/var -> pool/ROOT/ubuntu_5678/var
+	// pool/ROOT/ubuntu_1234/var_lib -> pool/ROOT/ubuntu_5678/var_lib
 	newRootName := rootName
-	suffixIndex := strings.LastIndex(newRootName, "_")
-	if suffixIndex != -1 {
-		newRootName = newRootName[:suffixIndex]
+	suffixIndex := strings.Index(newRootName, "_")
+	if suffixIndex > -1 {
+		subdatasets := ""
+		subDatasetsIndex := strings.Index(newRootName[suffixIndex:], "/")
+		if subDatasetsIndex > -1 {
+			subdatasets = newRootName[suffixIndex:][subDatasetsIndex:]
+		}
+		newRootName = fmt.Sprintf("%s_%s%s", newRootName[:suffixIndex], suffix, subdatasets)
+	} else {
+		newRootName += "_" + suffix
 	}
-	newRootName += "_" + suffix
 
 	parent, err := t.Zfs.findDatasetByName(rootName)
 	if err != nil {

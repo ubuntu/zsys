@@ -392,7 +392,7 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 		if np != empty {
 			props := c.dZFS.Properties()
 			(*props)[np] = libzfs.Property{
-				Value:  value,
+				Value:  filepath.Join(value, strings.TrimPrefix(*destV, oldMountPoint)),
 				Source: (*props)[np].Source,
 			}
 		}
