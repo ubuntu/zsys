@@ -56,32 +56,42 @@ const (
 	userdatasetsContainerName = "/userdata/"
 )
 
-func withMockZFS(z *zfs.Zfs) func(*Machines) {
-	return func(m *Machines) {
-		m.z = z
+// WithLibZFS allows overriding default libzfs implementations with a mock
+func WithLibZFS(libzfs zfs.LibZFSInterface) func(o *options) error {
+	return func(o *options) error {
+		o.libzfs = libzfs
+		return nil
 	}
 }
 
+type options struct {
+	libzfs zfs.LibZFSInterface
+}
+
+type option func(*options) error
+
 // New detects and generate machines elems
-func New(ctx context.Context, cmdline string, options ...func(*Machines)) (Machines, error) {
+func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) {
 	log.Info(ctx, i18n.G("Building new machines list"))
+	args := options{
+		libzfs: &zfs.LibZFSAdapter{},
+	}
+	for _, o := range opts {
+		if err := o(&args); err != nil {
+			return Machines{}, fmt.Errorf(i18n.G("Couldn't apply option to server: %v"), err)
+		}
+	}
 
 	machines := Machines{
 		all:     make(map[string]*Machine),
 		cmdline: cmdline,
 	}
 
-	for _, options := range options {
-		options(&machines)
+	z, err := zfs.New(ctx, zfs.WithLibZFS(args.libzfs))
+	if err != nil {
+		return Machines{}, fmt.Errorf(i18n.G("couldn't scan zfs filesystem"), err)
 	}
-
-	if machines.z == nil {
-		z, err := zfs.New(ctx)
-		if err != nil {
-			return Machines{}, fmt.Errorf(i18n.G("couldn't scan zfs filesystem"), err)
-		}
-		machines.z = z
-	}
+	machines.z = z
 
 	// We are going to transform the origin of datasets, get a copy first
 	zDatasets := machines.z.Datasets()

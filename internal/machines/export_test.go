@@ -50,3 +50,8 @@ func (m *Machines) UnmarshalJSON(b []byte) error {
 
 	return nil
 }
+
+// ResetForCmp prepares Machines by resetting private fields that change at each invocation
+func (m *Machines) ResetForCmp() {
+	m.z = nil
+}
