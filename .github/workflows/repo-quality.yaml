@@ -20,8 +20,6 @@ jobs:
     steps:
       # Checkout code
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       # Install go
       - uses: actions/setup-go@v1
         with:
@@ -41,8 +39,6 @@ jobs:
     steps:
       # Checkout code
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       # Add dependencies
       - name: Install dependencies
         run: |
@@ -62,8 +58,6 @@ jobs:
     steps:
       # Checkout code
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       # Add dependencies
       - name: Install dependencies
         run: |
@@ -83,8 +77,6 @@ jobs:
     steps:
       # Checkout code
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       # Add dependencies
       - name: Install dependencies
         run: |
@@ -104,8 +96,6 @@ jobs:
     steps:
       # Checkout code
       - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
       # Reset env so that apt install golang-go then reads GOROOT with uncompatible local version installed by github
       - name: Reset environment without GOROOT
         run: sudo sed -i "/GOROOT/d" /etc/environment
