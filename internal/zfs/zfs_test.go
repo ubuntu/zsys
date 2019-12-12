@@ -265,8 +265,10 @@ func TestClone(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"Simple clone":    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678"},
-		"Recursive clone": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
+		"Simple clone":                                       {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678"},
+		"Recursive clone":                                    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
+		"Recursive clone on non root dataset":                {def: "layout1__one_pool_n_datasets_n_snapshots_with_started_clone.yaml", dataset: "rpool/ROOT/ubuntu_1234/var@snap_r1", suffix: "5678", recursive: true},
+		"Recursive clone on root dataset ending with slash":  {def: "layout1__one_pool_n_datasets_n_snapshots_root_ends_with_slash.yaml", dataset: "rpool/ROOT/ubuntu_@snap_r1", suffix: "5678", recursive: true},
 		"Simple clone ignore missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678"},
 
 		"Simple clone keeps canmount off as off":               {def: "one_pool_n_datasets_one_snapshot_with_canmount_off.yaml", dataset: "rpool/ROOT/ubuntu@snap1", suffix: "5678"},
@@ -451,7 +453,7 @@ func TestDestroy(t *testing.T) {
 
 		"Dataset doesn't exists":                    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist", wantErr: true, isNoOp: true},
 		"Hierarchy with unpromoted clones":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
-		"Hierarchy with unpromoted clones non root": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234/var@snap_r1", wantErr: true, isNoOp: true},
+		"Hierarchy with unpromoted clones non root": {def: "layout1__one_pool_n_datasets_n_snapshots_with_started_clone.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234/var@snap_r1", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
