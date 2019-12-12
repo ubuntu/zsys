@@ -278,7 +278,7 @@ func (d *Dataset) checkNoClone() error {
 		return fmt.Errorf(i18n.G("couldn't scan %q for clones"), d.Name)
 	}
 	if len(clones) > 0 {
-		return fmt.Errorf(i18n.G("%q has some clones when it shouldn't"), d.Name)
+		return fmt.Errorf(i18n.G("%q has some clones (%v) when it shouldn't"), d.Name, clones)
 	}
 
 	for _, dc := range d.children {
@@ -334,7 +334,7 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 		return err
 	}
 
-	// In case we change the mountpoint, we need to translate the whole hierarchy for childre.
+	// In case we change the mountpoint, we need to translate the whole hierarchy for children.
 	// Store initial mountpoint path.
 	var oldMountPoint string
 	// Refresh local values on dataset object

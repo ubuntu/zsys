@@ -691,6 +691,7 @@ func (t *nestedTransaction) promoteRecursive(d *Dataset) error {
 	if err := d.dZFS.Promote(); err != nil {
 		return fmt.Errorf(i18n.G("couldn't promote %q: ")+config.ErrorFormat, d.Name, err)
 	}
+	// Reload properties on previous promoted datasets (dZFS.Promote() does only on newly promoted dataset)
 	if err := origD.dZFS.ReloadProperties(); err != nil {
 		return fmt.Errorf(i18n.G("couldn't refresh properties for %q: ")+config.ErrorFormat, origD.Name, err)
 	}
