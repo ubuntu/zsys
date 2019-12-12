@@ -142,7 +142,7 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 // getUserPropertyFromSys returns the value of a user property and its source from the underlying
 // ZFS system dataset state.
 // It also sanitize the sources to only return "local" or "inherited".
-func getUserPropertyFromSys(ctx context.Context, prop string, dZFS dZFSInterface) (value, source string, err error) {
+func getUserPropertyFromSys(ctx context.Context, prop string, dZFS DZFSInterface) (value, source string, err error) {
 	name := (*dZFS.Properties())[libzfs.DatasetPropName].Value
 
 	p, err := dZFS.GetUserProperty(prop)
@@ -183,7 +183,7 @@ func getUserPropertyFromSys(ctx context.Context, prop string, dZFS dZFSInterface
 }
 
 // newDatasetTree returns a Dataset and a populated tree of all its children
-func newDatasetTree(ctx context.Context, dZFS dZFSInterface, allDatasets *map[string]*Dataset) (*Dataset, error) {
+func newDatasetTree(ctx context.Context, dZFS DZFSInterface, allDatasets *map[string]*Dataset) (*Dataset, error) {
 	// Skip non file system or snapshot datasets
 	if dZFS.Type() == libzfs.DatasetTypeVolume || dZFS.Type() == libzfs.DatasetTypeBookmark {
 		return nil, nil

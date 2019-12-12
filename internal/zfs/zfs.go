@@ -32,17 +32,19 @@ const (
 	SnapshotMountpointProp = zsysPrefix + MountPointProp
 )
 
-type libZFSInterface interface {
-	DatasetOpenAll() (datasets []dZFSInterface, err error)
-	DatasetOpen(name string) (d dZFSInterface, err error)
-	DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (d dZFSInterface, err error)
-	DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (rd dZFSInterface, err error)
+// LibZFSInterface is the interface to use real libzfs or our in memory mock.
+type LibZFSInterface interface {
+	DatasetOpenAll() (datasets []DZFSInterface, err error)
+	DatasetOpen(name string) (d DZFSInterface, err error)
+	DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (d DZFSInterface, err error)
+	DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (rd DZFSInterface, err error)
 }
 
-type dZFSInterface interface {
+// DZFSInterface is the interface to use real libzfs Dataset object or in memory mock.
+type DZFSInterface interface {
 	dZFSChildren() *[]libzfs.Dataset
-	Children() []dZFSInterface
-	Clone(target string, props map[libzfs.Prop]libzfs.Property) (rd dZFSInterface, err error)
+	Children() []DZFSInterface
+	Clone(target string, props map[libzfs.Prop]libzfs.Property) (rd DZFSInterface, err error)
 	Clones() (clones []string, err error)
 	Close()
 	Destroy(Defer bool) (err error)
@@ -65,7 +67,7 @@ type Dataset struct {
 	DatasetProp
 
 	children []*Dataset
-	dZFS     dZFSInterface
+	dZFS     DZFSInterface
 }
 
 // DatasetProp abstracts some properties for a given dataset
@@ -109,11 +111,11 @@ type Zfs struct {
 	root        *Dataset
 	allDatasets map[string]*Dataset
 
-	libzfs libZFSInterface
+	libzfs LibZFSInterface
 }
 
 // WithLibZFS allows overriding default libzfs implementations with a mock
-func WithLibZFS(libzfs libZFSInterface) func(*Zfs) {
+func WithLibZFS(libzfs LibZFSInterface) func(*Zfs) {
 	return func(z *Zfs) {
 		z.libzfs = libzfs
 	}
@@ -126,7 +128,7 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	z := Zfs{
 		root:        &Dataset{Name: "/"},
 		allDatasets: make(map[string]*Dataset),
-		libzfs:      &libZFSAdapter{},
+		libzfs:      &LibZFSAdapter{},
 	}
 	for _, options := range options {
 		options(&z)

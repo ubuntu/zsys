@@ -2,17 +2,21 @@ package zfs
 
 import libzfs "github.com/bicomsystems/go-libzfs"
 
-type libZFSAdapter struct{}
+// LibZFSAdapter is an accessor to real system zfs libraries.
+type LibZFSAdapter struct{}
 
-func (libZFSAdapter) PoolOpen(name string) (pool libzfs.Pool, err error) {
+// PoolOpen opens given pool
+func (LibZFSAdapter) PoolOpen(name string) (pool libzfs.Pool, err error) {
 	return libzfs.PoolOpen(name)
 }
 
-func (libZFSAdapter) PoolCreate(name string, vdev libzfs.VDevTree, features map[string]string, props libzfs.PoolProperties, fsprops libzfs.DatasetProperties) (pool libzfs.Pool, err error) {
+// PoolCreate creates a zfs pool
+func (LibZFSAdapter) PoolCreate(name string, vdev libzfs.VDevTree, features map[string]string, props libzfs.PoolProperties, fsprops libzfs.DatasetProperties) (pool libzfs.Pool, err error) {
 	return libzfs.PoolCreate(name, vdev, features, props, fsprops)
 }
 
-func (l libZFSAdapter) DatasetOpenAll() (datasets []dZFSInterface, err error) {
+// DatasetOpenAll opens all the dataset recursively
+func (l LibZFSAdapter) DatasetOpenAll() (datasets []DZFSInterface, err error) {
 	ds, err := libzfs.DatasetOpenAll()
 	if err != nil {
 		return nil, err
@@ -25,7 +29,8 @@ func (l libZFSAdapter) DatasetOpenAll() (datasets []dZFSInterface, err error) {
 	return datasets, nil
 }
 
-func (libZFSAdapter) DatasetOpen(name string) (dZFSInterface, error) {
+// DatasetOpen opens a dataset
+func (LibZFSAdapter) DatasetOpen(name string) (DZFSInterface, error) {
 	d, err := libzfs.DatasetOpen(name)
 	if err != nil {
 		return dZFSAdapter{}, err
@@ -33,7 +38,8 @@ func (libZFSAdapter) DatasetOpen(name string) (dZFSInterface, error) {
 	return dZFSAdapter{&d}, nil
 }
 
-func (*libZFSAdapter) DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (dZFSInterface, error) {
+// DatasetCreate creates a dataset
+func (*LibZFSAdapter) DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
 	d, err := libzfs.DatasetCreate(path, dtype, props)
 	if err != nil {
 		return dZFSAdapter{}, err
@@ -41,7 +47,8 @@ func (*libZFSAdapter) DatasetCreate(path string, dtype libzfs.DatasetType, props
 	return dZFSAdapter{&d}, nil
 }
 
-func (*libZFSAdapter) DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (dZFSInterface, error) {
+// DatasetSnapshot creates a snapshot
+func (*LibZFSAdapter) DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
 	d, err := libzfs.DatasetSnapshot(path, recur, props)
 	if err != nil {
 		return dZFSAdapter{}, err
@@ -53,7 +60,7 @@ type dZFSAdapter struct {
 	*libzfs.Dataset
 }
 
-func (d dZFSAdapter) Children() (children []dZFSInterface) {
+func (d dZFSAdapter) Children() (children []DZFSInterface) {
 	for _, c := range d.Dataset.Children {
 		c := c
 		children = append(children, dZFSAdapter{&c})
@@ -73,7 +80,7 @@ func (d dZFSAdapter) Type() libzfs.DatasetType {
 	return d.Dataset.Type
 }
 
-func (d dZFSAdapter) Clone(target string, props map[libzfs.Prop]libzfs.Property) (dZFSInterface, error) {
+func (d dZFSAdapter) Clone(target string, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
 	c, err := d.Dataset.Clone(target, props)
 	if err != nil {
 		return dZFSAdapter{}, err

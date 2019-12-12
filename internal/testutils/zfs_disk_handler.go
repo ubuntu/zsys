@@ -1,4 +1,4 @@
-package zfs_test
+package testutils
 
 import (
 	"flag"
@@ -19,7 +19,8 @@ import (
 
 const mB = 1024 * 1024
 
-type fakePools struct {
+// FakePools is the handler for pool options and yaml loading
+type FakePools struct {
 	Pools                []fakePool
 	waitBetweenSnapshots bool
 	t                    *testing.T
@@ -27,7 +28,7 @@ type fakePools struct {
 	tempMountpaths       []string
 	tempFiles            []string
 
-	libzfs libZFSInterface
+	libzfs LibZFSInterface
 }
 
 type fakePool struct {
@@ -62,29 +63,31 @@ var (
 	keepPool = flag.Bool("keep-pool", false, "don't destroy pool and temporary folders for it. Don't run multiple tests with this flag.")
 )
 
-func withWaitBetweenSnapshots() func(*fakePools) {
-	return func(f *fakePools) {
+// WithWaitBetweenSnapshots force waiting between 2 snapshots creations on the same parent
+func WithWaitBetweenSnapshots() func(*FakePools) {
+	return func(f *FakePools) {
 		f.waitBetweenSnapshots = true
 	}
 }
 
-type libZFSInterface interface {
+// LibZFSInterface is the interface used to create zfs pools on disk or in memory
+type LibZFSInterface interface {
 	PoolOpen(name string) (pool libzfs.Pool, err error)
 	PoolCreate(name string, vdev libzfs.VDevTree, features map[string]string,
 		props libzfs.PoolProperties, fsprops libzfs.DatasetProperties) (pool libzfs.Pool, err error)
 	zfs.LibZFSInterface
 }
 
-// withLibZFS allows overriding default libzfs implementations with a mock
-func withLibZFS(libzfs libZFSInterface) func(*fakePools) {
-	return func(f *fakePools) {
+// WithLibZFS allows overriding default libzfs implementations with a mock
+func WithLibZFS(libzfs LibZFSInterface) func(*FakePools) {
+	return func(f *FakePools) {
 		f.libzfs = libzfs
 	}
 }
 
-// newFakePools returns a fakePools from a yaml file
-func newFakePools(t *testing.T, path string, opts ...func(*fakePools)) fakePools {
-	pools := fakePools{
+// NewFakePools returns a FakePools from a yaml file
+func NewFakePools(t *testing.T, path string, opts ...func(*FakePools)) FakePools {
+	pools := FakePools{
 		t:      t,
 		libzfs: &zfs.LibZFSAdapter{},
 	}
@@ -103,19 +106,21 @@ func newFakePools(t *testing.T, path string, opts ...func(*fakePools)) fakePools
 	return pools
 }
 
-func (fpools fakePools) Fatal(args ...interface{}) {
+// Fatal trigger a Fatal testing error
+func (fpools FakePools) Fatal(args ...interface{}) {
 	fpools.t.Helper()
 	fpools.cleanup()
 	fpools.t.Fatal(args...)
 }
 
-func (fpools fakePools) Fatalf(format string, args ...interface{}) {
+// Fatalf triggers a fatal testing error with formatting
+func (fpools FakePools) Fatalf(format string, args ...interface{}) {
 	fpools.t.Helper()
 	fpools.cleanup()
 	fpools.t.Fatalf(format, args...)
 }
 
-func (fpools fakePools) cleanup() {
+func (fpools FakePools) cleanup() {
 	if *keepPool {
 		fmt.Printf("Keep pool(s) as requesting for debug. Please zpool export them afterwards and remove %q\n", filepath.Dir(fpools.tempFiles[0]))
 		return
@@ -127,7 +132,7 @@ func (fpools fakePools) cleanup() {
 			fpools.t.Logf("couldn't delete %q: %v", p, err)
 			continue
 		}
-		if !isLibZFSMock(fpools.libzfs) {
+		if UseSystemZFS() {
 			pool.Export(true, fmt.Sprintf("Export temporary pool %q", p))
 		}
 		pool.Destroy(fmt.Sprintf("Cleanup temporary pool %q", p))
@@ -145,8 +150,8 @@ func (fpools fakePools) cleanup() {
 	}
 }
 
-// create on disk mock pools as files
-func (fpools fakePools) create(path string) func() {
+// Create on disk mock pools as files
+func (fpools FakePools) Create(path string) func() {
 	snapshotWG := sync.WaitGroup{}
 	for _, fpool := range fpools.Pools {
 		func() {

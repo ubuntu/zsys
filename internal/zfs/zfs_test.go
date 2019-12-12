@@ -70,15 +70,15 @@ func TestNew(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 
 			if tc.mounted != "" {
 				temp := filepath.Join(dir, "tempmount")
 				if err := os.MkdirAll(temp, 0755); err != nil {
 					t.Fatalf("couldn't create temporary mount point directory %q: %v", temp, err)
 				}
-				if !isLibZFSMock(libzfs) {
+				if testutils.UseSystemZFS() {
 					// zfs will unmount it when exporting the pool
 					if err := syscall.Mount(tc.mounted, temp, "zfs", 0, "zfsutil"); err != nil {
 						t.Fatalf("couldn't prepare and mount %q: %v", tc.mounted, err)
@@ -152,8 +152,8 @@ func TestCreate(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
@@ -217,8 +217,8 @@ func TestSnapshot(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
@@ -313,8 +313,8 @@ func TestClone(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
@@ -380,8 +380,8 @@ func TestPromote(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withWaitBetweenSnapshots(), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
@@ -461,8 +461,8 @@ func TestDestroy(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withWaitBetweenSnapshots(), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
@@ -563,8 +563,8 @@ func TestSetProperty(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
@@ -657,8 +657,8 @@ func TestTransactionsWithZFS(t *testing.T) {
 
 			ta := timeAsserter(time.Now())
 			libzfs := getLibZFS(t)
-			fPools := newFakePools(t, filepath.Join("testdata", tc.def), withLibZFS(libzfs))
-			defer fPools.create(dir)()
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
 			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
@@ -1078,7 +1078,8 @@ func failOnZFSPermissionDenied(t *testing.T) {
 	}
 }
 
-func getLibZFS(t *testing.T) libZFSInterface {
+// TODO: duplicated between all tests, should be fixed
+func getLibZFS(t *testing.T) testutils.LibZFSInterface {
 	t.Helper()
 
 	if !testutils.UseSystemZFS() {
@@ -1086,9 +1087,4 @@ func getLibZFS(t *testing.T) libZFSInterface {
 		return &mock
 	}
 	return &zfs.LibZFSAdapter{}
-}
-
-func isLibZFSMock(l libZFSInterface) bool {
-	_, ok := l.(*zfs.LibZFSMock)
-	return ok
 }

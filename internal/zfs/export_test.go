@@ -3,24 +3,7 @@ package zfs
 import (
 	"encoding/json"
 	"testing"
-
-	libzfs "github.com/bicomsystems/go-libzfs"
 )
-
-type (
-	DZFSInterface   = dZFSInterface
-	LibZFSInterface = libZFSInterface
-	LibZFSAdapter   = libZFSAdapter
-	LibZFSMock      = libZFSMock
-)
-
-// NewLibZFSMock returns a initialized LibZFSMock object
-func NewLibZFSMock() LibZFSMock {
-	return LibZFSMock{
-		datasets: make(map[string]*dZFSMock),
-		pools:    make(map[string]libzfs.Pool),
-	}
-}
 
 func (t *Transaction) RegisterRevert(f func() error) {
 	t.registerRevert(f)
