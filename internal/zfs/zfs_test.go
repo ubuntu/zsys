@@ -23,11 +23,12 @@ import (
 
 func init() {
 	testutils.InstallUpdateFlag()
+	testutils.InstallWithSystemZFSFlag()
 	config.SetVerboseMode(2)
 }
 
 func TestNew(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def     string
@@ -112,7 +113,7 @@ func TestNew(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def        string
@@ -171,7 +172,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestSnapshot(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def          string
@@ -237,7 +238,7 @@ func TestSnapshot(t *testing.T) {
 }
 
 func TestClone(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def        string
@@ -329,7 +330,7 @@ func TestClone(t *testing.T) {
 }
 
 func TestPromote(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def     string
@@ -410,7 +411,7 @@ func TestPromote(t *testing.T) {
 }
 
 func TestDestroy(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def     string
@@ -490,7 +491,7 @@ func TestDestroy(t *testing.T) {
 }
 
 func TestSetProperty(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def           string
@@ -582,7 +583,7 @@ func TestSetProperty(t *testing.T) {
 }
 
 func TestTransactionsWithZFS(t *testing.T) {
-	skipOnZFSPermissionDenied(t)
+	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
 		def           string
@@ -1038,9 +1039,13 @@ func (ta timeAsserter) assertAndReplaceCreationTimeInRange(t *testing.T, ds []*z
 	}
 }
 
-// skipOnZFSPermissionDenied skips the tests if the current user can't create zfs pools, datasets…
-func skipOnZFSPermissionDenied(t *testing.T) {
+// failOnZFSPermissionDenied fail if we want to use the real ZFS system and don't have the permission for it
+func failOnZFSPermissionDenied(t *testing.T) {
 	t.Helper()
+
+	if !testutils.UseSystemZFS() {
+		return
+	}
 
 	u, err := user.Current()
 	if err != nil {
@@ -1049,6 +1054,6 @@ func skipOnZFSPermissionDenied(t *testing.T) {
 
 	// in our default setup, only root users can interact with zfs kernel modules
 	if u.Uid != "0" {
-		t.Skip("skipping, you don't have permissions to interact with system zfs")
+		t.Fatalf("you don't have permissions to interact with system zfs")
 	}
 }
