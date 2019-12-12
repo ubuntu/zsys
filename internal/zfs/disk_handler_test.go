@@ -26,6 +26,8 @@ type fakePools struct {
 	tempPools            []string
 	tempMountpaths       []string
 	tempFiles            []string
+
+	libzfs libZFSInterface
 }
 
 type fakePool struct {
@@ -66,9 +68,26 @@ func withWaitBetweenSnapshots() func(*fakePools) {
 	}
 }
 
+type libZFSInterface interface {
+	PoolOpen(name string) (pool libzfs.Pool, err error)
+	PoolCreate(name string, vdev libzfs.VDevTree, features map[string]string,
+		props libzfs.PoolProperties, fsprops libzfs.DatasetProperties) (pool libzfs.Pool, err error)
+	zfs.LibZFSInterface
+}
+
+// withLibZFS allows overriding default libzfs implementations with a mock
+func withLibZFS(libzfs libZFSInterface) func(*fakePools) {
+	return func(f *fakePools) {
+		f.libzfs = libzfs
+	}
+}
+
 // newFakePools returns a fakePools from a yaml file
 func newFakePools(t *testing.T, path string, opts ...func(*fakePools)) fakePools {
-	pools := fakePools{t: t}
+	pools := fakePools{
+		t:      t,
+		libzfs: &zfs.LibZFSAdapter{},
+	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		t.Fatal("couldn't read yaml definition file", err)
@@ -103,12 +122,14 @@ func (fpools fakePools) cleanup() {
 	}
 
 	for _, p := range fpools.tempPools {
-		pool, err := libzfs.PoolOpen(p)
+		pool, err := fpools.libzfs.PoolOpen(p)
 		if err != nil {
 			fpools.t.Logf("couldn't delete %q: %v", p, err)
 			continue
 		}
-		pool.Export(true, fmt.Sprintf("Export temporary pool %q", p))
+		if !isLibZFSMock(fpools.libzfs) {
+			pool.Export(true, fmt.Sprintf("Export temporary pool %q", p))
+		}
 		pool.Destroy(fmt.Sprintf("Cleanup temporary pool %q", p))
 		pool.Close()
 	}
@@ -162,7 +183,7 @@ func (fpools fakePools) create(path string) func() {
 			fsprops[libzfs.DatasetPropMountpoint] = "/"
 			fsprops[libzfs.DatasetPropCanmount] = "off"
 
-			pool, err := libzfs.PoolCreate(fpool.Name, vdev, features, props, fsprops)
+			pool, err := fpools.libzfs.PoolCreate(fpool.Name, vdev, features, props, fsprops)
 			if err != nil {
 				fpools.Fatalf("couldn't create pool %q: %v", fpool.Name, err)
 			}
@@ -171,16 +192,16 @@ func (fpools fakePools) create(path string) func() {
 
 			for _, dataset := range fpool.Datasets {
 				datasetName := fpool.Name + "/" + dataset.Name
-				var d libzfs.Dataset
+				var d zfs.DZFSInterface
 				if dataset.Name == "." {
 					datasetName = fpool.Name
-					d, err = libzfs.DatasetOpen(datasetName)
+					d, err = fpools.libzfs.DatasetOpen(datasetName)
 					if err != nil {
 						fpools.Fatalf("couldn't open dataset %q: %v", datasetName, err)
 					}
 				} else {
 					props := make(map[libzfs.Prop]libzfs.Property)
-					d, err = libzfs.DatasetCreate(datasetName, libzfs.DatasetTypeFilesystem, props)
+					d, err = fpools.libzfs.DatasetCreate(datasetName, libzfs.DatasetTypeFilesystem, props)
 					if err != nil {
 						fpools.Fatalf("couldn't create dataset %q: %v", datasetName, err)
 					}
@@ -220,7 +241,7 @@ func (fpools fakePools) create(path string) func() {
 							time.Sleep(time.Second)
 						}
 						props := make(map[libzfs.Prop]libzfs.Property)
-						d, err := libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
+						d, err := fpools.libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)
 							os.Exit(1)
