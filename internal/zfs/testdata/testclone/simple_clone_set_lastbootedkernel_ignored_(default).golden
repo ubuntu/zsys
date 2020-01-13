@@ -33,7 +33,7 @@
    {
       "Name": "rpool/ROOT/ubuntu/subdataset",
       "Mountpoint": "/subdataset",
-      "CanMount": "off",
+      "CanMount": "on",
       "LastUsed": 1555555555,
       "Sources": {
          "Mountpoint": "inherited",

@@ -3,5 +3,4 @@ pools:
     datasets:
       - name: .
         mountpoint: /home/foo
-        canmount: on
         last_booted_kernel: vmlinuz-5.2.0-8-generic

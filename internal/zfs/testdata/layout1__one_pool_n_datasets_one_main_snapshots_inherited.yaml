@@ -2,6 +2,7 @@ pools:
   - name: rpool
     datasets:
       - name: ROOT
+        canmount: off
       - name: ROOT/ubuntu_1234
         zsys_bootfs: yes
         last_used: 2019-04-18T02:45:55+00:00
@@ -37,7 +38,6 @@ pools:
             bootfs_datasets: rpool/path/to/otherdataset:inherited
       - name: ROOT/ubuntu_1234/var/lib
         zsys_bootfs: no
-        canmount: on
         bootfs_datasets: rpool/path/to/another_local/dataset
         snapshots:
           - name: snap_r1
@@ -47,7 +47,6 @@ pools:
             last_booted_kernel: vmlinuz-5.2.0-8-generic:inherited
             bootfs_datasets: rpool/path/to/another_local/dataset:local
       - name: ROOT/ubuntu_1234/var/lib/apt
-        canmount: on
         snapshots:
           - name: snap_r1
             zsys_bootfs: no:inherited

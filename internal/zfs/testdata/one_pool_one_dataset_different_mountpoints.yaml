@@ -3,4 +3,3 @@ pools:
     datasets:
       - name: .
         mountpoint: /boot
-        canmount: on
