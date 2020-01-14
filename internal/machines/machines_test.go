@@ -110,7 +110,7 @@ func TestNew(t *testing.T) {
 	for name, tc := range tests {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
-			t.Parallel() // -> TODO: run in parallel if mock
+			t.Parallel()
 			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
@@ -688,13 +688,9 @@ func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	var err error
-	if err = m1.ResetForCmp(); err != nil {
-		t.Error(err)
-	}
-	if err = m2.ResetForCmp(); err != nil {
-		t.Error(err)
-	}
+	m1.ResetForCmp()
+	m2.ResetForCmp()
+
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),
 		cmpopts.IgnoreUnexported(zfs.Dataset{}, zfs.DatasetProp{})); diff != "" {
@@ -706,13 +702,9 @@ func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	var err error
-	if err = m1.ResetForCmp(); err != nil {
-		t.Error(err)
-	}
-	if err = m2.ResetForCmp(); err != nil {
-		t.Error(err)
-	}
+	m1.ResetForCmp()
+	m2.ResetForCmp()
+
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),
 		cmpopts.IgnoreUnexported(zfs.Dataset{}, zfs.DatasetProp{})); diff == "" {
