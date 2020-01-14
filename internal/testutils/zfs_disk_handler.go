@@ -50,10 +50,10 @@ type orderedSnapshots []struct {
 	Name             string
 	Mountpoint       string
 	CanMount         string
-	ZsysBootfs       string `yaml:"zsys_bootfs"`
-	LastBootedKernel string `yaml:"last_booted_kernel"`
-	BootfsDatasets   string `yaml:"bootfs_datasets"`
-	// LastUsed         time.Time `yaml:"last_used"` Last used will be snapshot creation time, so "now" in tests
+	ZsysBootfs       string     `yaml:"zsys_bootfs"`
+	LastBootedKernel string     `yaml:"last_booted_kernel"`
+	BootfsDatasets   string     `yaml:"bootfs_datasets"`
+	CreationTime     *time.Time `yaml:"creation_time"` // Snapshot creation time, only work for mock usage.
 }
 
 func (s orderedSnapshots) Len() int           { return len(s) }
@@ -253,6 +253,12 @@ func (fpools FakePools) Create(path string) func() {
 							time.Sleep(time.Second)
 						}
 						props := make(map[libzfs.Prop]libzfs.Property)
+						if s.CreationTime != nil {
+							if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+								fpools.Fatalf("trying to set snapshot time for %q on real ZFS run. This is not possible", datasetName)
+							}
+							props[libzfs.DatasetPropCreation] = libzfs.Property{Value: strconv.FormatInt(s.CreationTime.Unix(), 10)}
+						}
 						d, err := fpools.libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)
