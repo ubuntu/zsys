@@ -2,6 +2,7 @@ package machines_test
 
 import (
 	"context"
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -106,12 +107,7 @@ func TestNew(t *testing.T) {
 	for name, tc := range tests {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
-			//t.Parallel() -> TODO: run in parallel if mock
-			/*
-				if ds[i].Name == tc.mountedDataset {
-					ds[i].Mounted = true
-				}
-			*/
+			t.Parallel() // -> TODO: run in parallel if mock
 			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
@@ -126,7 +122,7 @@ func TestNew(t *testing.T) {
 
 			got, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
-				t.Error("expected success but go an error", err)
+				t.Error("expected success but got an error scanning for machines", err)
 			}
 			assertMachinesToGolden(t, got)
 		})
@@ -678,8 +674,13 @@ func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	m1.ResetForCmp()
-	m2.ResetForCmp()
+	var err error
+	if err = m1.ResetForCmp(); err != nil {
+		t.Error(err)
+	}
+	if err = m2.ResetForCmp(); err != nil {
+		t.Error(err)
+	}
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),
 		cmpopts.IgnoreUnexported(zfs.Dataset{}, zfs.DatasetProp{})); diff != "" {
@@ -691,8 +692,13 @@ func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	m1.ResetForCmp()
-	m2.ResetForCmp()
+	var err error
+	if err = m1.ResetForCmp(); err != nil {
+		t.Error(err)
+	}
+	if err = m2.ResetForCmp(); err != nil {
+		t.Error(err)
+	}
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),
 		cmpopts.IgnoreUnexported(zfs.Dataset{}, zfs.DatasetProp{})); diff == "" {
@@ -727,8 +733,10 @@ func getLibZFS(t *testing.T) testutils.LibZFSInterface {
 	t.Helper()
 
 	if !testutils.UseSystemZFS() {
+		fmt.Println("Running tests with mocked libzfs")
 		mock := zfs.NewLibZFSMock()
 		return &mock
 	}
+	fmt.Println("Running tests with system's libzfs")
 	return &zfs.LibZFSAdapter{}
 }
