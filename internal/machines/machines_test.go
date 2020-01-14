@@ -132,17 +132,27 @@ func TestNew(t *testing.T) {
 	}
 }
 
-/*
 func TestIdempotentNew(t *testing.T) {
 	t.Parallel()
-	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones.json")
+	dir, cleanup := testutils.TempDir(t)
+	defer cleanup()
 
-	got1 := machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
-	got2 := machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+	libzfs := getLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones.yaml"), testutils.WithLibZFS(libzfs))
+	defer fPools.Create(dir)()
 
+	got1, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
+	if err != nil {
+		t.Error("expected success but got an error at first scan on machines", err)
+	}
+	got2, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
+	if err != nil {
+		t.Error("expected success but got an error at second scan on machines", err)
+	}
 	assertMachinesEquals(t, got1, got2)
 }
 
+/*
 func TestBoot(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
@@ -663,6 +673,7 @@ func BenchmarkNewServer(b *testing.B) {
 	}
 }
 */
+
 // assertMachinesToGolden compares got slice of machines to reference files, based on test name.
 func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 	t.Helper()
