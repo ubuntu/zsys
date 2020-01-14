@@ -41,6 +41,7 @@ type fakePool struct {
 		LastUsed         time.Time `yaml:"last_used"`
 		LastBootedKernel string    `yaml:"last_booted_kernel"`
 		BootfsDatasets   string    `yaml:"bootfs_datasets"`
+		Origin           string    `yaml:"origin"`
 		Snapshots        orderedSnapshots
 	}
 }
@@ -232,6 +233,12 @@ func (fpools FakePools) Create(path string) func() {
 				}
 				if dataset.BootfsDatasets != "" {
 					d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
+				}
+				if dataset.Origin != "" {
+					if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+						fpools.Fatalf("trying to set origin on clone for %q on real ZFS run. This is not possible", datasetName)
+					}
+					d.SetProperty(libzfs.DatasetPropOrigin, dataset.Origin)
 				}
 				d.Close()
 
