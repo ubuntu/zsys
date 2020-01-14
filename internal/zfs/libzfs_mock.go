@@ -127,8 +127,12 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 	}
 	l.mu.RUnlock()
 
+	ctime := fmt.Sprintf("%d", time.Now().Unix())
+	if t, ok := props[libzfs.DatasetPropCreation]; ok {
+		ctime = t.Value
+	}
 	props[libzfs.DatasetPropCreation] = libzfs.Property{
-		Value:  fmt.Sprintf("%d", time.Now().Unix()),
+		Value:  ctime,
 		Source: "none",
 	}
 	props[libzfs.DatasetPropName] = libzfs.Property{Value: path}
