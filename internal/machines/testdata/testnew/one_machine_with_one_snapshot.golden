@@ -23,6 +23,7 @@
                      "Name": "rpool@snap1",
                      "IsSnapshot": true,
                      "Mountpoint": "/",
+                     "CanMount": "on",
                      "BootFS": true,
                      "LastUsed": 1588888888
                   }
@@ -43,6 +44,7 @@
          "Name": "rpool@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
+         "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1588888888
       }

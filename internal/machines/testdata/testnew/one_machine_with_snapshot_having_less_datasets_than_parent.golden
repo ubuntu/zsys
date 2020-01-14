@@ -14,7 +14,10 @@
             },
             {
                "Name": "rpool/opt",
-               "Mountpoint": "/opt"
+               "Mountpoint": "/opt",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1599999999
             }
          ],
          "History": {
@@ -27,6 +30,7 @@
                      "Name": "rpool@snap1",
                      "IsSnapshot": true,
                      "Mountpoint": "/",
+                     "CanMount": "on",
                      "BootFS": true,
                      "LastUsed": 1588888888
                   }
@@ -45,12 +49,16 @@
       },
       {
          "Name": "rpool/opt",
-         "Mountpoint": "/opt"
+         "Mountpoint": "/opt",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1599999999
       },
       {
          "Name": "rpool@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
+         "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1588888888
       }

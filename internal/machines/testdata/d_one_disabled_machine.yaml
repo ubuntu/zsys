@@ -1,0 +1,6 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .
+        mountpoint: /
+        canmount: off

@@ -26,82 +26,85 @@ func TestNew(t *testing.T) {
 		cmdline        string
 		mountedDataset string
 	}{
-		"One machine, one dataset": {def: "d_one_machine_one_dataset.yaml"},
-		//		"One disabled machine":                {def: "d_one_disabled_machine.json"},
-		//		"One machine with children":           {def: "d_one_machine_with_children.json"},
-		//		"One machine with unordered children": {def: "d_one_machine_with_children_unordered.json"},
-		//
-		//		"One machine, attach user datasets to machine": {def: "m_with_userdata.json"},
-		//		"One machine, attach boot to machine":          {def: "m_with_separate_boot.json"},
-		//		"One machine, with persistent datasets":        {def: "m_with_persistent.json"},
-		//
-		//		// Machine <-> snapshot interactions
-		//		"One machine with one snapshot":                              {def: "d_one_machine_with_one_snapshot.json"},
-		//		"One machine with snapshot having less datasets than parent": {def: "d_one_machine_with_snapshot_less_datasets.json"},
-		//		"One machine with snapshot having more datasets than parent": {def: "d_one_machine_with_snapshot_more_datasets.json"}, // This is actually one dataset being canmount=off
-		//
-		//		// Machine <-> clones interactions
-		//		"One machine with one clone":                                              {def: "d_one_machine_with_clone_dataset.json"},
-		//		"One machine with one clone named before":                                 {def: "d_one_machine_with_clone_named_before.json"},
-		//		"One machine with clones and snapshot on user datasets":                   {def: "m_with_clones_snapshots_userdata.json"},
-		//		"One machine with a missing clone results in ignored machine (ZFS error)": {def: "d_one_machine_missing_clone.json"},
-		//
-		//		// Zsys system special cases
-		//		"One machine, one dataset, non zsys":   {def: "d_one_machine_one_dataset_non_zsys.json"},
-		//		"Two machines, one zsys, one non zsys": {def: "d_two_machines_one_zsys_one_non_zsys.json"},
-		//
-		//		// Last used special cases
-		//		"One machine, no last used":                              {def: "d_one_machine_one_dataset_no_lastused.json"},
-		//		"One machine with children, last used from root is used": {def: "d_one_machine_with_children_all_with_lastused.json"},
-		//
-		//		// Boot special cases
-		//		// TODO: separate boot and internal boot dataset? See grub
-		//		"Two machines maps with different boot datasets":                 {def: "m_two_machines_with_separate_boot.json"},
-		//		"Boot dataset attached to nothing":                               {def: "m_with_unlinked_boot.json"}, // boots are still listed in the "all" list for switch to noauto.
-		//		"Boot dataset attached to nothing but ignored with canmount off": {def: "m_with_unlinked_boot_canmount_off.json"},
-		//		"Snapshot with boot dataset":                                     {def: "m_snapshot_with_separate_boot.json"},
-		//		"Clone with boot dataset":                                        {def: "m_clone_with_separate_boot.json"},
-		//		"Snapshot with boot dataset with children":                       {def: "m_snapshot_with_separate_boot_with_children.json"},
-		//		"Clone with boot dataset with children":                          {def: "m_clone_with_separate_boot_with_children.json"},
-		//		"Clone with boot dataset with children manually created":         {def: "m_clone_with_separate_boot_with_children_manually_created.json"},
-		//
-		//		// Userdata special cases
-		//		"Two machines maps with different user datasets":                 {def: "m_two_machines_with_different_userdata.json"},
-		//		"Two machines maps with same user datasets":                      {def: "m_two_machines_with_same_userdata.json"},
-		//		"User dataset attached to nothing":                               {def: "m_with_unlinked_userdata.json"}, // Userdata are still listed in the "all" list for switch to noauto.
-		//		"User dataset attached to nothing but ignored with canmount off": {def: "m_with_unlinked_userdata_canmount_off.json"},
-		//		"Snapshot with user dataset":                                     {def: "m_snapshot_with_userdata.json"},
-		//		"Clone with user dataset":                                        {def: "m_clone_with_userdata.json"},
-		//		"Snapshot with user dataset with children":                       {def: "m_snapshot_with_userdata_with_children.json"},
-		//		"Clone with user dataset with children":                          {def: "m_clone_with_userdata_with_children.json"},
-		//		"Clone with user dataset with children manually created":         {def: "m_clone_with_userdata_with_children_manually_created.json"},
-		//
-		//		// Persistent special cases
-		//		"One machine, with persistent disabled":  {def: "m_with_persistent_canmount_noauto.json"},
-		//		"Two machines have the same persistents": {def: "m_two_machines_with_persistent.json"},
-		//		"Snapshot has the same persistents":      {def: "m_snapshot_with_persistent.json"},
-		//		"Clone has the same persistents":         {def: "m_clone_with_persistent.json"},
-		//
-		//		// Limit case with no machines
-		//		"No machine": {def: "d_no_machine.json"},
-		//		"No dataset": {def: "d_no_dataset.json"},
-		//
-		//		// Real machine use cases
-		//		"zsys layout desktop, one machine":                                 {def: "m_layout1_one_machine.json"},
-		//		"zsys layout server, one machine":                                  {def: "m_layout2_one_machine.json"},
-		//		"zsys layout desktop with snapshots and clones, multiple machines": {def: "m_layout1_machines_with_snapshots_clones.json"},
-		//		"zsys layout desktop with cloning in progress, multiple machines":  {def: "m_layout1_machines_with_snapshots_clones_reverting.json"},
-		//		"zsys layout server with snapshots and clones, multiple machines":  {def: "m_layout2_machines_with_snapshots_clones.json"},
-		//		"zsys layout server with cloning in progress, multiple machines":   {def: "m_layout2_machines_with_snapshots_clones_reverting.json"},
-		//
-		//		// cmdline selection
-		//		"Select existing dataset machine":            {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpool")},
-		//		"Select correct machine":                     {def: "d_two_machines_one_dataset.json", cmdline: generateCmdLine("rpool2")},
-		//		"Select main machine with snapshots/clones":  {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
-		//		"Select snapshot use mounted system dataset": {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234@snap1"), mountedDataset: "rpool/ROOT/ubuntu_1234"},
-		//		"Select clone":                               {def: "m_clone_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		//		"Selected machine doesn't exist":             {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("foo")},
-		//		"Select existing dataset but not a machine":  {def: "m_with_persistent.json", cmdline: generateCmdLine("rpool/ROOT")},
+		"One machine, one dataset":            {def: "d_one_machine_one_dataset.yaml"},
+		"One disabled machine":                {def: "d_one_disabled_machine.yaml"},
+		"One machine with children":           {def: "d_one_machine_with_children.yaml"},
+		"One machine with unordered children": {def: "d_one_machine_with_children_unordered.yaml"},
+
+		"One machine, attach user datasets to machine": {def: "m_with_userdata.yaml"},
+		"One machine, attach boot to machine":          {def: "m_with_separate_boot.yaml"},
+		"One machine, with persistent datasets":        {def: "m_with_persistent.yaml"},
+
+		// Machine <-> snapshot interactions
+		"One machine with one snapshot":                              {def: "d_one_machine_with_one_snapshot.yaml"},
+		"One machine with snapshot having less datasets than parent": {def: "d_one_machine_with_snapshot_less_datasets.yaml"},
+		"One machine with snapshot having more datasets than parent": {def: "d_one_machine_with_snapshot_more_datasets.yaml"}, // This is actually one dataset being canmount=off
+
+		// Machine <-> clones interactions
+		// FIXME: The clone is deleted from got
+		"One machine with one clone":                            {def: "d_one_machine_with_clone_dataset.yaml"},
+		"One machine with one clone named before":               {def: "d_one_machine_with_clone_named_before.yaml"},
+		"One machine with clones and snapshot on user datasets": {def: "m_with_clones_snapshots_userdata.yaml"},
+
+		// NOTE: This case cannot happen and cannot be represented in the yaml test data
+		//"One machine with a missing clone results in ignored machine (ZFS error)": {def: "d_one_machine_missing_clone.json"},
+
+		// Zsys system special cases
+		"One machine, one dataset, non zsys":   {def: "d_one_machine_one_dataset_non_zsys.yaml"},
+		"Two machines, one zsys, one non zsys": {def: "d_two_machines_one_zsys_one_non_zsys.yaml"},
+
+		// Last used special cases
+		"One machine, no last used":                              {def: "d_one_machine_one_dataset_no_lastused.yaml"},
+		"One machine with children, last used from root is used": {def: "d_one_machine_with_children_all_with_lastused.yaml"},
+
+		// Boot special cases
+		// TODO: separate boot and internal boot dataset? See grub
+		"Two machines maps with different boot datasets":                 {def: "m_two_machines_with_separate_boot.yaml"},
+		"Boot dataset attached to nothing":                               {def: "m_with_unlinked_boot.yaml"}, // boots are still listed in the "all" list for switch to noauto.
+		"Boot dataset attached to nothing but ignored with canmount off": {def: "m_with_unlinked_boot_canmount_off.yaml"},
+		"Snapshot with boot dataset":                                     {def: "m_snapshot_with_separate_boot.yaml"},
+		"Clone with boot dataset":                                        {def: "m_clone_with_separate_boot.yaml"},
+		"Snapshot with boot dataset with children":                       {def: "m_snapshot_with_separate_boot_with_children.yaml"},
+		"Clone with boot dataset with children":                          {def: "m_clone_with_separate_boot_with_children.yaml"},
+		"Clone with boot dataset with children manually created":         {def: "m_clone_with_separate_boot_with_children_manually_created.yaml"},
+
+		// Userdata special cases
+		"Two machines maps with different user datasets":                 {def: "m_two_machines_with_different_userdata.yaml"},
+		"Two machines maps with same user datasets":                      {def: "m_two_machines_with_same_userdata.yaml"},
+		"User dataset attached to nothing":                               {def: "m_with_unlinked_userdata.yaml"}, // Userdata are still listed in the "all" list for switch to noauto.
+		"User dataset attached to nothing but ignored with canmount off": {def: "m_with_unlinked_userdata_canmount_off.yaml"},
+		"Snapshot with user dataset":                                     {def: "m_snapshot_with_userdata.yaml"},
+		"Clone with user dataset":                                        {def: "m_clone_with_userdata.yaml"},
+		"Snapshot with user dataset with children":                       {def: "m_snapshot_with_userdata_with_children.yaml"},
+		"Clone with user dataset with children":                          {def: "m_clone_with_userdata_with_children.yaml"},
+		"Clone with user dataset with children manually created":         {def: "m_clone_with_userdata_with_children_manually_created.yaml"},
+
+		// Persistent special cases
+		"One machine, with persistent disabled":  {def: "m_with_persistent_canmount_noauto.yaml"},
+		"Two machines have the same persistents": {def: "m_two_machines_with_persistent.yaml"},
+		"Snapshot has the same persistents":      {def: "m_snapshot_with_persistent.yaml"},
+		"Clone has the same persistents":         {def: "m_clone_with_persistent.yaml"},
+
+		// Limit case with no machines
+		"No machine": {def: "d_no_machine.yaml"},
+		"No dataset": {def: "d_no_dataset.yaml"},
+
+		// Real machine use cases
+		"zsys layout desktop, one machine":                                 {def: "m_layout1_one_machine.yaml"},
+		"zsys layout server, one machine":                                  {def: "m_layout2_one_machine.yaml"},
+		"zsys layout desktop with snapshots and clones, multiple machines": {def: "m_layout1_machines_with_snapshots_clones.yaml"},
+		"zsys layout desktop with cloning in progress, multiple machines":  {def: "m_layout1_machines_with_snapshots_clones_reverting.yaml"},
+		"zsys layout server with snapshots and clones, multiple machines":  {def: "m_layout2_machines_with_snapshots_clones.yaml"},
+		"zsys layout server with cloning in progress, multiple machines":   {def: "m_layout2_machines_with_snapshots_clones_reverting.yaml"},
+
+		// cmdline selection
+		"Select existing dataset machine":            {def: "d_one_machine_one_dataset.yaml", cmdline: generateCmdLine("rpool")},
+		"Select correct machine":                     {def: "d_two_machines_one_dataset.yaml", cmdline: generateCmdLine("rpool2")},
+		"Select main machine with snapshots/clones":  {def: "m_clone_with_persistent.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234")},
+		"Select snapshot use mounted system dataset": {def: "m_clone_with_persistent.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_1234@snap1"), mountedDataset: "rpool/ROOT/ubuntu_1234"},
+		"Select clone":                               {def: "m_clone_with_persistent.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Selected machine doesn't exist":             {def: "d_one_machine_one_dataset.yaml", cmdline: generateCmdLine("foo")},
+		"Select existing dataset but not a machine":  {def: "m_with_persistent.yaml", cmdline: generateCmdLine("rpool/ROOT")},
 	}
 
 	for name, tc := range tests {

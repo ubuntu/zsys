@@ -1,0 +1,52 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: main
+        zsys_bootfs: yes
+        last_used: 2020-09-13T12:26:39+00:00
+        last_booted_kernel: vmlinuz-5.2.0-8-generic
+        mountpoint: /
+        snapshots:
+          - name: snap1
+            mountpoint: /:local
+            canmount: on:local
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: clone
+        zsys_bootfs: yes
+        last_used: 2020-05-07T22:01:28+00:00
+        mountpoint: /
+        canmount: noauto
+        origin: rpool/main@snap1
+        snapshots:
+          - name: snap2
+            mountpoint: /:local
+            canmount: on:local
+            creation_time: 2019-08-24T17:11:06+00:00
+  - name: rpool2
+    datasets:
+      - name: USERDATA
+        canmount: off
+      - name: USERDATA/user1_abcd
+        mountpoint: /home/user1
+        bootfs_datasets: rpool/main
+        last_used: 2018-12-10T12:20:44+00:00
+        snapshots:
+          - name: snap1
+            mountpoint: /home/user1:local
+            canmount: on:local
+            creation_time: 2018-03-28T07:30:22+00:00
+            bootfs_datasets: rpool/main:local
+      - name: USERDATA/user1_efgh
+        mountpoint: /home/user1
+        bootfs_datasets: rpool/clone
+        last_used: 2018-03-28T07:30:22+00:00
+        snapshots:
+          - name: snap2
+            mountpoint: /home/user1:local
+            canmount: on:local
+            creation_time: 2018-03-28T07:30:22+00:00
+            bootfs_datasets: rpool/clone:local
+      - name: USERDATA/root_bcde
+        mountpoint: /root
+        bootfs_datasets: rpool/main
+        last_used: 2018-08-03T21:55:33+00:00

@@ -1,0 +1,52 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .
+        canmount: off
+        mountpoint: /
+      - name: ROOT
+        canmount: off
+      - name: ROOT/ubuntu_1234
+        zsys_bootfs: yes
+        last_used: 2020-09-13T12:26:39+00:00
+        last_booted_kernel: vmlinuz-5.2.0-0-generic
+        mountpoint: /
+      - name: ROOT/ubuntu_1234/var
+      - name: ROOT/ubuntu_1234/var/lib
+        zsys_bootfs: no
+        canmount: off
+      - name: ROOT/ubuntu_1234/var/lib/AccountServices
+      - name: ROOT/ubuntu_1234/var/lib/apt
+      - name: ROOT/ubuntu_1234/var/lib/aptitude
+      - name: ROOT/ubuntu_1234/var/lib/dpkg
+      - name: ROOT/ubuntu_1234/var/lib/NetworkManager
+      - name: srv
+      - name: var
+        canmount: off
+      - name: var/games
+      - name: var/lib
+      - name: var/log
+      - name: var/mail
+      - name: var/snap
+      - name: var/spool
+      - name: var/www
+      - name: USERDATA
+        canmount: off
+      - name: USERDATA/user1_abcd
+        mountpoint: /home/user1
+        bootfs_datasets: rpool/ROOT/ubuntu_1234
+        last_used: 2018-12-10T12:20:44+00:00
+      - name: USERDATA/root_bcde
+        mountpoint: /root
+        bootfs_datasets: rpool/ROOT/ubuntu_1234
+        last_used: 2018-08-03T21:55:33+00:00
+  - name: bpool
+    datasets:
+      - name: .
+        canmount: off
+        mountpoint: /boot
+      - name: BOOT
+        canmount: off
+      - name: BOOT/ubuntu_1234
+        mountpoint: /boot
+

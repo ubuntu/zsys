@@ -1,12 +1,12 @@
 {
    "All": {
-      "rpool_b": {
-         "ID": "rpool_b",
+      "rpool/b": {
+         "ID": "rpool/b",
          "IsZsys": true,
          "LastUsed": "2019-12-31T08:36:17+01:00",
          "SystemDatasets": [
             {
-               "Name": "rpool_b",
+               "Name": "rpool/b",
                "Mountpoint": "/",
                "CanMount": "on",
                "BootFS": true,
@@ -14,29 +14,30 @@
             }
          ],
          "History": {
-            "rpool_a": {
-               "ID": "rpool_a",
+            "rpool/a": {
+               "ID": "rpool/a",
                "IsZsys": true,
                "LastUsed": "2020-09-13T14:26:39+02:00",
                "SystemDatasets": [
                   {
-                     "Name": "rpool_a",
+                     "Name": "rpool/a",
                      "Mountpoint": "/",
                      "CanMount": "noauto",
                      "BootFS": true,
                      "LastUsed": 1599999999,
-                     "Origin": "rpool_b@snap1"
+                     "Origin": "rpool/b@snap1"
                   }
                ]
             },
-            "rpool_b@snap1": {
-               "ID": "rpool_b@snap1",
+            "rpool/b@snap1": {
+               "ID": "rpool/b@snap1",
                "LastUsed": "2020-05-08T00:01:28+02:00",
                "SystemDatasets": [
                   {
-                     "Name": "rpool_b@snap1",
+                     "Name": "rpool/b@snap1",
                      "IsSnapshot": true,
                      "Mountpoint": "/",
+                     "CanMount": "on",
                      "LastUsed": 1588888888
                   }
                ]
@@ -46,24 +47,25 @@
    },
    "AllSystemDatasets": [
       {
-         "Name": "rpool_b",
+         "Name": "rpool/b",
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1577777777
       },
       {
-         "Name": "rpool_a",
+         "Name": "rpool/a",
          "Mountpoint": "/",
          "CanMount": "noauto",
          "BootFS": true,
          "LastUsed": 1599999999,
-         "Origin": "rpool_b@snap1"
+         "Origin": "rpool/b@snap1"
       },
       {
-         "Name": "rpool_b@snap1",
+         "Name": "rpool/b@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
+         "CanMount": "on",
          "LastUsed": 1588888888
       }
    ]

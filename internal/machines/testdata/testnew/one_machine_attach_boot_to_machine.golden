@@ -3,19 +3,20 @@
       "rpool/ROOT/ubuntu_1234": {
          "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
-         "LastUsed": "2019-04-18T04:45:55+02:00",
+         "LastUsed": "2020-09-13T14:26:39+02:00",
          "SystemDatasets": [
             {
                "Name": "rpool/ROOT/ubuntu_1234",
                "Mountpoint": "/",
                "CanMount": "on",
                "BootFS": true,
-               "LastUsed": 1555555555
+               "LastUsed": 1599999999
             },
             {
                "Name": "bpool/BOOT/ubuntu_1234",
                "Mountpoint": "/boot",
-               "CanMount": "on"
+               "CanMount": "on",
+               "LastUsed": 1599999999
             }
          ]
       }
@@ -26,12 +27,13 @@
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
-         "LastUsed": 1555555555
+         "LastUsed": 1599999999
       },
       {
          "Name": "bpool/BOOT/ubuntu_1234",
          "Mountpoint": "/boot",
-         "CanMount": "on"
+         "CanMount": "on",
+         "LastUsed": 1599999999
       }
    ]
 }

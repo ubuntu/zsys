@@ -1,0 +1,32 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+      snapshots:
+        - name: snap1
+          zsys_bootfs: yes:local
+          mountpoint: /:local
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00
+  - name: bpool
+    datasets:
+      - name: BOOT
+        canmount: off
+      - name: BOOT/ubuntu_1234
+        mountpoint: /boot
+        snapshots:
+          - name: snap1
+            mountpoint: /boot:local
+            canmount: on:local
+            creation_time: 2018-12-10T12:20:44+00:00
+      - name: BOOT/ubuntu_1234/grub
+        snapshots:
+          - name: snap1
+            mountpoint: /boot/grub:inherited
+            canmount: on:local
+            creation_time: 2018-12-10T12:20:44+00:00
