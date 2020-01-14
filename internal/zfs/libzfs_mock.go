@@ -35,7 +35,9 @@ func (l *LibZFSMock) PoolCreate(name string, vdev libzfs.VDevTree, features map[
 	for i, prop := range props {
 		p.Properties[i] = libzfs.Property{Value: prop}
 	}
+	l.mu.Lock()
 	l.pools[name] = p
+	l.mu.Unlock()
 
 	datasetProps := make(map[libzfs.Prop]libzfs.Property)
 	for i, prop := range fsprops {
@@ -77,10 +79,10 @@ func (l *LibZFSMock) openChildrenFor(dm *dZFSMock) {
 	name := dm.Dataset.Properties[libzfs.DatasetPropName].Value
 	dm.children = nil
 	dm.Dataset.Children = nil
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 	for k := range l.datasets {
-		l.mu.RLock()
 		d := l.datasets[k]
-		l.mu.RUnlock()
 
 		/* Only consider potential children
 		   Retrieve direct children name from the dataset name with 2 cases to handle for a dataset and a snapshot
@@ -119,9 +121,11 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 	if !strings.Contains(path, "/") && strings.Contains(path, "@") {
 		poolName = strings.Split(path, "@")[0]
 	}
+	l.mu.RLock()
 	if _, ok := l.pools[poolName]; !ok {
 		return nil, fmt.Errorf("pool %q doesn't exists", poolName)
 	}
+	l.mu.RUnlock()
 
 	props[libzfs.DatasetPropCreation] = libzfs.Property{
 		Value:  fmt.Sprintf("%d", time.Now().Unix()),
@@ -205,7 +209,10 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 	}
 	if hasParent {
 		var found bool
-		for _, c := range parent.children {
+		l.mu.Lock()
+		pc := make([]*dZFSMock, len(parent.children))
+		copy(pc, parent.children)
+		for _, c := range pc {
 			if c == &d {
 				found = true
 				break
@@ -214,6 +221,7 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 		if !found {
 			parent.children = append(parent.children, &d)
 		}
+		l.mu.Unlock()
 	}
 
 	l.mu.Lock()
