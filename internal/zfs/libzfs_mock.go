@@ -269,6 +269,18 @@ func (l *LibZFSMock) createSnapshot(path string, recur bool, props map[libzfs.Pr
 	return d, nil
 }
 
+// SetDatasetAsMounted is a test-only property allowing forcing one dataset to be mounted
+func (l *LibZFSMock) SetDatasetAsMounted(name string, mounted bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	d := l.datasets[name]
+	m := "no"
+	if mounted {
+		m = "yes"
+	}
+	d.setPropertyWithSource(libzfs.DatasetPropMounted, m, "")
+}
+
 type dZFSMock struct {
 	*libzfs.Dataset
 	children       []*dZFSMock
@@ -367,10 +379,14 @@ func (d *dZFSMock) SetProperty(p libzfs.Prop, value string) error {
 }
 
 func (d *dZFSMock) setPropertyWithSource(p libzfs.Prop, value, source string) error {
+	// Those properties don't propagate to children
+	if p == libzfs.DatasetPropMounted || p == libzfs.DatasetPropOrigin {
+		source = "-"
+	}
+
 	d.Dataset.Properties[p] = libzfs.Property{Value: value, Source: source}
 
-	// This property doesn't propagate to children
-	if p == libzfs.DatasetPropMounted {
+	if source == "-" {
 		return nil
 	}
 

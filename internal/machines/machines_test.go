@@ -119,6 +119,11 @@ func TestNew(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
+			if tc.mountedDataset != "" {
+				lzfs := libzfs.(*zfs.LibZFSMock)
+				lzfs.SetDatasetAsMounted(tc.mountedDataset, true)
+			}
+
 			got, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but go an error", err)
