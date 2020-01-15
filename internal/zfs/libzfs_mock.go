@@ -1,6 +1,7 @@
 package zfs
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"regexp"
@@ -12,6 +13,8 @@ import (
 	libzfs "github.com/bicomsystems/go-libzfs"
 )
 
+const currentMagicTime = "2000000000"
+
 // LibZFSMock is the mock, in memory implementation of libzfs
 type LibZFSMock struct {
 	mu       sync.RWMutex
@@ -20,6 +23,11 @@ type LibZFSMock struct {
 
 	replaceSuffixFor string
 
+	errOnClone        bool
+	errOnPromote      bool
+	errOnScan         bool
+	errOnSetProperty  bool
+	forceLastUsedTime bool
 }
 
 // PoolOpen opens given pool
@@ -54,6 +62,10 @@ func (l *LibZFSMock) PoolCreate(name string, vdev libzfs.VDevTree, features map[
 
 // DatasetOpenAll opens all the dataset recursively
 func (l *LibZFSMock) DatasetOpenAll() (datasets []DZFSInterface, err error) {
+	if l.errOnScan {
+		return nil, errors.New("Error on DatasetOpenAll requested")
+	}
+
 	// This is the only place where we can clean the global datasets from datasets to remove as libzfs doesn't do that right on Promote.
 	// zfs.New() is calling DatasetOpenAll to load the whole new state from zfs kernel state.
 	for n := range l.pools {
@@ -285,6 +297,36 @@ func (l *LibZFSMock) SetDatasetAsMounted(name string, mounted bool) {
 	d.setPropertyWithSource(libzfs.DatasetPropMounted, m, "")
 }
 
+// SetPredictableSuffixOnClone is a test-only property allowing forcing one dataset to have a known suffix when cloned
+func (l *LibZFSMock) SetPredictableSuffixOnClone(dsBasepath string) {
+	l.replaceSuffixFor = dsBasepath
+}
+
+// ErrOnPromote forces a failure of the mock on clone operation
+func (l *LibZFSMock) ErrOnPromote(shouldErr bool) {
+	l.errOnPromote = shouldErr
+}
+
+// ErrOnClone forces a failure of the mock on clone operation
+func (l *LibZFSMock) ErrOnClone(shouldErr bool) {
+	l.errOnClone = shouldErr
+}
+
+// ErrOnScan forces a failure of the mock on scan operation
+func (l *LibZFSMock) ErrOnScan(shouldErr bool) {
+	l.errOnScan = shouldErr
+}
+
+// ErrOnSetProperty forces a failure of the mock on set property operation
+func (l *LibZFSMock) ErrOnSetProperty(shouldErr bool) {
+	l.errOnSetProperty = shouldErr
+}
+
+// ForceLastUsedTime ensures that any LastUsed property is set to the magic time for reproducibility
+func (l *LibZFSMock) ForceLastUsedTime(force bool) {
+	l.forceLastUsedTime = force
+}
+
 type dZFSMock struct {
 	*libzfs.Dataset
 	children       []*dZFSMock
@@ -324,6 +366,9 @@ func (d dZFSMock) Type() libzfs.DatasetType {
 
 func (d dZFSMock) Clone(target string, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
 	d.assertDatasetOpened()
+	if d.libZFSMock.errOnClone {
+		return nil, errors.New("Error on Clone requested")
+	}
 	props[libzfs.DatasetPropOrigin] = libzfs.Property{
 		Value:  d.Dataset.Properties[libzfs.DatasetPropName].Value,
 		Source: "-",
@@ -367,6 +412,11 @@ func (d dZFSMock) GetUserProperty(p string) (prop libzfs.Property, err error) {
 
 func (d *dZFSMock) SetUserProperty(prop, value string) error {
 	d.assertDatasetOpened()
+
+	if d.libZFSMock.forceLastUsedTime && prop == LastUsedProp {
+		value = currentMagicTime
+	}
+
 	return d.setUserPropertyWithSource(prop, value, "local")
 }
 
@@ -385,6 +435,9 @@ func (d *dZFSMock) setUserPropertyWithSource(prop, value, source string) error {
 }
 
 func (d *dZFSMock) SetProperty(p libzfs.Prop, value string) error {
+	if d.libZFSMock.errOnSetProperty {
+		return errors.New("Error on SetProperty requested")
+	}
 	d.assertDatasetOpened()
 	return d.setPropertyWithSource(p, value, "local")
 }
@@ -453,6 +506,9 @@ func (d *dZFSMock) Clones() (clones []string, err error) {
 
 func (d *dZFSMock) Promote() (err error) {
 	d.assertDatasetOpened()
+	if d.libZFSMock.errOnClone {
+		return errors.New("Error on Promote requested")
+	}
 
 	datasetName := d.Dataset.Properties[libzfs.DatasetPropName].Value
 	origin := d.Dataset.Properties[libzfs.DatasetPropOrigin].Value
