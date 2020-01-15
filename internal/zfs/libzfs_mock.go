@@ -3,6 +3,7 @@ package zfs
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,6 +17,9 @@ type LibZFSMock struct {
 	mu       sync.RWMutex
 	datasets map[string]*dZFSMock
 	pools    map[string]libzfs.Pool
+
+	replaceSuffixFor string
+
 }
 
 // PoolOpen opens given pool
@@ -324,6 +328,13 @@ func (d dZFSMock) Clone(target string, props map[libzfs.Prop]libzfs.Property) (D
 		Value:  d.Dataset.Properties[libzfs.DatasetPropName].Value,
 		Source: "-",
 	}
+
+	// for tests, ensure we have predictable suffix when cloning some datasets
+	if d.libZFSMock.replaceSuffixFor != "" && strings.HasPrefix(target, d.libZFSMock.replaceSuffixFor+"_") {
+		re := regexp.MustCompile(d.libZFSMock.replaceSuffixFor + `_([^/]+)(.*)`)
+		target = re.ReplaceAllString(target, d.libZFSMock.replaceSuffixFor+"_xxxxxx${2}")
+	}
+
 	dinterface, err := d.libZFSMock.DatasetCreate(target, libzfs.DatasetTypeFilesystem, props)
 	if err != nil {
 		return nil, err
