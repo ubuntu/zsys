@@ -24,8 +24,8 @@
                "CanMount": "off"
             },
             {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
-               "Mountpoint": "/var/lib/AccountServices",
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+               "Mountpoint": "/var/lib/AccountsService",
                "CanMount": "noauto"
             },
             {
@@ -140,9 +140,9 @@
                      "CanMount": "off"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap1",
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
                      "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "noauto"
                   },
                   {
@@ -264,9 +264,9 @@
                      "CanMount": "off"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2",
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2",
                      "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "noauto"
                   },
                   {
@@ -378,10 +378,10 @@
                      "Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap3"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_4242/var/lib/AccountServices",
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Name": "rpool/ROOT/ubuntu_4242/var/lib/AccountsService",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "on",
-                     "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+                     "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
                   },
                   {
                      "Name": "rpool/ROOT/ubuntu_4242/var/lib/NetworkManager",
@@ -493,10 +493,10 @@
                      "Origin": "rpool/ROOT/ubuntu_1234/var/lib@snap2"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices",
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "noauto",
-                     "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2"
+                     "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2"
                   },
                   {
                      "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
@@ -609,9 +609,9 @@
                      "CanMount": "off"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3",
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3",
                      "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "noauto"
                   },
                   {
@@ -722,10 +722,10 @@
                      "Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap3"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountServices",
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "noauto",
-                     "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+                     "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
                   },
                   {
                      "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
@@ -837,8 +837,8 @@
                "CanMount": "off"
             },
             {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountServices",
-               "Mountpoint": "/var/lib/AccountServices",
+               "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountsService",
+               "Mountpoint": "/var/lib/AccountsService",
                "CanMount": "noauto"
             },
             {
@@ -945,8 +945,8 @@
             "CanMount": "off"
          },
          {
-            "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
-            "Mountpoint": "/var/lib/AccountServices",
+            "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+            "Mountpoint": "/var/lib/AccountsService",
             "CanMount": "noauto"
          },
          {
@@ -1061,9 +1061,9 @@
                   "CanMount": "off"
                },
                {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap1",
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
                   "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/AccountServices",
+                  "Mountpoint": "/var/lib/AccountsService",
                   "CanMount": "noauto"
                },
                {
@@ -1185,9 +1185,9 @@
                   "CanMount": "off"
                },
                {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2",
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2",
                   "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/AccountServices",
+                  "Mountpoint": "/var/lib/AccountsService",
                   "CanMount": "noauto"
                },
                {
@@ -1299,10 +1299,10 @@
                   "Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap3"
                },
                {
-                  "Name": "rpool/ROOT/ubuntu_4242/var/lib/AccountServices",
-                  "Mountpoint": "/var/lib/AccountServices",
+                  "Name": "rpool/ROOT/ubuntu_4242/var/lib/AccountsService",
+                  "Mountpoint": "/var/lib/AccountsService",
                   "CanMount": "on",
-                  "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+                  "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
                },
                {
                   "Name": "rpool/ROOT/ubuntu_4242/var/lib/NetworkManager",
@@ -1414,10 +1414,10 @@
                   "Origin": "rpool/ROOT/ubuntu_1234/var/lib@snap2"
                },
                {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices",
-                  "Mountpoint": "/var/lib/AccountServices",
+                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
+                  "Mountpoint": "/var/lib/AccountsService",
                   "CanMount": "noauto",
-                  "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2"
+                  "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2"
                },
                {
                   "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
@@ -1530,9 +1530,9 @@
                   "CanMount": "off"
                },
                {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3",
+                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3",
                   "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/AccountServices",
+                  "Mountpoint": "/var/lib/AccountsService",
                   "CanMount": "noauto"
                },
                {
@@ -1643,10 +1643,10 @@
                   "Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap3"
                },
                {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountServices",
-                  "Mountpoint": "/var/lib/AccountServices",
+                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+                  "Mountpoint": "/var/lib/AccountsService",
                   "CanMount": "noauto",
-                  "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+                  "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
                },
                {
                   "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
@@ -1754,8 +1754,8 @@
          "CanMount": "off"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto"
       },
       {
@@ -1805,9 +1805,9 @@
          "CanMount": "off"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap1",
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
          "IsSnapshot": true,
-         "Mountpoint": "/var/lib/AccountServices",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto"
       },
       {
@@ -1862,9 +1862,9 @@
          "CanMount": "off"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2",
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2",
          "IsSnapshot": true,
-         "Mountpoint": "/var/lib/AccountServices",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto"
       },
       {
@@ -1918,10 +1918,10 @@
          "Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap3"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_4242/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_4242/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "on",
-         "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+         "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
       },
       {
          "Name": "rpool/ROOT/ubuntu_4242/var/lib/NetworkManager",
@@ -1975,10 +1975,10 @@
          "Origin": "rpool/ROOT/ubuntu_1234/var/lib@snap2"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto",
-         "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2"
+         "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2"
       },
       {
          "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
@@ -2032,9 +2032,9 @@
          "CanMount": "off"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3",
+         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3",
          "IsSnapshot": true,
-         "Mountpoint": "/var/lib/AccountServices",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto"
       },
       {
@@ -2087,10 +2087,10 @@
          "Origin": "rpool/ROOT/ubuntu_5678/var/lib@snap3"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto",
-         "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+         "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
       },
       {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
@@ -2141,8 +2141,8 @@
          "CanMount": "off"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto"
       },
       {

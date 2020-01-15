@@ -85,8 +85,8 @@
                "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
             },
             {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
-               "Mountpoint": "/var/lib/AccountServices",
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+               "Mountpoint": "/var/lib/AccountsService",
                "CanMount": "on",
                "LastUsed": 1599999999,
                "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
@@ -224,8 +224,8 @@
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "on",
          "LastUsed": 1599999999,
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"

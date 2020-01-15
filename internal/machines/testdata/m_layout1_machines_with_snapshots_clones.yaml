@@ -81,17 +81,17 @@ pools:
             canmount: on:local
             last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
             creation_time: 2019-12-31T07:36:17+00:00
-      - name: ROOT/ubuntu_1234/var/lib/AccountServices
+      - name: ROOT/ubuntu_1234/var/lib/AccountsService
         snapshots:
           - name: snap1
             zsys_bootfs: no:inherited
-            mountpoint: /var/lib/AccountServices:inherited
+            mountpoint: /var/lib/AccountsService:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
             creation_time: 2020-05-07T22:01:28+00:00
           - name: snap2
             zsys_bootfs: no:inherited
-            mountpoint: /var/lib/AccountServices:inherited
+            mountpoint: /var/lib/AccountsService:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
             creation_time: 2019-12-31T07:36:17+00:00
@@ -276,13 +276,13 @@ pools:
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
             creation_time: 2018-03-28T07:30:22+00:00
-      - name: ROOT/ubuntu_5678/var/lib/AccountServices
+      - name: ROOT/ubuntu_5678/var/lib/AccountsService
         canmount: noauto
-        origin: rpool/ROOT/ubuntu_1234/var/lib/AccountsServices@snap2
+        origin: rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2
         snapshots:
           - name: snap3
             zsys_bootfs: no:inherited
-            mountpoint: /var/lib/AccountServices:inherited
+            mountpoint: /var/lib/AccountsService:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
             creation_time: 2018-03-28T07:30:22+00:00
@@ -394,9 +394,9 @@ pools:
         canmount: noauto
         zsys_bootfs: no
         origin: rpool/ROOT/ubuntu_5678/var/lib@snap3
-      - name: ROOT/ubuntu_9876/var/lib/AccountServices
+      - name: ROOT/ubuntu_9876/var/lib/AccountsService
         canmount: noauto
-        origin: rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3
+        origin: rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3
       - name: ROOT/ubuntu_9876/var/lib/apt
         canmount: noauto
         origin: rpool/ROOT/ubuntu_5678/var/lib/apt@snap3
@@ -439,7 +439,7 @@ pools:
       - name: ROOT/ubuntu_9999/var/lib
         canmount: noauto
         zsys_bootfs: no
-      - name: ROOT/ubuntu_9999/var/lib/AccountServices
+      - name: ROOT/ubuntu_9999/var/lib/AccountsService
         canmount: noauto
       - name: ROOT/ubuntu_9999/var/lib/apt
         canmount: noauto

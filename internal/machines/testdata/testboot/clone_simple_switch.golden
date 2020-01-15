@@ -18,15 +18,15 @@
             "rpool/ROOT/ubuntu_1234@snap1": {
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
                "IsZsys": true,
-               "LastUsed": "2015-10-10T04:34:04+02:00",
+               "LastUsed": "2018-12-10T13:20:44+01:00",
                "SystemDatasets": [
                   {
                      "Name": "rpool/ROOT/ubuntu_1234@snap1",
                      "IsSnapshot": true,
                      "Mountpoint": "/",
-                     "CanMount": "noauto",
+                     "CanMount": "on",
                      "BootFS": true,
-                     "LastUsed": 1444444444,
+                     "LastUsed": 1544444444,
                      "LastBootedKernel": "vmlinuz-5.0.0-0-generic"
                   }
                ]
@@ -69,15 +69,15 @@
          "rpool/ROOT/ubuntu_1234@snap1": {
             "ID": "rpool/ROOT/ubuntu_1234@snap1",
             "IsZsys": true,
-            "LastUsed": "2015-10-10T04:34:04+02:00",
+            "LastUsed": "2018-12-10T13:20:44+01:00",
             "SystemDatasets": [
                {
                   "Name": "rpool/ROOT/ubuntu_1234@snap1",
                   "IsSnapshot": true,
                   "Mountpoint": "/",
-                  "CanMount": "noauto",
+                  "CanMount": "on",
                   "BootFS": true,
-                  "LastUsed": 1444444444,
+                  "LastUsed": 1544444444,
                   "LastBootedKernel": "vmlinuz-5.0.0-0-generic"
                }
             ]
@@ -113,9 +113,9 @@
          "Name": "rpool/ROOT/ubuntu_1234@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
-         "CanMount": "noauto",
+         "CanMount": "on",
          "BootFS": true,
-         "LastUsed": 1444444444,
+         "LastUsed": 1544444444,
          "LastBootedKernel": "vmlinuz-5.0.0-0-generic"
       },
       {

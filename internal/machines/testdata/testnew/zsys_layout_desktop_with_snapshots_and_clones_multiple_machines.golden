@@ -85,8 +85,8 @@
                "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
             },
             {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
-               "Mountpoint": "/var/lib/AccountServices",
+               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+               "Mountpoint": "/var/lib/AccountsService",
                "CanMount": "on",
                "LastUsed": 1599999999,
                "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
@@ -237,9 +237,9 @@
                      "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap1",
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
                      "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "on",
                      "LastUsed": 1588888888,
                      "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
@@ -398,9 +398,9 @@
                      "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2",
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2",
                      "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "on",
                      "LastUsed": 1577777777,
                      "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
@@ -551,12 +551,12 @@
                      "Origin": "rpool/ROOT/ubuntu_1234/var/www@snap2"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices",
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "noauto",
                      "LastUsed": 1533333333,
                      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountsServices@snap2"
+                     "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2"
                   },
                   {
                      "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
@@ -703,9 +703,9 @@
                      "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3",
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3",
                      "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "on",
                      "LastUsed": 1522222222,
                      "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
@@ -835,10 +835,10 @@
                      "Origin": "rpool/ROOT/ubuntu_5678/var/www@snap3"
                   },
                   {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountServices",
-                     "Mountpoint": "/var/lib/AccountServices",
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+                     "Mountpoint": "/var/lib/AccountsService",
                      "CanMount": "noauto",
-                     "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+                     "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
                   },
                   {
                      "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
@@ -969,8 +969,8 @@
                "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
             },
             {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountServices",
-               "Mountpoint": "/var/lib/AccountServices",
+               "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountsService",
+               "Mountpoint": "/var/lib/AccountsService",
                "CanMount": "noauto",
                "LastUsed": 1555555555,
                "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
@@ -1101,8 +1101,8 @@
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "on",
          "LastUsed": 1599999999,
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
@@ -1230,9 +1230,9 @@
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap1",
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
          "IsSnapshot": true,
-         "Mountpoint": "/var/lib/AccountServices",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "on",
          "LastUsed": 1588888888,
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
@@ -1366,9 +1366,9 @@
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountServices@snap2",
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2",
          "IsSnapshot": true,
-         "Mountpoint": "/var/lib/AccountServices",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "on",
          "LastUsed": 1577777777,
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
@@ -1502,12 +1502,12 @@
          "Origin": "rpool/ROOT/ubuntu_1234/var/www@snap2"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto",
          "LastUsed": 1533333333,
          "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountsServices@snap2"
+         "Origin": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2"
       },
       {
          "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
@@ -1637,9 +1637,9 @@
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3",
+         "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3",
          "IsSnapshot": true,
-         "Mountpoint": "/var/lib/AccountServices",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "on",
          "LastUsed": 1522222222,
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
@@ -1753,10 +1753,10 @@
          "Origin": "rpool/ROOT/ubuntu_5678/var/www@snap3"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto",
-         "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountServices@snap3"
+         "Origin": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3"
       },
       {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
@@ -1868,8 +1868,8 @@
          "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountServices",
-         "Mountpoint": "/var/lib/AccountServices",
+         "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
          "CanMount": "noauto",
          "LastUsed": 1555555555,
          "LastBootedKernel": "vmlinuz-5.0.9-0-generic"

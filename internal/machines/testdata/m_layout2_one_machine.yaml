@@ -15,7 +15,7 @@ pools:
       - name: ROOT/ubuntu_1234/var/lib
         zsys_bootfs: no
         canmount: off
-      - name: ROOT/ubuntu_1234/var/lib/AccountServices
+      - name: ROOT/ubuntu_1234/var/lib/AccountsService
       - name: ROOT/ubuntu_1234/var/lib/apt
       - name: ROOT/ubuntu_1234/var/lib/aptitude
       - name: ROOT/ubuntu_1234/var/lib/dpkg
