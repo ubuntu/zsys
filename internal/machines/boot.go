@@ -229,15 +229,14 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
 	datasetsToClone := getRootDatasets(snapshot.SystemDatasets)
 
-	// Skip bootfs datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
+	// Skip existing datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
 	// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
 	// in case of a real issue.
-	// TODO: should test the clone return value (clone fails on system dataset already exists -> skip, other clone fails -> return error)
+	// Clone fails on system dataset already exists and skipping requested -> ok, other clone fails -> return error
 	for _, n := range datasetsToClone {
-		log.Infof(t.Context(), i18n.G("cloning %q"), n)
+		log.Infof(t.Context(), i18n.G("cloning %q and children"), n)
 		if err := t.Clone(n, suffix, true, true); err != nil {
-			// TODO: transaction fix (as it's now set in error)
-			log.Warningf(t.Context(), i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), n, err)
+			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), n, err)
 		}
 	}
 
