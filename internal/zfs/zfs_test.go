@@ -277,11 +277,11 @@ func TestClone(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
-		def        string
-		dataset    string
-		suffix     string
-		skipBootfs bool
-		recursive  bool
+		def         string
+		dataset     string
+		suffix      string
+		allowExists bool
+		recursive   bool
 
 		wantErr bool
 		isNoOp  bool
@@ -319,7 +319,7 @@ func TestClone(t *testing.T) {
 		"Recursive missing some leaf snapshots":    {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
 		"Recursive missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true, wantErr: true, isNoOp: true},
 
-		"Allow cloning ignoring zsys bootfs": {def: "layout1_with_bootfs_already_cloned.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", skipBootfs: true, recursive: true},
+		"Existing datasets are skipped when requested": {def: "layout1_with_bootfs_already_cloned.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", allowExists: true, recursive: true},
 
 		"Snapshot doesn't exists":         {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@doesntexists", suffix: "5678", wantErr: true, isNoOp: true},
 		"Dataset doesn't exists":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist@something", suffix: "5678", wantErr: true, isNoOp: true},
@@ -346,7 +346,7 @@ func TestClone(t *testing.T) {
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
-			err = trans.Clone(tc.dataset, tc.suffix, tc.skipBootfs, tc.recursive)
+			err = trans.Clone(tc.dataset, tc.suffix, tc.allowExists, tc.recursive)
 
 			if err != nil && !tc.wantErr {
 				t.Fatalf("expected no error but got: %v", err)

@@ -281,6 +281,12 @@ func (z *Zfs) findDatasetByName(path string) (*Dataset, error) {
 	return d, nil
 }
 
+// datasetExists returns if a given dataset path already exists on the system or not.
+func (z *Zfs) datasetExists(path string) bool {
+	_, err := z.findDatasetByName(path)
+	return err == nil
+}
+
 // Done signal that the transaction has ended and the object can't be reused.
 // This should be called to release underlying resources.
 func (t *Transaction) Done() {
@@ -477,7 +483,7 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 
 // Clone creates a new dataset from a snapshot (and children if recursive is true) with a given suffix,
 // stripping older _<suffix> if any.
-func (t *Transaction) Clone(name, suffix string, skipBootfs, recursive bool) (errClone error) {
+func (t *Transaction) Clone(name, suffix string, ignoreErrorOnExists, recursive bool) (errClone error) {
 	t.checkValid()
 
 	log.Debugf(t.ctx, i18n.G("ZFS: trying to clone %q"), name)
@@ -528,20 +534,18 @@ func (t *Transaction) Clone(name, suffix string, skipBootfs, recursive bool) (er
 			return fmt.Errorf(i18n.G("integrity check failed: %v"), err)
 		}
 	}
-	return nestedT.cloneRecursive(*d, snapshotName, rootName, newRootName, skipBootfs, recursive)
+	return nestedT.cloneRecursive(*d, snapshotName, rootName, newRootName, ignoreErrorOnExists, recursive)
 }
 
 // cloneRecursive recursively clones all children and store "revert" operations by cleaning newly
 // created datasets.
-func (t *nestedTransaction) cloneRecursive(d Dataset, snapshotName, rootName, newRootName string, skipBootfs, recursive bool) error {
-	if (!skipBootfs && d.BootFS) || !d.BootFS {
-		// Calculate new name of the dataset
-		// eg. rpool/ROOT/ubuntu_11111/var@snap1 -> rpool/ROOT/ubuntu_22222/var
-		destPath := strings.Replace(strings.TrimSuffix(d.Name, "@"+snapshotName), rootName, newRootName, 1)
-		log.Debugf(t.ctx, "Trying to clone %q to %q", d.Name, destPath)
-		if err := t.cloneDataset(d, destPath); err != nil {
-			return err
-		}
+func (t *nestedTransaction) cloneRecursive(d Dataset, snapshotName, rootName, newRootName string, ignoreErrorOnExists, recursive bool) error {
+	// Calculate new name of the dataset
+	// eg. rpool/ROOT/ubuntu_11111/var@snap1 -> rpool/ROOT/ubuntu_22222/var
+	destPath := strings.Replace(strings.TrimSuffix(d.Name, "@"+snapshotName), rootName, newRootName, 1)
+	log.Debugf(t.ctx, "Trying to clone %q to %q", d.Name, destPath)
+	if err := t.cloneDataset(d, destPath, ignoreErrorOnExists); err != nil {
+		return err
 	}
 
 	if !recursive {
@@ -563,7 +567,7 @@ func (t *nestedTransaction) cloneRecursive(d Dataset, snapshotName, rootName, ne
 			if !strings.HasSuffix(c.Name, "@"+snapshotName) {
 				continue
 			}
-			if err := t.cloneRecursive(*c, snapshotName, rootName, newRootName, skipBootfs, true); err != nil {
+			if err := t.cloneRecursive(*c, snapshotName, rootName, newRootName, ignoreErrorOnExists, true); err != nil {
 				return fmt.Errorf("couldn't clone %q: %v", c.Name, err)
 			}
 		}
@@ -572,7 +576,7 @@ func (t *nestedTransaction) cloneRecursive(d Dataset, snapshotName, rootName, ne
 	return nil
 }
 
-func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
+func (t *nestedTransaction) cloneDataset(d Dataset, target string, ignoreErrorOnExists bool) error {
 	log.Debugf(t.ctx, i18n.G("Trying to clone %q"), d.Name)
 
 	props := make(map[libzfs.Prop]libzfs.Property)
@@ -600,6 +604,10 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 
 	newZFSDataset, err := d.dZFS.Clone(target, props)
 	if err != nil {
+		// if the dataset already existed and we expected it -> do not change anything and go on on other datasets
+		if ignoreErrorOnExists && t.Zfs.datasetExists(target) {
+			return nil
+		}
 		return fmt.Errorf(i18n.G("couldn't clone %q to %q: ")+config.ErrorFormat, d.Name, target, err)
 	}
 
@@ -646,7 +654,6 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string) error {
 		if err := newDataset.dZFS.SetUserProperty(LastBootedKernelProp, d.LastBootedKernel); err != nil {
 			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, LastBootedKernelProp, d.LastBootedKernel, newDataset.Name, err)
 		}
-
 	}
 
 	if err := newDataset.refreshProperties(t.ctx); err != nil {
