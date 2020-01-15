@@ -50,6 +50,11 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 			cancel()
 			return false, err
 		}
+
+		if err := ms.Refresh(ctx); err != nil {
+			return false, err
+		}
+		m, bootedState = ms.findFromRoot(root)
 	}
 
 	// We don't revert userdata, so we are using main state machine userdata to keep on the same track.
@@ -76,8 +81,12 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 		cancel()
 		return false, err
 	}
-	if ok {
+
+	if ok || hasChanges {
 		hasChanges = true
+		if err := ms.Refresh(ctx); err != nil {
+			return false, err
+		}
 	}
 
 	return hasChanges, nil
@@ -158,6 +167,10 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 		return false, err
 	}
 	changed = changed || chg
+
+	if err := ms.Refresh(ctx); err != nil {
+		return false, err
+	}
 
 	return changed, nil
 }
