@@ -123,6 +123,29 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestRefresh(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+	dir, cleanup := testutils.TempDir(t)
+	defer cleanup()
+
+	ta := timeAsserter(time.Now())
+	libzfs := getLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"), testutils.WithLibZFS(libzfs))
+	defer fPools.Create(dir)()
+
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+	if err != nil {
+		t.Fatalf("expected no error but got: %v", err)
+	}
+
+	oldZ := *z
+	if err := z.Refresh(context.Background()); err != nil {
+		t.Fatalf("expected no error but got: %v", err)
+	}
+
+	assertDatasetsEquals(t, ta, oldZ.Datasets(), z.Datasets())
+}
+
 func TestCreate(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 

@@ -126,31 +126,47 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	log.Debug(ctx, i18n.G("ZFS: new scan"))
 
 	z := Zfs{
-		root:        &Dataset{Name: "/"},
-		allDatasets: make(map[string]*Dataset),
-		libzfs:      &LibZFSAdapter{},
+		libzfs: &LibZFSAdapter{},
 	}
 	for _, options := range options {
 		options(&z)
 	}
 
+	if err := z.Refresh(ctx); err != nil {
+		return nil, err
+	}
+
+	return &z, nil
+}
+
+// Refresh rescans all the datasets for the zfs instance.
+func (z *Zfs) Refresh(ctx context.Context) error {
+	log.Debug(ctx, i18n.G("ZFS: refresh dataset list"))
+
+	newZ := Zfs{
+		root:        &Dataset{Name: "/"},
+		allDatasets: make(map[string]*Dataset),
+		libzfs:      z.libzfs,
+	}
+
 	// scan all datasets that are currently imported on the system
-	dsZFS, err := z.libzfs.DatasetOpenAll()
+	dsZFS, err := newZ.libzfs.DatasetOpenAll()
 	if err != nil {
-		return nil, fmt.Errorf(i18n.G("can't list datasets: %v"), err)
+		return fmt.Errorf(i18n.G("can't list datasets: %v"), err)
 	}
 
 	var children []*Dataset
 	for _, dZFS := range dsZFS {
-		c, err := newDatasetTree(ctx, dZFS, &z.allDatasets)
+		c, err := newDatasetTree(ctx, dZFS, &newZ.allDatasets)
 		if err != nil {
-			return nil, fmt.Errorf("couldn't scan all datasets: %v", err)
+			return fmt.Errorf("couldn't scan all datasets: %v", err)
 		}
 		children = append(children, c)
 	}
-	z.root.children = children
+	newZ.root.children = children
 
-	return &z, nil
+	*z = newZ
+	return nil
 }
 
 // Datasets returns all datasets on the system, where parent will always be before children.
