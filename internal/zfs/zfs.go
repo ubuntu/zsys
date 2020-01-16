@@ -665,6 +665,7 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string, ignoreErrorOn
 
 // Promote recursively all children, including dataset named "name".
 // If the hierarchy is partially promoted, promote the missing one and be no-op for the rest.
+// It will promote the main dataset until its origin is empty.
 func (t *Transaction) Promote(name string) (errPromote error) {
 	t.checkValid()
 	log.Debugf(t.ctx, i18n.G("ZFS: trying to promote %q"), name)
@@ -711,29 +712,26 @@ func (t *Transaction) Promote(name string) (errPromote error) {
 
 func (t *nestedTransaction) promoteRecursive(d *Dataset) error {
 	log.Debugf(t.ctx, i18n.G("Trying to promote %q"), d.Name)
-	origin := d.Origin
 
-	// Only promote if not promoted yet.
-	if origin == "" {
-		return nil
-	}
+	// Repromote until its origin is empty "master dataset"
+	for d.Origin != "" {
+		origDatasetName, _ := splitSnapshotName(d.Origin)
+		origD, err := t.Zfs.findDatasetByName(origDatasetName)
+		if err != nil {
+			return fmt.Errorf(i18n.G("cannot find %q: %v"), d.Origin, err)
+		}
 
-	origDatasetName, _ := splitSnapshotName(origin)
-	origD, err := t.Zfs.findDatasetByName(origDatasetName)
-	if err != nil {
-		return fmt.Errorf(i18n.G("cannot find %q: %v"), origin, err)
-	}
+		if err := d.dZFS.Promote(); err != nil {
+			return fmt.Errorf(i18n.G("couldn't promote %q: ")+config.ErrorFormat, d.Name, err)
+		}
+		// Reload properties on previous promoted datasets (dZFS.Promote() does only on newly promoted dataset)
+		if err := origD.dZFS.ReloadProperties(); err != nil {
+			return fmt.Errorf(i18n.G("couldn't refresh properties for %q: ")+config.ErrorFormat, origD.Name, err)
+		}
 
-	if err := d.dZFS.Promote(); err != nil {
-		return fmt.Errorf(i18n.G("couldn't promote %q: ")+config.ErrorFormat, d.Name, err)
-	}
-	// Reload properties on previous promoted datasets (dZFS.Promote() does only on newly promoted dataset)
-	if err := origD.dZFS.ReloadProperties(); err != nil {
-		return fmt.Errorf(i18n.G("couldn't refresh properties for %q: ")+config.ErrorFormat, origD.Name, err)
-	}
-
-	if err := t.inverseOrigin(origD, d); err != nil {
-		return fmt.Errorf(i18n.G("couldn't refresh our internal origin and layout cache: %v"), err)
+		if err := t.inverseOrigin(origD, d); err != nil {
+			return fmt.Errorf(i18n.G("couldn't refresh our internal origin and layout cache: %v"), err)
+		}
 	}
 
 	for i, c := range d.children {

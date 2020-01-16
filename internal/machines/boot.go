@@ -347,9 +347,6 @@ func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, cu
 
 func promoteDatasets(t *zfs.Transaction, ds []zfs.Dataset) (changed bool, err error) {
 	for _, d := range ds {
-		if d.Origin == "" {
-			continue
-		}
 		changed = true
 		log.Infof(t.Context(), i18n.G("Promoting dataset: %q"), d.Name)
 		if err := t.Promote(d.Name); err != nil {

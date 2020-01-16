@@ -1,0 +1,31 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: ROOT
+        canmount: off
+      - name: ROOT/ubuntu_1234
+        mountpoint: /
+        snapshots:
+          - name: snap1
+    # This is created imperatively in TestPromoteCloneTree()
+    # - name: ROOT/ubuntu_5678
+    #   mountpoint: /
+    #   canmount: noauto
+    #   origin: rpool/ROOT/ubuntu_1234@snap1
+    #   snapshots:
+    #     - name: snap2
+    #     - name: snap8888
+    # - name: ROOT/ubuntu_9876
+    #   mountpoint: /
+    #   canmount: noauto
+    #   origin: rpool/ROOT/ubuntu_5678@snap2
+    #   snapshots:
+    #     - name: snap3
+    # - name: ROOT/ubuntu_9999
+    #   mountpoint: /
+    #   canmount: noauto
+    #   origin: rpool/ROOT/ubuntu_9876@snap3
+    # - name: ROOT/ubuntu_8888
+    #   mountpoint: /
+    #   canmount: noauto
+    #   origin: rpool/ROOT/ubuntu_5678@snap8888

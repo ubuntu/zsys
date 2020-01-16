@@ -450,6 +450,82 @@ func TestPromote(t *testing.T) {
 	}
 }
 
+func TestPromoteCloneTree(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+	dir, cleanup := testutils.TempDir(t)
+	defer cleanup()
+
+	ta := timeAsserter(time.Now())
+	libzfs := getLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_n_clones.yaml"), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
+	//fPools.Create(dir)
+	defer fPools.Create(dir)()
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+	if err != nil {
+		t.Fatalf("expected no error but got: %v", err)
+	}
+
+	// Scan initial state for no-op
+	trans, _ := z.NewTransaction(context.Background())
+	defer trans.Done()
+
+	err = trans.Clone("rpool/ROOT/ubuntu_1234@snap1", "5678", false, false)
+	assert.NoError(t, err, "error in setup")
+	time.Sleep(time.Second)
+	trans.Snapshot("snap2", "rpool/ROOT/ubuntu_5678", false)
+	assert.NoError(t, err, "error in setup")
+	time.Sleep(time.Second)
+	trans.Snapshot("snap8888", "rpool/ROOT/ubuntu_5678", false)
+	assert.NoError(t, err, "error in setup")
+	err = trans.Clone("rpool/ROOT/ubuntu_5678@snap2", "9876", false, false)
+	assert.NoError(t, err, "error in setup")
+	time.Sleep(time.Second)
+	trans.Snapshot("snap3", "rpool/ROOT/ubuntu_9876", false)
+	assert.NoError(t, err, "error in setup")
+	err = trans.Clone("rpool/ROOT/ubuntu_9876@snap3", "9999", false, false)
+	assert.NoError(t, err, "error in setup")
+	err = trans.Clone("rpool/ROOT/ubuntu_5678@snap8888", "8888", false, false)
+	assert.NoError(t, err, "error in setup")
+
+	err = trans.Promote("rpool/ROOT/ubuntu_9876")
+	if err != nil {
+		t.Fatalf("promoting 9876 failed: %v", err)
+	}
+	for _, d := range z.Datasets() {
+		if d.IsSnapshot || d.Name == "rpool" || d.Name == "rpool/ROOT" {
+			continue
+		}
+
+		if d.Name == "rpool/ROOT/ubuntu_9876" {
+			assert.Equalf(t, "", d.Origin, "Origin of %s should be empty and is set to %s", d.Name, d.Origin)
+		} else {
+			assert.NotEqualf(t, "", d.Origin, "Origin of %s is empty when it shouldn't", d.Name)
+		}
+	}
+
+	zfs.AssertNoZFSChildren(t, z)
+	assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+
+	err = trans.Promote("rpool/ROOT/ubuntu_8888")
+	if err != nil {
+		t.Fatalf("promoting 8888 failed: %v", err)
+	}
+	for _, d := range z.Datasets() {
+		if d.IsSnapshot || d.Name == "rpool" || d.Name == "rpool/ROOT" {
+			continue
+		}
+
+		if d.Name == "rpool/ROOT/ubuntu_8888" {
+			assert.Equalf(t, "", d.Origin, "Origin of %s should be empty and is set to %s", d.Name, d.Origin)
+		} else {
+			assert.NotEqualf(t, "", d.Origin, "Origin of %s is empty when it shouldn't", d.Name)
+		}
+	}
+
+	zfs.AssertNoZFSChildren(t, z)
+	assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+}
+
 func TestDestroy(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
