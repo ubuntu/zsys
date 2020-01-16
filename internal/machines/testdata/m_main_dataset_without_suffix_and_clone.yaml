@@ -29,3 +29,4 @@ pools:
           - name: snap1
             mountpoint: /opt:inherited
             canmount: on:local
+            creation_time: 2018-12-10T12:20:44+00:00
