@@ -853,7 +853,7 @@ func (t *Transaction) SetProperty(name, value, datasetName string, force bool) e
 	origV, origS := d.getPropertyFromName(name)
 
 	if !force && origS != "local" && origS != "" {
-		log.Info(t.ctx, i18n.G("ZFS: can't set property %q=%q for %q as not a local property (%q)"), name, value, datasetName, origS)
+		log.Infof(t.ctx, i18n.G("ZFS: can't set property %q=%q for %q as not a local property (%q)"), name, value, datasetName, origS)
 		return nil
 	}
 

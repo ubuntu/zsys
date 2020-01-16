@@ -133,9 +133,10 @@ func (fpools FakePools) cleanup() {
 			fpools.t.Logf("couldn't delete %q: %v", p, err)
 			continue
 		}
-		if UseSystemZFS() {
+		if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
 			pool.Export(true, fmt.Sprintf("Export temporary pool %q", p))
 		}
+
 		pool.Destroy(fmt.Sprintf("Cleanup temporary pool %q", p))
 		pool.Close()
 	}

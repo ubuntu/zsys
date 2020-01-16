@@ -754,15 +754,11 @@ func getDefaultValue(v, defaultVal string) string {
 	return v
 }
 
-// TODO: duplicated between all tests, should be fixed
+// TODO: for now, we can only run with mock zfs system
 func getLibZFS(t *testing.T) testutils.LibZFSInterface {
 	t.Helper()
 
-	if !testutils.UseSystemZFS() {
-		fmt.Println("Running tests with mocked libzfs")
-		mock := zfs.NewLibZFSMock()
-		return &mock
-	}
-	fmt.Println("Running tests with system's libzfs")
-	return &zfs.LibZFSAdapter{}
+	fmt.Println("Running tests with mocked libzfs")
+	mock := zfs.NewLibZFSMock()
+	return &mock
 }
