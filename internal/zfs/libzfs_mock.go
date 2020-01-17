@@ -411,6 +411,9 @@ func (d dZFSMock) GetUserProperty(p string) (prop libzfs.Property, err error) {
 }
 
 func (d *dZFSMock) SetUserProperty(prop, value string) error {
+	if d.libZFSMock.errOnSetProperty {
+		return errors.New("Error on SetProperty requested")
+	}
 	d.assertDatasetOpened()
 
 	if d.libZFSMock.forceLastUsedTime && prop == LastUsedProp {
@@ -506,7 +509,7 @@ func (d *dZFSMock) Clones() (clones []string, err error) {
 
 func (d *dZFSMock) Promote() (err error) {
 	d.assertDatasetOpened()
-	if d.libZFSMock.errOnClone {
+	if d.libZFSMock.errOnPromote {
 		return errors.New("Error on Promote requested")
 	}
 
