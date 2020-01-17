@@ -713,7 +713,7 @@ func (t *Transaction) Promote(name string) (errPromote error) {
 func (t *nestedTransaction) promoteRecursive(d *Dataset) error {
 	log.Debugf(t.ctx, i18n.G("Trying to promote %q"), d.Name)
 
-	// Repromote until its origin is empty "master dataset"
+	// Repromote until its origin is empty as a "master dataset"
 	for d.Origin != "" {
 		origDatasetName, _ := splitSnapshotName(d.Origin)
 		origD, err := t.Zfs.findDatasetByName(origDatasetName)
