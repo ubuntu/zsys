@@ -520,15 +520,13 @@ func TestIdempotentCommit(t *testing.T) {
 	assertMachinesEquals(t, ms1, ms2)
 }
 
-/*
 func TestCreateUserData(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def                  string
-		user                 string
-		homePath             string
-		predictableSuffixFor string
-		cmdline              string
+		def      string
+		user     string
+		homePath string
+		cmdline  string
 
 		setPropertyErr bool
 		createErr      bool
@@ -537,47 +535,63 @@ func TestCreateUserData(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"One machine add user dataset":                  {def: "m_with_userdata.json"},
-		"One machine add user dataset without userdata": {def: "m_without_userdata.json"},
-		"One machine with no user, only userdata":       {def: "m_with_userdata_only.json"},
-		"No attached userdata":                          {def: "m_no_attached_userdata_first_pool.json"},
+		"One machine add user dataset":                  {def: "m_with_userdata.yaml"},
+		"One machine add user dataset without userdata": {def: "m_without_userdata.yaml"},
+		"One machine with no user, only userdata":       {def: "m_with_userdata_only.yaml"},
+		"No attached userdata":                          {def: "m_no_attached_userdata_first_pool.yaml"},
 
 		// Second pool cases
-		"User dataset on other pool":                       {def: "m_with_userdata_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo"},
-		"User dataset with no user on other pool":          {def: "m_with_userdata_only_on_other_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo"},
-		"Prefer system pool for userdata":                  {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool/USERDATA/userfoo"},
-		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
-		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.json", predictableSuffixFor: "rpool2/USERDATA/userfoo"},
+		"User dataset on other pool":                       {def: "m_with_userdata_on_other_pool.yaml"},
+		"User dataset with no user on other pool":          {def: "m_with_userdata_only_on_other_pool.yaml"},
+		"Prefer system pool for userdata":                  {def: "m_without_userdata_prefer_system_pool.yaml"},
+		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.yaml", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
+		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.yaml"},
 
 		// User or home edge cases
-		"No user set":                                           {def: "m_with_userdata.json", user: "[empty]", wantErr: true, isNoOp: true},
-		"No home path set":                                      {def: "m_with_userdata.json", homePath: "[empty]", wantErr: true, isNoOp: true},
-		"User already exists on this machine":                   {def: "m_with_userdata.json", user: "user1"},
-		"Target directory already exists and match user":        {def: "m_with_userdata.json", user: "user1", homePath: "/home/user1", isNoOp: true},
-		"Target directory already exists and don't match user":  {def: "m_with_userdata.json", homePath: "/home/user1", wantErr: true, isNoOp: true},
-		"Set Property when user already exists on this machine": {def: "m_with_userdata.json", setPropertyErr: true, user: "user1", wantErr: true, isNoOp: true},
-		"Scan when user already exists fails":                   {def: "m_with_userdata.json", scanErr: true, user: "user1", isNoOp: true},
+		"No user set":                                           {def: "m_with_userdata.yaml", user: "[empty]", wantErr: true, isNoOp: true},
+		"No home path set":                                      {def: "m_with_userdata.yaml", homePath: "[empty]", wantErr: true, isNoOp: true},
+		"User already exists on this machine":                   {def: "m_with_userdata.yaml", user: "user1"},
+		"Target directory already exists and match user":        {def: "m_with_userdata.yaml", user: "user1", homePath: "/home/user1", isNoOp: true},
+		"Target directory already exists and don't match user":  {def: "m_with_userdata.yaml", homePath: "/home/user1", wantErr: true, isNoOp: true},
+		"Set Property when user already exists on this machine": {def: "m_with_userdata.yaml", setPropertyErr: true, user: "user1", wantErr: true, isNoOp: true},
+		"Scan when user already exists fails":                   {def: "m_with_userdata.yaml", scanErr: true, user: "user1", wantErr: true, isNoOp: true},
 
 		// Error cases
-		"System not zsys":                                              {def: "m_with_userdata_no_zsys.json", wantErr: true, isNoOp: true},
-		"Create user dataset fails":                                    {def: "m_with_userdata.json", createErr: true, wantErr: true, isNoOp: true},
-		"Create user dataset container fails":                          {def: "m_without_userdata.json", createErr: true, wantErr: true, isNoOp: true},
-		"System bootfs property fails":                                 {def: "m_with_userdata.json", setPropertyErr: true, wantErr: true, isNoOp: true},
-		"Scan for user dataset container fails":                        {def: "m_without_userdata.json", scanErr: true, wantErr: true, isNoOp: true},
-		"Final scan fails issue warning and returns same machine list": {def: "m_with_userdata.json", scanErr: true, isNoOp: true},
+		"System not zsys":                       {def: "m_with_userdata_no_zsys.yaml", wantErr: true, isNoOp: true},
+		"Create user dataset fails":             {def: "m_with_userdata.yaml", createErr: true, wantErr: true, isNoOp: true},
+		"Create user dataset container fails":   {def: "m_without_userdata.yaml", createErr: true, wantErr: true, isNoOp: true},
+		"System bootfs property fails":          {def: "m_with_userdata.yaml", setPropertyErr: true, wantErr: true, isNoOp: true},
+		"Scan for user dataset container fails": {def: "m_without_userdata.yaml", scanErr: true, wantErr: true, isNoOp: true},
+		"Final scan triggers error":             {def: "m_with_userdata.yaml", scanErr: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			ds := machines.LoadDatasets(t, tc.def)
 			tc.cmdline = getDefaultValue(tc.cmdline, generateCmdLine("rpool/ROOT/ubuntu_1234"))
-			z := NewZfsMock(ds, "", getDefaultValue(tc.predictableSuffixFor, "rpool/USERDATA/userfoo"), tc.createErr, false, tc.scanErr, tc.setPropertyErr, false)
-			initMachines := machines.New(context.Background(), ds, tc.cmdline)
+
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs.ForceLastUsedTime(true)
+
+			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
 			ms := initMachines
 
-			err := ms.CreateUserData(z, getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"))
+			lzfs.ErrOnCreate(tc.createErr)
+			lzfs.ErrOnScan(tc.scanErr)
+			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+
+			err = ms.CreateUserData(context.Background(), getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"))
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -595,15 +609,10 @@ func TestCreateUserData(t *testing.T) {
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
 
-			// finale rescan uneeded if last one failed
-			if z.scanErr {
-				return
-			}
-			datasets, err := z.Scan()
+			machinesAfterRescan, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
-				t.Fatal("couldn't rescan before checking final state:", err)
+				t.Error("expected success but got an error scanning for machines", err)
 			}
-			machinesAfterRescan := machines.New(context.Background(), datasets, tc.cmdline)
 			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
@@ -622,29 +631,43 @@ func TestChangeHomeOnUserData(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"Rename home": {def: "m_with_userdata.json"},
+		"Rename home": {def: "m_with_userdata.yaml"},
 
 		// Argument or matching issue
-		"Home doesn't match": {def: "m_with_userdata.json", home: "/home/userabcd", wantErr: true, isNoOp: true},
-		"System not zsys":    {def: "m_with_userdata_no_zsys.json", wantErr: true, isNoOp: true},
-		"Old home empty":     {def: "m_with_userdata.json", home: "[empty]", wantErr: true, isNoOp: true},
-		"New home empty":     {def: "m_with_userdata.json", newHome: "[empty]", wantErr: true, isNoOp: true},
+		"Home doesn't match": {def: "m_with_userdata.yaml", home: "/home/userabcd", wantErr: true, isNoOp: true},
+		"System not zsys":    {def: "m_with_userdata_no_zsys.yaml", wantErr: true, isNoOp: true},
+		"Old home empty":     {def: "m_with_userdata.yaml", home: "[empty]", wantErr: true, isNoOp: true},
+		"New home empty":     {def: "m_with_userdata.yaml", newHome: "[empty]", wantErr: true, isNoOp: true},
 
 		// Errors
-		"Set property fails":               {def: "m_with_userdata.json", setPropertyErr: true, wantErr: true, isNoOp: true},
-		"Scan fails doesn't trigger error": {def: "m_with_userdata.json", scanErr: true, isNoOp: true},
+		"Set property fails":            {def: "m_with_userdata.yaml", setPropertyErr: true, wantErr: true, isNoOp: true},
+		"Scan fails does trigger error": {def: "m_with_userdata.yaml", scanErr: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			ds := machines.LoadDatasets(t, tc.def)
-			z := NewZfsMock(ds, "", "", false, false, tc.scanErr, tc.setPropertyErr, false)
-			initMachines := machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs.ForceLastUsedTime(true)
+
+			initMachines, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
 			ms := initMachines
 
-			err := ms.ChangeHomeOnUserData(z, getDefaultValue(tc.home, "/home/user1"), getDefaultValue(tc.newHome, "/home/foo"))
+			lzfs.ErrOnScan(tc.scanErr)
+			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+
+			err = ms.ChangeHomeOnUserData(context.Background(), getDefaultValue(tc.home, "/home/user1"), getDefaultValue(tc.newHome, "/home/foo"))
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -663,14 +686,10 @@ func TestChangeHomeOnUserData(t *testing.T) {
 			}
 
 			// finale rescan uneeded if last one failed
-			if z.scanErr {
-				return
-			}
-			datasets, err := z.Scan()
+			machinesAfterRescan, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
 			if err != nil {
-				t.Fatal("couldn't rescan before checking final state:", err)
+				t.Error("expected success but got an error scanning for machines", err)
 			}
-			machinesAfterRescan := machines.New(context.Background(), datasets, generateCmdLine("rpool/ROOT/ubuntu_1234"))
 			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}

@@ -37,7 +37,7 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) e
 		cancel()
 		return err
 	} else if reused {
-		return nil
+		return ms.Refresh(ctx)
 	}
 
 	log.Infof(ctx, i18n.G("Create user dataset for %q"), homepath)
@@ -96,7 +96,7 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) e
 		return fmt.Errorf(i18n.G("couldn't set last used time to %q: ")+config.ErrorFormat, currentTime, err)
 	}
 
-	return nil
+	return ms.Refresh(ctx)
 }
 
 // ChangeHomeOnUserData tries to find an existing dataset matching home as a valid mountpoint and rename it to newhome
@@ -125,7 +125,7 @@ func (ms *Machines) ChangeHomeOnUserData(ctx context.Context, home, newHome stri
 		cancel()
 		return fmt.Errorf(i18n.G("didn't find any existing dataset matching %q"), home)
 	}
-	return nil
+	return ms.Refresh(ctx)
 }
 
 func getUserDatasetPath(path string) string {
