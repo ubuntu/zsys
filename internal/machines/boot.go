@@ -248,7 +248,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	log.Info(t.Context(), i18n.G("Reverting user data"))
 	// Find user datasets attached to the snapshot and clone them
 	// Only root datasets are cloned
-	userDataSuffix := generateID(6)
+	userDataSuffix := t.Zfs.GenerateID(6)
 	var rootUserDatasets []zfs.Dataset
 	for _, d := range snapshot.UserDatasets {
 		parentFound := false

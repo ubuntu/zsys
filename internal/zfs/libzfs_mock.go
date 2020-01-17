@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -20,8 +19,6 @@ type LibZFSMock struct {
 	mu       sync.RWMutex
 	datasets map[string]*dZFSMock
 	pools    map[string]libzfs.Pool
-
-	replaceSuffixFor string
 
 	errOnClone        bool
 	errOnPromote      bool
@@ -297,11 +294,6 @@ func (l *LibZFSMock) SetDatasetAsMounted(name string, mounted bool) {
 	d.setPropertyWithSource(libzfs.DatasetPropMounted, m, "")
 }
 
-// SetPredictableSuffixOnClone is a test-only property allowing forcing one dataset to have a known suffix when cloned
-func (l *LibZFSMock) SetPredictableSuffixOnClone(dsBasepath string) {
-	l.replaceSuffixFor = dsBasepath
-}
-
 // ErrOnPromote forces a failure of the mock on clone operation
 func (l *LibZFSMock) ErrOnPromote(shouldErr bool) {
 	l.errOnPromote = shouldErr
@@ -325,6 +317,11 @@ func (l *LibZFSMock) ErrOnSetProperty(shouldErr bool) {
 // ForceLastUsedTime ensures that any LastUsed property is set to the magic time for reproducibility
 func (l *LibZFSMock) ForceLastUsedTime(force bool) {
 	l.forceLastUsedTime = force
+}
+
+// GenerateID returns from a given length a random string (known in advanced if libzfs mock is used)
+func (*LibZFSMock) GenerateID(length int) string {
+	return strings.Repeat("x", length)
 }
 
 type dZFSMock struct {
@@ -372,12 +369,6 @@ func (d dZFSMock) Clone(target string, props map[libzfs.Prop]libzfs.Property) (D
 	props[libzfs.DatasetPropOrigin] = libzfs.Property{
 		Value:  d.Dataset.Properties[libzfs.DatasetPropName].Value,
 		Source: "-",
-	}
-
-	// for tests, ensure we have predictable suffix when cloning some datasets
-	if d.libZFSMock.replaceSuffixFor != "" && strings.HasPrefix(target, d.libZFSMock.replaceSuffixFor+"_") {
-		re := regexp.MustCompile(d.libZFSMock.replaceSuffixFor + `_([^/]+)(.*)`)
-		target = re.ReplaceAllString(target, d.libZFSMock.replaceSuffixFor+"_xxxxxx${2}")
 	}
 
 	dinterface, err := d.libZFSMock.DatasetCreate(target, libzfs.DatasetTypeFilesystem, props)

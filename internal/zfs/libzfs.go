@@ -1,6 +1,12 @@
 package zfs
 
-import libzfs "github.com/bicomsystems/go-libzfs"
+import (
+	"math/rand"
+	"sync"
+	"time"
+
+	libzfs "github.com/bicomsystems/go-libzfs"
+)
 
 // LibZFSAdapter is an accessor to real system zfs libraries.
 type LibZFSAdapter struct{}
@@ -54,6 +60,21 @@ func (*LibZFSAdapter) DatasetSnapshot(path string, recur bool, props map[libzfs.
 		return dZFSAdapter{}, err
 	}
 	return dZFSAdapter{&d}, nil
+}
+
+var seedOnce = sync.Once{}
+
+// GenerateID with n ascii or digits, lowercase, characters
+func (*LibZFSAdapter) GenerateID(length int) string {
+	seedOnce.Do(func() { rand.Seed(time.Now().UnixNano()) })
+
+	var allowedRunes = []rune("abcdefghijklmnopqrstuvwxyz0123456789")
+
+	b := make([]rune, length)
+	for i := range b {
+		b[i] = allowedRunes[rand.Intn(len(allowedRunes))]
+	}
+	return string(b)
 }
 
 type dZFSAdapter struct {

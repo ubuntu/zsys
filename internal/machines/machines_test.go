@@ -156,10 +156,9 @@ func TestIdempotentNew(t *testing.T) {
 func TestBoot(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def              string
-		cmdline          string
-		mountedDataset   string
-		replaceSuffixFor string
+		def            string
+		cmdline        string
+		mountedDataset string
 
 		cloneErr       bool
 		scanErr        bool
@@ -201,21 +200,18 @@ func TestBoot(t *testing.T) {
 
 		// Reverting userdata
 		"Reverting userdata, with children": {def: "m_clone_with_userdata_with_children_reverting.yaml",
-			cmdline:          generateCmdLineWithRevert("rpool/ROOT/ubuntu_1234@snap1"),
-			mountedDataset:   "rpool/ROOT/ubuntu_4242",
-			replaceSuffixFor: "rpool/USERDATA/user1"},
+			cmdline:        generateCmdLineWithRevert("rpool/ROOT/ubuntu_1234@snap1"),
+			mountedDataset: "rpool/ROOT/ubuntu_4242"},
 
 		// Booting on snapshot on real machines
 		"Desktop revert on snapshot": {def: "m_layout1_machines_with_snapshots_clones_reverting.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242"},
 		"Desktop revert on snapshot with userdata revert": {def: "m_layout1_machines_with_snapshots_clones_reverting.yaml",
-			cmdline:          generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"),
-			mountedDataset:   "rpool/ROOT/ubuntu_4242",
-			replaceSuffixFor: "rpool/USERDATA/user1"},
+			cmdline:        generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"),
+			mountedDataset: "rpool/ROOT/ubuntu_4242"},
 		"Server revert on snapshot": {def: "m_layout2_machines_with_snapshots_clones_reverting.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), mountedDataset: "rpool/ROOT/ubuntu_4242"},
 		"Server revert on snapshot with userdata revert": {def: "m_layout2_machines_with_snapshots_clones_reverting.yaml",
-			cmdline:          generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"),
-			mountedDataset:   "rpool/ROOT/ubuntu_4242",
-			replaceSuffixFor: "rpool/USERDATA/user1"},
+			cmdline:        generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"),
+			mountedDataset: "rpool/ROOT/ubuntu_4242"},
 
 		// Error cases
 		"No booted state found does nothing":       {def: "m_layout1_machines_with_snapshots_clones_reverting.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678@snap3"), isNoOp: true},
@@ -239,9 +235,6 @@ func TestBoot(t *testing.T) {
 			lzfs := libzfs.(*zfs.LibZFSMock)
 			if tc.mountedDataset != "" {
 				lzfs.SetDatasetAsMounted(tc.mountedDataset, true)
-			}
-			if tc.replaceSuffixFor != "" {
-				lzfs.SetPredictableSuffixOnClone(tc.replaceSuffixFor)
 			}
 
 			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))

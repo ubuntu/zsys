@@ -78,7 +78,7 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) e
 		}
 	}
 
-	userdataset := filepath.Join(userdatasetRoot, fmt.Sprintf("%s_%s", user, generateID(6)))
+	userdataset := filepath.Join(userdatasetRoot, fmt.Sprintf("%s_%s", user, t.Zfs.GenerateID(6)))
 	if err := t.Create(userdataset, homepath, "on"); err != nil {
 		cancel()
 		return err

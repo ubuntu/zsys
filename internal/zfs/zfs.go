@@ -38,6 +38,7 @@ type LibZFSInterface interface {
 	DatasetOpen(name string) (d DZFSInterface, err error)
 	DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (d DZFSInterface, err error)
 	DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (rd DZFSInterface, err error)
+	GenerateID(length int) string
 }
 
 // DZFSInterface is the interface to use real libzfs Dataset object or in memory mock.
@@ -192,6 +193,11 @@ func (z Zfs) Datasets() []Dataset {
 		r = append(r, *d)
 	}
 	return r
+}
+
+// GenerateID returns from a given length a random string (known in advanced if libzfs mock is used)
+func (z Zfs) GenerateID(length int) string {
+	return z.libzfs.GenerateID(length)
 }
 
 // Transaction is a particular transaction on a Zfs state
