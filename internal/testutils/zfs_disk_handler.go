@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strconv"
 	"sync"
-	"testing"
 	"time"
 
 	libzfs "github.com/bicomsystems/go-libzfs"
@@ -23,7 +22,7 @@ const mB = 1024 * 1024
 type FakePools struct {
 	Pools                []fakePool
 	waitBetweenSnapshots bool
-	t                    *testing.T
+	t                    tester
 	tempPools            []string
 	tempMountpaths       []string
 	tempFiles            []string
@@ -87,7 +86,7 @@ func WithLibZFS(libzfs LibZFSInterface) func(*FakePools) {
 }
 
 // NewFakePools returns a FakePools from a yaml file
-func NewFakePools(t *testing.T, path string, opts ...func(*FakePools)) FakePools {
+func NewFakePools(t tester, path string, opts ...func(*FakePools)) FakePools {
 	pools := FakePools{
 		t:      t,
 		libzfs: &zfs.LibZFSAdapter{},

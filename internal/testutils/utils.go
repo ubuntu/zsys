@@ -4,7 +4,6 @@ import (
 	"flag"
 	"io/ioutil"
 	"os"
-	"testing"
 )
 
 var withSystemZFS *bool
@@ -13,8 +12,16 @@ func init() {
 	withSystemZFS = flag.Bool("with-system-zfs", false, "use system's libzfs to run the tests")
 }
 
+type tester interface {
+	Helper()
+	Error(args ...interface{})
+	Fatal(args ...interface{})
+	Fatalf(format string, args ...interface{})
+	Logf(format string, args ...interface{})
+}
+
 // TempDir creates a temporary directory and returns the created directory and a teardown removal function to defer
-func TempDir(t *testing.T) (string, func()) {
+func TempDir(t tester) (string, func()) {
 	t.Helper()
 
 	dir, err := ioutil.TempDir("", "zsystest-")

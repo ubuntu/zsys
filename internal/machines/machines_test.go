@@ -774,8 +774,12 @@ func getDefaultValue(v, defaultVal string) string {
 	return v
 }
 
+type testhelper interface {
+	Helper()
+}
+
 // TODO: for now, we can only run with mock zfs system
-func getLibZFS(t *testing.T) testutils.LibZFSInterface {
+func getLibZFS(t testhelper) testutils.LibZFSInterface {
 	t.Helper()
 
 	fmt.Println("Running tests with mocked libzfs")
