@@ -696,23 +696,36 @@ func TestChangeHomeOnUserData(t *testing.T) {
 }
 
 func BenchmarkNewDesktop(b *testing.B) {
-	ds := machines.LoadDatasets(b, "m_layout1_machines_with_snapshots_clones.json")
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
+
+	dir, cleanup := testutils.TempDir(b)
+	defer cleanup()
+
+	libzfs := getLibZFS(b)
+	fPools := testutils.NewFakePools(b, filepath.Join("testdata", "m_layout1_machines_with_snapshots_clones.yaml"), testutils.WithLibZFS(libzfs))
+	defer fPools.Create(dir)()
+
 	for n := 0; n < b.N; n++ {
-		machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+		machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
 	}
 }
 
 func BenchmarkNewServer(b *testing.B) {
-	ds := machines.LoadDatasets(b, "m_layout2_machines_with_snapshots_clones.json")
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
+
+	dir, cleanup := testutils.TempDir(b)
+	defer cleanup()
+
+	libzfs := getLibZFS(b)
+	fPools := testutils.NewFakePools(b, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones.yaml"), testutils.WithLibZFS(libzfs))
+	defer fPools.Create(dir)()
+
 	for n := 0; n < b.N; n++ {
-		machines.New(context.Background(), ds, generateCmdLine("rpool/ROOT/ubuntu_5678"))
+		machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
 	}
 }
-*/
 
 // assertMachinesToGolden compares got slice of machines to reference files, based on test name.
 func assertMachinesToGolden(t *testing.T, got machines.Machines) {
