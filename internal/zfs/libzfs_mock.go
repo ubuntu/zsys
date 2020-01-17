@@ -20,6 +20,7 @@ type LibZFSMock struct {
 	datasets map[string]*dZFSMock
 	pools    map[string]libzfs.Pool
 
+	errOnCreate       bool
 	errOnClone        bool
 	errOnPromote      bool
 	errOnScan         bool
@@ -123,6 +124,9 @@ func (l *LibZFSMock) openChildrenFor(dm *dZFSMock) {
 
 // DatasetCreate creates a dataset
 func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
+	if l.errOnCreate {
+		return nil, errors.New("Error on Create requested")
+	}
 	l.mu.Lock()
 	if _, ok := l.datasets[path]; ok {
 		l.mu.Unlock()
@@ -312,6 +316,11 @@ func (l *LibZFSMock) ErrOnScan(shouldErr bool) {
 // ErrOnSetProperty forces a failure of the mock on set property operation
 func (l *LibZFSMock) ErrOnSetProperty(shouldErr bool) {
 	l.errOnSetProperty = shouldErr
+}
+
+// ErrOnCreate forces a failure of the mock on create operation
+func (l *LibZFSMock) ErrOnCreate(shouldErr bool) {
+	l.errOnCreate = shouldErr
 }
 
 // ForceLastUsedTime ensures that any LastUsed property is set to the magic time for reproducibility
