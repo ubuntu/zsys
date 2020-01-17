@@ -3,5 +3,4 @@ pools:
     datasets:
       - name: .
         mountpoint: /home/foo
-        canmount: on
         bootfs_datasets: rpool/ROOT/ubuntu_42

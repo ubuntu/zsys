@@ -9,7 +9,6 @@ import (
 	"sort"
 	"strconv"
 	"sync"
-	"testing"
 	"time"
 
 	libzfs "github.com/bicomsystems/go-libzfs"
@@ -23,7 +22,7 @@ const mB = 1024 * 1024
 type FakePools struct {
 	Pools                []fakePool
 	waitBetweenSnapshots bool
-	t                    *testing.T
+	t                    tester
 	tempPools            []string
 	tempMountpaths       []string
 	tempFiles            []string
@@ -41,6 +40,7 @@ type fakePool struct {
 		LastUsed         time.Time `yaml:"last_used"`
 		LastBootedKernel string    `yaml:"last_booted_kernel"`
 		BootfsDatasets   string    `yaml:"bootfs_datasets"`
+		Origin           string    `yaml:"origin"`
 		Snapshots        orderedSnapshots
 	}
 }
@@ -49,10 +49,10 @@ type orderedSnapshots []struct {
 	Name             string
 	Mountpoint       string
 	CanMount         string
-	ZsysBootfs       string `yaml:"zsys_bootfs"`
-	LastBootedKernel string `yaml:"last_booted_kernel"`
-	BootfsDatasets   string `yaml:"bootfs_datasets"`
-	// LastUsed         time.Time `yaml:"last_used"` Last used will be snapshot creation time, so "now" in tests
+	ZsysBootfs       string     `yaml:"zsys_bootfs"`
+	LastBootedKernel string     `yaml:"last_booted_kernel"`
+	BootfsDatasets   string     `yaml:"bootfs_datasets"`
+	CreationTime     *time.Time `yaml:"creation_time"` // Snapshot creation time, only work for mock usage.
 }
 
 func (s orderedSnapshots) Len() int           { return len(s) }
@@ -86,7 +86,7 @@ func WithLibZFS(libzfs LibZFSInterface) func(*FakePools) {
 }
 
 // NewFakePools returns a FakePools from a yaml file
-func NewFakePools(t *testing.T, path string, opts ...func(*FakePools)) FakePools {
+func NewFakePools(t tester, path string, opts ...func(*FakePools)) FakePools {
 	pools := FakePools{
 		t:      t,
 		libzfs: &zfs.LibZFSAdapter{},
@@ -132,9 +132,10 @@ func (fpools FakePools) cleanup() {
 			fpools.t.Logf("couldn't delete %q: %v", p, err)
 			continue
 		}
-		if UseSystemZFS() {
+		if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
 			pool.Export(true, fmt.Sprintf("Export temporary pool %q", p))
 		}
+
 		pool.Destroy(fmt.Sprintf("Cleanup temporary pool %q", p))
 		pool.Close()
 	}
@@ -215,7 +216,7 @@ func (fpools FakePools) Create(path string) func() {
 					d.SetProperty(libzfs.DatasetPropMountpoint, dataset.Mountpoint)
 				}
 				if dataset.CanMount == "" {
-					dataset.CanMount = "off"
+					dataset.CanMount = "on"
 				}
 				if dataset.CanMount != "-" {
 					d.SetProperty(libzfs.DatasetPropCanmount, dataset.CanMount)
@@ -233,6 +234,12 @@ func (fpools FakePools) Create(path string) func() {
 				if dataset.BootfsDatasets != "" {
 					d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
 				}
+				if dataset.Origin != "" {
+					if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+						fpools.Fatalf("trying to set origin on clone for %q on real ZFS run. This is not possible", datasetName)
+					}
+					d.SetProperty(libzfs.DatasetPropOrigin, dataset.Origin)
+				}
 				d.Close()
 
 				snapshotWG.Add(1)
@@ -246,6 +253,12 @@ func (fpools FakePools) Create(path string) func() {
 							time.Sleep(time.Second)
 						}
 						props := make(map[libzfs.Prop]libzfs.Property)
+						if s.CreationTime != nil {
+							if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+								fpools.Fatalf("trying to set snapshot time for %q on real ZFS run. This is not possible", datasetName)
+							}
+							props[libzfs.DatasetPropCreation] = libzfs.Property{Value: strconv.FormatInt(s.CreationTime.Unix(), 10)}
+						}
 						d, err := fpools.libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)

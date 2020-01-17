@@ -1,0 +1,18 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: a
+        zsys_bootfs: yes
+        last_used: 2020-09-13T12:26:39+00:00
+        mountpoint: /
+        canmount: noauto
+        origin: rpool/b@snap1
+      - name: b
+        zsys_bootfs: yes
+        last_used: 2019-12-31T07:36:17+00:00
+        mountpoint: /
+        snapshots:
+          - name: snap1
+            mountpoint: /:local
+            canmount: on:local
+            creation_time: 2020-05-07T22:01:28+00:00

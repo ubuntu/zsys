@@ -4,4 +4,3 @@ pools:
       - name: .
         last_used: 2019-04-18T02:45:55+00:00
         mountpoint: /home/foo
-        canmount: on

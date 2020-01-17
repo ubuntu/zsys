@@ -33,7 +33,7 @@
    {
       "Name": "rpool/ROOT/ubuntu/inherited",
       "Mountpoint": "/inherited",
-      "CanMount": "off",
+      "CanMount": "on",
       "BootFS": true,
       "LastUsed": 1555555555,
       "Sources": {
@@ -56,7 +56,7 @@
    {
       "Name": "rpool/ROOT/ubuntu2",
       "Mountpoint": "/ROOT/ubuntu2",
-      "CanMount": "off",
+      "CanMount": "on",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local"

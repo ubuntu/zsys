@@ -36,7 +36,7 @@
    {
       "Name": "rpool/ROOT/ubuntu/inherit",
       "Mountpoint": "/inherit",
-      "CanMount": "off",
+      "CanMount": "on",
       "LastUsed": 1555555555,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
       "BootfsDatasets": "something",
@@ -68,7 +68,7 @@
    {
       "Name": "rpool/ROOT/ubuntu/overriden",
       "Mountpoint": "/overriden",
-      "CanMount": "off",
+      "CanMount": "on",
       "BootFS": true,
       "LastUsed": 1544444444,
       "LastBootedKernel": "vmlinuz-4.0.0-0-generic",

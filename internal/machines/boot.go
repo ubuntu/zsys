@@ -50,6 +50,11 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 			cancel()
 			return false, err
 		}
+
+		if err := ms.Refresh(ctx); err != nil {
+			return false, err
+		}
+		m, bootedState = ms.findFromRoot(root)
 	}
 
 	// We don't revert userdata, so we are using main state machine userdata to keep on the same track.
@@ -76,8 +81,12 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 		cancel()
 		return false, err
 	}
-	if ok {
+
+	if ok || hasChanges {
 		hasChanges = true
+		if err := ms.Refresh(ctx); err != nil {
+			return false, err
+		}
 	}
 
 	return hasChanges, nil
@@ -159,6 +168,10 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	}
 	changed = changed || chg
 
+	if err := ms.Refresh(ctx); err != nil {
+		return false, err
+	}
+
 	return changed, nil
 }
 
@@ -216,15 +229,14 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
 	datasetsToClone := getRootDatasets(snapshot.SystemDatasets)
 
-	// Skip bootfs datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
+	// Skip existing datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
 	// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
 	// in case of a real issue.
-	// TODO: should test the clone return value (clone fails on system dataset already exists -> skip, other clone fails -> return error)
+	// Clone fails on system dataset already exists and skipping requested -> ok, other clone fails -> return error
 	for _, n := range datasetsToClone {
-		log.Infof(t.Context(), i18n.G("cloning %q"), n)
+		log.Infof(t.Context(), i18n.G("cloning %q and children"), n)
 		if err := t.Clone(n, suffix, true, true); err != nil {
-			// TODO: transaction fix (as it's now set in error)
-			log.Warningf(t.Context(), i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), n, err)
+			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), n, err)
 		}
 	}
 
@@ -236,7 +248,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	log.Info(t.Context(), i18n.G("Reverting user data"))
 	// Find user datasets attached to the snapshot and clone them
 	// Only root datasets are cloned
-	userDataSuffix := generateID(6)
+	userDataSuffix := t.Zfs.GenerateID(6)
 	var rootUserDatasets []zfs.Dataset
 	for _, d := range snapshot.UserDatasets {
 		parentFound := false
@@ -335,6 +347,8 @@ func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, cu
 
 func promoteDatasets(t *zfs.Transaction, ds []zfs.Dataset) (changed bool, err error) {
 	for _, d := range ds {
+		// Even if we already check for this in Promote(), do an origin check here to only set changed to true
+		// when needed.
 		if d.Origin == "" {
 			continue
 		}

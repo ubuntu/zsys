@@ -123,6 +123,29 @@ func TestNew(t *testing.T) {
 	}
 }
 
+func TestRefresh(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+	dir, cleanup := testutils.TempDir(t)
+	defer cleanup()
+
+	ta := timeAsserter(time.Now())
+	libzfs := getLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"), testutils.WithLibZFS(libzfs))
+	defer fPools.Create(dir)()
+
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+	if err != nil {
+		t.Fatalf("expected no error but got: %v", err)
+	}
+
+	oldZ := *z
+	if err := z.Refresh(context.Background()); err != nil {
+		t.Fatalf("expected no error but got: %v", err)
+	}
+
+	assertDatasetsEquals(t, ta, oldZ.Datasets(), z.Datasets())
+}
+
 func TestCreate(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
@@ -254,11 +277,11 @@ func TestClone(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
 	tests := map[string]struct {
-		def        string
-		dataset    string
-		suffix     string
-		skipBootfs bool
-		recursive  bool
+		def         string
+		dataset     string
+		suffix      string
+		allowExists bool
+		recursive   bool
 
 		wantErr bool
 		isNoOp  bool
@@ -296,7 +319,7 @@ func TestClone(t *testing.T) {
 		"Recursive missing some leaf snapshots":    {def: "layout1_missing_leaf_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true},
 		"Recursive missing intermediate snapshots": {def: "layout1_missing_intermediate_snapshot.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", recursive: true, wantErr: true, isNoOp: true},
 
-		"Allow cloning ignoring zsys bootfs": {def: "layout1_with_bootfs_already_cloned.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", skipBootfs: true, recursive: true},
+		"Existing datasets are skipped when requested": {def: "layout1_with_bootfs_already_cloned.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1", suffix: "5678", allowExists: true, recursive: true},
 
 		"Snapshot doesn't exists":         {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@doesntexists", suffix: "5678", wantErr: true, isNoOp: true},
 		"Dataset doesn't exists":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist@something", suffix: "5678", wantErr: true, isNoOp: true},
@@ -323,7 +346,7 @@ func TestClone(t *testing.T) {
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
-			err = trans.Clone(tc.dataset, tc.suffix, tc.skipBootfs, tc.recursive)
+			err = trans.Clone(tc.dataset, tc.suffix, tc.allowExists, tc.recursive)
 
 			if err != nil && !tc.wantErr {
 				t.Fatalf("expected no error but got: %v", err)
@@ -425,6 +448,81 @@ func TestPromote(t *testing.T) {
 			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 		})
 	}
+}
+
+func TestPromoteCloneTree(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+	dir, cleanup := testutils.TempDir(t)
+	defer cleanup()
+
+	ta := timeAsserter(time.Now())
+	libzfs := getLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_n_clones.yaml"), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
+	defer fPools.Create(dir)()
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+	if err != nil {
+		t.Fatalf("expected no error but got: %v", err)
+	}
+
+	// Scan initial state for no-op
+	trans, _ := z.NewTransaction(context.Background())
+	defer trans.Done()
+
+	err = trans.Clone("rpool/ROOT/ubuntu_1234@snap1", "5678", false, false)
+	assert.NoError(t, err, "error in setup")
+	time.Sleep(time.Second)
+	trans.Snapshot("snap2", "rpool/ROOT/ubuntu_5678", false)
+	assert.NoError(t, err, "error in setup")
+	time.Sleep(time.Second)
+	trans.Snapshot("snap8888", "rpool/ROOT/ubuntu_5678", false)
+	assert.NoError(t, err, "error in setup")
+	err = trans.Clone("rpool/ROOT/ubuntu_5678@snap2", "9876", false, false)
+	assert.NoError(t, err, "error in setup")
+	time.Sleep(time.Second)
+	trans.Snapshot("snap3", "rpool/ROOT/ubuntu_9876", false)
+	assert.NoError(t, err, "error in setup")
+	err = trans.Clone("rpool/ROOT/ubuntu_9876@snap3", "9999", false, false)
+	assert.NoError(t, err, "error in setup")
+	err = trans.Clone("rpool/ROOT/ubuntu_5678@snap8888", "8888", false, false)
+	assert.NoError(t, err, "error in setup")
+
+	err = trans.Promote("rpool/ROOT/ubuntu_9876")
+	if err != nil {
+		t.Fatalf("promoting 9876 failed: %v", err)
+	}
+	for _, d := range z.Datasets() {
+		if d.IsSnapshot || d.Name == "rpool" || d.Name == "rpool/ROOT" {
+			continue
+		}
+
+		if d.Name == "rpool/ROOT/ubuntu_9876" {
+			assert.Equalf(t, "", d.Origin, "Origin of %s should be empty and is set to %s", d.Name, d.Origin)
+		} else {
+			assert.NotEqualf(t, "", d.Origin, "Origin of %s is empty when it shouldn't", d.Name)
+		}
+	}
+
+	zfs.AssertNoZFSChildren(t, z)
+	assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+
+	err = trans.Promote("rpool/ROOT/ubuntu_8888")
+	if err != nil {
+		t.Fatalf("promoting 8888 failed: %v", err)
+	}
+	for _, d := range z.Datasets() {
+		if d.IsSnapshot || d.Name == "rpool" || d.Name == "rpool/ROOT" {
+			continue
+		}
+
+		if d.Name == "rpool/ROOT/ubuntu_8888" {
+			assert.Equalf(t, "", d.Origin, "Origin of %s should be empty and is set to %s", d.Name, d.Origin)
+		} else {
+			assert.NotEqualf(t, "", d.Origin, "Origin of %s is empty when it shouldn't", d.Name)
+		}
+	}
+
+	zfs.AssertNoZFSChildren(t, z)
+	assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
 }
 
 func TestDestroy(t *testing.T) {

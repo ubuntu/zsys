@@ -523,10 +523,24 @@ func (t *nestedTransaction) inverseOrigin(oldOrigDataset, newOrigDataset *Datase
 		// Refresh our global map
 		t.Zfs.allDatasets[s.Name] = s
 		delete(t.Zfs.allDatasets, oldName)
+
+		// Move all datasets which origin depends on that snapshot to the new one
+		for dName, d := range t.Zfs.allDatasets {
+			if d.Origin != oldName || strings.HasPrefix(s.Name, dName+"@") {
+				continue
+			}
+			d.Origin = s.Name
+
+			// Ensure we reloaded the properties of this dataset as the underlying ZFS has changed as well.
+			if err := d.dZFS.ReloadProperties(); err != nil {
+				return fmt.Errorf("cannot Refresh properties for %q: %v", dName, err)
+			}
+		}
 	}
 
+	orig := oldOrigDataset.Origin
 	oldOrigDataset.Origin = baseSnapshot.Name
-	newOrigDataset.Origin = ""
+	newOrigDataset.Origin = orig
 
 	return nil
 }

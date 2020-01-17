@@ -82,17 +82,44 @@ func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) 
 		}
 	}
 
-	machines := Machines{
-		all:     make(map[string]*Machine),
-		cmdline: cmdline,
-	}
-
 	z, err := zfs.New(ctx, zfs.WithLibZFS(args.libzfs))
 	if err != nil {
 		return Machines{}, fmt.Errorf(i18n.G("couldn't scan zfs filesystem"), err)
 	}
-	machines.z = z
 
+	machines := Machines{
+		all:     make(map[string]*Machine),
+		cmdline: cmdline,
+		z:       z,
+	}
+	if err := machines.refresh(ctx); err != nil {
+		return Machines{}, err
+	}
+
+	return machines, nil
+}
+
+// Refresh reloads the list of machines after rescanning zfs datasets state from system
+func (machines *Machines) Refresh(ctx context.Context) error {
+	newMachines := Machines{
+		all:     make(map[string]*Machine),
+		cmdline: machines.cmdline,
+		z:       machines.z,
+	}
+	if err := newMachines.z.Refresh(ctx); err != nil {
+		return err
+	}
+
+	if err := newMachines.refresh(ctx); err != nil {
+		return err
+	}
+
+	*machines = newMachines
+	return nil
+}
+
+// refresh reloads the list of machines, based on already loaded zfs datasets state
+func (machines *Machines) refresh(ctx context.Context) error {
 	// We are going to transform the origin of datasets, get a copy first
 	zDatasets := machines.z.Datasets()
 	datasets := make([]zfs.Dataset, len(zDatasets))
@@ -149,13 +176,13 @@ func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) 
 	// Append unlinked boot datasets to ensure we will switch to noauto everything
 	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
 
-	root, _ := bootParametersFromCmdline(cmdline)
+	root, _ := bootParametersFromCmdline(machines.cmdline)
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
 
 	log.Debugf(ctx, i18n.G("current machines scanning layout:\n"+pp.Sprint(machines)))
 
-	return machines, nil
+	return nil
 }
 
 // triageDatasets attach main system datasets to machines and returns other types of datasets for later triage/attachment.

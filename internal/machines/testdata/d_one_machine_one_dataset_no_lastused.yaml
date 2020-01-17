@@ -1,0 +1,7 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .
+        zsys_bootfs: yes
+        mountpoint: /
+        canmount: on

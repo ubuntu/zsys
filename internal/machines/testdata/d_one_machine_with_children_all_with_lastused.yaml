@@ -1,0 +1,11 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .
+        zsys_bootfs: yes
+        last_used: 2020-09-13T12:26:39+00:00
+        mountpoint: /
+        canmount: on
+      - name: opt
+        mountpoint: /opt
+        last_used: 2019-04-18T02:45:55+00:00

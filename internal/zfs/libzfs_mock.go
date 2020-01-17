@@ -1,6 +1,7 @@
 package zfs
 
 import (
+	"errors"
 	"fmt"
 	"path/filepath"
 	"strconv"
@@ -11,11 +12,20 @@ import (
 	libzfs "github.com/bicomsystems/go-libzfs"
 )
 
+const currentMagicTime = "2000000000"
+
 // LibZFSMock is the mock, in memory implementation of libzfs
 type LibZFSMock struct {
 	mu       sync.RWMutex
 	datasets map[string]*dZFSMock
 	pools    map[string]libzfs.Pool
+
+	errOnCreate       bool
+	errOnClone        bool
+	errOnPromote      bool
+	errOnScan         bool
+	errOnSetProperty  bool
+	forceLastUsedTime bool
 }
 
 // PoolOpen opens given pool
@@ -35,7 +45,9 @@ func (l *LibZFSMock) PoolCreate(name string, vdev libzfs.VDevTree, features map[
 	for i, prop := range props {
 		p.Properties[i] = libzfs.Property{Value: prop}
 	}
+	l.mu.Lock()
 	l.pools[name] = p
+	l.mu.Unlock()
 
 	datasetProps := make(map[libzfs.Prop]libzfs.Property)
 	for i, prop := range fsprops {
@@ -48,6 +60,10 @@ func (l *LibZFSMock) PoolCreate(name string, vdev libzfs.VDevTree, features map[
 
 // DatasetOpenAll opens all the dataset recursively
 func (l *LibZFSMock) DatasetOpenAll() (datasets []DZFSInterface, err error) {
+	if l.errOnScan {
+		return nil, errors.New("Error on DatasetOpenAll requested")
+	}
+
 	// This is the only place where we can clean the global datasets from datasets to remove as libzfs doesn't do that right on Promote.
 	// zfs.New() is calling DatasetOpenAll to load the whole new state from zfs kernel state.
 	for n := range l.pools {
@@ -77,10 +93,10 @@ func (l *LibZFSMock) openChildrenFor(dm *dZFSMock) {
 	name := dm.Dataset.Properties[libzfs.DatasetPropName].Value
 	dm.children = nil
 	dm.Dataset.Children = nil
+	l.mu.RLock()
+	defer l.mu.RUnlock()
 	for k := range l.datasets {
-		l.mu.RLock()
 		d := l.datasets[k]
-		l.mu.RUnlock()
 
 		/* Only consider potential children
 		   Retrieve direct children name from the dataset name with 2 cases to handle for a dataset and a snapshot
@@ -108,6 +124,9 @@ func (l *LibZFSMock) openChildrenFor(dm *dZFSMock) {
 
 // DatasetCreate creates a dataset
 func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
+	if l.errOnCreate {
+		return nil, errors.New("Error on Create requested")
+	}
 	l.mu.Lock()
 	if _, ok := l.datasets[path]; ok {
 		l.mu.Unlock()
@@ -119,12 +138,18 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 	if !strings.Contains(path, "/") && strings.Contains(path, "@") {
 		poolName = strings.Split(path, "@")[0]
 	}
+	l.mu.RLock()
 	if _, ok := l.pools[poolName]; !ok {
 		return nil, fmt.Errorf("pool %q doesn't exists", poolName)
 	}
+	l.mu.RUnlock()
 
+	ctime := fmt.Sprintf("%d", time.Now().Unix())
+	if t, ok := props[libzfs.DatasetPropCreation]; ok {
+		ctime = t.Value
+	}
 	props[libzfs.DatasetPropCreation] = libzfs.Property{
-		Value:  fmt.Sprintf("%d", time.Now().Unix()),
+		Value:  ctime,
 		Source: "none",
 	}
 	props[libzfs.DatasetPropName] = libzfs.Property{Value: path}
@@ -205,7 +230,10 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 	}
 	if hasParent {
 		var found bool
-		for _, c := range parent.children {
+		l.mu.Lock()
+		pc := make([]*dZFSMock, len(parent.children))
+		copy(pc, parent.children)
+		for _, c := range pc {
 			if c == &d {
 				found = true
 				break
@@ -214,6 +242,7 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 		if !found {
 			parent.children = append(parent.children, &d)
 		}
+		l.mu.Unlock()
 	}
 
 	l.mu.Lock()
@@ -257,6 +286,53 @@ func (l *LibZFSMock) createSnapshot(path string, recur bool, props map[libzfs.Pr
 	return d, nil
 }
 
+// SetDatasetAsMounted is a test-only property allowing forcing one dataset to be mounted
+func (l *LibZFSMock) SetDatasetAsMounted(name string, mounted bool) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	d := l.datasets[name]
+	m := "no"
+	if mounted {
+		m = "yes"
+	}
+	d.setPropertyWithSource(libzfs.DatasetPropMounted, m, "")
+}
+
+// ErrOnPromote forces a failure of the mock on clone operation
+func (l *LibZFSMock) ErrOnPromote(shouldErr bool) {
+	l.errOnPromote = shouldErr
+}
+
+// ErrOnClone forces a failure of the mock on clone operation
+func (l *LibZFSMock) ErrOnClone(shouldErr bool) {
+	l.errOnClone = shouldErr
+}
+
+// ErrOnScan forces a failure of the mock on scan operation
+func (l *LibZFSMock) ErrOnScan(shouldErr bool) {
+	l.errOnScan = shouldErr
+}
+
+// ErrOnSetProperty forces a failure of the mock on set property operation
+func (l *LibZFSMock) ErrOnSetProperty(shouldErr bool) {
+	l.errOnSetProperty = shouldErr
+}
+
+// ErrOnCreate forces a failure of the mock on create operation
+func (l *LibZFSMock) ErrOnCreate(shouldErr bool) {
+	l.errOnCreate = shouldErr
+}
+
+// ForceLastUsedTime ensures that any LastUsed property is set to the magic time for reproducibility
+func (l *LibZFSMock) ForceLastUsedTime(force bool) {
+	l.forceLastUsedTime = force
+}
+
+// GenerateID returns from a given length a random string (known in advanced if libzfs mock is used)
+func (*LibZFSMock) GenerateID(length int) string {
+	return strings.Repeat("x", length)
+}
+
 type dZFSMock struct {
 	*libzfs.Dataset
 	children       []*dZFSMock
@@ -296,10 +372,14 @@ func (d dZFSMock) Type() libzfs.DatasetType {
 
 func (d dZFSMock) Clone(target string, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
 	d.assertDatasetOpened()
+	if d.libZFSMock.errOnClone {
+		return nil, errors.New("Error on Clone requested")
+	}
 	props[libzfs.DatasetPropOrigin] = libzfs.Property{
 		Value:  d.Dataset.Properties[libzfs.DatasetPropName].Value,
 		Source: "-",
 	}
+
 	dinterface, err := d.libZFSMock.DatasetCreate(target, libzfs.DatasetTypeFilesystem, props)
 	if err != nil {
 		return nil, err
@@ -331,7 +411,15 @@ func (d dZFSMock) GetUserProperty(p string) (prop libzfs.Property, err error) {
 }
 
 func (d *dZFSMock) SetUserProperty(prop, value string) error {
+	if d.libZFSMock.errOnSetProperty {
+		return errors.New("Error on SetProperty requested")
+	}
 	d.assertDatasetOpened()
+
+	if d.libZFSMock.forceLastUsedTime && prop == LastUsedProp {
+		value = currentMagicTime
+	}
+
 	return d.setUserPropertyWithSource(prop, value, "local")
 }
 
@@ -350,15 +438,22 @@ func (d *dZFSMock) setUserPropertyWithSource(prop, value, source string) error {
 }
 
 func (d *dZFSMock) SetProperty(p libzfs.Prop, value string) error {
+	if d.libZFSMock.errOnSetProperty {
+		return errors.New("Error on SetProperty requested")
+	}
 	d.assertDatasetOpened()
 	return d.setPropertyWithSource(p, value, "local")
 }
 
 func (d *dZFSMock) setPropertyWithSource(p libzfs.Prop, value, source string) error {
+	// Those properties don't propagate to children
+	if p == libzfs.DatasetPropMounted || p == libzfs.DatasetPropOrigin {
+		source = "-"
+	}
+
 	d.Dataset.Properties[p] = libzfs.Property{Value: value, Source: source}
 
-	// This property doesn't propagate to children
-	if p == libzfs.DatasetPropMounted {
+	if source == "-" {
 		return nil
 	}
 
@@ -414,6 +509,9 @@ func (d *dZFSMock) Clones() (clones []string, err error) {
 
 func (d *dZFSMock) Promote() (err error) {
 	d.assertDatasetOpened()
+	if d.libZFSMock.errOnPromote {
+		return errors.New("Error on Promote requested")
+	}
 
 	datasetName := d.Dataset.Properties[libzfs.DatasetPropName].Value
 	origin := d.Dataset.Properties[libzfs.DatasetPropOrigin].Value
@@ -448,6 +546,7 @@ func (d *dZFSMock) Promote() (err error) {
 	}
 	d.libZFSMock.mu.Unlock()
 
+	var newOrig string
 	for _, snap := range snapshotsToMigrate {
 		// Create new snapshots for every snapshots to migrate
 		oldDatasetName := snap.Dataset.Properties[libzfs.DatasetPropName].Value
@@ -470,18 +569,20 @@ func (d *dZFSMock) Promote() (err error) {
 
 		// Old promoted dataset should now point to new one
 		if snap == origSnapshot {
+			newOrig = (*d.libZFSMock.datasets[strings.Split(oldDatasetName, "@")[0]].Properties())[libzfs.DatasetPropOrigin].Value
 			d.libZFSMock.datasets[strings.Split(oldDatasetName, "@")[0]].tempOrigin = newName
 		}
 
 		// All datasets pointing to those snapshots to Migrate should point to new snapshots
 		d.libZFSMock.mu.Lock()
-		for _, ds := range d.libZFSMock.datasets {
+		for dName, ds := range d.libZFSMock.datasets {
 			if ds.IsSnapshot() {
 				continue
 			}
-			if ds.Dataset.Properties[libzfs.DatasetPropOrigin].Value == oldDatasetName {
-				ds.tempOrigin = newName
+			if ds.Dataset.Properties[libzfs.DatasetPropOrigin].Value != oldDatasetName || strings.HasPrefix(newName, dName+"@") {
+				continue
 			}
+			ds.tempOrigin = newName
 		}
 		d.libZFSMock.mu.Unlock()
 
@@ -491,9 +592,11 @@ func (d *dZFSMock) Promote() (err error) {
 		d.libZFSMock.mu.Unlock()
 	}
 
-	// Reset promoted snapshot (real is calling ReloadProperties right away on d only)
-	d.Dataset.Properties[libzfs.DatasetPropOrigin] = libzfs.Property{Source: "-"}
-
+	// Reset promoted snapshot. This simulates ReloadProperties called only on this dataset in libzfz
+	d.Dataset.Properties[libzfs.DatasetPropOrigin] = libzfs.Property{
+		Value:  newOrig,
+		Source: "-",
+	}
 	return nil
 }
 

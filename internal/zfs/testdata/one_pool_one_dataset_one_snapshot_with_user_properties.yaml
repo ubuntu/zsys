@@ -7,7 +7,6 @@ pools:
         last_booted_kernel: vmlinuz-5.2.0-8-generic
         bootfs_datasets: something
         mountpoint: /
-        canmount: on
         snapshots:
           - name: snap1
             zsys_bootfs: yes:local

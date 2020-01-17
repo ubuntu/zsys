@@ -2,17 +2,17 @@ pools:
   - name: rpool
     datasets:
       - name: ROOT
+        canmount: off
       - name: ROOT/ubuntu
         zsys_bootfs: yes
         last_used: 2019-04-18T02:45:55+00:00
         mountpoint: /
-        canmount: on
   - name: bpool
     datasets:
       - name: BOOT
+        canmount: off
       - name: BOOT/boot
         zsys_bootfs: yes
         last_used: 2019-04-18T02:45:55+00:00
         mountpoint: /boot
-        canmount: on
 
