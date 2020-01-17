@@ -1,0 +1,32 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: ROOT
+        canmount: off
+      - name: ROOT/ubuntu
+        zsys_bootfs: yes
+        last_used: 2019-04-18T02:45:55+00:00
+        mountpoint: /
+        origin: rpool/ROOT/ubuntu_5678@snap1
+      - name: ROOT/ubuntu/opt
+        mountpoint: /opt
+        origin: rpool/ROOT/ubuntu_5678/opt@snap1
+      - name: ROOT/ubuntu_5678
+        zsys_bootfs: yes
+        last_used: 2019-12-31T07:36:17+00:00
+        mountpoint: /
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
+            creation_time: 2018-12-10T12:20:44+00:00
+      - name: ROOT/ubuntu_5678/opt
+        mountpoint: /opt
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            mountpoint: /opt:inherited
+            canmount: on:local
+            creation_time: 2018-12-10T12:20:44+00:00

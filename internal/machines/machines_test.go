@@ -391,7 +391,6 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	assertMachinesEquals(t, ms1, ms2)
 }
 
-/*
 func TestCommit(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
@@ -402,62 +401,70 @@ func TestCommit(t *testing.T) {
 		setPropertyErr bool
 		promoteErr     bool
 
-		wantSignalNoChange bool
-		wantErr            bool
-		isNoOp             bool
+		wantNoChange bool
+		wantErr      bool
+		isNoOp       bool
 	}{
-		"One machine, commit one clone":                      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool_clone")},
-		"One machine, commit current":                        {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool")},
-		"One machine, update LastUsed but same kernel":       {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-5.2.0-8-generic"), wantSignalNoChange: true},
-		"One machine, update LastUsed and Kernel":            {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
-		"One machine, set LastUsed and Kernel basename":      {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
-		"One machine, Kernel basename with already basename": {def: "d_one_machine_with_clone_to_promote.json", cmdline: generateCmdLine("rpool BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
-		"One machine non zsys":                               {def: "d_one_machine_one_dataset_non_zsys.json", cmdline: generateCmdLine("rpool"), isNoOp: true, wantSignalNoChange: true},
-		"One machine no match":                               {def: "d_one_machine_one_dataset.json", cmdline: generateCmdLine("rpoolfake"), isNoOp: true, wantSignalNoChange: true},
+		"One machine, commit one clone":                      {def: "d_one_machine_with_clone_to_promote.yaml", cmdline: generateCmdLine("rpool/clone")},
+		"One machine, commit current":                        {def: "d_one_machine_with_clone_dataset.yaml", cmdline: generateCmdLine("rpool/main")},
+		"One machine, update LastUsed but same kernel":       {def: "d_one_machine_with_clone_dataset.yaml", cmdline: generateCmdLine("rpool/main BOOT_IMAGE=vmlinuz-5.2.0-8-generic"), wantNoChange: true},
+		"One machine, update LastUsed and Kernel":            {def: "d_one_machine_with_clone_dataset.yaml", cmdline: generateCmdLine("rpool/main BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
+		"One machine, set LastUsed and Kernel basename":      {def: "d_one_machine_with_clone_to_promote.yaml", cmdline: generateCmdLine("rpool/clone BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
+		"One machine, Kernel basename with already basename": {def: "d_one_machine_with_clone_to_promote.yaml", cmdline: generateCmdLine("rpool/clone BOOT_IMAGE=vmlinuz-9.9.9-9-generic")},
+		"One machine non zsys":                               {def: "d_one_machine_one_dataset_non_zsys.yaml", cmdline: generateCmdLine("rpool"), isNoOp: true, wantNoChange: true},
+		"One machine no match":                               {def: "d_one_machine_one_dataset.yaml", cmdline: generateCmdLine("rpoolfake"), isNoOp: true, wantNoChange: true},
 
-		"One machine with children":                                       {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"One machine with children, LastUsed and kernel basename on root": {def: "m_clone_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678 BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
-		"Without suffix": {def: "m_main_dataset_without_suffix_and_clone_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu")},
+		"One machine with children":                                       {def: "m_clone_with_children_to_promote.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"One machine with children, LastUsed and kernel basename on root": {def: "m_clone_with_children_to_promote.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678 BOOT_IMAGE=/boot/vmlinuz-9.9.9-9-generic")},
+		"Without suffix": {def: "m_main_dataset_without_suffix_and_clone_to_promote.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu")},
 
-		"Separate user dataset, no user revert":                                {def: "m_clone_with_userdata_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"Separate user dataset with children, no user revert":                  {def: "m_clone_with_userdata_with_children_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"Separate user dataset with children manually created, no user revert": {def: "m_clone_with_userdata_with_children_manually_created_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"Separate user dataset, user revert":                                   {def: "m_clone_with_userdata_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
-		"Separate user dataset with children, user revert":                     {def: "m_clone_with_userdata_with_children_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
-		"Separate user dataset with children manually created, user revert":    {def: "m_clone_with_userdata_with_children_manually_created_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset, no user revert":                                {def: "m_clone_with_userdata_to_promote_no_user_revert.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children, no user revert":                  {def: "m_clone_with_userdata_with_children_to_promote_no_user_revert.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children manually created, no user revert": {def: "m_clone_with_userdata_with_children_manually_created_to_promote_no_user_revert.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset, user revert":                                   {def: "m_clone_with_userdata_to_promote_user_revert.yaml", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children, user revert":                     {def: "m_clone_with_userdata_with_children_to_promote_user_revert.yaml", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
+		"Separate user dataset with children manually created, user revert":    {def: "m_clone_with_userdata_with_children_manually_created_to_promote_user_revert.yaml", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678")},
 
-		"Separate boot":                                {def: "m_clone_with_separate_boot_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"Separate boot with children":                  {def: "m_clone_with_separate_boot_with_children_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
-		"Separate boot with children manually created": {def: "m_clone_with_separate_boot_with_children_manually_created_to_promote.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate boot":                                {def: "m_clone_with_separate_boot_to_promote.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate boot with children":                  {def: "m_clone_with_separate_boot_with_children_to_promote.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
+		"Separate boot with children manually created": {def: "m_clone_with_separate_boot_with_children_manually_created_to_promote.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
 
 		// Real machines
-		"Desktop without user revert": {def: "m_layout1_machines_with_snapshots_clones_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9876")},
-		"Desktop with user revert":    {def: "m_layout1_machines_with_snapshots_clones_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_9876")},
-		"Server without user revert":  {def: "m_layout2_machines_with_snapshots_clones_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9876")},
-		"Server with user revert":     {def: "m_layout2_machines_with_snapshots_clones_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_9876")},
+		"Desktop without user revert": {def: "m_layout1_machines_with_snapshots_clones_no_user_revert.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9876")},
+		"Desktop with user revert":    {def: "m_layout1_machines_with_snapshots_clones_user_revert.yaml", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_9876")},
+		"Server without user revert":  {def: "m_layout2_machines_with_snapshots_clones_no_user_revert.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9876")},
+		"Server with user revert":     {def: "m_layout2_machines_with_snapshots_clones_user_revert.yaml", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_9876")},
 
 		// Error cases
-		"SetProperty fails (first)":  {def: "m_clone_with_userdata_with_children_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678"), setPropertyErr: true, wantErr: true},
-		"SetProperty fails (second)": {def: "m_clone_with_userdata_to_promote_no_user_revert.json", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678"), setPropertyErr: true, wantErr: true},
-		"Promote fails":              {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool_clone"), promoteErr: true, wantErr: true},
-		"Promote userdata fails":     {def: "m_clone_with_userdata_to_promote_user_revert.json", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"), promoteErr: true, wantErr: true},
-		"Scan fails":                 {def: "d_one_machine_with_clone_dataset.json", cmdline: generateCmdLine("rpool"), scanErr: true, wantErr: true},
+		"SetProperty fails (first)":  {def: "m_clone_with_userdata_with_children_to_promote_no_user_revert.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678"), setPropertyErr: true, wantErr: true},
+		"SetProperty fails (second)": {def: "m_clone_with_userdata_to_promote_no_user_revert.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678"), setPropertyErr: true, wantErr: true},
+		"Promote fails":              {def: "d_one_machine_with_clone_dataset.yaml", cmdline: generateCmdLine("rpool/clone"), promoteErr: true, wantErr: true},
+		"Promote userdata fails":     {def: "m_clone_with_userdata_to_promote_user_revert.yaml", cmdline: generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"), promoteErr: true, wantErr: true},
+		"Scan fails":                 {def: "d_one_machine_with_clone_dataset.yaml", cmdline: generateCmdLine("rpool/main"), scanErr: true, wantErr: true},
 	}
 	for name, tc := range tests {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			ds := machines.LoadDatasets(t, tc.def)
-			z := NewZfsMock(ds, "", "", false, false, tc.scanErr, tc.setPropertyErr, tc.promoteErr)
-			// Do the Scan() manually, as we don't wan't to suffer from scanErr
-			var datasets []zfs.Dataset
-			for _, d := range z.d {
-				datasets = append(datasets, *d)
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
 			}
-			initMachines := machines.New(context.Background(), datasets, tc.cmdline)
+			lzfs := libzfs.(*zfs.LibZFSMock)
+
+			lzfs.ErrOnScan(tc.scanErr)
+			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+			lzfs.ErrOnPromote(tc.promoteErr)
+			lzfs.ForceLastUsedTime(true)
 			ms := initMachines
 
-			hasChanged, err := ms.Commit(z)
+			hasChanged, err := ms.Commit(context.Background())
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -468,9 +475,7 @@ func TestCommit(t *testing.T) {
 				t.Fatal("expected an error but got none")
 			}
 
-			if tc.wantSignalNoChange != !hasChanged {
-				t.Errorf("expected signalling change=%v, but got: %v", !tc.wantSignalNoChange, hasChanged)
-			}
+			assert.Equal(t, !tc.wantNoChange, hasChanged, "change returned signal")
 			if tc.isNoOp {
 				assertMachinesEquals(t, initMachines, ms)
 			} else {
@@ -478,48 +483,51 @@ func TestCommit(t *testing.T) {
 				assertMachinesNotEquals(t, initMachines, ms)
 			}
 
-			datasets, err = z.Scan()
+			machinesAfterRescan, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
-				t.Fatal("couldn't rescan before checking final state:", err)
+				t.Error("expected success but got an error scanning for machines", err)
 			}
-			machinesAfterRescan := machines.New(context.Background(), datasets, tc.cmdline)
 			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
 }
 
-/*
-
 func TestIdempotentCommit(t *testing.T) {
 	t.Parallel()
-	ds := machines.LoadDatasets(t, "m_layout2_machines_with_snapshots_clones_no_user_revert.json")
-	z := NewZfsMock(ds, "", "", false, false, false, false, false)
-	datasets, err := z.Scan()
-	if err != nil {
-		t.Fatal("couldn't scan for initial state:", err)
-	}
-	ms1 := machines.New(context.Background(), datasets, generateCmdLine("rpool/ROOT/ubuntu_9876"))
+	dir, cleanup := testutils.TempDir(t)
+	defer cleanup()
 
-	changed, err := ms1.Commit(z)
+	libzfs := getLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones_no_user_revert.yaml"), testutils.WithLibZFS(libzfs))
+	defer fPools.Create(dir)()
+
+	lzfs := libzfs.(*zfs.LibZFSMock)
+	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_9876", true)
+	lzfs.ForceLastUsedTime(true)
+
+	ms1, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_9876"), machines.WithLibZFS(libzfs))
+	if err != nil {
+		t.Error("expected success but got an error at first scan on machines", err)
+	}
+
+	hasChanged, err := ms1.Commit(context.Background())
 	if err != nil {
 		t.Fatal("first commit failed:", err)
 	}
-	if !changed {
-		t.Fatal("expected first commit to signal a changed, but got false")
-	}
+	assert.True(t, hasChanged, "expected first commit to signal a change, but got false")
+
 	ms2 := ms1
 
-	changed, err = ms2.Commit(z)
+	hasChanged, err = ms2.Commit(context.Background())
 	if err != nil {
 		t.Fatal("second commit failed:", err)
 	}
-	if changed {
-		t.Fatal("expected second commit to signal no change, but got true")
-	}
+	assert.False(t, hasChanged, "expected second commit to signal no change, but got true")
 
 	assertMachinesEquals(t, ms1, ms2)
 }
 
+/*
 func TestCreateUserData(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {

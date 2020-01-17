@@ -1,0 +1,349 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .
+        canmount: off
+        mountpoint: /
+      - name: ROOT
+        canmount: off
+      - name: ROOT/ubuntu_1234
+        zsys_bootfs: yes
+        last_used: 2020-09-13T12:26:39+00:00
+        last_booted_kernel: vmlinuz-5.2.0-0-generic
+        mountpoint: /
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:local
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-2-generic:local
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_1234/var
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: yes:inherited
+            mountpoint: /var:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: yes:inherited
+            mountpoint: /var:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_1234/var/lib
+        canmount: off
+        zsys_bootfs: no
+        snapshots:
+          - name: snap1
+            zsys_bootfs: no:local
+            mountpoint: /var/lib:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: no:local
+            mountpoint: /var/lib:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_1234/var/lib/AccountsService
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/AccountsService:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/AccountsService:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_1234/var/lib/apt
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/apt:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/apt:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_1234/var/lib/aptitude
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/aptitude:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/aptitude:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_1234/var/lib/dpkg
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/dpkg:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/dpkg:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_1234/var/lib/NetworkManager
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/NetworkManager:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.1.0-1-generic:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/NetworkManager:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.2.0-0-generic:inherited
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: ROOT/ubuntu_5678
+        zsys_bootfs: yes
+        last_used: 2018-08-03T21:55:33+00:00
+        last_booted_kernel: vmlinuz-5.0.0-0-generic
+        mountpoint: /
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:local
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_5678/var
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234/var@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: yes:inherited
+            mountpoint: /var:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_5678/var/lib
+        canmount: off
+        zsys_bootfs: no
+        origin: rpool/ROOT/ubuntu_1234/var/lib@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: no:local
+            mountpoint: /var/lib:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_5678/var/lib/AccountsService
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/AccountsService:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_5678/var/lib/apt
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234/var/lib/apt@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/apt:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_5678/var/lib/aptitude
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/aptitude:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_5678/var/lib/dpkg
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/dpkg:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_5678/var/lib/NetworkManager
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap2
+        snapshots:
+          - name: snap3
+            zsys_bootfs: no:inherited
+            mountpoint: /var/lib/NetworkManager:inherited
+            canmount: on:local
+            last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: ROOT/ubuntu_9876
+        zsys_bootfs: yes
+        mountpoint: /
+        origin: rpool/ROOT/ubuntu_5678@snap3
+      - name: ROOT/ubuntu_9876/var
+        origin: rpool/ROOT/ubuntu_5678/var@snap3
+      - name: ROOT/ubuntu_9876/var/lib
+        zsys_bootfs: no
+        canmount: off
+        origin: rpool/ROOT/ubuntu_5678/var/lib@snap3
+      - name: ROOT/ubuntu_9876/var/lib/AccountsService
+        origin: rpool/ROOT/ubuntu_5678/var/lib/AccountsService@snap3
+      - name: ROOT/ubuntu_9876/var/lib/apt
+        origin: rpool/ROOT/ubuntu_5678/var/lib/apt@snap3
+      - name: ROOT/ubuntu_9876/var/lib/aptitude
+        origin: rpool/ROOT/ubuntu_5678/var/lib/aptitude@snap3
+      - name: ROOT/ubuntu_9876/var/lib/dpkg
+        origin: rpool/ROOT/ubuntu_5678/var/lib/dpkg@snap3
+      - name: ROOT/ubuntu_9876/var/lib/NetworkManager
+        origin: rpool/ROOT/ubuntu_5678/var/lib/NetworkManager@snap3
+      - name: ROOT/ubuntu_9999
+        zsys_bootfs: yes
+        last_used: 2019-04-18T02:45:55+00:00
+        last_booted_kernel: vmlinuz-5.0.9-0-generic
+        mountpoint: /
+        canmount: noauto
+      - name: ROOT/ubuntu_9999/var
+        canmount: noauto
+      - name: ROOT/ubuntu_9999/var/lib
+        canmount: off
+        zsys_bootfs: no
+      - name: ROOT/ubuntu_9999/var/lib/AccountsService
+        canmount: noauto
+      - name: ROOT/ubuntu_9999/var/lib/apt
+        canmount: noauto
+      - name: ROOT/ubuntu_9999/var/lib/aptitude
+        canmount: noauto
+      - name: ROOT/ubuntu_9999/var/lib/dpkg
+        canmount: noauto
+      - name: ROOT/ubuntu_9999/var/lib/NetworkManager
+        canmount: noauto
+      - name: srv
+      - name: var
+        canmount: off
+      - name: var/games
+      - name: var/lib
+      - name: var/log
+      - name: var/mail
+      - name: var/snap
+      - name: var/spool
+      - name: var/www
+      - name: USERDATA
+        canmount: off
+      - name: USERDATA/user1_abcd
+        mountpoint: /home/user1
+        canmount: noauto
+        bootfs_datasets: rpool/ROOT/ubuntu_1234
+        last_used: 2018-12-10T12:20:44+00:00
+        snapshots:
+          - name: snap1
+            mountpoint: /home/user1:local
+            canmount: on:local
+            bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+            creation_time: 2020-05-07T22:01:28+00:00
+      - name: USERDATA/user1_efgh
+        mountpoint: /home/user1
+        bootfs_datasets: rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678
+        last_used: 2018-12-10T12:20:44+00:00
+        origin: rpool/USERDATA/user1_abcd@snap1
+        snapshots:
+          - name: snap2
+            mountpoint: /home/user1:local
+            canmount: on:local
+            bootfs_datasets: rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678:local
+            creation_time: 2019-12-31T07:36:17+00:00
+          - name: snap3
+            mountpoint: /home/user1:local
+            canmount: on:local
+            bootfs_datasets: rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678:local
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: USERDATA/user2_aaaa
+        canmount: noauto
+        mountpoint: /home/user2
+        bootfs_datasets: rpool/ROOT/ubuntu_9999
+        last_used: 2018-12-10T12:20:44+00:00
+      - name: USERDATA/root_bcde
+        mountpoint: /root
+        canmount: noauto
+        bootfs_datasets: rpool/ROOT/ubuntu_1234
+        last_used: 2018-08-03T21:55:33+00:00
+        snapshots:
+          - name: snap1
+            mountpoint: /root:local
+            canmount: on:local
+            bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+            creation_time: 2020-05-07T22:01:28+00:00
+  - name: bpool
+    datasets:
+      - name: .
+        canmount: off
+        mountpoint: /boot
+      - name: BOOT
+        canmount: off
+      - name: BOOT/ubuntu_1234
+        mountpoint: /boot
+        canmount: noauto
+        snapshots:
+          - name: snap1
+            mountpoint: /boot:local
+            canmount: on:local
+            creation_time: 2020-05-07T22:01:28+00:00
+          - name: snap2
+            mountpoint: /boot:local
+            canmount: on:local
+            creation_time: 2019-12-31T07:36:17+00:00
+      - name: BOOT/ubuntu_5678
+        mountpoint: /boot
+        canmount: noauto
+        origin: bpool/BOOT/ubuntu_1234@snap2
+        snapshots:
+          - name: snap3
+            mountpoint: /boot:local
+            canmount: on:local
+            creation_time: 2018-03-28T07:30:22+00:00
+      - name: BOOT/ubuntu_9876
+        mountpoint: /boot
+        origin: bpool/BOOT/ubuntu_5678@snap3
+      - name: BOOT/ubuntu_9999
+        mountpoint: /boot
+        canmount: noauto
+
