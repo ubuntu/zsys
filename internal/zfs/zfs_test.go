@@ -458,7 +458,6 @@ func TestPromoteCloneTree(t *testing.T) {
 	ta := timeAsserter(time.Now())
 	libzfs := getLibZFS(t)
 	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_n_clones.yaml"), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
-	//fPools.Create(dir)
 	defer fPools.Create(dir)()
 	z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
 	if err != nil {
