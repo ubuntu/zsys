@@ -543,6 +543,7 @@ func (d *dZFSMock) Promote() (err error) {
 	}
 	d.libZFSMock.mu.Unlock()
 
+	var newOrig string
 	for _, snap := range snapshotsToMigrate {
 		// Create new snapshots for every snapshots to migrate
 		oldDatasetName := snap.Dataset.Properties[libzfs.DatasetPropName].Value
@@ -565,18 +566,20 @@ func (d *dZFSMock) Promote() (err error) {
 
 		// Old promoted dataset should now point to new one
 		if snap == origSnapshot {
+			newOrig = (*d.libZFSMock.datasets[strings.Split(oldDatasetName, "@")[0]].Properties())[libzfs.DatasetPropOrigin].Value
 			d.libZFSMock.datasets[strings.Split(oldDatasetName, "@")[0]].tempOrigin = newName
 		}
 
 		// All datasets pointing to those snapshots to Migrate should point to new snapshots
 		d.libZFSMock.mu.Lock()
-		for _, ds := range d.libZFSMock.datasets {
+		for dName, ds := range d.libZFSMock.datasets {
 			if ds.IsSnapshot() {
 				continue
 			}
-			if ds.Dataset.Properties[libzfs.DatasetPropOrigin].Value == oldDatasetName {
-				ds.tempOrigin = newName
+			if ds.Dataset.Properties[libzfs.DatasetPropOrigin].Value != oldDatasetName || strings.HasPrefix(newName, dName+"@") {
+				continue
 			}
+			ds.tempOrigin = newName
 		}
 		d.libZFSMock.mu.Unlock()
 
@@ -586,9 +589,11 @@ func (d *dZFSMock) Promote() (err error) {
 		d.libZFSMock.mu.Unlock()
 	}
 
-	// Reset promoted snapshot (real is calling ReloadProperties right away on d only)
-	d.Dataset.Properties[libzfs.DatasetPropOrigin] = libzfs.Property{Source: "-"}
-
+	// Reset promoted snapshot. This simulates ReloadProperties called only on this dataset in libzfz
+	d.Dataset.Properties[libzfs.DatasetPropOrigin] = libzfs.Property{
+		Value:  newOrig,
+		Source: "-",
+	}
 	return nil
 }
 
