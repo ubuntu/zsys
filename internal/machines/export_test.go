@@ -15,8 +15,8 @@ type MachinesTest struct {
 	Cmdline           string              `json:",omitempty"`
 	Current           *Machine            `json:",omitempty"`
 	NextState         *State              `json:",omitempty"`
-	AllSystemDatasets []zfs.Dataset       `json:",omitempty"`
-	AllUsersDatasets  []zfs.Dataset       `json:",omitempty"`
+	AllSystemDatasets []*zfs.Dataset      `json:",omitempty"`
+	AllUsersDatasets  []*zfs.Dataset      `json:",omitempty"`
 }
 
 // Export for json Marshmalling all private fields

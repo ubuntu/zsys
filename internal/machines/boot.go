@@ -176,12 +176,12 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 }
 
 // diffDatasets returns datasets in a that aren't in b
-func diffDatasets(a, b []zfs.Dataset) []zfs.Dataset {
+func diffDatasets(a, b []*zfs.Dataset) []*zfs.Dataset {
 	mb := make(map[string]struct{}, len(b))
 	for _, x := range b {
 		mb[x.Name] = struct{}{}
 	}
-	var diff []zfs.Dataset
+	var diff []*zfs.Dataset
 	for _, x := range a {
 		if _, found := mb[x.Name]; !found {
 			diff = append(diff, x)
@@ -200,7 +200,7 @@ func splitSnapshotName(name string) (string, string) {
 }
 
 // getRootDatasets returns the name of any independent root datasets from a list
-func getRootDatasets(ds []zfs.Dataset) (rds []string) {
+func getRootDatasets(ds []*zfs.Dataset) (rds []string) {
 	for _, n := range ds {
 		var found bool
 		for _, rootName := range rds {
@@ -249,7 +249,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// Find user datasets attached to the snapshot and clone them
 	// Only root datasets are cloned
 	userDataSuffix := t.Zfs.GenerateID(6)
-	var rootUserDatasets []zfs.Dataset
+	var rootUserDatasets []*zfs.Dataset
 	for _, d := range snapshot.UserDatasets {
 		parentFound := false
 		for _, r := range rootUserDatasets {
@@ -278,7 +278,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	return nil
 }
 
-func switchDatasetsCanMount(t *zfs.Transaction, ds []zfs.Dataset, canMount string) (hasChanges bool, err error) {
+func switchDatasetsCanMount(t *zfs.Transaction, ds []*zfs.Dataset, canMount string) (hasChanges bool, err error) {
 	// Only handle on and noauto datasets, not off
 	initialCanMount := "on"
 	if canMount == "on" {
@@ -300,7 +300,7 @@ func switchDatasetsCanMount(t *zfs.Transaction, ds []zfs.Dataset, canMount strin
 }
 
 // switchUsersDatasetsTags tags and untags users datasets to associate with current main system dataset id.
-func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, currentUsersDatasets []zfs.Dataset) error {
+func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, currentUsersDatasets []*zfs.Dataset) error {
 	// Untag non attached userdatasets
 	for _, d := range diffDatasets(allUsersDatasets, currentUsersDatasets) {
 		if d.IsSnapshot {
@@ -345,7 +345,7 @@ func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, cu
 	return nil
 }
 
-func promoteDatasets(t *zfs.Transaction, ds []zfs.Dataset) (changed bool, err error) {
+func promoteDatasets(t *zfs.Transaction, ds []*zfs.Dataset) (changed bool, err error) {
 	for _, d := range ds {
 		// Even if we already check for this in Promote(), do an origin check here to only set changed to true
 		// when needed.
