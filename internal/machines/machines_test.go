@@ -741,8 +741,8 @@ func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	m1.ResetForCmp()
-	m2.ResetForCmp()
+	m1.MakeComparable()
+	m2.MakeComparable()
 
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),
@@ -755,8 +755,8 @@ func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	m1.ResetForCmp()
-	m2.ResetForCmp()
+	m1.MakeComparable()
+	m2.MakeComparable()
 
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),
