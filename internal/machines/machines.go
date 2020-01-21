@@ -118,19 +118,26 @@ func (machines *Machines) Refresh(ctx context.Context) error {
 	return nil
 }
 
+type originAndChildren struct {
+	origin   string
+	children []*zfs.Dataset
+}
+
 // refresh reloads the list of machines, based on already loaded zfs datasets state
 func (machines *Machines) refresh(ctx context.Context) error {
 	// We are going to transform the origin of datasets, get a copy first
 	zDatasets := machines.z.Datasets()
-	datasets := make([]zfs.Dataset, len(zDatasets))
-	copy(datasets, zDatasets)
+	datasets := make([]*zfs.Dataset, 0, len(zDatasets))
+	for i := range zDatasets {
+		datasets = append(datasets, &zDatasets[i])
+	}
 
 	// Sort datasets so that children datasets are after their parents.
 	sortedDataset := sortedDataset(datasets)
 	sort.Sort(sortedDataset)
 
 	// Resolve out to its root origin for /, /boot* and user datasets
-	origins := resolveOrigin(ctx, []zfs.Dataset(sortedDataset))
+	origins := resolveOrigin(ctx, []*zfs.Dataset(sortedDataset), "/")
 
 	// First, set main datasets, then set clones
 	mainDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
@@ -138,13 +145,13 @@ func (machines *Machines) refresh(ctx context.Context) error {
 	otherDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
 	for _, d := range sortedDataset {
 		if origins[d.Name] == nil {
-			otherDatasets = append(otherDatasets, d)
+			otherDatasets = append(otherDatasets, *d)
 			continue
 		}
 		if *origins[d.Name] == "" {
-			mainDatasets = append(mainDatasets, d)
+			mainDatasets = append(mainDatasets, *d)
 		} else {
-			cloneDatasets = append(cloneDatasets, d)
+			cloneDatasets = append(cloneDatasets, *d)
 		}
 	}
 

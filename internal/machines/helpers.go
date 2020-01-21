@@ -12,7 +12,7 @@ import (
 )
 
 // sortDataset enables sorting a slice of Dataset elements.
-type sortedDataset []zfs.Dataset
+type sortedDataset []*zfs.Dataset
 
 func (s sortedDataset) Len() int { return len(s) }
 func (s sortedDataset) Less(i, j int) bool {
@@ -73,11 +73,11 @@ nextUserData:
 }
 
 // resolveOrigin iterates over each datasets up to their true origin and replaces them.
-// This is only done for / as it's the deduplication we are interested in.
-func resolveOrigin(ctx context.Context, datasets []zfs.Dataset) map[string]*string {
+// This is only done for onlyOnMountpoint if not empty to limit the interest of deduplication we are interested in.
+func resolveOrigin(ctx context.Context, datasets []*zfs.Dataset, onlyOnMountpoint string) map[string]*string {
 	r := make(map[string]*string)
 	for _, curDataset := range datasets {
-		if curDataset.Mountpoint != "/" || curDataset.CanMount == "off" {
+		if (onlyOnMountpoint != "" && curDataset.Mountpoint != onlyOnMountpoint) || curDataset.CanMount == "off" {
 			continue
 		}
 
