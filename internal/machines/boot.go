@@ -199,25 +199,6 @@ func splitSnapshotName(name string) (string, string) {
 	return name[:i], name[i+1:]
 }
 
-// getRootDatasets returns the name of any independent root datasets from a list
-func getRootDatasets(ds []*zfs.Dataset) (rds []string) {
-	for _, n := range ds {
-		var found bool
-		for _, rootName := range rds {
-			base, _ := splitSnapshotName(rootName)
-			if strings.HasPrefix(n.Name, base+"/") {
-				found = true
-			}
-		}
-		if found {
-			continue
-		}
-		rds = append(rds, n.Name)
-	}
-
-	return rds
-}
-
 func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, needCreateUserDatas bool) error {
 	// get current generated suffix by initramfs
 	j := strings.LastIndex(bootedStateID, "_")
@@ -227,16 +208,16 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	suffix := bootedStateID[j+1:]
 
 	// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
-	datasetsToClone := getRootDatasets(snapshot.SystemDatasets)
+	datasetsToClone := getRootDatasets(t.Context(), snapshot.SystemDatasets)
 
 	// Skip existing datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
 	// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
 	// in case of a real issue.
 	// Clone fails on system dataset already exists and skipping requested -> ok, other clone fails -> return error
-	for _, n := range datasetsToClone {
-		log.Infof(t.Context(), i18n.G("cloning %q and children"), n)
-		if err := t.Clone(n, suffix, true, true); err != nil {
-			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), n, err)
+	for d := range datasetsToClone {
+		log.Infof(t.Context(), i18n.G("cloning %q and children"), d.Name)
+		if err := t.Clone(d.Name, suffix, true, true); err != nil {
+			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), d.Name, err)
 		}
 	}
 

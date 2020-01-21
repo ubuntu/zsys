@@ -49,6 +49,29 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 	return false, err
 }
 
+func getRootDatasets(ctx context.Context, ds []*zfs.Dataset) (rds map[*zfs.Dataset][]*zfs.Dataset) {
+	rds = make(map[*zfs.Dataset][]*zfs.Dataset)
+nextUserData:
+	for _, d := range ds {
+		if d.CanMount == "off" {
+			continue
+		}
+		for r := range rds {
+			ok, err := isChild(r.Name, *d)
+			if err != nil {
+				log.Warningf(ctx, "Couldn’t evaluate if %q is a child of %q: %v", d.Name, r.Name, err)
+			}
+			if ok {
+				rds[r] = append(rds[r], d)
+				continue nextUserData
+			}
+		}
+		rds[d] = nil
+	}
+
+	return rds
+}
+
 // resolveOrigin iterates over each datasets up to their true origin and replaces them.
 // This is only done for / as it's the deduplication we are interested in.
 func resolveOrigin(ctx context.Context, datasets []zfs.Dataset) map[string]*string {
