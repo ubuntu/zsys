@@ -34,17 +34,18 @@ pools:
           - name: snap1
             mountpoint: /home/user1:local
             canmount: on:local
-            creation_time: 2018-03-28T07:30:22+00:00
+            creation_time: 2019-12-31T07:36:17+00:00
             bootfs_datasets: rpool/main:local
       - name: USERDATA/user1_efgh
         mountpoint: /home/user1
         bootfs_datasets: rpool/clone
         last_used: 2018-03-28T07:30:22+00:00
+        origin: rpool2/USERDATA/user1_abcd@snap1
         snapshots:
           - name: snap2
             mountpoint: /home/user1:local
             canmount: on:local
-            creation_time: 2018-03-28T07:30:22+00:00
+            creation_time: 2019-08-24T17:11:06+00:00
             bootfs_datasets: rpool/clone:local
       - name: USERDATA/root_bcde
         mountpoint: /root
