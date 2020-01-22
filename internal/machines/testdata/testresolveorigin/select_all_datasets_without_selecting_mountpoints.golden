@@ -1,0 +1,12 @@
+{
+   "rpool/clone": "rpool/main",
+   "rpool/clone/child": "rpool/main/child",
+   "rpool/clone/child@snap2": "rpool/main/child",
+   "rpool/clone2": "rpool/main",
+   "rpool/clone2/child": "rpool/main/child",
+   "rpool/clone@snap2": "rpool/main",
+   "rpool/main": "",
+   "rpool/main/child": "",
+   "rpool/main/child@snap1": "rpool/main/child",
+   "rpool/main@snap1": "rpool/main"
+}
