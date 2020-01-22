@@ -172,18 +172,27 @@ func (machines *Machines) refresh(ctx context.Context) error {
 	}
 	originsUserDatasets := resolveOrigin(ctx, rootsOnlyUserDatasets, "")
 
+	unattachedSnapshotsUserDatasets, unattachedClonesUserDatasets := make(map[*zfs.Dataset][]*zfs.Dataset), make(map[*zfs.Dataset][]*zfs.Dataset) // user only snapshots or clone (not linked to a system state)
 	for r, children := range rootUserDatasets {
 		// Handle snapshots userdatasets
 		if r.IsSnapshot {
+			var associateWithAtLeastOne bool
+
+			_, snapshot := splitSnapshotName(r.Name)
 			for n, ms := range mns {
 				// Snapshots are not necessarily with a dataset ID matching its parent of dataset promotions, just match
 				// its name.
-				_, snapshot := splitSnapshotName(r.Name)
-				if strings.HasSuffix(n, snapshot) {
+				if strings.HasSuffix(n, "@"+snapshot) {
 					ms.machine.addUserDatasets(ctx, r, children, ms.state)
+					associateWithAtLeastOne = true
 					continue
 				}
 			}
+			if associateWithAtLeastOne {
+				continue
+			}
+			unattachedSnapshotsUserDatasets[r] = children
+			continue
 		}
 
 		// Handle regular userdatasets (main or clone), associated to a system state
@@ -225,36 +234,17 @@ func (machines *Machines) refresh(ctx context.Context) error {
 			if associateWithAtLeastOne {
 				continue
 			}
-		}
+			unattachedClonesUserDatasets[r] = children
 
-		// Handle regular userdatasets (main or clone), not associated to a system state.
-		// This is a userdataset "snapshot" (clone or snapshot).
+		}
+	}
+
+	// Handle regular userdatasets (main or clone), not associated to a system state.
+
+	// This is a userdataset "snapshot" clone dataset.
+	for r, children := range unattachedClonesUserDatasets {
 		// WARNING: We only consider the dataset "group" (clones and promoted) attached to main state of a given machine
 		// to regroup on a known machine.
-		if r.IsSnapshot {
-			base, _ := splitSnapshotName(r.Name)
-			var associated bool
-			for _, m := range machines.all {
-				t := strings.Split(filepath.Base(base), "_")
-				user := t[0]
-				if len(t) > 1 {
-					user = strings.Join(t[:len(t)-1], "_")
-				}
-				for _, ds := range m.Users[user] {
-					if ds[0].Name == base {
-						m.addUserDatasets(ctx, r, children, nil)
-						associated = true
-						break
-					}
-				}
-				// we don’t break here, as a userdata only snapshot can be associated with multiple machines
-			}
-			if !associated {
-				log.Warningf(ctx, i18n.G("Couldn’t find any association for user dataset %s"), r.Name)
-			}
-			continue
-		}
-
 		origin := *(originsUserDatasets[r.Name])
 		// This is manual promotion from the user on a user dataset without promoting the whole state:
 		// ignore the dataset and issue a warning.
@@ -285,6 +275,30 @@ func (machines *Machines) refresh(ctx context.Context) error {
 		}
 
 		if !associateWithAtLeastOne {
+			log.Warningf(ctx, i18n.G("Couldn’t find any association for user dataset %s"), r.Name)
+		}
+	}
+
+	// This is a userdataset "snapshot" snapshot dataset.
+	for r, children := range unattachedSnapshotsUserDatasets {
+		base, _ := splitSnapshotName(r.Name)
+		var associated bool
+		for _, m := range machines.all {
+			t := strings.Split(filepath.Base(base), "_")
+			user := t[0]
+			if len(t) > 1 {
+				user = strings.Join(t[:len(t)-1], "_")
+			}
+			for _, ds := range m.Users[user] {
+				if ds[0].Name == base {
+					m.addUserDatasets(ctx, r, children, nil)
+					associated = true
+					break
+				}
+			}
+			// we don’t break here, as a userdata only snapshot can be associated with multiple machines
+		}
+		if !associated {
 			log.Warningf(ctx, i18n.G("Couldn’t find any association for user dataset %s"), r.Name)
 		}
 	}
