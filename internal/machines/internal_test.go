@@ -1,8 +1,8 @@
 package machines
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"context"
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -17,11 +17,11 @@ func init() {
 	config.SetVerboseMode(1)
 }
 
-/*
 func TestResolveOrigin(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def string
+		def              string
+		onlyOnMountpoint string
 	}{
 		"one dataset":                                 {"d_one_machine_one_dataset.json"},
 		"one machine with one snapshot":               {"d_one_machine_with_one_snapshot.json"},
@@ -46,36 +46,48 @@ func TestResolveOrigin(t *testing.T) {
 	for name, tc := range tests {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			ds := LoadDatasets(t, tc.def)
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
 
-			got := resolveOrigin(context.Background(), ds)
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			if err != nil {
+				t.Fatalf("couldn’t create original zfs datasets state")
+			}
+
+			var ds []*zfs.Dataset
+			for _, d := range z.Datasets() {
+				d := d
+				ds = append(ds, &d)
+			}
+			if tc.onlyOnMountpoint == "" {
+				tc.onlyOnMountpoint = "/"
+			}
+			if tc.onlyOnMountpoint == "-" {
+				tc.onlyOnMountpoint = ""
+			}
+
+			got := resolveOrigin(context.Background(), ds, tc.onlyOnMountpoint)
 
 			assertDatasetsOrigin(t, got)
 		})
 	}
 }
-*/
 
-type FatalHelper interface {
-	Fatalf(format string, args ...interface{})
+type testhelper interface {
 	Helper()
 }
 
-// LoadDatasets returns datasets from a def file path.
-func LoadDatasets(t FatalHelper, def string) (ds []zfs.Dataset) {
+// TODO: for now, we can only run with mock zfs system
+func getLibZFS(t testhelper) testutils.LibZFSInterface {
 	t.Helper()
 
-	p := filepath.Join("testdata", def)
-	b, err := ioutil.ReadFile(p)
-	if err != nil {
-		t.Fatalf("couldn't read definition file %q: %v", def, err)
-	}
-
-	if err := json.Unmarshal(b, &ds); err != nil {
-		t.Fatalf("couldn't convert definition file %q to slice of dataset: %v", def, err)
-	}
-	return ds
+	fmt.Println("Running tests with mocked libzfs")
+	mock := zfs.NewLibZFSMock()
+	return &mock
 }
 
 // assertDatasetsOrigin compares got maps of origin to reference files, based on test name.
