@@ -166,3 +166,12 @@ func sortedStateKeys(m map[string]*State) []string {
 	sort.Strings(keys)
 	return keys
 }
+
+// splitSnapshotName return base and trailing names
+func splitSnapshotName(name string) (string, string) {
+	i := strings.LastIndex(name, "@")
+	if i < 0 {
+		return name, ""
+	}
+	return name[:i], name[i+1:]
+}

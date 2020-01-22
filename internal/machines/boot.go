@@ -190,15 +190,6 @@ func diffDatasets(a, b []*zfs.Dataset) []*zfs.Dataset {
 	return diff
 }
 
-// splitSnapshotName return base and trailing names
-func splitSnapshotName(name string) (string, string) {
-	i := strings.LastIndex(name, "@")
-	if i < 0 {
-		return name, ""
-	}
-	return name[:i], name[i+1:]
-}
-
 func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, needCreateUserDatas bool) error {
 	// get current generated suffix by initramfs
 	j := strings.LastIndex(bootedStateID, "_")
