@@ -102,10 +102,7 @@ func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) 
 		cmdline: cmdline,
 		z:       z,
 	}
-	if err := machines.refresh(ctx); err != nil {
-		return Machines{}, err
-	}
-
+	machines.refresh(ctx)
 	return machines, nil
 }
 
@@ -120,16 +117,13 @@ func (machines *Machines) Refresh(ctx context.Context) error {
 		return err
 	}
 
-	if err := newMachines.refresh(ctx); err != nil {
-		return err
-	}
-
+	newMachines.refresh(ctx)
 	*machines = newMachines
 	return nil
 }
 
 // refresh reloads the list of machines, based on already loaded zfs datasets state
-func (machines *Machines) refresh(ctx context.Context) error {
+func (machines *Machines) refresh(ctx context.Context) {
 	// We are going to transform the origin of datasets, get a copy first
 	zDatasets := machines.z.Datasets()
 	datasets := make([]*zfs.Dataset, 0, len(zDatasets))
@@ -333,8 +327,6 @@ func (machines *Machines) refresh(ctx context.Context) error {
 	machines.current = m
 
 	log.Debugf(ctx, i18n.G("current machines scanning layout:\n"+pp.Sprint(machines)))
-
-	return nil
 }
 
 // populate attach main system datasets to machines and returns other types of datasets for later triage/attachment, alongside
