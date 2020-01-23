@@ -58,6 +58,16 @@ func (m *Machines) UnmarshalJSON(b []byte) error {
 	m.allSystemDatasets = mt.AllSystemDatasets
 	m.allUsersDatasets = mt.AllUsersDatasets
 
+	if m.current != nil {
+		for k, machine := range mt.All {
+			if machine.ID != m.current.ID {
+				continue
+			}
+			// restore current machine pointing to the same element than the hashmap
+			m.current = mt.All[k]
+		}
+	}
+
 	return nil
 }
 
