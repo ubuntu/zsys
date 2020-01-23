@@ -625,7 +625,7 @@
                   {
                      "Name": "rpool/ROOT/ubuntu_5678/srv@snap3",
                      "IsSnapshot": true,
-                     "Mountpoint": "/",
+                     "Mountpoint": "/srv",
                      "CanMount": "on",
                      "BootFS": true,
                      "LastUsed": 1522222222,
@@ -1559,7 +1559,7 @@
       {
          "Name": "rpool/ROOT/ubuntu_5678/srv@snap3",
          "IsSnapshot": true,
-         "Mountpoint": "/",
+         "Mountpoint": "/srv",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1522222222,
