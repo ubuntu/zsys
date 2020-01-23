@@ -110,11 +110,11 @@ jobs:
       - name: Reset environment without GOROOT
         run: sudo sed -i "/GOROOT/d" /etc/environment
       # Add dependencies
-      - name: Upgrade to eoan for matching libzfs
+      - name: Upgrade to focal for matching libzfs
         run: |
           sudo apt update
           sudo apt install -y eatmydata
-          sudo sed -i s/bionic/eoan/g /etc/apt/sources.list
+          sudo sed -i s/bionic/focal/g /etc/apt/sources.list
           sudo eatmydata apt update
           sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
       - name: Install dependencies
