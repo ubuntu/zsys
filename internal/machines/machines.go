@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"path/filepath"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
 
@@ -34,7 +33,7 @@ type Machine struct {
 	// Main machine State
 	State
 	// Users is a per user reference to each of its state
-	Users map[string]map[string][]*zfs.Dataset `json:",omitempty"`
+	Users map[string]map[string]userState `json:",omitempty"`
 	// History is a map or root system datasets to all its possible State
 	History map[string]*State `json:",omitempty"`
 }
@@ -60,6 +59,12 @@ type State struct {
 type machineAndState struct {
 	state   *State
 	machine *Machine
+}
+
+type userState struct {
+	ID       string
+	LastUsed *time.Time `json:",omitempty"`
+	Datasets []*zfs.Dataset
 }
 
 const (
@@ -254,7 +259,7 @@ func (machines *Machines) refresh(ctx context.Context) {
 			var associated bool
 			for _, userStates := range m.Users {
 				for _, userState := range userStates {
-					if userState[0].Name == origin {
+					if userState.ID == origin {
 						m.addUserDatasets(ctx, r, children, nil)
 						associated = true
 						associateWithAtLeastOne = true
@@ -283,8 +288,8 @@ func (machines *Machines) refresh(ctx context.Context) {
 			if len(t) > 1 {
 				user = strings.Join(t[:len(t)-1], "_")
 			}
-			for _, ds := range m.Users[user] {
-				if ds[0].Name == base {
+			for _, userState := range m.Users[user] {
+				if userState.ID == base {
 					m.addUserDatasets(ctx, r, children, nil)
 					associated = true
 					break
@@ -393,7 +398,7 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 				IsZsys:         d.BootFS,
 				SystemDatasets: []*zfs.Dataset{&d},
 			},
-			Users:   make(map[string]map[string][]*zfs.Dataset),
+			Users:   make(map[string]map[string]userState),
 			History: make(map[string]*State),
 		}
 		// We don't want lastused to be 1970 in our golden files
@@ -469,26 +474,21 @@ func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children 
 		user = strings.Join(t[:len(t)-1], "_")
 	}
 	if m.Users[user] == nil {
-		m.Users[user] = make(map[string][]*zfs.Dataset)
+		m.Users[user] = make(map[string]userState)
 	}
 
-	// Create dataset with state timestamp
-	var timestamp string
-	if state != nil && m.ID == state.ID {
-		timestamp = "current"
-	} else {
-		timestamp = strconv.Itoa(r.LastUsed)
+	// Attach to global user map new userData
+	// If the dataset has already been added  it is overwritten
+	s := userState{
+		ID:       r.Name,
+		Datasets: append([]*zfs.Dataset{r}, children...),
 	}
-
-	if d, ok := m.Users[user][timestamp]; ok {
-		if d[0].Name != r.Name {
-			log.Warningf(ctx, i18n.G("User %s has already a user snapshot attached at %s (%s) for machine %s. Can't add %s"), user, timestamp, d[0].Name, r.Name)
-		}
-		return
+	// We don't want lastused to be 1970 in our golden files
+	if r.LastUsed != 0 {
+		lu := time.Unix(int64(r.LastUsed), 0)
+		s.LastUsed = &lu
 	}
-
-	// Attach to global user map
-	m.Users[user][timestamp] = append([]*zfs.Dataset{r}, children...)
+	m.Users[user][r.Name] = s
 }
 
 // attachRemainingDatasets attaches to machine boot and persistent datasets if they fit current machine.
