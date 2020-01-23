@@ -519,8 +519,6 @@ func (m *Machine) attachRemainingDatasets(ctx context.Context, boots, persistent
 		h := m.History[k]
 		h.attachRemainingDatasetsForHistory(boots, persistents)
 	}
-	// TODO: REMOVE
-	m.Users = nil
 }
 
 // attachRemainingDatasetsForHistory attaches to a given history state boot and persistent datasets if they fit.
