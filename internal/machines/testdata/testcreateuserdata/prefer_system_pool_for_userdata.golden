@@ -21,7 +21,20 @@
                "LastUsed": 2000000000,
                "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
             }
-         ]
+         ],
+         "Users": {
+            "userfoo": {
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/userfoo_xxxxxx",
+                     "Mountpoint": "/home/foo",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            }
+         }
       },
       "rpool2/ROOT/ubuntu_1234": {
          "ID": "rpool2/ROOT/ubuntu_1234",
@@ -60,7 +73,20 @@
             "LastUsed": 2000000000,
             "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
          }
-      ]
+      ],
+      "Users": {
+         "userfoo": {
+            "current": [
+               {
+                  "Name": "rpool/USERDATA/userfoo_xxxxxx",
+                  "Mountpoint": "/home/foo",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+               }
+            ]
+         }
+      }
    },
    "AllSystemDatasets": [
       {

@@ -21,7 +21,20 @@
                "LastUsed": 2000000000,
                "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
             }
-         ]
+         ],
+         "Users": {
+            "userfoo": {
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/userfoo_xxxxxx",
+                     "Mountpoint": "/home/foo",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            }
+         }
       }
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_1234 ccccc",
@@ -46,7 +59,20 @@
             "LastUsed": 2000000000,
             "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
          }
-      ]
+      ],
+      "Users": {
+         "userfoo": {
+            "current": [
+               {
+                  "Name": "rpool/USERDATA/userfoo_xxxxxx",
+                  "Mountpoint": "/home/foo",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+               }
+            ]
+         }
+      }
    },
    "AllSystemDatasets": [
       {

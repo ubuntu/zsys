@@ -28,7 +28,31 @@
                "LastUsed": 1544444444,
                "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
             }
-         ]
+         ],
+         "Users": {
+            "root": {
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/root_bcde",
+                     "Mountpoint": "/root",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            },
+            "user1": {
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "noauto",
+                     "LastUsed": 1544444444,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            }
+         }
       },
       "rpool/ROOT/ubuntu_5678": {
          "ID": "rpool/ROOT/ubuntu_5678",
@@ -51,7 +75,20 @@
                "LastUsed": 1522222222,
                "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
             }
-         ]
+         ],
+         "Users": {
+            "user1": {
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+                  }
+               ]
+            }
+         }
       }
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc",
@@ -76,7 +113,20 @@
             "LastUsed": 1522222222,
             "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
          }
-      ]
+      ],
+      "Users": {
+         "user1": {
+            "current": [
+               {
+                  "Name": "rpool/USERDATA/user1_efgh",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 1522222222,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+               }
+            ]
+         }
+      }
    },
    "AllSystemDatasets": [
       {

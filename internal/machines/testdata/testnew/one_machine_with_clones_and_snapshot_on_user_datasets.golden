@@ -16,20 +16,74 @@
          ],
          "UserDatasets": [
             {
-               "Name": "rpool2/USERDATA/root_bcde",
-               "Mountpoint": "/root",
-               "CanMount": "on",
-               "LastUsed": 1533333333,
-               "BootfsDatasets": "rpool/main"
-            },
-            {
                "Name": "rpool2/USERDATA/user1_abcd",
                "Mountpoint": "/home/user1",
                "CanMount": "on",
                "LastUsed": 1544444444,
                "BootfsDatasets": "rpool/main"
+            },
+            {
+               "Name": "rpool2/USERDATA/root_bcde",
+               "Mountpoint": "/root",
+               "CanMount": "on",
+               "LastUsed": 1533333333,
+               "BootfsDatasets": "rpool/main"
             }
          ],
+         "Users": {
+            "root": {
+               "current": [
+                  {
+                     "Name": "rpool2/USERDATA/root_bcde",
+                     "Mountpoint": "/root",
+                     "CanMount": "on",
+                     "LastUsed": 1533333333,
+                     "BootfsDatasets": "rpool/main"
+                  }
+               ]
+            },
+            "user1": {
+               "1522222222": [
+                  {
+                     "Name": "rpool2/USERDATA/user1_efgh",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool/clone",
+                     "Origin": "rpool2/USERDATA/user1_abcd@snap1"
+                  }
+               ],
+               "1566666666": [
+                  {
+                     "Name": "rpool2/USERDATA/user1_efgh@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1566666666,
+                     "BootfsDatasets": "rpool/clone"
+                  }
+               ],
+               "1577777777": [
+                  {
+                     "Name": "rpool2/USERDATA/user1_abcd@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777,
+                     "BootfsDatasets": "rpool/main"
+                  }
+               ],
+               "current": [
+                  {
+                     "Name": "rpool2/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1544444444,
+                     "BootfsDatasets": "rpool/main"
+                  }
+               ]
+            }
+         },
          "History": {
             "rpool/clone": {
                "ID": "rpool/clone",

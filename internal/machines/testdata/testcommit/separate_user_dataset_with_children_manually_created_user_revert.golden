@@ -29,6 +29,57 @@
                "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
             }
          ],
+         "Users": {
+            "root": {
+               "1533333333": [
+                  {
+                     "Name": "rpool/USERDATA/root_bcde",
+                     "Mountpoint": "/root",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            },
+            "user1": {
+               "1522222222": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ],
+               "1544444444": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "noauto",
+                     "LastUsed": 1544444444,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+                     "Origin": "rpool/USERDATA/user1_efgh@snap1"
+                  }
+               ],
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+                  },
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh/tools",
+                     "Mountpoint": "/home/user1/tools",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+                  }
+               ]
+            }
+         },
          "History": {
             "rpool/ROOT/ubuntu_1234": {
                "ID": "rpool/ROOT/ubuntu_1234",
@@ -120,6 +171,57 @@
             "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
          }
       ],
+      "Users": {
+         "root": {
+            "1533333333": [
+               {
+                  "Name": "rpool/USERDATA/root_bcde",
+                  "Mountpoint": "/root",
+                  "CanMount": "noauto",
+                  "LastUsed": 1533333333,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+               }
+            ]
+         },
+         "user1": {
+            "1522222222": [
+               {
+                  "Name": "rpool/USERDATA/user1_efgh@snap1",
+                  "IsSnapshot": true,
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 1522222222,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+               }
+            ],
+            "1544444444": [
+               {
+                  "Name": "rpool/USERDATA/user1_abcd",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "noauto",
+                  "LastUsed": 1544444444,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+                  "Origin": "rpool/USERDATA/user1_efgh@snap1"
+               }
+            ],
+            "current": [
+               {
+                  "Name": "rpool/USERDATA/user1_efgh",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+               },
+               {
+                  "Name": "rpool/USERDATA/user1_efgh/tools",
+                  "Mountpoint": "/home/user1/tools",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
+               }
+            ]
+         }
+      },
       "History": {
          "rpool/ROOT/ubuntu_1234": {
             "ID": "rpool/ROOT/ubuntu_1234",

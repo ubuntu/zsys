@@ -29,6 +29,50 @@
                "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
             }
          ],
+         "Users": {
+            "root": {
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/root_bcde",
+                     "Mountpoint": "/root",
+                     "CanMount": "on",
+                     "LastUsed": 1533333333,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            },
+            "user1": {
+               "1511111111": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "noauto",
+                     "LastUsed": 1511111111,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
+                     "Origin": "rpool/USERDATA/user1_abcd@snap1"
+                  }
+               ],
+               "1522222222": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ],
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1544444444,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            }
+         },
          "History": {
             "rpool/ROOT/ubuntu_1234@snap1": {
                "ID": "rpool/ROOT/ubuntu_1234@snap1",

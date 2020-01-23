@@ -29,6 +29,73 @@
                "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
             }
          ],
+         "Users": {
+            "root": {
+               "2000000000": [
+                  {
+                     "Name": "rpool/USERDATA/root_bcde",
+                     "Mountpoint": "/root",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+                  }
+               ],
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/root_bcde",
+                     "Mountpoint": "/root",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+                  }
+               ]
+            },
+            "user1": {
+               "1511111111": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "noauto",
+                     "LastUsed": 1511111111,
+                     "Origin": "rpool/USERDATA/user1_abcd@snap1"
+                  },
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh/tools",
+                     "Mountpoint": "/home/user1/tools",
+                     "CanMount": "noauto",
+                     "LastUsed": 1511111111
+                  }
+               ],
+               "1522222222": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ],
+               "2000000000": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+                  }
+               ],
+               "current": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+                  }
+               ]
+            }
+         },
          "History": {
             "rpool/ROOT/ubuntu_1234": {
                "ID": "rpool/ROOT/ubuntu_1234",
@@ -119,6 +186,73 @@
             "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
          }
       ],
+      "Users": {
+         "root": {
+            "2000000000": [
+               {
+                  "Name": "rpool/USERDATA/root_bcde",
+                  "Mountpoint": "/root",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+               }
+            ],
+            "current": [
+               {
+                  "Name": "rpool/USERDATA/root_bcde",
+                  "Mountpoint": "/root",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+               }
+            ]
+         },
+         "user1": {
+            "1511111111": [
+               {
+                  "Name": "rpool/USERDATA/user1_efgh",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "noauto",
+                  "LastUsed": 1511111111,
+                  "Origin": "rpool/USERDATA/user1_abcd@snap1"
+               },
+               {
+                  "Name": "rpool/USERDATA/user1_efgh/tools",
+                  "Mountpoint": "/home/user1/tools",
+                  "CanMount": "noauto",
+                  "LastUsed": 1511111111
+               }
+            ],
+            "1522222222": [
+               {
+                  "Name": "rpool/USERDATA/user1_abcd@snap1",
+                  "IsSnapshot": true,
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 1522222222,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+               }
+            ],
+            "2000000000": [
+               {
+                  "Name": "rpool/USERDATA/user1_abcd",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+               }
+            ],
+            "current": [
+               {
+                  "Name": "rpool/USERDATA/user1_abcd",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_5678"
+               }
+            ]
+         }
+      },
       "History": {
          "rpool/ROOT/ubuntu_1234": {
             "ID": "rpool/ROOT/ubuntu_1234",
