@@ -204,9 +204,6 @@ func (machines *Machines) refresh(ctx context.Context) {
 					continue
 				}
 
-				// TODO: Verify that we have tests that cover the case:
-				// 		- root is associated to 2 states
-				//		- children are associated with only 1
 				associateWithAtLeastOne = true
 				var associatedChildren []*zfs.Dataset
 				for _, d := range children {
@@ -217,6 +214,9 @@ func (machines *Machines) refresh(ctx context.Context) {
 							break
 						}
 					}
+					// We don’t break here because we can have the case of:
+					// - main userdataset is associated with 2 states
+					// - one child is associated with only one of them
 					if !isAssociated {
 						continue
 					}

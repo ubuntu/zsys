@@ -79,6 +79,11 @@ func TestNew(t *testing.T) {
 		"Snapshot with user dataset with children":                       {def: "m_snapshot_with_userdata_with_children.yaml"},
 		"Clone with user dataset with children":                          {def: "m_clone_with_userdata_with_children.yaml"},
 		"Clone with user dataset with children manually created":         {def: "m_clone_with_userdata_with_children_manually_created.yaml"},
+		"Userdata with children associated only to one state":            {def: "m_with_userdata_child_associated_one_state.yaml"},
+		"Userdata is linked to no machines":                              {def: "m_with_userdata_linked_to_no_machines.yaml"},
+
+		// Userdata user snapshots
+		"Userdata has a user snapshot": {def: "m_with_userdata_user_snapshot.yaml"},
 
 		// Persistent special cases
 		"One machine, with persistent disabled":  {def: "m_with_persistent_canmount_noauto.yaml"},
