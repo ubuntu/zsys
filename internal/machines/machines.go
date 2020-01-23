@@ -245,7 +245,7 @@ func (machines *Machines) refresh(ctx context.Context) {
 		// If we iterated over all the user datasets from all machines and states, we may find a match, but ignore
 		// for now as this is already a manual user interaction.
 		if origin == "" {
-			log.Warningf(ctx, i18n.G("Couldn’t find any association for user dataset %s"), r.Name)
+			log.Warningf(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
 			continue
 		}
 
@@ -269,7 +269,7 @@ func (machines *Machines) refresh(ctx context.Context) {
 		}
 
 		if !associateWithAtLeastOne {
-			log.Warningf(ctx, i18n.G("Couldn’t find any association for user dataset %s"), r.Name)
+			log.Warningf(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
 		}
 	}
 
@@ -293,7 +293,7 @@ func (machines *Machines) refresh(ctx context.Context) {
 			// we don’t break here, as a userdata only snapshot can be associated with multiple machines
 		}
 		if !associated {
-			log.Warningf(ctx, i18n.G("Couldn’t find any association for user dataset %s"), r.Name)
+			log.Warningf(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
 		}
 	}
 
@@ -482,7 +482,7 @@ func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children 
 
 	if d, ok := m.Users[user][timestamp]; ok {
 		if d[0].Name != r.Name {
-			log.Warningf(ctx, i18n.G("User %s has already a user snapshot attached at %s (%s) for machine %s. Can’t add %s"), user, timestamp, d[0].Name, r.Name)
+			log.Warningf(ctx, i18n.G("User %s has already a user snapshot attached at %s (%s) for machine %s. Can't add %s"), user, timestamp, d[0].Name, r.Name)
 		}
 		return
 	}
