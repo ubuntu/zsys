@@ -79,6 +79,12 @@ func TestNew(t *testing.T) {
 		"Snapshot with user dataset with children":                       {def: "m_snapshot_with_userdata_with_children.yaml"},
 		"Clone with user dataset with children":                          {def: "m_clone_with_userdata_with_children.yaml"},
 		"Clone with user dataset with children manually created":         {def: "m_clone_with_userdata_with_children_manually_created.yaml"},
+		"Userdata with children associated only to one state":            {def: "m_with_userdata_child_associated_one_state.yaml"},
+		"Userdata is linked to no machines":                              {def: "m_with_userdata_linked_to_no_machines.yaml"},
+
+		// Userdata user snapshots
+		"Userdata has a user snapshot":              {def: "m_with_userdata_user_snapshot.yaml"},
+		"Userdata with underscore in snapshot name": {def: "m_with_userdata_snapshotname_with_underscore.yaml"},
 
 		// Persistent special cases
 		"One machine, with persistent disabled":  {def: "m_with_persistent_canmount_noauto.yaml"},
@@ -695,6 +701,172 @@ func TestChangeHomeOnUserData(t *testing.T) {
 	}
 }
 
+func TestCreateSystemSnapshot(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def          string
+		cmdline      string
+		snapshotName string
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Take one snapshot":       {def: "m_with_userdata.yaml"},
+		"Give a name to snapshot": {def: "m_with_userdata.yaml", snapshotName: "my_snapshot"},
+
+		"Children on system datasets": {def: "m_with_userdata_children_on_system.yaml"},
+		"Children on user datasets":   {def: "m_with_userdata_children_on_user.yaml"},
+		"Children on user datasets with one child non associated with current machine": {def: "m_with_userdata_child_associated_one_state.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9999")},
+
+		"No associated userdata": {def: "d_one_machine_with_children.yaml", cmdline: generateCmdLine("rpool")},
+
+		// error cases with snapshot exists on root. on userdataset. on system child. on user child
+		"Error on existing snapshot on system root":  {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "system_root_snapshot", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on system child": {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "system_child_snapshot", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on user root":    {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_root_snapshot", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on user child":   {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_child_snapshot", wantErr: true, isNoOp: true},
+
+		"Non zsys":   {def: "m_with_userdata_no_zsys.yaml", wantErr: true, isNoOp: true},
+		"No machine": {def: "m_with_userdata_no_zsys.yaml", cmdline: generateCmdLine("rpool/ROOT/nomachine"), wantErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			if tc.cmdline == "" {
+				tc.cmdline = generateCmdLine("rpool/ROOT/ubuntu_1234")
+			}
+
+			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			lzfs := libzfs.(*zfs.LibZFSMock)
+
+			lzfs.ForceLastUsedTime(true)
+			ms := initMachines
+
+			err = ms.CreateSystemSnapshot(context.Background(), tc.snapshotName)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			// finale rescan uneeded if last one failed
+			machinesAfterRescan, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
+func TestCreateUserSnapshot(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def          string
+		cmdline      string
+		snapshotName string
+		userName     string
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Take one snapshot":       {def: "m_with_userdata.yaml"},
+		"Give a name to snapshot": {def: "m_with_userdata.yaml", snapshotName: "my_snapshot"},
+
+		"Children on user datasets": {def: "m_with_userdata_children_on_user.yaml"},
+		"Children on user datasets with one child non associated with current machine": {def: "m_with_userdata_child_associated_one_state.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9999")},
+
+		// Error cases with non-existent user, snapshot exists on root, on userdataset, on system child, on user child
+		"Error on empty user":                       {def: "m_with_userdata.yaml", userName: "-", wantErr: true, isNoOp: true},
+		"Error on non existent user":                {def: "m_with_userdata.yaml", userName: "nonexistent", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on system root": {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "system_root_snapshot", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on user root":   {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_root_snapshot", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on user child":  {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_child_snapshot", wantErr: true, isNoOp: true},
+		// We don’t handle that case: the snapshot is only on a child, so it’s not part of history of this machine, and can’t be automatically reverted to it
+		//"Error on existing snapshot on system child": {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "system_child_snapshot", wantErr: true, isNoOp: true},
+
+		"Non zsys":   {def: "m_with_userdata_no_zsys.yaml", wantErr: true, isNoOp: true},
+		"No machine": {def: "m_with_userdata_no_zsys.yaml", cmdline: generateCmdLine("rpool/ROOT/nomachine"), wantErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			if tc.userName == "" {
+				tc.userName = "user1"
+			} else if tc.userName == "-" {
+				tc.userName = ""
+			}
+			if tc.cmdline == "" {
+				tc.cmdline = generateCmdLine("rpool/ROOT/ubuntu_1234")
+			}
+
+			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			lzfs := libzfs.(*zfs.LibZFSMock)
+
+			lzfs.ForceLastUsedTime(true)
+			ms := initMachines
+
+			err = ms.CreateUserSnapshot(context.Background(), tc.userName, tc.snapshotName)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			// finale rescan uneeded if last one failed
+			machinesAfterRescan, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
@@ -741,8 +913,8 @@ func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	m1.ResetForCmp()
-	m2.ResetForCmp()
+	m1.MakeComparable()
+	m2.MakeComparable()
 
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),
@@ -755,8 +927,8 @@ func assertMachinesEquals(t *testing.T, m1, m2 machines.Machines) {
 func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
 	t.Helper()
 
-	m1.ResetForCmp()
-	m2.ResetForCmp()
+	m1.MakeComparable()
+	m2.MakeComparable()
 
 	if diff := cmp.Diff(m1, m2, cmpopts.EquateEmpty(),
 		cmp.AllowUnexported(machines.Machines{}),

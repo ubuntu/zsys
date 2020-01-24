@@ -261,6 +261,10 @@ func (l *LibZFSMock) DatasetSnapshot(path string, recur bool, props map[libzfs.P
 }
 
 func (l *LibZFSMock) createSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
+	if l.forceLastUsedTime {
+		props[libzfs.DatasetPropCreation] = libzfs.Property{Value: currentMagicTime}
+	}
+
 	dinterface, err := l.DatasetCreate(path, libzfs.DatasetTypeSnapshot, props)
 	if err != nil {
 		return nil, err

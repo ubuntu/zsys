@@ -1,5 +1,5 @@
 {
-   "rpool": "",
-   "rpool@snap1": "rpool",
-   "rpool_clone": "rpool"
+   "rpool/clone": "rpool/main",
+   "rpool/main": "",
+   "rpool/main@snap1": "rpool/main"
 }

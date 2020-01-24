@@ -12,7 +12,7 @@ import (
 )
 
 // sortDataset enables sorting a slice of Dataset elements.
-type sortedDataset []zfs.Dataset
+type sortedDataset []*zfs.Dataset
 
 func (s sortedDataset) Len() int { return len(s) }
 func (s sortedDataset) Less(i, j int) bool {
@@ -49,12 +49,35 @@ func isChild(name string, d zfs.Dataset) (bool, error) {
 	return false, err
 }
 
+func getRootDatasets(ctx context.Context, ds []*zfs.Dataset) (rds map[*zfs.Dataset][]*zfs.Dataset) {
+	rds = make(map[*zfs.Dataset][]*zfs.Dataset)
+nextUserData:
+	for _, d := range ds {
+		if d.CanMount == "off" {
+			continue
+		}
+		for r := range rds {
+			ok, err := isChild(r.Name, *d)
+			if err != nil {
+				log.Warningf(ctx, "Couldn’t evaluate if %q is a child of %q: %v", d.Name, r.Name, err)
+			}
+			if ok {
+				rds[r] = append(rds[r], d)
+				continue nextUserData
+			}
+		}
+		rds[d] = nil
+	}
+
+	return rds
+}
+
 // resolveOrigin iterates over each datasets up to their true origin and replaces them.
-// This is only done for / as it's the deduplication we are interested in.
-func resolveOrigin(ctx context.Context, datasets []zfs.Dataset) map[string]*string {
+// This is only done for onlyOnMountpoint if not empty to limit the interest of deduplication we are interested in.
+func resolveOrigin(ctx context.Context, datasets []*zfs.Dataset, onlyOnMountpoint string) map[string]*string {
 	r := make(map[string]*string)
 	for _, curDataset := range datasets {
-		if curDataset.Mountpoint != "/" || curDataset.CanMount == "off" {
+		if (onlyOnMountpoint != "" && curDataset.Mountpoint != onlyOnMountpoint) || curDataset.CanMount == "off" {
 			continue
 		}
 
@@ -101,7 +124,7 @@ func resolveOrigin(ctx context.Context, datasets []zfs.Dataset) map[string]*stri
 
 // appendDatasetIfNotPresent will check that the dataset wasn't already added and will append it
 // excludeCanMountOff restricts (for unlinked datasets) the check on datasets that are canMount noauto or on
-func appendIfNotPresent(mainDatasets, newDatasets []zfs.Dataset, excludeCanMountOff bool) []zfs.Dataset {
+func appendIfNotPresent(mainDatasets, newDatasets []*zfs.Dataset, excludeCanMountOff bool) []*zfs.Dataset {
 	for _, d := range newDatasets {
 		if excludeCanMountOff && d.CanMount == "off" {
 			continue
@@ -142,4 +165,23 @@ func sortedStateKeys(m map[string]*State) []string {
 	}
 	sort.Strings(keys)
 	return keys
+}
+
+// splitSnapshotName return base and trailing names
+func splitSnapshotName(name string) (string, string) {
+	i := strings.LastIndex(name, "@")
+	if i < 0 {
+		return name, ""
+	}
+	return name[:i], name[i+1:]
+}
+
+// nameInBootfsDatasets returns if name is part of the bootfsdatsets list for d
+func nameInBootfsDatasets(name string, d zfs.Dataset) bool {
+	for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
+		if bootfsDataset == name || strings.HasPrefix(d.BootfsDatasets, name+"/") {
+			return true
+		}
+	}
+	return false
 }

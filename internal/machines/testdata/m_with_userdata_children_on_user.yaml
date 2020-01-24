@@ -1,0 +1,20 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+    - name: USERDATA/user1_abcd/tools
+    - name: USERDATA/root_bcde
+      mountpoint: /root
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234

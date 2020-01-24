@@ -241,7 +241,7 @@ pools:
         snapshots:
           - name: snap3
             zsys_bootfs: yes:inherited
-            mountpoint: /:inherited
+            mountpoint: /srv:inherited
             canmount: on:inherited
             last_booted_kernel: vmlinuz-5.0.0-3-generic:inherited
             creation_time: 2018-03-28T07:30:22+00:00

@@ -3,7 +3,7 @@ module github.com/ubuntu/zsys
 go 1.13
 
 require (
-	github.com/bicomsystems/go-libzfs v0.2.2-0.20190807094932-e50663fa5901
+	github.com/bicomsystems/go-libzfs v0.3.1
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
 	github.com/godbus/dbus/v5 v5.0.3
 	github.com/golang/protobuf v1.3.2
@@ -23,5 +23,3 @@ require (
 	google.golang.org/grpc v1.24.0
 	gopkg.in/yaml.v2 v2.2.2
 )
-
-replace github.com/bicomsystems/go-libzfs => github.com/ubuntu/go-libzfs v0.2.2-0.20191206162817-0cd45ea96669

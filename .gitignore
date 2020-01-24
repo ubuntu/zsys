@@ -14,3 +14,8 @@ coverage/
 # Package artefacts
 obj-x86_64-linux-gnu/
 vendor/
+
+# Various cruft to not consider
+*.log
+*.code-workspace
+

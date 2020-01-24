@@ -2,6 +2,8 @@ package machines
 
 import (
 	"encoding/json"
+	"sort"
+	"strings"
 
 	"github.com/ubuntu/zsys/internal/zfs"
 )
@@ -15,9 +17,17 @@ type MachinesTest struct {
 	Cmdline           string              `json:",omitempty"`
 	Current           *Machine            `json:",omitempty"`
 	NextState         *State              `json:",omitempty"`
-	AllSystemDatasets []zfs.Dataset       `json:",omitempty"`
-	AllUsersDatasets  []zfs.Dataset       `json:",omitempty"`
+	AllSystemDatasets []*zfs.Dataset      `json:",omitempty"`
+	AllUsersDatasets  []*zfs.Dataset      `json:",omitempty"`
 }
+
+type SortedDatasets []*zfs.Dataset
+
+func (s SortedDatasets) Len() int { return len(s) }
+func (s SortedDatasets) Less(i, j int) bool {
+	return strings.ReplaceAll(s[i].Name, "@", "#") < strings.ReplaceAll(s[j].Name, "@", "#")
+}
+func (s SortedDatasets) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 // Export for json Marshmalling all private fields
 func (m Machines) MarshalJSON() ([]byte, error) {
@@ -48,10 +58,31 @@ func (m *Machines) UnmarshalJSON(b []byte) error {
 	m.allSystemDatasets = mt.AllSystemDatasets
 	m.allUsersDatasets = mt.AllUsersDatasets
 
+	if m.current != nil {
+		for k, machine := range mt.All {
+			if machine.ID != m.current.ID {
+				continue
+			}
+			// restore current machine pointing to the same element than the hashmap
+			m.current = mt.All[k]
+		}
+	}
+
 	return nil
 }
 
-// ResetForCmp prepares Machines by resetting private fields that change at each invocation
-func (m *Machines) ResetForCmp() {
+// MakeComparable prepares Machines by resetting private fields that change at each invocation
+func (m *Machines) MakeComparable() {
+	for k, machine := range m.all {
+		ds := SortedDatasets(machine.UserDatasets)
+		sort.Sort(ds)
+		m.all[k].UserDatasets = ds
+		for l, h := range machine.History {
+			ds := SortedDatasets(h.UserDatasets)
+			sort.Sort(ds)
+			m.all[k].History[l].UserDatasets = ds
+		}
+	}
+
 	m.z = nil
 }
