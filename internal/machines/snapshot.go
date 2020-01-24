@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
@@ -54,6 +55,13 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 		if !ok {
 			return fmt.Errorf(i18n.G("user %q doesn't exist"), onlyUser)
 		}
+		// check if a system history entry matches the desired snapshot name.
+		for n := range m.History {
+			if strings.HasSuffix(n, "@"+name) {
+				return fmt.Errorf(i18n.G("A snapshot %q already exists on system and can create an incoherent state"), name)
+			}
+		}
+
 		// Only filter datasets attached to current state, as some subdataset could be linked to another
 		// system state but not that particular one.
 		for _, userState := range userStates {
