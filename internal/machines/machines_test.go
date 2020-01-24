@@ -781,6 +781,92 @@ func TestCreateSystemSnapshot(t *testing.T) {
 	}
 }
 
+func TestCreateUserSnapshot(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def          string
+		cmdline      string
+		snapshotName string
+		userName     string
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Take one snapshot":       {def: "m_with_userdata.yaml"},
+		"Give a name to snapshot": {def: "m_with_userdata.yaml", snapshotName: "my_snapshot"},
+
+		"Children on user datasets": {def: "m_with_userdata_children_on_user.yaml"},
+		"Children on user datasets with one child non associated with current machine": {def: "m_with_userdata_child_associated_one_state.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9999")},
+
+		// Error cases with non-existent user, snapshot exists on root, on userdataset, on system child, on user child
+		"Error on empty user":                       {def: "m_with_userdata.yaml", userName: "-", wantErr: true, isNoOp: true},
+		"Error on non existent user":                {def: "m_with_userdata.yaml", userName: "nonexistent", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on system root": {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "system_root_snapshot", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on user root":   {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_root_snapshot", wantErr: true, isNoOp: true},
+		"Error on existing snapshot on user child":  {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_child_snapshot", wantErr: true, isNoOp: true},
+		// We don’t handle that case: the snapshot is only on a child, so it’s not part of history of this machine, and can’t be automatically reverted to it
+		//"Error on existing snapshot on system child": {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "system_child_snapshot", wantErr: true, isNoOp: true},
+
+		"Non zsys":   {def: "m_with_userdata_no_zsys.yaml", wantErr: true, isNoOp: true},
+		"No machine": {def: "m_with_userdata_no_zsys.yaml", cmdline: generateCmdLine("rpool/ROOT/nomachine"), wantErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			if tc.userName == "" {
+				tc.userName = "user1"
+			} else if tc.userName == "-" {
+				tc.userName = ""
+			}
+			if tc.cmdline == "" {
+				tc.cmdline = generateCmdLine("rpool/ROOT/ubuntu_1234")
+			}
+
+			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			lzfs := libzfs.(*zfs.LibZFSMock)
+
+			lzfs.ForceLastUsedTime(true)
+			ms := initMachines
+
+			err = ms.CreateUserSnapshot(context.Background(), tc.userName, tc.snapshotName)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			// finale rescan uneeded if last one failed
+			machinesAfterRescan, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()

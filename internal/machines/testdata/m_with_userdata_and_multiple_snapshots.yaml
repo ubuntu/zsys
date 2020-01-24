@@ -9,6 +9,8 @@ pools:
       mountpoint: /
       snapshots:
       - name: system_root_snapshot
+        zsys_bootfs: yes:local
+        mountpoint: /:local
         creation_time: 2019-12-31T07:36:17+00:00
     - name: ROOT/ubuntu_1234/tools
       snapshots:
