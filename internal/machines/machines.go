@@ -468,7 +468,8 @@ func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children 
 	}
 
 	// Extract user name
-	t := strings.Split(filepath.Base(r.Name), "_")
+	base, _ := splitSnapshotName(r.Name)
+	t := strings.Split(filepath.Base(base), "_")
 	user := t[0]
 	if len(t) > 1 {
 		user = strings.Join(t[:len(t)-1], "_")

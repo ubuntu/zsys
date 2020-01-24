@@ -83,7 +83,8 @@ func TestNew(t *testing.T) {
 		"Userdata is linked to no machines":                              {def: "m_with_userdata_linked_to_no_machines.yaml"},
 
 		// Userdata user snapshots
-		"Userdata has a user snapshot": {def: "m_with_userdata_user_snapshot.yaml"},
+		"Userdata has a user snapshot":              {def: "m_with_userdata_user_snapshot.yaml"},
+		"Userdata with underscore in snapshot name": {def: "m_with_userdata_snapshotname_with_underscore.yaml"},
 
 		// Persistent special cases
 		"One machine, with persistent disabled":  {def: "m_with_persistent_canmount_noauto.yaml"},
