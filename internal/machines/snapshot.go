@@ -68,7 +68,6 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 		toSnapshot = append(toSnapshot, m.SystemDatasets...)
 		toSnapshot = append(toSnapshot, m.UserDatasets...)
 	}
-	toSnapshot = append(toSnapshot, m.UserDatasets...)
 	for _, d := range toSnapshot {
 		if err := t.Snapshot(name, d.Name, false); err != nil {
 			cancel()
