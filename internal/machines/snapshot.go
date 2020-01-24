@@ -4,19 +4,37 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
-// CreateSnapshot creates a snapshot of a system and all users datasets.
+// CreateSystemSnapshot creates a snapshot of a system and all users datasets.
+// If snapshotname is not empty, it is used as the id of the snapshot otherwise an id
+// is generated with a random string.
+// TODO: if system snapshot: caller to call update-grub?
+func (ms *Machines) CreateSystemSnapshot(ctx context.Context, snapshotname string) error {
+	return ms.createSnapshot(ctx, snapshotname, "")
+}
+
+// CreateUserSnapshot creates a snapshot for the provided user.
+// If snapshotName is not empty, it is used as the id of the snapshot otherwise an id
+// is generated with a random string.
+// userName is the name of the user to snapshot the datasets from.
+func (ms *Machines) CreateUserSnapshot(ctx context.Context, userName, snapshotName string) error {
+	if userName == "" {
+		return errors.New(i18n.G("Needs a valid user name, got nothing"))
+	}
+	return ms.createSnapshot(ctx, snapshotName, userName)
+}
+
+// createSnapshot creates a snapshot of a system and all users datasets.
 // If name is not empty, it is used as the id of the snapshot otherwise an id
 // is generated with a random string.
 // If onlyUser is empty a snapshot of all the system datasets is taken,
 // otherwise only a snapshot of the given username is done
-func (ms *Machines) CreateSnapshot(ctx context.Context, name string, onlyUser string) error {
+func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser string) error {
 	m := ms.current
 	if !m.isZsys() {
 		return errors.New(i18n.G("Current machine isn't Zsys, nothing to create"))
@@ -59,6 +77,5 @@ func (ms *Machines) CreateSnapshot(ctx context.Context, name string, onlyUser st
 	}
 
 	ms.refresh(ctx)
-	// TODO: if system snapshot: caller to call update-grub?
 	return nil
 }
