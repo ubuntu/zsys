@@ -281,13 +281,13 @@ func (machines *Machines) refresh(ctx context.Context) {
 	// This is a userdataset "snapshot" snapshot dataset.
 	for r, children := range unattachedSnapshotsUserDatasets {
 		base, _ := splitSnapshotName(r.Name)
+		t := strings.Split(filepath.Base(base), "_")
+		user := t[0]
+		if len(t) > 1 {
+			user = strings.Join(t[:len(t)-1], "_")
+		}
 		var associated bool
 		for _, m := range machines.all {
-			t := strings.Split(filepath.Base(base), "_")
-			user := t[0]
-			if len(t) > 1 {
-				user = strings.Join(t[:len(t)-1], "_")
-			}
 			for _, userState := range m.Users[user] {
 				if userState.ID == base {
 					m.addUserDatasets(ctx, r, children, nil)
