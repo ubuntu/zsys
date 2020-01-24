@@ -112,23 +112,23 @@ func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) 
 }
 
 // Refresh reloads the list of machines after rescanning zfs datasets state from system
-func (machines *Machines) Refresh(ctx context.Context) error {
-	newMachines := Machines{
-		all:     make(map[string]*Machine),
-		cmdline: machines.cmdline,
-		z:       machines.z,
-	}
-	if err := newMachines.z.Refresh(ctx); err != nil {
+func (ms *Machines) Refresh(ctx context.Context) error {
+	if err := ms.z.Refresh(ctx); err != nil {
 		return err
 	}
 
-	newMachines.refresh(ctx)
-	*machines = newMachines
+	ms.refresh(ctx)
 	return nil
 }
 
 // refresh reloads the list of machines, based on already loaded zfs datasets state
-func (machines *Machines) refresh(ctx context.Context) {
+func (ms *Machines) refresh(ctx context.Context) {
+	machines := Machines{
+		all:     make(map[string]*Machine),
+		cmdline: ms.cmdline,
+		z:       ms.z,
+	}
+
 	// We are going to transform the origin of datasets, get a copy first
 	zDatasets := machines.z.Datasets()
 	datasets := make([]*zfs.Dataset, 0, len(zDatasets))
@@ -317,12 +317,13 @@ func (machines *Machines) refresh(ctx context.Context) {
 	m, _ := machines.findFromRoot(root)
 	machines.current = m
 
-	log.Debugf(ctx, i18n.G("current machines scanning layout:\n"+pp.Sprint(machines)))
+	*ms = machines
+	log.Debugf(ctx, i18n.G("current machines scanning layout:\n"+pp.Sprint(ms)))
 }
 
 // populate attach main system datasets to machines and returns other types of datasets for later triage/attachment, alongside
 // a map to direct access to a given state and machine
-func (machines *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, origins map[string]*string) (mns map[string]machineAndState, boots, userdatas, persistents []*zfs.Dataset) {
+func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, origins map[string]*string) (mns map[string]machineAndState, boots, userdatas, persistents []*zfs.Dataset) {
 	mns = make(map[string]machineAndState)
 
 	for _, d := range allDatasets {
@@ -331,7 +332,7 @@ func (machines *Machines) populate(ctx context.Context, allDatasets []zfs.Datase
 		// Main active system dataset building up a machine
 		m := newMachineFromDataset(d, origins[d.Name])
 		if m != nil {
-			machines.all[d.Name] = m
+			ms.all[d.Name] = m
 			mns[d.Name] = machineAndState{
 				state:   &m.State,
 				machine: m,
@@ -340,7 +341,7 @@ func (machines *Machines) populate(ctx context.Context, allDatasets []zfs.Datase
 		}
 
 		// Check for children, clones and snapshots
-		if machines.populateSystemAndHistory(ctx, d, origins[d.Name], &mns) {
+		if ms.populateSystemAndHistory(ctx, d, origins[d.Name], &mns) {
 			continue
 		}
 
@@ -400,8 +401,8 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 // populateSystemAndHistory identified if the given dataset is a system dataset (children of root one) or a history
 // one. It creates and attach the states as needed.
 // It returns ok if the dataset matches any machine and is attached.
-func (machines *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset, origin *string, mns *map[string]machineAndState) (ok bool) {
-	for _, m := range machines.all {
+func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset, origin *string, mns *map[string]machineAndState) (ok bool) {
+	for _, m := range ms.all {
 
 		// Direct main machine state children
 		if ok, err := isChild(m.ID, d); err != nil {
