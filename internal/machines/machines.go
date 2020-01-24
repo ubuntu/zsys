@@ -198,31 +198,17 @@ func (machines *Machines) refresh(ctx context.Context) {
 		if !r.IsSnapshot {
 			var associateWithAtLeastOne bool
 			for n, ms := range mns {
-				var isAssociated bool
-				for _, bootfsDataset := range strings.Split(r.BootfsDatasets, ":") {
-					if bootfsDataset == n || strings.HasPrefix(r.BootfsDatasets, n+"/") {
-						isAssociated = true
-						break
-					}
-				}
-				if !isAssociated {
+				if !nameInBootfsDatasets(n, *r) {
 					continue
 				}
 
 				associateWithAtLeastOne = true
 				var associatedChildren []*zfs.Dataset
 				for _, d := range children {
-					isAssociated = false
-					for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
-						if bootfsDataset == n || strings.HasPrefix(d.BootfsDatasets, n+"/") {
-							isAssociated = true
-							break
-						}
-					}
-					// We don’t break here because we can have the case of:
+					// We don’t break the outer loop here because we can have the case of:
 					// - main userdataset is associated with 2 states
 					// - one child is associated with only one of them
-					if !isAssociated {
+					if !nameInBootfsDatasets(n, *d) {
 						continue
 					}
 					associatedChildren = append(associatedChildren, d)

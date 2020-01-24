@@ -175,3 +175,13 @@ func splitSnapshotName(name string) (string, string) {
 	}
 	return name[:i], name[i+1:]
 }
+
+// nameInBootfsDatasets returns if name is part of the bootfsdatsets list for d
+func nameInBootfsDatasets(name string, d zfs.Dataset) bool {
+	for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
+		if bootfsDataset == name || strings.HasPrefix(d.BootfsDatasets, name+"/") {
+			return true
+		}
+	}
+	return false
+}

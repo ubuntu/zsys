@@ -40,11 +40,8 @@ func (ms *Machines) CreateSnapshot(ctx context.Context, name string, onlyUser st
 		// system state but not that particular one.
 		for _, userState := range userStates {
 			for _, d := range userState.Datasets {
-				for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
-					if bootfsDataset == m.ID || strings.HasPrefix(d.BootfsDatasets, m.ID+"/") {
-						toSnapshot = append(toSnapshot, d)
-						break // go on on next dataset
-					}
+				if nameInBootfsDatasets(m.ID, *d) {
+					toSnapshot = append(toSnapshot, d)
 				}
 			}
 		}
