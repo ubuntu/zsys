@@ -66,6 +66,11 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
+#: internal/machines/snapshot.go:61
+msgid ""
+"A snapshot %q already exists on system and can create an incoherent state"
+msgstr ""
+
 #: internal/daemon/daemon.go:156
 msgid "All connections closed"
 msgstr ""
@@ -86,7 +91,7 @@ msgstr ""
 msgid "Booting on snapshot: %q cloned to %q\n"
 msgstr ""
 
-#: internal/machines/machines.go:75
+#: internal/machines/machines.go:90
 msgid "Building new machines list"
 msgstr ""
 
@@ -127,11 +132,11 @@ msgstr ""
 msgid "Control() error: %s"
 msgstr ""
 
-#: internal/daemon/daemon.go:74 internal/machines/machines.go:81
+#: internal/daemon/daemon.go:74 internal/machines/machines.go:96
 msgid "Couldn't apply option to server: %v"
 msgstr ""
 
-#: internal/machines/boot.go:239
+#: internal/machines/boot.go:211
 msgid ""
 "Couldn't create new subdatasets from %q. Assuming it has already been "
 "created successfully: %v"
@@ -139,6 +144,12 @@ msgstr ""
 
 #: internal/authorizer/authorizer.go:146
 msgid "Couldn't determine start time of client process: %v"
+msgstr ""
+
+#: internal/machines/machines.go:239 internal/machines/machines.go:263
+#: internal/machines/machines.go:287
+#, c-format
+msgid "Couldn't find any association for user dataset %s"
 msgstr ""
 
 #: internal/authorizer/authorizer.go:140
@@ -167,7 +178,7 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to commit on boot"
 msgstr ""
 
-#: internal/machines/userdata.go:22
+#: internal/machines/snapshot.go:41 internal/machines/userdata.go:22
 msgid "Current machine isn't Zsys, nothing to create"
 msgstr ""
 
@@ -183,7 +194,7 @@ msgstr ""
 msgid "Did you mean this?\n"
 msgstr ""
 
-#: internal/machines/helpers.go:93
+#: internal/machines/helpers.go:116
 msgid "Didn't find origin %q for %q matching any dataset"
 msgstr ""
 
@@ -218,7 +229,7 @@ msgstr ""
 msgid "MountPoint property for %q has an unexpected source: %q"
 msgstr ""
 
-#: internal/machines/boot.go:225
+#: internal/machines/boot.go:197
 msgid ""
 "Mounted clone bootFS dataset created by initramfs doesn't have a valid "
 "_suffix (at least .*_<onechar>): %q"
@@ -228,7 +239,7 @@ msgstr ""
 msgid "Needs a valid home path, got nothing"
 msgstr ""
 
-#: internal/machines/userdata.go:25
+#: internal/machines/snapshot.go:28 internal/machines/userdata.go:25
 msgid "Needs a valid user name, got nothing"
 msgstr ""
 
@@ -264,7 +275,7 @@ msgstr ""
 msgid "Prepare current boot state"
 msgstr ""
 
-#: internal/machines/boot.go:356
+#: internal/machines/boot.go:328
 msgid "Promoting dataset: %q"
 msgstr ""
 
@@ -289,6 +300,14 @@ msgstr ""
 msgid "Rename home user dataset from %q to %q"
 msgstr ""
 
+#: internal/machines/snapshot.go:75
+msgid "Requesting current system snapshot %q"
+msgstr ""
+
+#: internal/machines/snapshot.go:53
+msgid "Requesting snapshot %q for user %q"
+msgstr ""
+
 #: internal/daemon/daemon.go:163
 #, c-format
 msgid "Reset idle timeout to %s"
@@ -310,7 +329,7 @@ msgstr ""
 msgid "Reusing %q as matching user name or old mountpoint"
 msgstr ""
 
-#: internal/machines/boot.go:248
+#: internal/machines/boot.go:220
 msgid "Reverting user data"
 msgstr ""
 
@@ -327,11 +346,11 @@ msgstr ""
 msgid "Stopping daemon requested. Wait for active requests to close"
 msgstr ""
 
-#: internal/machines/boot.go:292
+#: internal/machines/boot.go:264
 msgid "Switch dataset %q to mount %q"
 msgstr ""
 
-#: internal/machines/boot.go:334
+#: internal/machines/boot.go:306
 msgid "Tag current user dataset: %q"
 msgstr ""
 
@@ -359,7 +378,7 @@ msgstr ""
 msgid "Trying to snapshot %q"
 msgstr ""
 
-#: internal/machines/boot.go:318
+#: internal/machines/boot.go:290
 msgid "Untagging user dataset: %q"
 msgstr ""
 
@@ -526,11 +545,11 @@ msgstr ""
 msgid "cannot retrieve systemd listeners: %v"
 msgstr ""
 
-#: internal/machines/boot.go:237
+#: internal/machines/boot.go:209
 msgid "cloning %q and children"
 msgstr ""
 
-#: internal/machines/boot.go:273 internal/machines/boot.go:341
+#: internal/machines/boot.go:245 internal/machines/boot.go:313
 #: internal/machines/userdata.go:90
 msgid "couldn't add %q to BootfsDatasets property of %q: "
 msgstr ""
@@ -569,7 +588,7 @@ msgstr ""
 msgid "couldn't create new authorizer: %v"
 msgstr ""
 
-#: internal/machines/boot.go:265
+#: internal/machines/boot.go:237
 msgid "couldn't create new user datasets from %q: %v"
 msgstr ""
 
@@ -625,7 +644,7 @@ msgstr ""
 msgid "couldn't promote %q: "
 msgstr ""
 
-#: internal/machines/boot.go:358
+#: internal/machines/boot.go:330
 msgid "couldn't promote dataset %q: "
 msgstr ""
 
@@ -641,7 +660,7 @@ msgstr ""
 msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
-#: internal/machines/boot.go:320
+#: internal/machines/boot.go:292
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -649,7 +668,7 @@ msgstr ""
 msgid "couldn't scan %q for clones"
 msgstr ""
 
-#: internal/machines/machines.go:87
+#: internal/machines/machines.go:102
 msgid "couldn't scan zfs filesystem"
 msgstr ""
 
@@ -681,11 +700,11 @@ msgstr ""
 msgid "couldn't snapshot %q: %v"
 msgstr ""
 
-#: internal/machines/boot.go:294
+#: internal/machines/boot.go:266
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
-#: internal/machines/machines.go:183
+#: internal/machines/machines.go:321
 msgid "current machines scanning layout:\n"
 msgstr ""
 
@@ -706,11 +725,11 @@ msgstr ""
 msgid "failed to listen on %q: %w"
 msgstr ""
 
-#: internal/machines/machines.go:263 internal/machines/machines.go:287
+#: internal/machines/machines.go:409 internal/machines/machines.go:438
 msgid "ignoring %q as couldn't assert if it's a child: "
 msgstr ""
 
-#: internal/machines/machines.go:222
+#: internal/machines/machines.go:367
 msgid ""
 "ignoring %q: either an orphan clone or not a boot, user or system datasets "
 "and canmount isn't on"
@@ -824,6 +843,10 @@ msgstr ""
 
 #: internal/authorizer/servercreds.go:28
 msgid "unexpected socket type"
+msgstr ""
+
+#: internal/machines/snapshot.go:56
+msgid "user %q doesn't exist"
 msgstr ""
 
 #: cmd/zsysd/client/version.go:30
