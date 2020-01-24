@@ -1,0 +1,269 @@
+{
+   "All": {
+      "rpool/ROOT/ubuntu_1234": {
+         "ID": "rpool/ROOT/ubuntu_1234",
+         "IsZsys": true,
+         "LastUsed": "2019-04-18T04:45:55+02:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool/ROOT/ubuntu_1234",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1555555555
+            }
+         ],
+         "UserDatasets": [
+            {
+               "Name": "rpool/USERDATA/user1_abcd",
+               "Mountpoint": "/home/user1",
+               "CanMount": "on",
+               "LastUsed": 1555555555,
+               "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+            },
+            {
+               "Name": "rpool/USERDATA/user1_abcd/childfor1234",
+               "Mountpoint": "/home/user1/childfor1234",
+               "CanMount": "on",
+               "LastUsed": 1555555555,
+               "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+            }
+         ],
+         "Users": {
+            "user1": {
+               "rpool/USERDATA/user1_abcd": {
+                  "ID": "rpool/USERDATA/user1_abcd",
+                  "LastUsed": "2019-04-18T04:45:55+02:00",
+                  "Datasets": [
+                     {
+                        "Name": "rpool/USERDATA/user1_abcd",
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 1555555555,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+                     },
+                     {
+                        "Name": "rpool/USERDATA/user1_abcd/childfor1234",
+                        "Mountpoint": "/home/user1/childfor1234",
+                        "CanMount": "on",
+                        "LastUsed": 1555555555,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                     }
+                  ]
+               }
+            }
+         }
+      },
+      "rpool/ROOT/ubuntu_9999": {
+         "ID": "rpool/ROOT/ubuntu_9999",
+         "IsZsys": true,
+         "LastUsed": "2018-12-10T13:20:44+01:00",
+         "SystemDatasets": [
+            {
+               "Name": "rpool/ROOT/ubuntu_9999",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 1544444444
+            }
+         ],
+         "UserDatasets": [
+            {
+               "Name": "rpool/USERDATA/user1_abcd",
+               "Mountpoint": "/home/user1",
+               "CanMount": "on",
+               "LastUsed": 1555555555,
+               "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+            }
+         ],
+         "Users": {
+            "user1": {
+               "rpool/USERDATA/user1_abcd": {
+                  "ID": "rpool/USERDATA/user1_abcd",
+                  "LastUsed": "2019-04-18T04:45:55+02:00",
+                  "Datasets": [
+                     {
+                        "Name": "rpool/USERDATA/user1_abcd",
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 1555555555,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+                     }
+                  ]
+               },
+               "rpool/USERDATA/user1_abcd@autozsys_xxxxxx": {
+                  "ID": "rpool/USERDATA/user1_abcd@autozsys_xxxxxx",
+                  "LastUsed": "2033-05-18T05:33:20+02:00",
+                  "Datasets": [
+                     {
+                        "Name": "rpool/USERDATA/user1_abcd@autozsys_xxxxxx",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 2000000000,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+                     }
+                  ]
+               }
+            }
+         },
+         "History": {
+            "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx": {
+               "ID": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
+               "IsZsys": true,
+               "LastUsed": "2033-05-18T05:33:20+02:00",
+               "SystemDatasets": [
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 2000000000
+                  }
+               ],
+               "UserDatasets": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd@autozsys_xxxxxx",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+                  }
+               ]
+            }
+         }
+      }
+   },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_9999 ccccc",
+   "Current": {
+      "ID": "rpool/ROOT/ubuntu_9999",
+      "IsZsys": true,
+      "LastUsed": "2018-12-10T13:20:44+01:00",
+      "SystemDatasets": [
+         {
+            "Name": "rpool/ROOT/ubuntu_9999",
+            "Mountpoint": "/",
+            "CanMount": "on",
+            "BootFS": true,
+            "LastUsed": 1544444444
+         }
+      ],
+      "UserDatasets": [
+         {
+            "Name": "rpool/USERDATA/user1_abcd",
+            "Mountpoint": "/home/user1",
+            "CanMount": "on",
+            "LastUsed": 1555555555,
+            "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+         }
+      ],
+      "Users": {
+         "user1": {
+            "rpool/USERDATA/user1_abcd": {
+               "ID": "rpool/USERDATA/user1_abcd",
+               "LastUsed": "2019-04-18T04:45:55+02:00",
+               "Datasets": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1555555555,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+                  }
+               ]
+            },
+            "rpool/USERDATA/user1_abcd@autozsys_xxxxxx": {
+               "ID": "rpool/USERDATA/user1_abcd@autozsys_xxxxxx",
+               "LastUsed": "2033-05-18T05:33:20+02:00",
+               "Datasets": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd@autozsys_xxxxxx",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+                  }
+               ]
+            }
+         }
+      },
+      "History": {
+         "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx": {
+            "ID": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
+            "IsZsys": true,
+            "LastUsed": "2033-05-18T05:33:20+02:00",
+            "SystemDatasets": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
+                  "IsSnapshot": true,
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 2000000000
+               }
+            ],
+            "UserDatasets": [
+               {
+                  "Name": "rpool/USERDATA/user1_abcd@autozsys_xxxxxx",
+                  "IsSnapshot": true,
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+               }
+            ]
+         }
+      }
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool/ROOT/ubuntu_1234",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1555555555
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9999",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1544444444
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
+         "IsSnapshot": true,
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000
+      }
+   ],
+   "AllUsersDatasets": [
+      {
+         "Name": "rpool/USERDATA/user1_abcd",
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1555555555,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+      },
+      {
+         "Name": "rpool/USERDATA/user1_abcd@autozsys_xxxxxx",
+         "IsSnapshot": true,
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 2000000000,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234:rpool/ROOT/ubuntu_9999"
+      },
+      {
+         "Name": "rpool/USERDATA/user1_abcd/childfor1234",
+         "Mountpoint": "/home/user1/childfor1234",
+         "CanMount": "on",
+         "LastUsed": 1555555555,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+      }
+   ]
+}
