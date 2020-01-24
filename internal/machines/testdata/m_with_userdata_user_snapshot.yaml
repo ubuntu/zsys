@@ -14,7 +14,7 @@ pools:
       last_used: 2018-12-10T12:20:44+00:00
       bootfs_datasets: rpool/ROOT/ubuntu_1234
       snapshots:
-        - name: automated_user_snapshot
+        - name: automatedusersnapshot
           creation_time: 2019-12-31T07:36:17+00:00
     - name: USERDATA/root_bcde
       mountpoint: /root

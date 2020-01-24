@@ -58,15 +58,13 @@
                         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
                      }
                   ]
-               }
-            },
-            "user1_abcd@automated_user": {
-               "rpool/USERDATA/user1_abcd@automated_user_snapshot": {
-                  "ID": "rpool/USERDATA/user1_abcd@automated_user_snapshot",
+               },
+               "rpool/USERDATA/user1_abcd@automatedusersnapshot": {
+                  "ID": "rpool/USERDATA/user1_abcd@automatedusersnapshot",
                   "LastUsed": "2019-12-31T08:36:17+01:00",
                   "Datasets": [
                      {
-                        "Name": "rpool/USERDATA/user1_abcd@automated_user_snapshot",
+                        "Name": "rpool/USERDATA/user1_abcd@automatedusersnapshot",
                         "IsSnapshot": true,
                         "LastUsed": 1577777777
                      }
@@ -101,7 +99,7 @@
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
       },
       {
-         "Name": "rpool/USERDATA/user1_abcd@automated_user_snapshot",
+         "Name": "rpool/USERDATA/user1_abcd@automatedusersnapshot",
          "IsSnapshot": true,
          "LastUsed": 1577777777
       }
