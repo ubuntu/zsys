@@ -47,7 +47,7 @@ func init() {
 func saveState(args []string) (err error) {
 
 	if saveSystem && userName != "" {
-		return errors.New(i18n.G("you can’t provide system and user flags at the same time"))
+		return errors.New(i18n.G("you can't provide system and user flags at the same time"))
 	}
 
 	var stateName string
