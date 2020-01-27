@@ -18,7 +18,7 @@ var (
 	rootCmd       = &cobra.Command{
 		Use:   "zsysd",
 		Short: i18n.G("ZFS SYStem integration daemon"),
-		Long: i18n.G(`Zfs SYStem daemon targeting an enhanced ZOL experience.
+		Long: i18n.G(`Zfs SYStem daemon for an enhanced ZFS on Linux experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
  user data from system and persistent data, and more.`),
