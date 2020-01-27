@@ -20,7 +20,7 @@ ZFS SYStem integration control zsys daemon
 
 ##### Synopsis
 
-Zfs SYStem tool targeting an enhanced ZOL experience.
+Zfs SYStem tool for an enhanced ZFS on Linux experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
  user data from system and persistent data, and more.
@@ -67,6 +67,82 @@ zsysctl completion [flags]
   -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
 ```
 
+#### zsysctl save
+
+Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided.
+
+##### Synopsis
+
+Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided.
+
+```
+zsysctl save [state id] [flags]
+```
+
+##### Options
+
+```
+  -h, --help          help for save
+  -s, --system        Save complete system state (users and system)
+  -u, --user string   Save the state for a given user or current user if empty
+```
+
+##### Options inherited from parent commands
+
+```
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
+#### zsysctl state
+
+Machine state management
+
+##### Synopsis
+
+Machine state management
+
+```
+zsysctl state COMMAND [flags]
+```
+
+##### Options
+
+```
+  -h, --help   help for state
+```
+
+##### Options inherited from parent commands
+
+```
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
+#### zsysctl save
+
+Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided.
+
+##### Synopsis
+
+Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided.
+
+```
+zsysctl save [state id] [flags]
+```
+
+##### Options
+
+```
+  -h, --help          help for save
+  -s, --system        Save complete system state (users and system)
+  -u, --user string   Save the state for a given user or current user if empty
+```
+
+##### Options inherited from parent commands
+
+```
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
 #### zsysctl version
 
 Returns version of client and server
@@ -97,7 +173,7 @@ ZFS SYStem integration daemon
 
 ##### Synopsis
 
-Zfs SYStem daemon targeting an enhanced ZOL experience.
+Zfs SYStem daemon for an enhanced ZFS on Linux experience.
  It allows running multiple ZFS system in parallels on the same machine,
  get automated snapshots, managing complex zfs dataset layouts separating
  user data from system and persistent data, and more.
