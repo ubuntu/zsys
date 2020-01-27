@@ -1,0 +1,9 @@
+[Unit]
+Description=Save current user state periodically
+
+[Timer]
+OnStartupSec=1min
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target
