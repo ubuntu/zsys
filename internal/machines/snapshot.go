@@ -7,14 +7,12 @@ import (
 	"strings"
 
 	"github.com/ubuntu/zsys/internal/i18n"
-	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 // CreateSystemSnapshot creates a snapshot of a system and all users datasets.
 // If snapshotname is not empty, it is used as the id of the snapshot otherwise an id
 // is generated with a random string.
-// TODO: if system snapshot: caller to call update-grub?
 func (ms *Machines) CreateSystemSnapshot(ctx context.Context, snapshotname string) error {
 	return ms.createSnapshot(ctx, snapshotname, "")
 }
@@ -50,7 +48,6 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 
 	var toSnapshot []*zfs.Dataset
 	if onlyUser != "" {
-		log.Infof(ctx, i18n.G("Requesting snapshot %q for user %q"), name, onlyUser)
 		userStates, ok := m.Users[onlyUser]
 		if !ok {
 			return fmt.Errorf(i18n.G("user %q doesn't exist"), onlyUser)
@@ -72,7 +69,6 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 			}
 		}
 	} else {
-		log.Infof(ctx, i18n.G("Requesting current system snapshot %q"), name)
 		toSnapshot = append(toSnapshot, m.SystemDatasets...)
 		toSnapshot = append(toSnapshot, m.UserDatasets...)
 	}
