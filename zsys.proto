@@ -8,6 +8,9 @@ service Zsys {
   rpc ChangeHomeOnUserData(ChangeHomeOnUserDataRequest) returns (stream LogResponse);
   rpc PrepareBoot(Empty) returns (stream PrepareBootResponse);
   rpc CommitBoot(Empty) returns (stream CommitBootResponse);
+
+  rpc SaveSystemState(SaveSystemStateRequest) returns (stream CreateSaveStateResponse);
+  rpc SaveUserState(SaveUserStateRequest) returns (stream CreateSaveStateResponse);
 }
 
 message Empty {}
@@ -43,5 +46,21 @@ message CommitBootResponse {
   oneof reply {
     string log = 1;
     bool changed = 2;
+  }
+}
+
+message SaveSystemStateRequest {
+  string stateName = 1;
+}
+
+message SaveUserStateRequest {
+  string userName = 1;
+  string stateName = 2;
+}
+
+message CreateSaveStateResponse {
+  oneof reply {
+    string log = 1;
+    string stateName = 2;
   }
 }

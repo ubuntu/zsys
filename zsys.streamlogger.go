@@ -210,6 +210,66 @@ func (z *ZsysLogServer) CommitBoot(req *Empty, stream Zsys_CommitBootServer) err
 }
 
 /*
+ * Zsys.SaveSystemState()
+ */
+
+// zsysSaveSystemStateLogStream is a Zsys_SaveSystemStateServer augmented by its own Context containing the log streamer
+type zsysSaveSystemStateLogStream struct {
+	Zsys_SaveSystemStateServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysSaveSystemStateLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// SaveSystemState overrides ZsysServer SaveSystemState, installing a logger first
+func (z *ZsysLogServer) SaveSystemState(req *SaveSystemStateRequest, stream Zsys_SaveSystemStateServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "SaveSystemState")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.SaveSystemState(req, &zsysSaveSystemStateLogStream{
+		Zsys_SaveSystemStateServer: stream,
+		ctx:                        ctx,
+	})
+}
+
+/*
+ * Zsys.SaveUserState()
+ */
+
+// zsysSaveUserStateLogStream is a Zsys_SaveUserStateServer augmented by its own Context containing the log streamer
+type zsysSaveUserStateLogStream struct {
+	Zsys_SaveUserStateServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysSaveUserStateLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// SaveUserState overrides ZsysServer SaveUserState, installing a logger first
+func (z *ZsysLogServer) SaveUserState(req *SaveUserStateRequest, stream Zsys_SaveUserStateServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "SaveUserState")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.SaveUserState(req, &zsysSaveUserStateLogStream{
+		Zsys_SaveUserStateServer: stream,
+		ctx:                      ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -270,6 +330,32 @@ func (s *zsysCommitBootServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&CommitBootResponse{
 			Reply: &CommitBootResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysSaveSystemStateServer to an io.Writer
+func (s *zsysSaveSystemStateServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&CreateSaveStateResponse{
+			Reply: &CreateSaveStateResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysSaveUserStateServer to an io.Writer
+func (s *zsysSaveUserStateServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&CreateSaveStateResponse{
+			Reply: &CreateSaveStateResponse_Log{Log: string(p)},
 		})
 	if err != nil {
 		return 0, err
