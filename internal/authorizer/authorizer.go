@@ -10,6 +10,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"os/user"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -26,9 +27,10 @@ type caller interface {
 
 // Authorizer is an abstraction of polkit authorization.
 type Authorizer struct {
-	authority caller
-	pid       uint32
-	uid       uint32
+	authority  caller
+	userLookup func(string) (*user.User, error)
+	pid        uint32
+	uid        uint32
 
 	root string
 }
@@ -36,6 +38,12 @@ type Authorizer struct {
 func withAuthority(c caller) func(*Authorizer) {
 	return func(a *Authorizer) {
 		a.authority = c
+	}
+}
+
+func withUserLookup(userLookup func(string) (*user.User, error)) func(*Authorizer) {
+	return func(a *Authorizer) {
+		a.userLookup = userLookup
 	}
 }
 
@@ -55,8 +63,9 @@ func New(options ...func(*Authorizer)) (*Authorizer, error) {
 		"/org/freedesktop/PolicyKit1/Authority")
 
 	a := Authorizer{
-		authority: authority,
-		root:      "/",
+		authority:  authority,
+		root:       "/",
+		userLookup: user.Lookup,
 	}
 
 	for _, option := range options {
@@ -79,10 +88,13 @@ const (
 	ActionSystemList Action = "com.ubuntu.zsys.system-list"
 	// ActionSystemWrite is the action to perform system write operations.
 	ActionSystemWrite Action = "com.ubuntu.zsys.system-write"
-	// ActionUserWriteSelf is the action to perform user write operations on own user's datasets.
-	ActionUserWriteSelf Action = "com.ubuntu.zsys.user-write-self"
-	//ActionUserWriteOthers is the action to perform user operation on other user's datasets.
-	ActionUserWriteOthers Action = "com.ubuntu.zsys.user-write-others"
+
+	// ActionUserWrite is the action which will be transformed to Self or Others depending on the request and requester.
+	ActionUserWrite Action = "internal-for-actionUserWriteSelf-or-actionUserWriteOthers-based-on-uid"
+	// actionUserWriteSelf is the action to perform user write operations on own user's datasets.
+	actionUserWriteSelf Action = "com.ubuntu.zsys.user-write-self"
+	// actionUserWriteOthers is the action to perform user operation on other user's datasets.
+	actionUserWriteOthers Action = "com.ubuntu.zsys.user-write-others"
 )
 
 type polkitCheckFlags uint32
@@ -90,6 +102,11 @@ type polkitCheckFlags uint32
 const (
 	checkAllowInteration polkitCheckFlags = 0x01
 )
+
+type onUserKey string
+
+// OnUserKey is the authorizer context key passing optional user name
+var OnUserKey onUserKey = "UserName"
 
 type authSubject struct {
 	Kind    string
@@ -122,17 +139,41 @@ func (a Authorizer) IsAllowedFromContext(ctx context.Context, action Action) (er
 		return errors.New(i18n.G("Context request grpc peer creeds information is not a peerCredsInfo."))
 	}
 
-	return a.isAllowed(ctx, action, pci.pid, pci.uid)
+	var actionUID uint32
+	if action == ActionUserWrite {
+		userName, ok := ctx.Value(OnUserKey).(string)
+		if !ok {
+			return errors.New(i18n.G("Request to act on user dataset should have a user name attached"))
+		}
+		user, err := a.userLookup(userName)
+		if err != nil {
+			return fmt.Errorf(i18n.G("Couldn't retrieve user for %q: %v"), userName, err)
+		}
+		uid, err := strconv.Atoi(user.Uid)
+		if err != nil {
+			return fmt.Errorf(i18n.G("Couldn't convert %q to a valid uid for %q"), user.Uid, userName)
+		}
+		actionUID = uint32(uid)
+	}
+
+	return a.isAllowed(ctx, action, pci.pid, pci.uid, actionUID)
 }
 
 // isAllowed returns nil if the user is allowed to perform an operation.
-func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid uint32) error {
+// ActionUID is only used for ActionUserWrite which will be converted to corresponding polkit action
+// (self or others)
+func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid uint32, actionUID uint32) error {
 	if uid == 0 {
 		log.Debug(ctx, i18n.G("Authorized as being administrator"))
 		return nil
 	} else if action == ActionAlwaysAllowed {
 		log.Debug(ctx, i18n.G("Any user always authorized"))
 		return nil
+	} else if action == ActionUserWrite {
+		action = actionUserWriteOthers
+		if actionUID == uid {
+			action = actionUserWriteSelf
+		}
 	}
 
 	f, err := os.Open(filepath.Join(a.root, fmt.Sprintf("proc/%d/stat", pid)))

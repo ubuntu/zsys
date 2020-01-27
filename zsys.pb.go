@@ -428,6 +428,172 @@ func (*CommitBootResponse) XXX_OneofWrappers() []interface{} {
 	}
 }
 
+type SaveSystemStateRequest struct {
+	StateName            string   `protobuf:"bytes,1,opt,name=stateName,proto3" json:"stateName,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SaveSystemStateRequest) Reset()         { *m = SaveSystemStateRequest{} }
+func (m *SaveSystemStateRequest) String() string { return proto.CompactTextString(m) }
+func (*SaveSystemStateRequest) ProtoMessage()    {}
+func (*SaveSystemStateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{7}
+}
+
+func (m *SaveSystemStateRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SaveSystemStateRequest.Unmarshal(m, b)
+}
+func (m *SaveSystemStateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SaveSystemStateRequest.Marshal(b, m, deterministic)
+}
+func (m *SaveSystemStateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SaveSystemStateRequest.Merge(m, src)
+}
+func (m *SaveSystemStateRequest) XXX_Size() int {
+	return xxx_messageInfo_SaveSystemStateRequest.Size(m)
+}
+func (m *SaveSystemStateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SaveSystemStateRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SaveSystemStateRequest proto.InternalMessageInfo
+
+func (m *SaveSystemStateRequest) GetStateName() string {
+	if m != nil {
+		return m.StateName
+	}
+	return ""
+}
+
+type SaveUserStateRequest struct {
+	UserName             string   `protobuf:"bytes,1,opt,name=userName,proto3" json:"userName,omitempty"`
+	StateName            string   `protobuf:"bytes,2,opt,name=stateName,proto3" json:"stateName,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *SaveUserStateRequest) Reset()         { *m = SaveUserStateRequest{} }
+func (m *SaveUserStateRequest) String() string { return proto.CompactTextString(m) }
+func (*SaveUserStateRequest) ProtoMessage()    {}
+func (*SaveUserStateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{8}
+}
+
+func (m *SaveUserStateRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SaveUserStateRequest.Unmarshal(m, b)
+}
+func (m *SaveUserStateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SaveUserStateRequest.Marshal(b, m, deterministic)
+}
+func (m *SaveUserStateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SaveUserStateRequest.Merge(m, src)
+}
+func (m *SaveUserStateRequest) XXX_Size() int {
+	return xxx_messageInfo_SaveUserStateRequest.Size(m)
+}
+func (m *SaveUserStateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_SaveUserStateRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SaveUserStateRequest proto.InternalMessageInfo
+
+func (m *SaveUserStateRequest) GetUserName() string {
+	if m != nil {
+		return m.UserName
+	}
+	return ""
+}
+
+func (m *SaveUserStateRequest) GetStateName() string {
+	if m != nil {
+		return m.StateName
+	}
+	return ""
+}
+
+type CreateSaveStateResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*CreateSaveStateResponse_Log
+	//	*CreateSaveStateResponse_StateName
+	Reply                isCreateSaveStateResponse_Reply `protobuf_oneof:"reply"`
+	XXX_NoUnkeyedLiteral struct{}                        `json:"-"`
+	XXX_unrecognized     []byte                          `json:"-"`
+	XXX_sizecache        int32                           `json:"-"`
+}
+
+func (m *CreateSaveStateResponse) Reset()         { *m = CreateSaveStateResponse{} }
+func (m *CreateSaveStateResponse) String() string { return proto.CompactTextString(m) }
+func (*CreateSaveStateResponse) ProtoMessage()    {}
+func (*CreateSaveStateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{9}
+}
+
+func (m *CreateSaveStateResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_CreateSaveStateResponse.Unmarshal(m, b)
+}
+func (m *CreateSaveStateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_CreateSaveStateResponse.Marshal(b, m, deterministic)
+}
+func (m *CreateSaveStateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_CreateSaveStateResponse.Merge(m, src)
+}
+func (m *CreateSaveStateResponse) XXX_Size() int {
+	return xxx_messageInfo_CreateSaveStateResponse.Size(m)
+}
+func (m *CreateSaveStateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_CreateSaveStateResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_CreateSaveStateResponse proto.InternalMessageInfo
+
+type isCreateSaveStateResponse_Reply interface {
+	isCreateSaveStateResponse_Reply()
+}
+
+type CreateSaveStateResponse_Log struct {
+	Log string `protobuf:"bytes,1,opt,name=log,proto3,oneof"`
+}
+
+type CreateSaveStateResponse_StateName struct {
+	StateName string `protobuf:"bytes,2,opt,name=stateName,proto3,oneof"`
+}
+
+func (*CreateSaveStateResponse_Log) isCreateSaveStateResponse_Reply() {}
+
+func (*CreateSaveStateResponse_StateName) isCreateSaveStateResponse_Reply() {}
+
+func (m *CreateSaveStateResponse) GetReply() isCreateSaveStateResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *CreateSaveStateResponse) GetLog() string {
+	if x, ok := m.GetReply().(*CreateSaveStateResponse_Log); ok {
+		return x.Log
+	}
+	return ""
+}
+
+func (m *CreateSaveStateResponse) GetStateName() string {
+	if x, ok := m.GetReply().(*CreateSaveStateResponse_StateName); ok {
+		return x.StateName
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*CreateSaveStateResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*CreateSaveStateResponse_Log)(nil),
+		(*CreateSaveStateResponse_StateName)(nil),
+	}
+}
+
 func init() {
 	proto.RegisterType((*Empty)(nil), "zsys.Empty")
 	proto.RegisterType((*LogResponse)(nil), "zsys.LogResponse")
@@ -436,34 +602,43 @@ func init() {
 	proto.RegisterType((*ChangeHomeOnUserDataRequest)(nil), "zsys.ChangeHomeOnUserDataRequest")
 	proto.RegisterType((*PrepareBootResponse)(nil), "zsys.PrepareBootResponse")
 	proto.RegisterType((*CommitBootResponse)(nil), "zsys.CommitBootResponse")
+	proto.RegisterType((*SaveSystemStateRequest)(nil), "zsys.SaveSystemStateRequest")
+	proto.RegisterType((*SaveUserStateRequest)(nil), "zsys.SaveUserStateRequest")
+	proto.RegisterType((*CreateSaveStateResponse)(nil), "zsys.CreateSaveStateResponse")
 }
 
 func init() { proto.RegisterFile("zsys.proto", fileDescriptor_05865bfaed6eea5d) }
 
 var fileDescriptor_05865bfaed6eea5d = []byte{
-	// 344 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x92, 0xcb, 0x4f, 0xc2, 0x40,
-	0x10, 0xc6, 0x2d, 0x82, 0xc5, 0x21, 0xf1, 0x31, 0x4a, 0x52, 0xcb, 0x41, 0xed, 0xc9, 0x13, 0x36,
-	0x1a, 0xe3, 0x1d, 0x34, 0x12, 0x1f, 0x68, 0x9a, 0xe8, 0xc1, 0x5b, 0xd5, 0x09, 0x90, 0xd0, 0x6e,
-	0xdd, 0x5d, 0x34, 0xf5, 0x5f, 0xf3, 0x9f, 0x33, 0xfb, 0xe0, 0x51, 0xad, 0xf1, 0xe2, 0x6d, 0x66,
-	0xfa, 0xf5, 0xb7, 0x3b, 0xdf, 0xb7, 0x00, 0x1f, 0x22, 0x17, 0xed, 0x8c, 0x33, 0xc9, 0xb0, 0xaa,
-	0xea, 0xc0, 0x85, 0xda, 0x79, 0x92, 0xc9, 0x3c, 0xd8, 0x85, 0xc6, 0x35, 0x1b, 0x44, 0x24, 0x32,
-	0x96, 0x0a, 0xc2, 0x0d, 0x58, 0x1e, 0xb3, 0x81, 0xe7, 0xec, 0x39, 0x07, 0xab, 0x91, 0x2a, 0x83,
-	0x4b, 0x58, 0x7f, 0x20, 0x2e, 0x46, 0x2c, 0x9d, 0x89, 0x70, 0x41, 0xd4, 0x5b, 0xd2, 0x32, 0xf4,
-	0xc1, 0x7d, 0x33, 0x32, 0xaf, 0x62, 0xe7, 0xd3, 0x41, 0xc7, 0x85, 0x1a, 0xa7, 0x6c, 0x9c, 0x07,
-	0x17, 0xd0, 0xec, 0x72, 0x8a, 0x25, 0xdd, 0x0b, 0xe2, 0x67, 0xb1, 0x8c, 0x23, 0x7a, 0x9d, 0x90,
-	0x90, 0x88, 0x50, 0x9d, 0x08, 0xe2, 0xf6, 0x5c, 0x5d, 0xa3, 0x0f, 0xf5, 0x21, 0x4b, 0x28, 0x8b,
-	0xe5, 0xd0, 0x20, 0xa3, 0x59, 0x1f, 0x5c, 0x41, 0xab, 0x3b, 0x8c, 0xd3, 0x01, 0xf5, 0x58, 0x42,
-	0xb7, 0x69, 0x09, 0x4e, 0x49, 0xa7, 0x38, 0x55, 0xa3, 0x07, 0x6e, 0x4a, 0xef, 0x4a, 0x6f, 0x69,
-	0xd3, 0x36, 0xe8, 0xc3, 0xd6, 0x1d, 0xa7, 0x2c, 0xe6, 0xd4, 0x61, 0x4c, 0xfe, 0xb5, 0xe5, 0xb3,
-	0x3e, 0xf7, 0x45, 0x43, 0xea, 0x6a, 0x4b, 0x3b, 0x98, 0x6f, 0x79, 0x03, 0xd8, 0x65, 0x49, 0x32,
-	0x92, 0xff, 0x82, 0x3b, 0xfa, 0xac, 0x40, 0xf5, 0x51, 0xe4, 0x02, 0x0f, 0xc1, 0xb5, 0x49, 0x60,
-	0xa3, 0xad, 0x13, 0xd5, 0x11, 0xfa, 0x4d, 0xd3, 0x7c, 0x4b, 0x29, 0x74, 0xb0, 0x03, 0x6b, 0x45,
-	0xbb, 0xb1, 0x65, 0xa4, 0xa5, 0x21, 0xf8, 0x9b, 0xe6, 0xe3, 0xc2, 0x73, 0x08, 0x1d, 0xec, 0xc3,
-	0x76, 0x99, 0xd3, 0xb8, 0x6f, 0x49, 0xbf, 0xa7, 0x50, 0xce, 0x3b, 0x85, 0xc6, 0x82, 0xd9, 0xc5,
-	0x45, 0x76, 0x4c, 0x53, 0x12, 0x46, 0xe8, 0xe0, 0x09, 0xc0, 0xdc, 0xd5, 0xe2, 0x7f, 0x9e, 0xbd,
-	0xcb, 0x0f, 0xd3, 0x43, 0xe7, 0x69, 0x45, 0xbf, 0xfa, 0xe3, 0xaf, 0x00, 0x00, 0x00, 0xff, 0xff,
-	0x4d, 0x63, 0x94, 0x5d, 0x03, 0x03, 0x00, 0x00,
+	// 447 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0x4f, 0x6f, 0xd3, 0x40,
+	0x10, 0xc5, 0xeb, 0x36, 0xc5, 0xe9, 0x44, 0x50, 0x18, 0x5a, 0x30, 0x6e, 0xf9, 0xe7, 0x13, 0xa7,
+	0x62, 0x81, 0x80, 0x7b, 0x02, 0x22, 0x82, 0x12, 0x22, 0x47, 0xf4, 0xc0, 0x6d, 0x81, 0x51, 0x12,
+	0x29, 0xf6, 0x9a, 0xdd, 0x4d, 0x90, 0xf9, 0xaa, 0x7c, 0x19, 0xb4, 0xbb, 0xfe, 0x1f, 0x43, 0x2e,
+	0xbd, 0xcd, 0x4c, 0xde, 0x3c, 0xef, 0xdb, 0xfd, 0x29, 0x00, 0xbf, 0x65, 0x26, 0x2f, 0x52, 0xc1,
+	0x15, 0xc7, 0x9e, 0xae, 0x03, 0x17, 0x0e, 0xdf, 0xc5, 0xa9, 0xca, 0x82, 0xc7, 0x30, 0xb8, 0xe4,
+	0xf3, 0x88, 0x64, 0xca, 0x13, 0x49, 0x78, 0x1b, 0x0e, 0x56, 0x7c, 0xee, 0x39, 0x4f, 0x9c, 0x67,
+	0x47, 0x91, 0x2e, 0x83, 0x0f, 0x70, 0x7c, 0x45, 0x42, 0x2e, 0x79, 0x52, 0x8a, 0xb0, 0x26, 0x1a,
+	0xef, 0x19, 0x19, 0xfa, 0xe0, 0x6e, 0xac, 0xcc, 0xdb, 0xcf, 0xe7, 0xc5, 0x60, 0xe8, 0xc2, 0xa1,
+	0xa0, 0x74, 0x95, 0x05, 0xef, 0xe1, 0x74, 0x24, 0x88, 0x29, 0xfa, 0x22, 0x49, 0xbc, 0x65, 0x8a,
+	0x45, 0xf4, 0x73, 0x4d, 0x52, 0x21, 0x42, 0x6f, 0x2d, 0x49, 0xe4, 0xdf, 0x35, 0x35, 0xfa, 0xd0,
+	0x5f, 0xf0, 0x98, 0x52, 0xa6, 0x16, 0xd6, 0x32, 0x2a, 0xfb, 0xe0, 0x23, 0x9c, 0x8d, 0x16, 0x2c,
+	0x99, 0xd3, 0x98, 0xc7, 0xf4, 0x39, 0xe9, 0xb0, 0xd3, 0xd2, 0xc2, 0x4e, 0xd7, 0xe8, 0x81, 0x9b,
+	0xd0, 0x2f, 0xad, 0xcf, 0xdd, 0x8a, 0x36, 0x98, 0xc0, 0xdd, 0xa9, 0xa0, 0x94, 0x09, 0x1a, 0x72,
+	0xae, 0x76, 0xa5, 0xfc, 0x6e, 0xbe, 0xfb, 0xc3, 0x98, 0xf4, 0x75, 0xca, 0x7c, 0x50, 0xa5, 0xfc,
+	0x04, 0x38, 0xe2, 0x71, 0xbc, 0x54, 0xd7, 0x63, 0xf7, 0x1a, 0xee, 0xcd, 0xd8, 0x86, 0x66, 0x99,
+	0x54, 0x14, 0xcf, 0x14, 0x53, 0x54, 0xc4, 0x3c, 0x87, 0x23, 0xa9, 0xfb, 0x09, 0x2b, 0xb3, 0x56,
+	0x83, 0x60, 0x0a, 0x27, 0x7a, 0x4f, 0xdf, 0x4d, 0x63, 0xcb, 0x87, 0xbe, 0xbe, 0xdf, 0xda, 0x52,
+	0xd9, 0x37, 0x1d, 0xf7, 0xdb, 0x8e, 0x57, 0x70, 0xdf, 0x3e, 0x9f, 0x39, 0x8f, 0xf5, 0xfc, 0x4f,
+	0xba, 0x47, 0x5b, 0x66, 0xe3, 0xbd, 0x9a, 0x5d, 0x99, 0xf0, 0xc5, 0x9f, 0x03, 0xe8, 0x7d, 0x95,
+	0x99, 0xc4, 0xe7, 0xe0, 0xe6, 0xac, 0xe1, 0xe0, 0xc2, 0x30, 0x6b, 0x20, 0xf5, 0x4f, 0x6d, 0xd3,
+	0xe2, 0x30, 0x74, 0x70, 0x08, 0xb7, 0x9a, 0x40, 0xe1, 0x99, 0x95, 0x76, 0x62, 0xe6, 0xdf, 0xb1,
+	0x3f, 0xd6, 0x80, 0x0f, 0x1d, 0x9c, 0xc0, 0x49, 0x17, 0x4b, 0xf8, 0x34, 0x77, 0xfa, 0x37, 0x67,
+	0xdd, 0x7e, 0x6f, 0x60, 0x50, 0xc3, 0xa9, 0x19, 0xe4, 0x81, 0x6d, 0x3a, 0x70, 0x0b, 0x1d, 0x7c,
+	0x05, 0x50, 0x71, 0xd3, 0xdc, 0xf3, 0xf2, 0xb3, 0x6c, 0x61, 0x15, 0x3a, 0x38, 0x85, 0xe3, 0x16,
+	0x1f, 0x78, 0x6e, 0xe5, 0xdd, 0xd8, 0xf8, 0x0f, 0xeb, 0x57, 0xb4, 0xf5, 0x94, 0xa1, 0x83, 0x97,
+	0x70, 0xb3, 0x41, 0x0e, 0xfa, 0x95, 0x5f, 0x1b, 0xa7, 0x9d, 0x6e, 0xdf, 0x6e, 0x98, 0xff, 0x9d,
+	0x97, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff, 0xb0, 0xbc, 0xbe, 0xbf, 0x85, 0x04, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -483,6 +658,8 @@ type ZsysClient interface {
 	ChangeHomeOnUserData(ctx context.Context, in *ChangeHomeOnUserDataRequest, opts ...grpc.CallOption) (Zsys_ChangeHomeOnUserDataClient, error)
 	PrepareBoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_PrepareBootClient, error)
 	CommitBoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_CommitBootClient, error)
+	SaveSystemState(ctx context.Context, in *SaveSystemStateRequest, opts ...grpc.CallOption) (Zsys_SaveSystemStateClient, error)
+	SaveUserState(ctx context.Context, in *SaveUserStateRequest, opts ...grpc.CallOption) (Zsys_SaveUserStateClient, error)
 }
 
 type zsysClient struct {
@@ -653,6 +830,70 @@ func (x *zsysCommitBootClient) Recv() (*CommitBootResponse, error) {
 	return m, nil
 }
 
+func (c *zsysClient) SaveSystemState(ctx context.Context, in *SaveSystemStateRequest, opts ...grpc.CallOption) (Zsys_SaveSystemStateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[5], "/zsys.Zsys/SaveSystemState", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysSaveSystemStateClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_SaveSystemStateClient interface {
+	Recv() (*CreateSaveStateResponse, error)
+	grpc.ClientStream
+}
+
+type zsysSaveSystemStateClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysSaveSystemStateClient) Recv() (*CreateSaveStateResponse, error) {
+	m := new(CreateSaveStateResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) SaveUserState(ctx context.Context, in *SaveUserStateRequest, opts ...grpc.CallOption) (Zsys_SaveUserStateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[6], "/zsys.Zsys/SaveUserState", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysSaveUserStateClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_SaveUserStateClient interface {
+	Recv() (*CreateSaveStateResponse, error)
+	grpc.ClientStream
+}
+
+type zsysSaveUserStateClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysSaveUserStateClient) Recv() (*CreateSaveStateResponse, error) {
+	m := new(CreateSaveStateResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ZsysServer is the server API for Zsys service.
 type ZsysServer interface {
 	Version(*Empty, Zsys_VersionServer) error
@@ -660,6 +901,8 @@ type ZsysServer interface {
 	ChangeHomeOnUserData(*ChangeHomeOnUserDataRequest, Zsys_ChangeHomeOnUserDataServer) error
 	PrepareBoot(*Empty, Zsys_PrepareBootServer) error
 	CommitBoot(*Empty, Zsys_CommitBootServer) error
+	SaveSystemState(*SaveSystemStateRequest, Zsys_SaveSystemStateServer) error
+	SaveUserState(*SaveUserStateRequest, Zsys_SaveUserStateServer) error
 }
 
 // UnimplementedZsysServer can be embedded to have forward compatible implementations.
@@ -680,6 +923,12 @@ func (*UnimplementedZsysServer) PrepareBoot(req *Empty, srv Zsys_PrepareBootServ
 }
 func (*UnimplementedZsysServer) CommitBoot(req *Empty, srv Zsys_CommitBootServer) error {
 	return status.Errorf(codes.Unimplemented, "method CommitBoot not implemented")
+}
+func (*UnimplementedZsysServer) SaveSystemState(req *SaveSystemStateRequest, srv Zsys_SaveSystemStateServer) error {
+	return status.Errorf(codes.Unimplemented, "method SaveSystemState not implemented")
+}
+func (*UnimplementedZsysServer) SaveUserState(req *SaveUserStateRequest, srv Zsys_SaveUserStateServer) error {
+	return status.Errorf(codes.Unimplemented, "method SaveUserState not implemented")
 }
 
 func RegisterZsysServer(s *grpc.Server, srv ZsysServer) {
@@ -791,6 +1040,48 @@ func (x *zsysCommitBootServer) Send(m *CommitBootResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Zsys_SaveSystemState_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SaveSystemStateRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).SaveSystemState(m, &zsysSaveSystemStateServer{stream})
+}
+
+type Zsys_SaveSystemStateServer interface {
+	Send(*CreateSaveStateResponse) error
+	grpc.ServerStream
+}
+
+type zsysSaveSystemStateServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysSaveSystemStateServer) Send(m *CreateSaveStateResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_SaveUserState_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SaveUserStateRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).SaveUserState(m, &zsysSaveUserStateServer{stream})
+}
+
+type Zsys_SaveUserStateServer interface {
+	Send(*CreateSaveStateResponse) error
+	grpc.ServerStream
+}
+
+type zsysSaveUserStateServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysSaveUserStateServer) Send(m *CreateSaveStateResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 var _Zsys_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "zsys.Zsys",
 	HandlerType: (*ZsysServer)(nil),
@@ -819,6 +1110,16 @@ var _Zsys_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "CommitBoot",
 			Handler:       _Zsys_CommitBoot_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SaveSystemState",
+			Handler:       _Zsys_SaveSystemState_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "SaveUserState",
+			Handler:       _Zsys_SaveUserState_Handler,
 			ServerStreams: true,
 		},
 	},

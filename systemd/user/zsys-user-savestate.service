@@ -1,0 +1,9 @@
+[Unit]
+Description=Save current user state periodically
+
+# We can't run it in a container
+ConditionVirtualization=!container
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/zsysctl state save

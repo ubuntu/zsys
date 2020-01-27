@@ -1,5 +1,6 @@
 # Binaries for programs, uncommited generated code and plugins
 cmd/zsysd/zsysd
+cmd/zsysd/zsysctl
 generated/
 *.so
 *.dylib

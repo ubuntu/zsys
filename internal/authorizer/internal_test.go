@@ -22,18 +22,24 @@ func TestIsAllowed(t *testing.T) {
 	defer StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
-		action          Action
-		pid             int32
-		uid             uint32
+		action    Action
+		pid       int32
+		uid       uint32
+		actionUID uint32
+
 		polkitAuthorize bool
 
-		wantAuthorized  bool
-		wantPolkitError bool
+		wantActionRequested Action
+		wantAuthorized      bool
+		wantPolkitError     bool
 	}{
 		"Root is always authorized":             {uid: 0, wantAuthorized: true},
 		"ActionAlwaysAllowed is always allowed": {action: ActionAlwaysAllowed, uid: 1000, wantAuthorized: true},
 		"Valid process and ACK":                 {pid: 10000, uid: 1000, polkitAuthorize: true, wantAuthorized: true},
 		"Valid process and NACK":                {pid: 10000, uid: 1000, polkitAuthorize: false, wantAuthorized: false},
+
+		"ActionUserWrite on its own datasets is transformed on actionUserWriteSelf": {action: ActionUserWrite, actionUID: 1000, pid: 10000, uid: 1000, wantActionRequested: actionUserWriteSelf},
+		"ActionUserWrite on other datasets is transformed on actionUserWriteOthers": {action: ActionUserWrite, actionUID: 999, pid: 10000, uid: 1000, wantActionRequested: actionUserWriteOthers},
 
 		"Process doesn't exists":                         {pid: 99999, uid: 1000, polkitAuthorize: true, wantAuthorized: false},
 		"Invalid process stat file: missing )":           {pid: 10001, uid: 1000, polkitAuthorize: true, wantAuthorized: false},
@@ -52,7 +58,7 @@ func TestIsAllowed(t *testing.T) {
 				tc.action = ActionManageService
 			}
 
-			d := DbusMock{
+			d := &DbusMock{
 				IsAuthorized:    tc.polkitAuthorize,
 				WantPolkitError: tc.wantPolkitError}
 			a, err := New(WithAuthority(d), WithRoot("testdata"))
@@ -60,7 +66,11 @@ func TestIsAllowed(t *testing.T) {
 				t.Fatalf("Failed to create authorizer: %v", err)
 			}
 
-			errAllowed := a.isAllowed(context.Background(), tc.action, tc.pid, tc.uid)
+			errAllowed := a.isAllowed(context.Background(), tc.action, tc.pid, tc.uid, tc.actionUID)
+
+			if tc.wantActionRequested != "" {
+				assert.Equal(t, string(tc.wantActionRequested), string(d.actionRequested), "Unexpected action received by polkit")
+			}
 
 			assert.Equal(t, tc.wantAuthorized, errAllowed == nil, "isAllowed returned state match expectations")
 		})

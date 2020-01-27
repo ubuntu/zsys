@@ -1,1 +1,3 @@
-systemd/* lib/systemd/system/
+systemd/*.service lib/systemd/system/
+systemd/*.socket lib/systemd/system/
+systemd/user/* usr/lib/systemd/user/
