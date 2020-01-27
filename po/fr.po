@@ -47,7 +47,7 @@ msgstr ""
 msgid "%q property isn't an int: "
 msgstr ""
 
-#: internal/daemon/boot.go:73
+#: internal/daemon/boot.go:73 internal/daemon/state.go:43
 msgid "%q returned an error: "
 msgstr ""
 
@@ -66,7 +66,7 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/machines/snapshot.go:61
+#: internal/machines/snapshot.go:58
 msgid ""
 "A snapshot %q already exists on system and can create an incoherent state"
 msgstr ""
@@ -79,11 +79,11 @@ msgstr ""
 msgid "An error occurred when reverting a Zfs transaction: "
 msgstr ""
 
-#: internal/authorizer/authorizer.go:134
+#: internal/authorizer/authorizer.go:170
 msgid "Any user always authorized"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:131
+#: internal/authorizer/authorizer.go:167
 msgid "Authorized as being administrator"
 msgstr ""
 
@@ -95,7 +95,7 @@ msgstr ""
 msgid "Building new machines list"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:164
+#: internal/authorizer/authorizer.go:205
 msgid "Call to polkit failed: %v"
 msgstr ""
 
@@ -103,7 +103,7 @@ msgstr ""
 msgid "CanMount property for %q has an unexpected source: %q"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:108
+#: internal/authorizer/authorizer.go:125
 msgid "Check if grpc request peer is authorized"
 msgstr ""
 
@@ -119,11 +119,11 @@ msgstr ""
 msgid "Committing boot for %q"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:118
+#: internal/authorizer/authorizer.go:135
 msgid "Context request doesn't have grpc peer creds informations."
 msgstr ""
 
-#: internal/authorizer/authorizer.go:122
+#: internal/authorizer/authorizer.go:139
 msgid "Context request grpc peer creeds information is not a peerCredsInfo."
 msgstr ""
 
@@ -136,13 +136,17 @@ msgstr ""
 msgid "Couldn't apply option to server: %v"
 msgstr ""
 
+#: internal/authorizer/authorizer.go:154
+msgid "Couldn't convert %q to a valid uid for %q"
+msgstr ""
+
 #: internal/machines/boot.go:211
 msgid ""
 "Couldn't create new subdatasets from %q. Assuming it has already been "
 "created successfully: %v"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:146
+#: internal/authorizer/authorizer.go:187
 msgid "Couldn't determine start time of client process: %v"
 msgstr ""
 
@@ -152,12 +156,16 @@ msgstr ""
 msgid "Couldn't find any association for user dataset %s"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:140
+#: internal/authorizer/authorizer.go:181
 msgid "Couldn't open stat file for process: %v"
 msgstr ""
 
 #: cmd/zsysd/daemon/zsysd.go:32
 msgid "Couldn't register grpc server: %v"
+msgstr ""
+
+#: internal/authorizer/authorizer.go:150
+msgid "Couldn't retrieve user for %q: %v"
 msgstr ""
 
 #: cmd/zsysd/client/userdata.go:25
@@ -178,7 +186,7 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to commit on boot"
 msgstr ""
 
-#: internal/machines/snapshot.go:41 internal/machines/userdata.go:22
+#: internal/machines/snapshot.go:39 internal/machines/userdata.go:22
 msgid "Current machine isn't Zsys, nothing to create"
 msgstr ""
 
@@ -225,6 +233,10 @@ msgstr ""
 msgid "Idle timeout expired"
 msgstr ""
 
+#: cmd/zsysd/client/state.go:21
+msgid "Machine state management"
+msgstr ""
+
 #: internal/zfs/helpers.go:66
 msgid "MountPoint property for %q has an unexpected source: %q"
 msgstr ""
@@ -239,7 +251,7 @@ msgstr ""
 msgid "Needs a valid home path, got nothing"
 msgstr ""
 
-#: internal/machines/snapshot.go:28 internal/machines/userdata.go:25
+#: internal/machines/snapshot.go:26 internal/machines/userdata.go:25
 msgid "Needs a valid user name, got nothing"
 msgstr ""
 
@@ -247,15 +259,15 @@ msgstr ""
 msgid "New dataNew dataset found: %q"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:112
+#: internal/authorizer/authorizer.go:129
 msgid "Permission denied: %w"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:167
+#: internal/authorizer/authorizer.go:208
 msgid "Polkit call result, authorized: %t"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:170
+#: internal/authorizer/authorizer.go:211
 msgid "Polkit denied access"
 msgstr ""
 
@@ -300,12 +312,24 @@ msgstr ""
 msgid "Rename home user dataset from %q to %q"
 msgstr ""
 
-#: internal/machines/snapshot.go:75
-msgid "Requesting current system snapshot %q"
+#: internal/authorizer/authorizer.go:146
+msgid "Request to act on user dataset should have a user name attached"
 msgstr ""
 
-#: internal/machines/snapshot.go:53
-msgid "Requesting snapshot %q for user %q"
+#: internal/daemon/state.go:31
+msgid "Requesting saving current system state"
+msgstr ""
+
+#: internal/daemon/state.go:29
+msgid "Requesting saving current system state %q"
+msgstr ""
+
+#: internal/daemon/state.go:67
+msgid "Requesting saving state %q for user %q"
+msgstr ""
+
+#: internal/daemon/state.go:69
+msgid "Requesting saving state for user %q"
 msgstr ""
 
 #: internal/daemon/daemon.go:163
@@ -333,6 +357,20 @@ msgstr ""
 msgid "Reverting user data"
 msgstr ""
 
+#: cmd/zsysd/client/state.go:41
+msgid "Save complete system state (users and system)"
+msgstr ""
+
+#: cmd/zsysd/client/state.go:42
+msgid "Save the state for a given user or current user if empty"
+msgstr ""
+
+#: cmd/zsysd/client/state.go:27
+msgid ""
+"Saves the current state of the machine. By default it saves only the user "
+"state. state_id is generated if not provided."
+msgstr ""
+
 #: internal/daemon/daemon.go:140
 #, c-format
 msgid "Serving on %s"
@@ -344,6 +382,10 @@ msgstr ""
 
 #: internal/daemon/daemon.go:154
 msgid "Stopping daemon requested. Wait for active requests to close"
+msgstr ""
+
+#: cmd/zsysd/client/state.go:119
+msgid "Successfully saved as %q\n"
 msgstr ""
 
 #: internal/machines/boot.go:264
@@ -556,7 +598,7 @@ msgstr ""
 
 #: internal/streamlogger/streamlogger.go.template:88 zsys.streamlogger.go:82
 #: zsys.streamlogger.go:112 zsys.streamlogger.go:142 zsys.streamlogger.go:172
-#: zsys.streamlogger.go:202
+#: zsys.streamlogger.go:202 zsys.streamlogger.go:232 zsys.streamlogger.go:262
 msgid "couldn't attach a logger to request: %w"
 msgstr ""
 
@@ -662,6 +704,14 @@ msgstr ""
 
 #: internal/machines/boot.go:292
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
+msgstr ""
+
+#: internal/daemon/state.go:73
+msgid "couldn't save state for user %q:"
+msgstr ""
+
+#: internal/daemon/state.go:35
+msgid "couldn't save system state: "
 msgstr ""
 
 #: internal/zfs/helpers.go:278
@@ -794,19 +844,19 @@ msgid ""
 "shouldn't have a snapshot. However %q exists"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:208
+#: internal/authorizer/authorizer.go:249
 msgid "parsing error: %v"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:200
+#: internal/authorizer/authorizer.go:241
 msgid "parsing error: ) at the end"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:204
+#: internal/authorizer/authorizer.go:245
 msgid "parsing error: less fields than required"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:196
+#: internal/authorizer/authorizer.go:237
 msgid "parsing error: missing )"
 msgstr ""
 
@@ -845,8 +895,12 @@ msgstr ""
 msgid "unexpected socket type"
 msgstr ""
 
-#: internal/machines/snapshot.go:56
+#: internal/machines/snapshot.go:53
 msgid "user %q doesn't exist"
+msgstr ""
+
+#: cmd/zsysd/client/state.go:50
+msgid "you can't provide system and user flags at the same time"
 msgstr ""
 
 #: cmd/zsysd/client/version.go:30
