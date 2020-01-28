@@ -316,19 +316,19 @@
    },
    "AllSystemDatasets": [
       {
-         "Name": "rpool/ROOT/ubuntu_5678",
-         "Mountpoint": "/",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 2000000000
-      },
-      {
          "Name": "rpool/ROOT/ubuntu_1234",
          "Mountpoint": "/",
          "CanMount": "noauto",
          "BootFS": true,
          "LastUsed": 1555555555,
          "Origin": "rpool/ROOT/ubuntu_5678@snap1"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_5678",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000
       },
       {
          "Name": "rpool/ROOT/ubuntu_5678@snap1",

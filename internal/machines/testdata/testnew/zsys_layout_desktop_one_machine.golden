@@ -185,6 +185,11 @@
    },
    "AllSystemDatasets": [
       {
+         "Name": "bpool/BOOT/ubuntu_1234",
+         "Mountpoint": "/boot",
+         "CanMount": "on"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234",
          "Mountpoint": "/",
          "CanMount": "on",
@@ -219,6 +224,41 @@
       {
          "Name": "rpool/ROOT/ubuntu_1234/var/lib",
          "Mountpoint": "/var/lib",
+         "CanMount": "on",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
+         "CanMount": "on",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+         "Mountpoint": "/var/lib/NetworkManager",
+         "CanMount": "on",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+         "Mountpoint": "/var/lib/apt",
+         "CanMount": "on",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+         "Mountpoint": "/var/lib/aptitude",
+         "CanMount": "on",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+         "Mountpoint": "/var/lib/dpkg",
          "CanMount": "on",
          "LastUsed": 1599999999,
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
@@ -262,46 +302,6 @@
          "BootFS": true,
          "LastUsed": 1599999999,
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
-         "Mountpoint": "/var/lib/AccountsService",
-         "CanMount": "on",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
-         "Mountpoint": "/var/lib/NetworkManager",
-         "CanMount": "on",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
-         "Mountpoint": "/var/lib/apt",
-         "CanMount": "on",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
-         "Mountpoint": "/var/lib/aptitude",
-         "CanMount": "on",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
-         "Mountpoint": "/var/lib/dpkg",
-         "CanMount": "on",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234",
-         "Mountpoint": "/boot",
-         "CanMount": "on"
       }
    ],
    "AllUsersDatasets": [

@@ -904,6 +904,7 @@ func assertMachinesToGolden(t *testing.T, got machines.Machines) {
 	t.Helper()
 
 	want := machines.Machines{}
+	got.MakeComparable()
 	testutils.LoadFromGoldenFile(t, got, &want)
 
 	assertMachinesEquals(t, want, got)

@@ -171,6 +171,11 @@
    },
    "AllSystemDatasets": [
       {
+         "Name": "bpool/BOOT/ubuntu_1234",
+         "Mountpoint": "/boot",
+         "CanMount": "on"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234",
          "Mountpoint": "/",
          "CanMount": "on",
@@ -227,11 +232,6 @@
          "CanMount": "on",
          "LastUsed": 1599999999,
          "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234",
-         "Mountpoint": "/boot",
-         "CanMount": "on"
       }
    ],
    "AllUsersDatasets": [

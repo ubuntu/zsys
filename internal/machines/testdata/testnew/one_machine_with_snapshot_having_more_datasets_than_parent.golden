@@ -59,19 +59,19 @@
          "LastUsed": 1599999999
       },
       {
-         "Name": "rpool/opt",
-         "Mountpoint": "/opt",
-         "CanMount": "off",
-         "BootFS": true,
-         "LastUsed": 1599999999
-      },
-      {
          "Name": "rpool@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1588888888
+      },
+      {
+         "Name": "rpool/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "off",
+         "BootFS": true,
+         "LastUsed": 1599999999
       },
       {
          "Name": "rpool/opt@snap1",

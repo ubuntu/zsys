@@ -53,19 +53,19 @@
    },
    "AllSystemDatasets": [
       {
-         "Name": "rpool/b",
-         "Mountpoint": "/",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 1577777777
-      },
-      {
          "Name": "rpool/a",
          "Mountpoint": "/",
          "CanMount": "noauto",
          "BootFS": true,
          "LastUsed": 1599999999,
          "Origin": "rpool/b@snap1"
+      },
+      {
+         "Name": "rpool/b",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1577777777
       },
       {
          "Name": "rpool/b@snap1",

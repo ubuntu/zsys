@@ -196,25 +196,6 @@
    },
    "AllSystemDatasets": [
       {
-         "Name": "rpool/ROOT/ubuntu_5678",
-         "Mountpoint": "/",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 2000000000
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_5678",
-         "Mountpoint": "/boot",
-         "CanMount": "on",
-         "LastUsed": 2000000000
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_5678/grub",
-         "Mountpoint": "/boot/grub",
-         "CanMount": "on",
-         "LastUsed": 2000000000
-      },
-      {
          "Name": "bpool/BOOT/ubuntu_1234",
          "Mountpoint": "/boot",
          "CanMount": "noauto",
@@ -227,12 +208,10 @@
          "Origin": "bpool/BOOT/ubuntu_5678/grub@snap1"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234",
-         "Mountpoint": "/",
-         "CanMount": "noauto",
-         "BootFS": true,
-         "LastUsed": 1555555555,
-         "Origin": "rpool/ROOT/ubuntu_5678@snap1"
+         "Name": "bpool/BOOT/ubuntu_5678",
+         "Mountpoint": "/boot",
+         "CanMount": "on",
+         "LastUsed": 2000000000
       },
       {
          "Name": "bpool/BOOT/ubuntu_5678@snap1",
@@ -242,11 +221,32 @@
          "LastUsed": 1544444444
       },
       {
+         "Name": "bpool/BOOT/ubuntu_5678/grub",
+         "Mountpoint": "/boot/grub",
+         "CanMount": "on",
+         "LastUsed": 2000000000
+      },
+      {
          "Name": "bpool/BOOT/ubuntu_5678/grub@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/boot/grub",
          "CanMount": "on",
          "LastUsed": 1544444444
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234",
+         "Mountpoint": "/",
+         "CanMount": "noauto",
+         "BootFS": true,
+         "LastUsed": 1555555555,
+         "Origin": "rpool/ROOT/ubuntu_5678@snap1"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_5678",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000
       },
       {
          "Name": "rpool/ROOT/ubuntu_5678@snap1",

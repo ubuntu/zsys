@@ -120,20 +120,20 @@
          "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
       },
       {
-         "Name": "rpool/opt",
-         "Mountpoint": "/opt",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-      },
-      {
          "Name": "rpool@autozsys_xxxxxx",
          "IsSnapshot": true,
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 2000000000,
+         "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
+      },
+      {
+         "Name": "rpool/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1599999999,
          "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
       },
       {

@@ -152,20 +152,6 @@
    },
    "AllSystemDatasets": [
       {
-         "Name": "rpool/ROOT/ubuntu_5678",
-         "Mountpoint": "/",
-         "CanMount": "noauto",
-         "BootFS": true,
-         "LastUsed": 1577777777
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_5678/opt",
-         "Mountpoint": "/opt",
-         "CanMount": "noauto",
-         "BootFS": true,
-         "LastUsed": 1577777777
-      },
-      {
          "Name": "rpool/ROOT/ubuntu",
          "Mountpoint": "/",
          "CanMount": "on",
@@ -182,12 +168,26 @@
          "Origin": "rpool/ROOT/ubuntu_5678/opt@snap1"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_5678",
+         "Mountpoint": "/",
+         "CanMount": "noauto",
+         "BootFS": true,
+         "LastUsed": 1577777777
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_5678@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1544444444
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_5678/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "noauto",
+         "BootFS": true,
+         "LastUsed": 1577777777
       },
       {
          "Name": "rpool/ROOT/ubuntu_5678/opt@snap1",

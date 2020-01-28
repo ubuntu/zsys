@@ -315,19 +315,19 @@
          "LastUsed": 1555555555
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/tools",
-         "Mountpoint": "/tools",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 1555555555
-      },
-      {
          "Name": "rpool/ROOT/ubuntu_1234@autozsys_xxxxxx",
          "IsSnapshot": true,
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/tools",
+         "Mountpoint": "/tools",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1555555555
       },
       {
          "Name": "rpool/ROOT/ubuntu_1234/tools@autozsys_xxxxxx",

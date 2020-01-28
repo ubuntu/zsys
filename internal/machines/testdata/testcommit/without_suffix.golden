@@ -159,19 +159,19 @@
          "LastUsed": 2000000000
       },
       {
-         "Name": "rpool/ROOT/ubuntu/opt",
-         "Mountpoint": "/opt",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 2000000000
-      },
-      {
          "Name": "rpool/ROOT/ubuntu@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1544444444
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000
       },
       {
          "Name": "rpool/ROOT/ubuntu/opt@snap1",

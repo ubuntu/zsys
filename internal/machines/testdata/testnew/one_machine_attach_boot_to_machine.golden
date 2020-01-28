@@ -27,16 +27,16 @@
    },
    "AllSystemDatasets": [
       {
+         "Name": "bpool/BOOT/ubuntu_1234",
+         "Mountpoint": "/boot",
+         "CanMount": "on",
+         "LastUsed": 1599999999
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234",
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
-         "LastUsed": 1599999999
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234",
-         "Mountpoint": "/boot",
-         "CanMount": "on",
          "LastUsed": 1599999999
       }
    ]

@@ -106,20 +106,20 @@
    },
    "AllSystemDatasets": [
       {
-         "Name": "rpool/main",
-         "Mountpoint": "/",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 2000000000,
-         "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-      },
-      {
          "Name": "rpool/clone",
          "Mountpoint": "/",
          "CanMount": "noauto",
          "BootFS": true,
          "LastUsed": 1588888888,
          "Origin": "rpool/main@snap1"
+      },
+      {
+         "Name": "rpool/main",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000,
+         "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
       },
       {
          "Name": "rpool/main@snap1",
