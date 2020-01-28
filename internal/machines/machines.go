@@ -70,6 +70,7 @@ type userState struct {
 
 const (
 	userdatasetsContainerName = "/userdata/"
+	bootfsdatasetsSeparator   = ","
 )
 
 // WithLibZFS allows overriding default libzfs implementations with a mock

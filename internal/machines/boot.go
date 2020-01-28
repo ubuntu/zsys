@@ -283,8 +283,8 @@ func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, cu
 		var newTag string
 		// Multiple elements, strip current bootfs dataset name
 		if d.BootfsDatasets != "" && d.BootfsDatasets != id {
-			newTag = strings.Replace(d.BootfsDatasets, id+":", "", -1)
-			newTag = strings.TrimSuffix(newTag, ":"+id)
+			newTag = strings.Replace(d.BootfsDatasets, id+bootfsdatasetsSeparator, "", -1)
+			newTag = strings.TrimSuffix(newTag, bootfsdatasetsSeparator+id)
 		}
 		if newTag == d.BootfsDatasets {
 			continue
@@ -301,12 +301,12 @@ func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, cu
 	// set it.
 	for _, d := range currentUsersDatasets {
 		if (d.BootfsDatasets == id && d.LastUsed != 0) ||
-			strings.Contains(d.BootfsDatasets, id+":") ||
-			strings.HasSuffix(d.BootfsDatasets, ":"+id) {
+			strings.Contains(d.BootfsDatasets, id+bootfsdatasetsSeparator) ||
+			strings.HasSuffix(d.BootfsDatasets, bootfsdatasetsSeparator+id) {
 			continue
 		}
 		log.Infof(t.Context(), i18n.G("Tag current user dataset: %q"), d.Name)
-		newTag := d.BootfsDatasets + ":" + id
+		newTag := d.BootfsDatasets + bootfsdatasetsSeparator + id
 		// TOREMOVE in 20.04: this double check as well (due to && d.LastUsed != 0)
 		if d.BootfsDatasets == id && d.LastUsed == 0 {
 			newTag = d.BootfsDatasets
