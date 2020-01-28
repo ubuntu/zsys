@@ -66,8 +66,16 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 	}
 
 	// Start switching every non desired system and user datasets to noauto
-	noAutoDatasets := diffDatasets(ms.allSystemDatasets, bootedState.SystemDatasets)
-	noAutoDatasets = append(noAutoDatasets, diffDatasets(ms.allUsersDatasets, bootedState.UserDatasets)...)
+	var systemDatasets []*zfs.Dataset
+	for _, ds := range bootedState.SystemDatasets {
+		systemDatasets = append(systemDatasets, ds...)
+	}
+	noAutoDatasets := diffDatasets(ms.allSystemDatasets, systemDatasets)
+	var userDatasets []*zfs.Dataset
+	for _, ds := range bootedState.UserDatasets {
+		userDatasets = append(userDatasets, ds...)
+	}
+	noAutoDatasets = append(noAutoDatasets, diffDatasets(ms.allUsersDatasets, userDatasets)...)
 	hasChanges, err := switchDatasetsCanMount(t, noAutoDatasets, "noauto")
 	if err != nil {
 		cancel()
@@ -75,7 +83,7 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 	}
 
 	// Switch current state system and user datasets to on
-	autoDatasets := append(bootedState.SystemDatasets, bootedState.UserDatasets...)
+	autoDatasets := append(systemDatasets, userDatasets...)
 	ok, err := switchDatasetsCanMount(t, autoDatasets, "on")
 	if err != nil {
 		cancel()
@@ -121,17 +129,25 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	}
 
 	// Retag new userdatasets if needed
-	if err := switchUsersDatasetsTags(t, bootedState.ID, ms.allUsersDatasets, bootedState.UserDatasets); err != nil {
+	var userDatasets []*zfs.Dataset
+	for _, ds := range bootedState.UserDatasets {
+		userDatasets = append(userDatasets, ds...)
+	}
+	if err := switchUsersDatasetsTags(t, bootedState.ID, ms.allUsersDatasets, userDatasets); err != nil {
 		cancel()
 		return false, err
 	}
 
+	var systemDatasets []*zfs.Dataset
+	for _, ds := range bootedState.SystemDatasets {
+		systemDatasets = append(systemDatasets, ds...)
+	}
 	// System and users datasets: set lastUsed
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
 	// Last used is not a relevant change for signalling a change and justify bootloader rebuild: last-used is not
 	// displayed for current system dataset.
 	log.Infof(ctx, i18n.G("set current time to %q"), currentTime)
-	for _, d := range append(bootedState.SystemDatasets, bootedState.UserDatasets...) {
+	for _, d := range append(systemDatasets, userDatasets...) {
 		if err := t.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false); err != nil {
 			cancel()
 			return false, fmt.Errorf(i18n.G("couldn't set last used time to %q: ")+config.ErrorFormat, currentTime, err)
@@ -142,11 +158,11 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 
 	kernel := kernelFromCmdline(ms.cmdline)
 	log.Infof(ctx, i18n.G("Set latest booted kernel to %q\n"), kernel)
-	if bootedState.SystemDatasets[0].LastBootedKernel != kernel {
+	if systemDatasets[0].LastBootedKernel != kernel {
 		// Signal last booted kernel changes.
 		// This will help the bootloader, like grub, to rebuild and adjust the marker for last successfully booted kernel in advanced options.
 		changed = true
-		if err := t.SetProperty(zfs.LastBootedKernelProp, kernel, bootedState.SystemDatasets[0].Name, false); err != nil {
+		if err := t.SetProperty(zfs.LastBootedKernelProp, kernel, bootedState.ID, false); err != nil {
 			cancel()
 			return false, fmt.Errorf(i18n.G("couldn't set last booted kernel to %q ")+config.ErrorFormat, kernel, err)
 		}
@@ -154,14 +170,14 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 
 	// Promotion needed for system and user datasets
 	log.Info(ctx, i18n.G("Promoting user datasets"))
-	chg, err := promoteDatasets(t, bootedState.UserDatasets)
+	chg, err := promoteDatasets(t, userDatasets)
 	if err != nil {
 		cancel()
 		return false, err
 	}
 	changed = changed || chg
 	log.Info(ctx, i18n.G("Promoting system datasets"))
-	chg, err = promoteDatasets(t, bootedState.SystemDatasets)
+	chg, err = promoteDatasets(t, systemDatasets)
 	if err != nil {
 		cancel()
 		return false, err
@@ -198,17 +214,14 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	}
 	suffix := bootedStateID[j+1:]
 
-	// Fetch every independent root datasets (like rpool, bpool, …) that needs to be cloned
-	datasetsToClone := getRootDatasets(t.Context(), snapshot.SystemDatasets)
-
 	// Skip existing datasets in the cloning phase. We assume any error would mean that EnsureBoot was called twice
 	// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
 	// in case of a real issue.
 	// Clone fails on system dataset already exists and skipping requested -> ok, other clone fails -> return error
-	for d := range datasetsToClone {
-		log.Infof(t.Context(), i18n.G("cloning %q and children"), d.Name)
-		if err := t.Clone(d.Name, suffix, true, true); err != nil {
-			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), d.Name, err)
+	for route := range snapshot.SystemDatasets {
+		log.Infof(t.Context(), i18n.G("cloning %q and children"), route)
+		if err := t.Clone(route, suffix, true, true); err != nil {
+			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), route, err)
 		}
 	}
 
@@ -221,29 +234,18 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// Find user datasets attached to the snapshot and clone them
 	// Only root datasets are cloned
 	userDataSuffix := t.Zfs.GenerateID(6)
-	var rootUserDatasets []*zfs.Dataset
-	for _, d := range snapshot.UserDatasets {
-		parentFound := false
-		for _, r := range rootUserDatasets {
-			if base, _ := splitSnapshotName(r.Name); strings.Contains(d.Name, base+"/") {
-				parentFound = true
-				break
-			}
+	for route := range snapshot.UserDatasets {
+		// Recursively clones childrens, which shouldn't have bootfs elements.
+		if err := t.Clone(route, userDataSuffix, false, true); err != nil {
+			return fmt.Errorf(i18n.G("couldn't create new user datasets from %q: %v"), snapshot.ID, err)
 		}
-		if !parentFound {
-			rootUserDatasets = append(rootUserDatasets, d)
-			// Recursively clones childrens, which shouldn't have bootfs elements.
-			if err := t.Clone(d.Name, userDataSuffix, false, true); err != nil {
-				return fmt.Errorf(i18n.G("couldn't create new user datasets from %q: %v"), snapshot.ID, err)
-			}
-			// Associate this parent new user dataset to its parent system dataset
-			base, _ := splitSnapshotName(d.Name)
-			// Reformat the name with the new uuid and clone now the dataset.
-			suffixIndex := strings.LastIndex(base, "_")
-			userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
-			if err := t.SetProperty(zfs.BootfsDatasetsProp, bootedStateID, userdatasetName, false); err != nil {
-				return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, bootedStateID, d.Name, err)
-			}
+		// Associate this parent new user dataset to its parent system dataset
+		base, _ := splitSnapshotName(route)
+		// Reformat the name with the new uuid and clone now the dataset.
+		suffixIndex := strings.LastIndex(base, "_")
+		userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
+		if err := t.SetProperty(zfs.BootfsDatasetsProp, bootedStateID, userdatasetName, false); err != nil {
+			return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, bootedStateID, route, err)
 		}
 	}
 

@@ -43,9 +43,10 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) e
 	log.Infof(ctx, i18n.G("Create user dataset for %q"), homepath)
 
 	// Take same pool as existing userdatasets for current system
-	userdatasetRoot := ""
-	if len(ms.current.UserDatasets) > 0 {
-		userdatasetRoot = getUserDatasetPath(ms.current.UserDatasets[0].Name)
+	var userdatasetRoot string
+	for p := range ms.current.UserDatasets {
+		userdatasetRoot = getUserDatasetPath(p)
+		break
 	}
 	// If there is none attached to the current system, try to take first existing userdataset detected pool
 	if userdatasetRoot == "" && len(ms.allUsersDatasets) > 0 {
@@ -64,7 +65,7 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) e
 
 	// If there is still none found, take the current system pool and create one
 	if userdatasetRoot == "" {
-		p := ms.current.SystemDatasets[0].Name
+		p := ms.current.ID
 		i := strings.Index(p, "/")
 		if i != -1 {
 			p = p[0:i]
@@ -143,37 +144,38 @@ func (ms *Machines) tryReuseUserDataSet(t *zfs.Transaction, user string, oldhome
 	log.Debugf(t.Context(), i18n.G("Trying to check if there is a user or home directory already attached to this machine"))
 
 	// If there this user or home already attached to this machine: retarget home
-	for _, d := range ms.current.UserDatasets {
+	for _, ds := range ms.current.UserDatasets {
+		for _, d := range ds {
+			var match bool
+			// try handling user dataset
+			if user != "" {
+				// get user name from dataset
+				n := strings.Split(d.Name, "/")
+				userName := n[len(n)-1]
+				n = strings.Split(userName, "_")
+				userName = strings.Join(n[0:len(n)-1], "_")
 
-		var match bool
-		// try handling user dataset
-		if user != "" {
-			// get user name from dataset
-			n := strings.Split(d.Name, "/")
-			userName := n[len(n)-1]
-			n = strings.Split(userName, "_")
-			userName = strings.Join(n[0:len(n)-1], "_")
+				// Home path is already attached to current system, but with a different user name. Fail
+				if d.Mountpoint == newhome && user != userName {
+					return false, fmt.Errorf(i18n.G("%q is already associated to %q, which is for a different user name (%q) than %q"), newhome, d.Name, userName, user)
+				}
+				if userName == user {
+					match = true
+				}
+			} else if oldhome != "" {
+				if d.Mountpoint == oldhome {
+					match = true
+				}
+			}
 
-			// Home path is already attached to current system, but with a different user name. Fail
-			if d.Mountpoint == newhome && user != userName {
-				return false, fmt.Errorf(i18n.G("%q is already associated to %q, which is for a different user name (%q) than %q"), newhome, d.Name, userName, user)
+			// We'll reuse that dataset
+			if match {
+				log.Infof(t.Context(), i18n.G("Reusing %q as matching user name or old mountpoint"), d.Name)
+				if err := t.SetProperty(zfs.MountPointProp, newhome, d.Name, false); err != nil {
+					return false, fmt.Errorf(i18n.G("couldn't set new home %q to %q: ")+config.ErrorFormat, newhome, d.Name, err)
+				}
+				return true, nil
 			}
-			if userName == user {
-				match = true
-			}
-		} else if oldhome != "" {
-			if d.Mountpoint == oldhome {
-				match = true
-			}
-		}
-
-		// We'll reuse that dataset
-		if match {
-			log.Infof(t.Context(), i18n.G("Reusing %q as matching user name or old mountpoint"), d.Name)
-			if err := t.SetProperty(zfs.MountPointProp, newhome, d.Name, false); err != nil {
-				return false, fmt.Errorf(i18n.G("couldn't set new home %q to %q: ")+config.ErrorFormat, newhome, d.Name, err)
-			}
-			return true, nil
 		}
 	}
 

@@ -73,16 +73,9 @@ func (m *Machines) UnmarshalJSON(b []byte) error {
 
 // MakeComparable prepares Machines by resetting private fields that change at each invocation
 func (m *Machines) MakeComparable() {
-	for k, machine := range m.all {
-		ds := SortedDatasets(machine.UserDatasets)
-		sort.Sort(ds)
-		m.all[k].UserDatasets = ds
-		for l, h := range machine.History {
-			ds := SortedDatasets(h.UserDatasets)
-			sort.Sort(ds)
-			m.all[k].History[l].UserDatasets = ds
-		}
-	}
+	ds := SortedDatasets(m.allSystemDatasets)
+	sort.Sort(ds)
+	m.allSystemDatasets = ds
 
 	m.z = nil
 }
