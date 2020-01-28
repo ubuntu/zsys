@@ -4,87 +4,95 @@
          "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool/ROOT/ubuntu_1234",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/var",
-               "Mountpoint": "/var",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib",
-               "Mountpoint": "/var/lib",
-               "CanMount": "off",
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
-               "Mountpoint": "/var/lib/AccountsService",
-               "CanMount": "on",
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
-               "Mountpoint": "/var/lib/NetworkManager",
-               "CanMount": "on",
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
-               "Mountpoint": "/var/lib/apt",
-               "CanMount": "on",
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
-               "Mountpoint": "/var/lib/aptitude",
-               "CanMount": "on",
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
-               "Mountpoint": "/var/lib/dpkg",
-               "CanMount": "on",
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-            },
-            {
-               "Name": "bpool/BOOT/ubuntu_1234",
-               "Mountpoint": "/boot",
-               "CanMount": "on"
-            }
-         ],
-         "UserDatasets": [
-            {
-               "Name": "rpool/USERDATA/root_bcde",
-               "Mountpoint": "/root",
-               "CanMount": "on",
-               "LastUsed": 1533333333,
-               "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-            },
-            {
-               "Name": "rpool/USERDATA/user1_abcd",
-               "Mountpoint": "/home/user1",
-               "CanMount": "on",
-               "LastUsed": 1544444444,
-               "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-            }
-         ],
+         "SystemDatasets": {
+            "bpool/BOOT/ubuntu_1234": [
+               {
+                  "Name": "bpool/BOOT/ubuntu_1234",
+                  "Mountpoint": "/boot",
+                  "CanMount": "on"
+               }
+            ],
+            "rpool/ROOT/ubuntu_1234": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/var",
+                  "Mountpoint": "/var",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib",
+                  "Mountpoint": "/var/lib",
+                  "CanMount": "off",
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+                  "Mountpoint": "/var/lib/AccountsService",
+                  "CanMount": "on",
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+                  "Mountpoint": "/var/lib/NetworkManager",
+                  "CanMount": "on",
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+                  "Mountpoint": "/var/lib/apt",
+                  "CanMount": "on",
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+                  "Mountpoint": "/var/lib/aptitude",
+                  "CanMount": "on",
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+                  "Mountpoint": "/var/lib/dpkg",
+                  "CanMount": "on",
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+               }
+            ]
+         },
+         "UserDatasets": {
+            "rpool/USERDATA/root_bcde": [
+               {
+                  "Name": "rpool/USERDATA/root_bcde",
+                  "Mountpoint": "/root",
+                  "CanMount": "on",
+                  "LastUsed": 1533333333,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+               }
+            ],
+            "rpool/USERDATA/user1_abcd": [
+               {
+                  "Name": "rpool/USERDATA/user1_abcd",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 1544444444,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+               }
+            ]
+         },
          "PersistentDatasets": [
             {
                "Name": "rpool/srv",

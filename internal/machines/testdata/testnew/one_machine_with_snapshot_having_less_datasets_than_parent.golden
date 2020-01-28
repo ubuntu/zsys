@@ -4,37 +4,41 @@
          "ID": "rpool",
          "IsZsys": true,
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1599999999
-            },
-            {
-               "Name": "rpool/opt",
-               "Mountpoint": "/opt",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1599999999
-            }
-         ],
+         "SystemDatasets": {
+            "rpool": [
+               {
+                  "Name": "rpool",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999
+               },
+               {
+                  "Name": "rpool/opt",
+                  "Mountpoint": "/opt",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999
+               }
+            ]
+         },
          "History": {
             "rpool@snap1": {
                "ID": "rpool@snap1",
                "IsZsys": true,
                "LastUsed": "2020-05-08T00:01:28+02:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1588888888
-                  }
-               ]
+               "SystemDatasets": {
+                  "rpool@snap1": [
+                     {
+                        "Name": "rpool@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1588888888
+                     }
+                  ]
+               }
             }
          }
       }

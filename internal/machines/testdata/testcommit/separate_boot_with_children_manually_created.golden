@@ -4,14 +4,93 @@
          "ID": "rpool/ROOT/ubuntu_5678",
          "IsZsys": true,
          "LastUsed": "2033-05-18T05:33:20+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool/ROOT/ubuntu_5678",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 2000000000
+         "SystemDatasets": {
+            "bpool/BOOT/ubuntu_5678": [
+               {
+                  "Name": "bpool/BOOT/ubuntu_5678",
+                  "Mountpoint": "/boot",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "bpool/BOOT/ubuntu_5678/grub",
+                  "Mountpoint": "/boot/grub",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               }
+            ],
+            "rpool/ROOT/ubuntu_5678": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_5678",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 2000000000
+               }
+            ]
+         },
+         "History": {
+            "rpool/ROOT/ubuntu_1234": {
+               "ID": "rpool/ROOT/ubuntu_1234",
+               "IsZsys": true,
+               "LastUsed": "2019-04-18T04:45:55+02:00",
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_1234": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_1234",
+                        "Mountpoint": "/boot",
+                        "CanMount": "noauto",
+                        "Origin": "bpool/BOOT/ubuntu_5678@snap1"
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_1234": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234",
+                        "Mountpoint": "/",
+                        "CanMount": "noauto",
+                        "BootFS": true,
+                        "LastUsed": 1555555555,
+                        "Origin": "rpool/ROOT/ubuntu_5678@snap1"
+                     }
+                  ]
+               }
             },
+            "rpool/ROOT/ubuntu_5678@snap1": {
+               "ID": "rpool/ROOT/ubuntu_5678@snap1",
+               "IsZsys": true,
+               "LastUsed": "2018-12-10T13:20:44+01:00",
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_5678@snap1": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_5678@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/boot",
+                        "CanMount": "on",
+                        "LastUsed": 1544444444
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_5678@snap1": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1544444444
+                     }
+                  ]
+               }
+            }
+         }
+      }
+   },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc",
+   "Current": {
+      "ID": "rpool/ROOT/ubuntu_5678",
+      "IsZsys": true,
+      "LastUsed": "2033-05-18T05:33:20+02:00",
+      "SystemDatasets": {
+         "bpool/BOOT/ubuntu_5678": [
             {
                "Name": "bpool/BOOT/ubuntu_5678",
                "Mountpoint": "/boot",
@@ -25,12 +104,31 @@
                "LastUsed": 2000000000
             }
          ],
-         "History": {
-            "rpool/ROOT/ubuntu_1234": {
-               "ID": "rpool/ROOT/ubuntu_1234",
-               "IsZsys": true,
-               "LastUsed": "2019-04-18T04:45:55+02:00",
-               "SystemDatasets": [
+         "rpool/ROOT/ubuntu_5678": [
+            {
+               "Name": "rpool/ROOT/ubuntu_5678",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 2000000000
+            }
+         ]
+      },
+      "History": {
+         "rpool/ROOT/ubuntu_1234": {
+            "ID": "rpool/ROOT/ubuntu_1234",
+            "IsZsys": true,
+            "LastUsed": "2019-04-18T04:45:55+02:00",
+            "SystemDatasets": {
+               "bpool/BOOT/ubuntu_1234": [
+                  {
+                     "Name": "bpool/BOOT/ubuntu_1234",
+                     "Mountpoint": "/boot",
+                     "CanMount": "noauto",
+                     "Origin": "bpool/BOOT/ubuntu_5678@snap1"
+                  }
+               ],
+               "rpool/ROOT/ubuntu_1234": [
                   {
                      "Name": "rpool/ROOT/ubuntu_1234",
                      "Mountpoint": "/",
@@ -38,28 +136,16 @@
                      "BootFS": true,
                      "LastUsed": 1555555555,
                      "Origin": "rpool/ROOT/ubuntu_5678@snap1"
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_1234",
-                     "Mountpoint": "/boot",
-                     "CanMount": "noauto",
-                     "Origin": "bpool/BOOT/ubuntu_5678@snap1"
                   }
                ]
-            },
-            "rpool/ROOT/ubuntu_5678@snap1": {
-               "ID": "rpool/ROOT/ubuntu_5678@snap1",
-               "IsZsys": true,
-               "LastUsed": "2018-12-10T13:20:44+01:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1544444444
-                  },
+            }
+         },
+         "rpool/ROOT/ubuntu_5678@snap1": {
+            "ID": "rpool/ROOT/ubuntu_5678@snap1",
+            "IsZsys": true,
+            "LastUsed": "2018-12-10T13:20:44+01:00",
+            "SystemDatasets": {
+               "bpool/BOOT/ubuntu_5678@snap1": [
                   {
                      "Name": "bpool/BOOT/ubuntu_5678@snap1",
                      "IsSnapshot": true,
@@ -67,80 +153,18 @@
                      "CanMount": "on",
                      "LastUsed": 1544444444
                   }
+               ],
+               "rpool/ROOT/ubuntu_5678@snap1": [
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 1544444444
+                  }
                ]
             }
-         }
-      }
-   },
-   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc",
-   "Current": {
-      "ID": "rpool/ROOT/ubuntu_5678",
-      "IsZsys": true,
-      "LastUsed": "2033-05-18T05:33:20+02:00",
-      "SystemDatasets": [
-         {
-            "Name": "rpool/ROOT/ubuntu_5678",
-            "Mountpoint": "/",
-            "CanMount": "on",
-            "BootFS": true,
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "bpool/BOOT/ubuntu_5678",
-            "Mountpoint": "/boot",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "bpool/BOOT/ubuntu_5678/grub",
-            "Mountpoint": "/boot/grub",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         }
-      ],
-      "History": {
-         "rpool/ROOT/ubuntu_1234": {
-            "ID": "rpool/ROOT/ubuntu_1234",
-            "IsZsys": true,
-            "LastUsed": "2019-04-18T04:45:55+02:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234",
-                  "Mountpoint": "/",
-                  "CanMount": "noauto",
-                  "BootFS": true,
-                  "LastUsed": 1555555555,
-                  "Origin": "rpool/ROOT/ubuntu_5678@snap1"
-               },
-               {
-                  "Name": "bpool/BOOT/ubuntu_1234",
-                  "Mountpoint": "/boot",
-                  "CanMount": "noauto",
-                  "Origin": "bpool/BOOT/ubuntu_5678@snap1"
-               }
-            ]
-         },
-         "rpool/ROOT/ubuntu_5678@snap1": {
-            "ID": "rpool/ROOT/ubuntu_5678@snap1",
-            "IsZsys": true,
-            "LastUsed": "2018-12-10T13:20:44+01:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 1544444444
-               },
-               {
-                  "Name": "bpool/BOOT/ubuntu_5678@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/boot",
-                  "CanMount": "on",
-                  "LastUsed": 1544444444
-               }
-            ]
          }
       }
    },

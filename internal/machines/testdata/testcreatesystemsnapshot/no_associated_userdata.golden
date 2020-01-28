@@ -4,7 +4,64 @@
          "ID": "rpool",
          "IsZsys": true,
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": [
+         "SystemDatasets": {
+            "rpool": [
+               {
+                  "Name": "rpool",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
+               },
+               {
+                  "Name": "rpool/opt",
+                  "Mountpoint": "/opt",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
+               }
+            ]
+         },
+         "History": {
+            "rpool@autozsys_xxxxxx": {
+               "ID": "rpool@autozsys_xxxxxx",
+               "IsZsys": true,
+               "LastUsed": "2033-05-18T05:33:20+02:00",
+               "SystemDatasets": {
+                  "rpool@autozsys_xxxxxx": [
+                     {
+                        "Name": "rpool@autozsys_xxxxxx",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 2000000000,
+                        "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
+                     },
+                     {
+                        "Name": "rpool/opt@autozsys_xxxxxx",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/opt",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 2000000000,
+                        "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
+                     }
+                  ]
+               }
+            }
+         }
+      }
+   },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool ccccc",
+   "Current": {
+      "ID": "rpool",
+      "IsZsys": true,
+      "LastUsed": "2020-09-13T14:26:39+02:00",
+      "SystemDatasets": {
+         "rpool": [
             {
                "Name": "rpool",
                "Mountpoint": "/",
@@ -21,13 +78,15 @@
                "LastUsed": 1599999999,
                "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
             }
-         ],
-         "History": {
-            "rpool@autozsys_xxxxxx": {
-               "ID": "rpool@autozsys_xxxxxx",
-               "IsZsys": true,
-               "LastUsed": "2033-05-18T05:33:20+02:00",
-               "SystemDatasets": [
+         ]
+      },
+      "History": {
+         "rpool@autozsys_xxxxxx": {
+            "ID": "rpool@autozsys_xxxxxx",
+            "IsZsys": true,
+            "LastUsed": "2033-05-18T05:33:20+02:00",
+            "SystemDatasets": {
+               "rpool@autozsys_xxxxxx": [
                   {
                      "Name": "rpool@autozsys_xxxxxx",
                      "IsSnapshot": true,
@@ -48,57 +107,6 @@
                   }
                ]
             }
-         }
-      }
-   },
-   "Cmdline": "aaaaa bbbbb root=ZFS=rpool ccccc",
-   "Current": {
-      "ID": "rpool",
-      "IsZsys": true,
-      "LastUsed": "2020-09-13T14:26:39+02:00",
-      "SystemDatasets": [
-         {
-            "Name": "rpool",
-            "Mountpoint": "/",
-            "CanMount": "on",
-            "BootFS": true,
-            "LastUsed": 1599999999,
-            "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-         },
-         {
-            "Name": "rpool/opt",
-            "Mountpoint": "/opt",
-            "CanMount": "on",
-            "BootFS": true,
-            "LastUsed": 1599999999,
-            "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-         }
-      ],
-      "History": {
-         "rpool@autozsys_xxxxxx": {
-            "ID": "rpool@autozsys_xxxxxx",
-            "IsZsys": true,
-            "LastUsed": "2033-05-18T05:33:20+02:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool@autozsys_xxxxxx",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 2000000000,
-                  "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-               },
-               {
-                  "Name": "rpool/opt@autozsys_xxxxxx",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/opt",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 2000000000,
-                  "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-               }
-            ]
          }
       }
    },

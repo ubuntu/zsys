@@ -4,27 +4,31 @@
          "ID": "rpool",
          "IsZsys": true,
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1599999999
-            }
-         ]
+         "SystemDatasets": {
+            "rpool": [
+               {
+                  "Name": "rpool",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999
+               }
+            ]
+         }
       },
       "rpool2": {
          "ID": "rpool2",
          "LastUsed": "2020-05-08T00:01:28+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool2",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "LastUsed": 1588888888
-            }
-         ]
+         "SystemDatasets": {
+            "rpool2": [
+               {
+                  "Name": "rpool2",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "LastUsed": 1588888888
+               }
+            ]
+         }
       }
    },
    "AllSystemDatasets": [

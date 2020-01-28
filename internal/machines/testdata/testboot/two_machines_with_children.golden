@@ -4,28 +4,56 @@
          "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool/ROOT/ubuntu_1234",
-               "Mountpoint": "/",
-               "CanMount": "noauto",
-               "BootFS": true,
-               "LastUsed": 1555555555
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_1234/opt",
-               "Mountpoint": "/opt",
-               "CanMount": "noauto",
-               "BootFS": true,
-               "LastUsed": 1555555555
-            }
-         ]
+         "SystemDatasets": {
+            "rpool/ROOT/ubuntu_1234": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234",
+                  "Mountpoint": "/",
+                  "CanMount": "noauto",
+                  "BootFS": true,
+                  "LastUsed": 1555555555
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234/opt",
+                  "Mountpoint": "/opt",
+                  "CanMount": "noauto",
+                  "BootFS": true,
+                  "LastUsed": 1555555555
+               }
+            ]
+         }
       },
       "rpool/ROOT/ubuntu_5678": {
          "ID": "rpool/ROOT/ubuntu_5678",
          "IsZsys": true,
          "LastUsed": "2018-12-10T13:20:44+01:00",
-         "SystemDatasets": [
+         "SystemDatasets": {
+            "rpool/ROOT/ubuntu_5678": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_5678",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1544444444
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_5678/opt",
+                  "Mountpoint": "/opt",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1544444444
+               }
+            ]
+         }
+      }
+   },
+   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc",
+   "Current": {
+      "ID": "rpool/ROOT/ubuntu_5678",
+      "IsZsys": true,
+      "LastUsed": "2018-12-10T13:20:44+01:00",
+      "SystemDatasets": {
+         "rpool/ROOT/ubuntu_5678": [
             {
                "Name": "rpool/ROOT/ubuntu_5678",
                "Mountpoint": "/",
@@ -42,28 +70,6 @@
             }
          ]
       }
-   },
-   "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_5678 ccccc",
-   "Current": {
-      "ID": "rpool/ROOT/ubuntu_5678",
-      "IsZsys": true,
-      "LastUsed": "2018-12-10T13:20:44+01:00",
-      "SystemDatasets": [
-         {
-            "Name": "rpool/ROOT/ubuntu_5678",
-            "Mountpoint": "/",
-            "CanMount": "on",
-            "BootFS": true,
-            "LastUsed": 1544444444
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_5678/opt",
-            "Mountpoint": "/opt",
-            "CanMount": "on",
-            "BootFS": true,
-            "LastUsed": 1544444444
-         }
-      ]
    },
    "AllSystemDatasets": [
       {
