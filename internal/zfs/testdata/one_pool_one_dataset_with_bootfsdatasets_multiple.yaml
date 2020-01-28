@@ -3,4 +3,4 @@ pools:
     datasets:
       - name: .
         mountpoint: /home/foo
-        bootfs_datasets: rpool/ROOT/ubuntu_42:rpool/ROOT/ubuntu_43
+        bootfs_datasets: rpool/ROOT/ubuntu_42,rpool/ROOT/ubuntu_43
