@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -867,6 +868,116 @@ func TestCreateUserSnapshot(t *testing.T) {
 	}
 }
 
+func TestGetStateAndDependencies(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def          string
+		promoteState string
+		depsFor      string
+
+		wantDeps []string
+		wantErr  bool
+	}{
+		"Get itself, no snapshot": {def: "m_with_userdata.yaml", depsFor: "rpool/ROOT/ubuntu_1234", wantDeps: []string{"rpool/ROOT/ubuntu_1234"}},
+		"Get snapshots on one state, no clone": {def: "state_snapshot_with_userdata_02.yaml", depsFor: "rpool/ROOT/ubuntu_1234",
+			wantDeps: []string{
+				"rpool/ROOT/ubuntu_1234",
+				"rpool/ROOT/ubuntu_1234@snap1",
+				"rpool/ROOT/ubuntu_1234@snap2",
+				"rpool/ROOT/ubuntu_1234@snap3",
+			},
+		},
+		"Get deps for current machine": {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/ROOT/ubuntu_1234",
+			wantDeps: []string{
+				"rpool/ROOT/ubuntu_1234",
+				"rpool/ROOT/ubuntu_1234@snap1",
+				"rpool/ROOT/ubuntu_1234@snap2",
+				"rpool/ROOT/ubuntu_5678",
+				"rpool/ROOT/ubuntu_1234@snap3",
+			},
+		},
+		"Get deps for current machine clone": {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/ROOT/ubuntu_5678", wantDeps: []string{"rpool/ROOT/ubuntu_5678"}},
+		"Get deps for current machine with promoted clone (with snapshot one dependency)": {def: "state_snapshot_with_userdata_01.yaml", promoteState: "rpool/ROOT/ubuntu_5678", depsFor: "rpool/ROOT/ubuntu_5678",
+			wantDeps: []string{
+				"rpool/ROOT/ubuntu_5678",
+				"rpool/ROOT/ubuntu_5678@snap1",
+				"rpool/ROOT/ubuntu_5678@snap2",
+				"rpool/ROOT/ubuntu_1234",
+				"rpool/ROOT/ubuntu_1234@snap3",
+			},
+		},
+
+		// Match tests
+		"Match current machine on base name":     {def: "m_with_userdata.yaml", depsFor: "ubuntu_1234", wantDeps: []string{"rpool/ROOT/ubuntu_1234"}},
+		"Match history machine on snapshot name": {def: "state_snapshot_with_userdata_01.yaml", depsFor: "snap1", wantDeps: []string{"rpool/ROOT/ubuntu_1234@snap1"}},
+		"Match history on base name":             {def: "state_snapshot_with_userdata_01.yaml", depsFor: "ubuntu_5678", wantDeps: []string{"rpool/ROOT/ubuntu_5678"}},
+
+		"Multiple match on snapshot name":     {def: "state_snapshot_with_userdata_03.yaml", depsFor: "snap1", wantErr: true},
+		"Multiple match on base dataset name": {def: "state_snapshot_with_userdata_04.yaml", depsFor: "ubuntu_1234", wantErr: true},
+		"No matches":                          {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/ROOT/ubuntu_doesntexist", wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			ms, err := machines.New(context.Background(), generateCmdLine(tc.promoteState), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			if tc.promoteState != "" {
+				if _, err = ms.EnsureBoot(context.Background()); err != nil {
+					t.Fatalf("Setup fail: %v", err)
+				}
+				if _, err = ms.Commit(context.Background()); err != nil {
+					t.Fatalf("Setup fail: %v", err)
+				}
+			}
+			stateDeps, err := ms.GetStateAndDependencies(tc.depsFor)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			var deps []string
+			for _, s := range stateDeps {
+				deps = append(deps, s.ID)
+			}
+
+			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
+			// However, we identified 4 rules to ensure that the dependency order (from root to leaf) is respected.
+
+			// rule 1: ensure that the 2 lists have the same elements
+			if len(deps) != len(tc.wantDeps) {
+				t.Fatalf("deps content doesn't have enough elements:\nGot:  %v\nWant: %v", deps, tc.wantDeps)
+			} else {
+				assert.ElementsMatch(t, tc.wantDeps, deps, "didn't get matching dep list content")
+			}
+
+			// rule 2: ensure that no snapshot from a base appears before that base
+			assertSnapshotAfterItsBaseState(t, deps)
+
+			// rule 3: ensure that the order between a snapshot and an immediately following dataset is preserved (snapshot to clone)
+			assertSnapshotToCloneOrderIsPreserved(t, tc.wantDeps, deps)
+
+			// rule 4: snapshots from a parent datasets appear before OR only after any snapshots on a child dataset
+			assertNoParentSnapshotBeforeChildren(t, deps)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
@@ -935,6 +1046,86 @@ func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
 		cmp.AllowUnexported(machines.Machines{}),
 		cmpopts.IgnoreUnexported(zfs.Dataset{}, zfs.DatasetProp{})); diff == "" {
 		t.Errorf("Machines are equals where we expected not to:\n%+v", pp.Sprint(m1))
+	}
+}
+
+// assertSnapshotAfterItsBase ensure that all snapshots only appear once its base state
+func assertSnapshotAfterItsBaseState(t *testing.T, states []string) {
+	t.Helper()
+
+	for i, s := range states {
+		base, snapshot := machines.SplitSnapshotName(s)
+		if snapshot != "" {
+			continue
+		}
+		for j, ss := range states {
+			b, snapshot2 := machines.SplitSnapshotName(ss)
+			if b != base || snapshot2 == "" {
+				continue
+			}
+			if j > i {
+				continue
+			}
+			t.Errorf("Found snapshot %s before base dataset %s: %v", ss, s, states)
+		}
+	}
+}
+
+// assertSnapshotToCloneOrderIsPreserved ensure that a close comes immediatly after its origin
+func assertSnapshotToCloneOrderIsPreserved(t *testing.T, want []string, got []string) {
+	t.Helper()
+
+	for k, w := range want {
+		if k == 0 {
+			continue
+		}
+		if _, snapshot := machines.SplitSnapshotName(w); snapshot == "" {
+			previousState := want[k-1]
+
+			// note: we know that g is in got as we checked content equality between got and want before
+			for j, g := range got {
+				if g != previousState {
+					continue
+				}
+				if j+1 > len(w) {
+					t.Errorf("%s is last element of got and should be immediately followed by %s:\n%s", g, w, strings.Join(got, "\n"))
+					break
+				}
+				if got[j+1] != w {
+					t.Errorf("%s should be immediately followed by %s:\n%s", g, w, strings.Join(got, "\n"))
+				}
+			}
+		}
+	}
+}
+
+// assertNoParentSnapshotBeforeChildren ensure that snapshots from a parent datasets appear before OR only after any snapshot on a child dataset
+func assertNoParentSnapshotBeforeChildren(t *testing.T, states []string) {
+	t.Helper()
+
+	for i, s := range states {
+		if i == 0 || i == len(states)-1 {
+			continue
+		}
+		if newBase, snapshot := machines.SplitSnapshotName(s); snapshot == "" {
+			previousBase, _ := machines.SplitSnapshotName(states[i-1])
+
+			var previousBaseFound bool
+			for _, s2 := range states[i+1:] {
+				base, _ := machines.SplitSnapshotName(s2)
+
+				if !previousBaseFound {
+					if base == previousBase {
+						previousBaseFound = true
+					}
+					continue
+				}
+				if base == newBase {
+					t.Errorf("found %s after a snapshot of %s:\n%s", s2, previousBase, strings.Join(states, "\n"))
+				}
+			}
+		}
+
 	}
 }
 

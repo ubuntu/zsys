@@ -79,3 +79,6 @@ func (m *Machines) MakeComparable() {
 
 	m.z = nil
 }
+
+// SplitSnapshotName calls internal splitSnapshotName to split a snapshot name in base and id of a snapshot
+func SplitSnapshotName(s string) (string, string) { return splitSnapshotName(s) }
