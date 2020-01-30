@@ -46,3 +46,9 @@ pools:
       last_used: 2020-05-07T22:01:28+00:00
       mountpoint: /
     - name: ROOT/ubuntu_1234/opt
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      mountpoint: /home/user1
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      last_used: 2018-12-10T12:20:44+00:00

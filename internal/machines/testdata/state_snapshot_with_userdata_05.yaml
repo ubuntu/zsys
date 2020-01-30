@@ -1,0 +1,191 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2020-05-07T22:01:28+00:00
+      mountpoint: /
+      snapshots:
+        - name: snap1
+          zsys_bootfs: yes:local
+          mountpoint: /:local
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00
+        - name: snap2
+          zsys_bootfs: yes:local
+          mountpoint: /:local
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
+        - name: snap3
+          zsys_bootfs: yes:local
+          mountpoint: /:local
+          canmount: on:local
+          creation_time: 2019-08-24T17:11:06+00:00
+    - name: ROOT/ubuntu_5678
+      zsys_bootfs: yes
+      last_used: 2020-05-07T22:01:28+00:00
+      mountpoint: /
+      origin: rpool/ROOT/ubuntu_1234@snap2
+    - name: ROOT/ubuntu_1234/opt
+      snapshots:
+        - name: snap1
+          zsys_bootfs: yes:inherited
+          mountpoint: /opt:inherited
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00
+        - name: snap2
+          zsys_bootfs: yes:local
+          mountpoint: /:local
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
+        - name: snap3
+          zsys_bootfs: yes:local
+          mountpoint: /:local
+          canmount: on:local
+          creation_time: 2019-08-24T17:11:06+00:00
+    - name: ROOT/ubuntu_5678/opt
+      origin: rpool/ROOT/ubuntu_1234/opt@snap2
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      mountpoint: /home/user1
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      last_used: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/root_bcde
+      mountpoint: /root
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      snapshots:
+        - name: snap1
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        - name: snaproot1
+          zsys_bootfs: yes:local
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2019-03-18T02:45:55+00:00
+        - name: snap2
+          zsys_bootfs: yes:local
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
+        - name: snap3
+          zsys_bootfs: yes:local
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2019-08-24T17:11:06+00:00
+    - name: USERDATA/user1_efgh
+      mountpoint: /home/user1
+      bootfs_datasets: rpool/ROOT/ubuntu_clone1
+      last_used: 2018-12-10T12:20:44+00:00
+      origin: rpool/USERDATA/user1_abcd@snap2
+      snapshots:
+        - name: snapuser2
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        - name: snapuser3
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        - name: snapuser5
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+    - name: USERDATA/user1_ijkl
+      origin: rpool/USERDATA/user1_efgh@snapuser2
+    - name: USERDATA/user1_mnop
+      origin: rpool/USERDATA/user1_efgh@snapuser2
+      snapshots:
+        - name: snapuser3
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user1_qrst
+      origin: rpool/USERDATA/user1_efgh@snapuser2
+      snapshots:
+        - name: snapuser3
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user1_uvwx
+      origin: rpool/USERDATA/user1_qrst@snapuser3
+      snapshots:
+        - name: snapuser4
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: user1_xyz
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      origin: rpool/USERDATA/user1_efgh@snapuser3
+    - name: user1_aaaa
+      mountpoint: /home/user1
+      canmount: off
+      last_used: 2018-12-10T12:20:44+00:00
+      origin: rpool/USERDATA/user1_efgh@snapuser5
+    - name: USERDATA/root_fghi
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      origin: rpool/USERDATA/root_bcde@snaproot1
+    - name: USERDATA/root_cdef
+      mountpoint: /root
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_clone1
+      origin: rpool/USERDATA/root_bcde@snap2
+      snapshots:
+        - name: snaproot2
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+  - name: bpool
+    datasets:
+    - name: BOOT
+      canmount: off
+    - name: BOOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2020-05-07T22:01:28+00:00
+      mountpoint: /boot
+      snapshots:
+        - name: snap1
+          zsys_bootfs: yes:local
+          mountpoint: /boot:local
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00
+        - name: snap2
+          zsys_bootfs: yes:local
+          mountpoint: /boot:local
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
+        - name: snap3
+          zsys_bootfs: yes:local
+          mountpoint: /boot:local
+          canmount: on:local
+          creation_time: 2019-08-24T17:11:06+00:00
+    - name: BOOT/ubuntu_1234/grub
+      snapshots:
+        - name: snap1
+          zsys_bootfs: yes:inherited
+          mountpoint: /boot/grub:inherited
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00
+        - name: snap2
+          zsys_bootfs: yes:local
+          mountpoint: /boot/grub:local
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
+        - name: snap3
+          zsys_bootfs: yes:local
+          mountpoint: /boot/grub:local
+          canmount: on:local
+          creation_time: 2019-08-24T17:11:06+00:00
+    - name: BOOT/ubuntu_5678
+      mountpoint: /boot
+    - name: BOOT/ubuntu_5678/grub

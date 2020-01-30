@@ -985,6 +985,100 @@ func TestGetStateAndDependencies(t *testing.T) {
 	}
 }
 
+func TestGetUserStateAndDependencies(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def     string
+		depsFor string
+		user    string
+
+		wantDeps []string
+		wantErr  bool
+	}{
+		"User manual snapshot, no clone":             {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser2", wantDeps: []string{"rpool/USERDATA/user1_efgh@snapuser2"}},
+		"User manual clone":                          {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_ijkl", wantDeps: []string{"rpool/USERDATA/user1_ijkl"}},
+		"User manual clone with snapshots, no clone": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_mnop", wantDeps: []string{"rpool/USERDATA/user1_mnop", "rpool/USERDATA/user1_mnop@snapuser3"}},
+		"User manual clone with snapshots, with clone and snapshots": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_qrst",
+			wantDeps: []string{
+				"rpool/USERDATA/user1_qrst",
+				"rpool/USERDATA/user1_qrst@snapuser3",
+				"rpool/USERDATA/user1_uvwx",
+				"rpool/USERDATA/user1_uvwx@snapuser4",
+			}},
+
+		// Match tests
+		"Match on base name":           {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "ijkl", wantDeps: []string{"rpool/USERDATA/user1_ijkl"}},
+		"Match on base name with user": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "user1_ijkl", wantDeps: []string{"rpool/USERDATA/user1_ijkl"}},
+		"Match on snapshot name":       {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "snapuser4", wantDeps: []string{"rpool/USERDATA/user1_uvwx@snapuser4"}},
+
+		"Is dataset linked to a system state":                {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_abcd", wantErr: true},
+		"Is snapshot linked to a system state":               {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snap2", wantErr: true},
+		"Is snapshot linked via its clone to a system state": {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snaproot1", wantErr: true},
+
+		"Manual clone on our removal list on remaining datatasets":  {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser5", wantErr: true},
+		"Manual clone on our removal list on persistent datatasets": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser3", wantErr: true},
+
+		"No user provided":                    {def: "state_snapshot_with_userdata_01.yaml", user: "", depsFor: "rpool/USERDATA/user1_efgh@snapuser2", wantErr: true},
+		"No target name provided":             {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "", wantErr: true},
+		"No match as on different user":       {def: "state_snapshot_with_userdata_01.yaml", user: "user99", depsFor: "rpool/USERDATA/user1_efgh@snapuser2", wantErr: true},
+		"Multiple match on snapshot name":     {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "snapuser3", wantErr: true},
+		"Multiple match on base dataset name": {def: "state_snapshot_with_userdata_04.yaml", user: "user1", depsFor: "abcd", wantErr: true},
+		"No matches":                          {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/USERDATA/user_doesntexist", wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			ms, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			stateDeps, err := ms.GetUserStateAndDependencies(tc.user, tc.depsFor)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			var deps []string
+			for _, s := range stateDeps {
+				deps = append(deps, s.ID)
+			}
+
+			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
+			// However, we identified 4 rules to ensure that the dependency order (from root to leaf) is respected.
+
+			// rule 1: ensure that the 2 lists have the same elements
+			if len(deps) != len(tc.wantDeps) {
+				t.Fatalf("deps content doesn't have enough elements:\nGot:  %v\nWant: %v", deps, tc.wantDeps)
+			} else {
+				assert.ElementsMatch(t, tc.wantDeps, deps, "didn't get matching dep list content")
+			}
+
+			// rule 2: ensure that no snapshot from a base appears before that base
+			assertSnapshotAfterItsBaseState(t, deps)
+
+			// rule 3: ensure that the order between a snapshot and an immediately following dataset is preserved (snapshot to clone)
+			assertSnapshotToCloneOrderIsPreserved(t, tc.wantDeps, deps)
+
+			// rule 4: snapshots from a parent datasets appear before OR only after any snapshots on a child dataset
+			assertNoParentSnapshotBeforeChildren(t, deps)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
