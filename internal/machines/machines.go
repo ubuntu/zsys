@@ -18,12 +18,13 @@ import (
 // Machines hold a zfs system states, with a map of main root system dataset name to a given Machine,
 // current machine and nextState if an upgrade has been proceeded.
 type Machines struct {
-	all               map[string]*Machine
-	cmdline           string
-	current           *Machine
-	nextState         *State
-	allSystemDatasets []*zfs.Dataset
-	allUsersDatasets  []*zfs.Dataset
+	all                   map[string]*Machine
+	cmdline               string
+	current               *Machine
+	nextState             *State
+	allSystemDatasets     []*zfs.Dataset
+	allUsersDatasets      []*zfs.Dataset
+	allPersistentDatasets []*zfs.Dataset
 	// cantmount noauto or off datasets, which are not system, users or persistent
 	unmanagedDatasets []*zfs.Dataset
 
@@ -320,6 +321,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 
 	// Append unlinked boot datasets to ensure we will switch to noauto everything
 	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
+	machines.allPersistentDatasets = persistents
 	machines.unmanagedDatasets = unmanagedDatasets
 
 	root, _ := bootParametersFromCmdline(machines.cmdline)
