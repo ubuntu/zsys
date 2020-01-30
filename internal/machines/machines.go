@@ -24,6 +24,8 @@ type Machines struct {
 	nextState         *State
 	allSystemDatasets []*zfs.Dataset
 	allUsersDatasets  []*zfs.Dataset
+	// cantmount noauto or off datasets, which are not system, users or persistent
+	unmanagedDatasets []*zfs.Dataset
 
 	z *zfs.Zfs
 }
@@ -162,7 +164,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 	}
 
 	// First, handle system datasets (active for each machine and history) and return remaining ones.
-	mns, boots, flattenedUserDatas, persistents := machines.populate(ctx, append(append(mainDatasets, cloneDatasets...), otherDatasets...), origins)
+	mns, boots, flattenedUserDatas, persistents, unmanagedDatasets := machines.populate(ctx, append(append(mainDatasets, cloneDatasets...), otherDatasets...), origins)
 
 	// Get a userdata map from parent to its children
 	rootUserDatasets := getRootDatasets(ctx, flattenedUserDatas)
@@ -318,6 +320,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 
 	// Append unlinked boot datasets to ensure we will switch to noauto everything
 	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
+	machines.unmanagedDatasets = unmanagedDatasets
 
 	root, _ := bootParametersFromCmdline(machines.cmdline)
 	m, _ := machines.findFromRoot(root)
@@ -329,7 +332,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 
 // populate attach main system datasets to machines and returns other types of datasets for later triage/attachment, alongside
 // a map to direct access to a given state and machine
-func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, origins map[string]*string) (mns map[string]machineAndState, boots, userdatas, persistents []*zfs.Dataset) {
+func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, origins map[string]*string) (mns map[string]machineAndState, boots, userdatas, persistents, unmanagedDatasets []*zfs.Dataset) {
 	mns = make(map[string]machineAndState)
 
 	for _, d := range allDatasets {
@@ -371,6 +374,7 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 		// will mount them.
 		if d.CanMount != "on" {
 			log.Debugf(ctx, i18n.G("ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on"), d.Name)
+			unmanagedDatasets = append(unmanagedDatasets, &d)
 			continue
 		}
 
@@ -378,7 +382,7 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 		persistents = append(persistents, &d)
 	}
 
-	return mns, boots, userdatas, persistents
+	return mns, boots, userdatas, persistents, unmanagedDatasets
 }
 
 // newMachineFromDataset returns a new machine if the given dataset is a main system one.

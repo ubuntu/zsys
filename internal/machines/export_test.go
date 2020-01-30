@@ -19,6 +19,7 @@ type MachinesTest struct {
 	NextState         *State              `json:",omitempty"`
 	AllSystemDatasets []*zfs.Dataset      `json:",omitempty"`
 	AllUsersDatasets  []*zfs.Dataset      `json:",omitempty"`
+	UnmanagedDatasets []*zfs.Dataset      `json:",omitempty"`
 }
 
 type SortedDatasets []*zfs.Dataset
@@ -39,6 +40,7 @@ func (m Machines) MarshalJSON() ([]byte, error) {
 	mt.NextState = m.nextState
 	mt.AllSystemDatasets = m.allSystemDatasets
 	mt.AllUsersDatasets = m.allUsersDatasets
+	mt.UnmanagedDatasets = m.unmanagedDatasets
 
 	return json.Marshal(mt)
 }
@@ -57,6 +59,7 @@ func (m *Machines) UnmarshalJSON(b []byte) error {
 	m.nextState = mt.NextState
 	m.allSystemDatasets = mt.AllSystemDatasets
 	m.allUsersDatasets = mt.AllUsersDatasets
+	m.unmanagedDatasets = mt.UnmanagedDatasets
 
 	if m.current != nil {
 		for k, machine := range mt.All {
