@@ -918,6 +918,10 @@ func TestGetStateAndDependencies(t *testing.T) {
 		"Multiple match on snapshot name":     {def: "state_snapshot_with_userdata_03.yaml", depsFor: "snap1", wantErr: true},
 		"Multiple match on base dataset name": {def: "state_snapshot_with_userdata_04.yaml", depsFor: "ubuntu_1234", wantErr: true},
 		"No matches":                          {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/ROOT/ubuntu_doesntexist", wantErr: true},
+
+		// Manual user clones
+		"Manual clone on our removal list on remaining datatasets":  {def: "state_snapshot_with_userdata_with_manual_system_clone_unmanaged.yaml", depsFor: "rpool/ROOT/ubuntu_1234", wantErr: true},
+		"Manual clone on our removal list on persistent datatasets": {def: "state_snapshot_with_userdata_with_manual_system_clone_persistent.yaml", depsFor: "rpool/ROOT/ubuntu_1234", wantErr: true},
 	}
 
 	for name, tc := range tests {
