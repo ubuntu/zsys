@@ -113,6 +113,9 @@ func TestNew(t *testing.T) {
 		"Select clone":                               {def: "m_clone_with_persistent.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_5678")},
 		"Selected machine doesn't exist":             {def: "d_one_machine_one_dataset.yaml", cmdline: generateCmdLine("foo")},
 		"Select existing dataset but not a machine":  {def: "m_with_persistent.yaml", cmdline: generateCmdLine("rpool/ROOT")},
+
+		// Error cases
+		"Clone, origin doesn't exist": {def: "m_clone_origin_doesnt_exist.yaml"},
 	}
 
 	for name, tc := range tests {

@@ -235,7 +235,12 @@ func (ms *Machines) refresh(ctx context.Context) {
 	for r, children := range unattachedClonesUserDatasets {
 		// WARNING: We only consider the dataset "group" (clones and promoted) attached to main state of a given machine
 		// to regroup on a known machine.
-		origin := *(originsUserDatasets[r.Name])
+
+		var origin string
+		if v, ok := originsUserDatasets[r.Name]; ok {
+			origin = *v
+		}
+
 		// This is manual promotion from the user on a user dataset without promoting the whole state:
 		// ignore the dataset and issue a warning.
 		// If we iterated over all the user datasets from all machines and states, we may find a match, but ignore
