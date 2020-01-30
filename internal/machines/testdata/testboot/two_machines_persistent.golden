@@ -87,6 +87,13 @@
          "LastUsed": 1544444444
       }
    ],
+   "AllPersistentDatasets": [
+      {
+         "Name": "rpool/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "on"
+      }
+   ],
    "UnmanagedDatasets": [
       {
          "Name": "rpool",

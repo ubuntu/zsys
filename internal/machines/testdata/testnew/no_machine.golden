@@ -1,1 +1,9 @@
-{}
+{
+   "AllPersistentDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/foo",
+         "CanMount": "on"
+      }
+   ]
+}

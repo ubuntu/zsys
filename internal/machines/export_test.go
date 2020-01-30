@@ -13,13 +13,14 @@ const (
 )
 
 type MachinesTest struct {
-	All               map[string]*Machine `json:",omitempty"`
-	Cmdline           string              `json:",omitempty"`
-	Current           *Machine            `json:",omitempty"`
-	NextState         *State              `json:",omitempty"`
-	AllSystemDatasets []*zfs.Dataset      `json:",omitempty"`
-	AllUsersDatasets  []*zfs.Dataset      `json:",omitempty"`
-	UnmanagedDatasets []*zfs.Dataset      `json:",omitempty"`
+	All                   map[string]*Machine `json:",omitempty"`
+	Cmdline               string              `json:",omitempty"`
+	Current               *Machine            `json:",omitempty"`
+	NextState             *State              `json:",omitempty"`
+	AllSystemDatasets     []*zfs.Dataset      `json:",omitempty"`
+	AllUsersDatasets      []*zfs.Dataset      `json:",omitempty"`
+	AllPersistentDatasets []*zfs.Dataset      `json:",omitempty"`
+	UnmanagedDatasets     []*zfs.Dataset      `json:",omitempty"`
 }
 
 type SortedDatasets []*zfs.Dataset
@@ -40,6 +41,7 @@ func (m Machines) MarshalJSON() ([]byte, error) {
 	mt.NextState = m.nextState
 	mt.AllSystemDatasets = m.allSystemDatasets
 	mt.AllUsersDatasets = m.allUsersDatasets
+	mt.AllPersistentDatasets = m.allPersistentDatasets
 	mt.UnmanagedDatasets = m.unmanagedDatasets
 
 	return json.Marshal(mt)
@@ -59,6 +61,7 @@ func (m *Machines) UnmarshalJSON(b []byte) error {
 	m.nextState = mt.NextState
 	m.allSystemDatasets = mt.AllSystemDatasets
 	m.allUsersDatasets = mt.AllUsersDatasets
+	m.allPersistentDatasets = mt.AllPersistentDatasets
 	m.unmanagedDatasets = mt.UnmanagedDatasets
 
 	if m.current != nil {

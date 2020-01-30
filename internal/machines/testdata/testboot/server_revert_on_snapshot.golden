@@ -2801,6 +2801,48 @@
          "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
       }
    ],
+   "AllPersistentDatasets": [
+      {
+         "Name": "rpool/srv",
+         "Mountpoint": "/srv",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/games",
+         "Mountpoint": "/var/games",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/lib",
+         "Mountpoint": "/var/lib",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/log",
+         "Mountpoint": "/var/log",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/mail",
+         "Mountpoint": "/var/mail",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/snap",
+         "Mountpoint": "/var/snap",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/spool",
+         "Mountpoint": "/var/spool",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/www",
+         "Mountpoint": "/var/www",
+         "CanMount": "on"
+      }
+   ],
    "UnmanagedDatasets": [
       {
          "Name": "rpool",
