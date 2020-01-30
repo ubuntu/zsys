@@ -3,6 +3,7 @@ package machines
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -184,4 +185,15 @@ func nameInBootfsDatasets(name string, d zfs.Dataset) bool {
 		}
 	}
 	return false
+}
+
+func userFromDatasetName(n string) string {
+	base, _ := splitSnapshotName(n)
+	t := strings.Split(filepath.Base(base), "_")
+	user := t[0]
+	if len(t) > 1 {
+		user = strings.Join(t[:len(t)-1], "_")
+	}
+	return user
+
 }

@@ -32,11 +32,12 @@ type Machines struct {
 }
 
 // Machine is a group of Main and its History children states
+// TODO: History should be replaced with States as a map and main state points to it
 type Machine struct {
 	// Main machine State
 	State
 	// Users is a per user reference to each of its state
-	Users map[string]map[string]userState `json:",omitempty"`
+	Users map[string]map[string]UserState `json:",omitempty"`
 	// History is a map or root system datasets to all its possible State
 	History map[string]*State `json:",omitempty"`
 }
@@ -65,7 +66,8 @@ type machineAndState struct {
 	machine *Machine
 }
 
-type userState struct {
+// UserState represents a particular state for a user
+type UserState struct {
 	ID       string
 	LastUsed *time.Time `json:",omitempty"`
 	Datasets []*zfs.Dataset
@@ -153,7 +155,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 	cloneDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
 	otherDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
 	for _, d := range sortedDataset {
-		if origins[d.Name] == nil {
+		if _, exists := origins[d.Name]; !exists {
 			otherDatasets = append(otherDatasets, *d)
 			continue
 		}
@@ -253,9 +255,9 @@ func (ms *Machines) refresh(ctx context.Context) {
 		var associateWithAtLeastOne bool
 		for _, m := range machines.all {
 			var associated bool
-			for _, userStates := range m.Users {
-				for _, userState := range userStates {
-					if userState.ID == origin {
+			for _, UserStates := range m.Users {
+				for _, UserState := range UserStates {
+					if UserState.ID == origin {
 						m.addUserDatasets(ctx, r, children, nil)
 						associated = true
 						associateWithAtLeastOne = true
@@ -277,15 +279,11 @@ func (ms *Machines) refresh(ctx context.Context) {
 	// This is a userdataset "snapshot" snapshot dataset.
 	for r, children := range unattachedSnapshotsUserDatasets {
 		base, _ := splitSnapshotName(r.Name)
-		t := strings.Split(filepath.Base(base), "_")
-		user := t[0]
-		if len(t) > 1 {
-			user = strings.Join(t[:len(t)-1], "_")
-		}
+		user := userFromDatasetName(r.Name)
 		var associated bool
 		for _, m := range machines.all {
-			for _, userState := range m.Users[user] {
-				if userState.ID == base {
+			for _, UserState := range m.Users[user] {
+				if UserState.ID == base {
 					m.addUserDatasets(ctx, r, children, nil)
 					associated = true
 					break
@@ -403,7 +401,7 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 				SystemDatasets: make(map[string][]*zfs.Dataset),
 				UserDatasets:   make(map[string][]*zfs.Dataset),
 			},
-			Users:   make(map[string]map[string]userState),
+			Users:   make(map[string]map[string]UserState),
 			History: make(map[string]*State),
 		}
 		m.SystemDatasets[d.Name] = []*zfs.Dataset{&d}
@@ -475,20 +473,14 @@ func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children 
 		state.UserDatasets[r.Name] = append(state.UserDatasets[r.Name], children...)
 	}
 
-	// Extract user name
-	base, _ := splitSnapshotName(r.Name)
-	t := strings.Split(filepath.Base(base), "_")
-	user := t[0]
-	if len(t) > 1 {
-		user = strings.Join(t[:len(t)-1], "_")
-	}
+	user := userFromDatasetName(r.Name)
 	if m.Users[user] == nil {
-		m.Users[user] = make(map[string]userState)
+		m.Users[user] = make(map[string]UserState)
 	}
 
 	// Attach to global user map new userData
 	// If the dataset has already been added  it is overwritten
-	s := userState{
+	s := UserState{
 		ID:       r.Name,
 		Datasets: append([]*zfs.Dataset{r}, children...),
 	}
