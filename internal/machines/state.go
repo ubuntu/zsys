@@ -44,6 +44,45 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, error) {
 
 	matches = append(matches, deps...)
 
+	originsToDatasets := make(map[string][]string)
+	for _, d := range append(ms.allPersistentDatasets, ms.unmanagedDatasets...) {
+		if d.Origin == "" {
+			continue
+		}
+		originsToDatasets[d.Origin] = append(originsToDatasets[d.Origin], d.Name)
+	}
+
+	var errmsg string
+	// Look for manually cloned datasets in persistent OR remaining datasets outside of zsys machines
+	for _, state := range matches {
+		// Only snapshots can have clone dependencies outside of their system path
+		if !state.isSnapshot() {
+			continue
+		}
+
+		var dNames []string
+		for _, ds := range state.SystemDatasets {
+			for _, d := range ds {
+				dNames = append(dNames, d.Name)
+			}
+		}
+		for _, ds := range state.UserDatasets {
+			for _, d := range ds {
+				dNames = append(dNames, d.Name)
+			}
+		}
+		for _, n := range dNames {
+			if names, ok := originsToDatasets[n]; ok {
+				for _, m := range names {
+					errmsg += fmt.Sprintf(i18n.G("  - %s is a clone of %s\n"), m, n)
+				}
+			}
+		}
+	}
+	if errmsg != "" {
+		return nil, fmt.Errorf(i18n.G("one or multiple manually cloned datasets should be removed first.\n%s\nPlease use \"zfs destroy\" to remove them manually."), errmsg)
+	}
+
 	return matches, nil
 }
 
