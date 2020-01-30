@@ -1,12 +1,15 @@
 package machines
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
 
+	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
+	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 // GetStateAndDependencies fetches a given state and all its deps
@@ -15,10 +18,7 @@ import (
 //   * dataset ID (can match basename, multiple results)
 //   * snapshot name (can match snapshot, multiple results)
 func (ms Machines) GetStateAndDependencies(s string) ([]State, error) {
-	// Match(es) for s
-	var matches []State
-
-	var deps []State
+	var matches, deps []State
 	for _, m := range ms.all {
 		if s == m.ID || s == filepath.Base(m.ID) {
 			matches = append(matches, m.State)
@@ -40,7 +40,7 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, error) {
 		for _, match := range matches {
 			errmsg += fmt.Sprintf(i18n.G("  - %s (%s)\n"), match.ID, match.LastUsed.Format("2006-01-02 15:04:05"))
 		}
-		return nil, fmt.Errorf(i18n.G("multiple states are matching %s:\n%sPlease use full state path."), s, errmsg)
+		return nil, fmt.Errorf(i18n.G("multiple states are matching %s:\n%s\nPlease use full state path."), s, errmsg)
 	}
 
 	matches = append(matches, deps...)

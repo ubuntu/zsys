@@ -136,7 +136,6 @@ func (ms *Machines) refresh(ctx context.Context) {
 		z:       ms.z,
 	}
 
-	// We are going to transform the origin of datasets, get a copy first
 	zDatasets := machines.z.Datasets()
 	datasets := make([]*zfs.Dataset, 0, len(zDatasets))
 	for i := range zDatasets {
