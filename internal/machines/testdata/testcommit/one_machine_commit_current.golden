@@ -125,5 +125,12 @@
          "CanMount": "on",
          "LastUsed": 1577777777
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      }
    ]
 }

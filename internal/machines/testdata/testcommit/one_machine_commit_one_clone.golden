@@ -128,5 +128,12 @@
          "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
          "Origin": "rpool/clone@snap1"
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      }
    ]
 }

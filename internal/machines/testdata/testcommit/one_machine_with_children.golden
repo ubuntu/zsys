@@ -211,5 +211,17 @@
          "LastUsed": 1544444444,
          "LastBootedKernel": "vmlinuz-5.0.0-0-generic"
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      }
    ]
 }

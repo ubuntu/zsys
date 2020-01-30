@@ -199,5 +199,27 @@
          "BootFS": true,
          "LastUsed": 1544444444
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "bpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "bpool/BOOT",
+         "Mountpoint": "/BOOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      }
    ]
 }

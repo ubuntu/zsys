@@ -282,5 +282,22 @@
          "BootfsDatasets": "rpool/ROOT/ubuntu_5678",
          "Origin": "rpool/USERDATA/user1_abcd/tools@snap1"
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA",
+         "Mountpoint": "/USERDATA",
+         "CanMount": "off"
+      }
    ]
 }

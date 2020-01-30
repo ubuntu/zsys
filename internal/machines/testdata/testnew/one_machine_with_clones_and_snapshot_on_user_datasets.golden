@@ -268,5 +268,22 @@
          "LastUsed": 1566666666,
          "BootfsDatasets": "rpool/clone"
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool2",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool2/USERDATA",
+         "Mountpoint": "/USERDATA",
+         "CanMount": "off"
+      }
    ]
 }

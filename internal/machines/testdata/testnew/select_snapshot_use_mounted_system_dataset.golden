@@ -175,5 +175,17 @@
          "LastUsed": 1577777777,
          "Origin": "rpool/ROOT/ubuntu_1234@snap1"
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      }
    ]
 }

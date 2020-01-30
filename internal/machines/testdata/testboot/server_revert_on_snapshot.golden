@@ -2800,5 +2800,27 @@
          "LastUsed": 1544444444,
          "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
       }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA",
+         "Mountpoint": "/USERDATA",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/var",
+         "Mountpoint": "/var",
+         "CanMount": "off"
+      }
    ]
 }
