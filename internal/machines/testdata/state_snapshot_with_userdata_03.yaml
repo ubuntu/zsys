@@ -111,7 +111,7 @@ pools:
           creation_time: 2019-08-24T17:11:06+00:00
     - name: USERDATA/user1_efgh
       mountpoint: /home/user1
-      bootfs_datasets: rpool/ROOT/ubuntu_clone1
+      bootfs_datasets: rpool/ROOT/ubuntu_5678
       last_used: 2018-12-10T12:20:44+00:00
       origin: rpool/USERDATA/user1_abcd@snap2
       snapshots:
@@ -123,7 +123,7 @@ pools:
     - name: USERDATA/root_cdef
       mountpoint: /root
       last_used: 2018-08-03T21:55:33+00:00
-      bootfs_datasets: rpool/ROOT/ubuntu_clone1
+      bootfs_datasets: rpool/ROOT/ubuntu_5678
       origin: rpool/USERDATA/root_bcde@snap2
       snapshots:
         - name: snaproot2

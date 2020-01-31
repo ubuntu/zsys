@@ -20,13 +20,13 @@ pools:
       bootfs_datasets: rpool/ROOT/ubuntu_1234
     - name: USERDATA/user1_efgh
       mountpoint: /home/user1
-      bootfs_datasets: rpool/ROOT/ubuntu_clone1
+      bootfs_datasets: rpool/ROOT/ubuntu_5678
       last_used: 2018-12-10T12:20:44+00:00
       origin: rpool/USERDATA/user1_abcd@snap2
     - name: USERDATA/root_cdef
       mountpoint: /root
       last_used: 2018-08-03T21:55:33+00:00
-      bootfs_datasets: rpool/ROOT/ubuntu_clone1
+      bootfs_datasets: rpool/ROOT/ubuntu_5678
       origin: rpool/USERDATA/root_bcde@snap2
   - name: bpool
     datasets:
