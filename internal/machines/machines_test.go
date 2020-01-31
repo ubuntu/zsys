@@ -1079,6 +1079,127 @@ func TestGetUserStateAndDependencies(t *testing.T) {
 	}
 }
 
+func TestRemoveSystemStates(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def            string
+		currentStateID string
+		states         []string
+
+		setPropertyErr bool
+
+		isNoOp  bool
+		wantErr bool
+	}{
+		"Remove non current state, one dataset": {def: "m_with_userdata.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}},
+		// FIXME: miss bpool and bpool/BOOT from golden file
+		"Remove non current state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}},
+		"Remove one snapshot only":                    {def: "state_snapshot_with_userdata_02.yaml", states: []string{"rpool/ROOT/ubuntu_1234@snap3"}},
+		"Removing main dataset deletes its snapshots": {def: "state_snapshot_with_userdata_02.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}},
+
+		"Remove multiple states in correct order": {def: "state_snapshot_with_userdata_02.yaml", states: []string{
+			"rpool/ROOT/ubuntu_1234@snap3",
+			"rpool/ROOT/ubuntu_1234@snap2",
+			"rpool/ROOT/ubuntu_1234@snap1",
+			"rpool/ROOT/ubuntu_1234",
+		}},
+		"Remove multiple states with clones in correct order": {def: "state_snapshot_with_userdata_01.yaml", states: []string{
+			"rpool/ROOT/ubuntu_1234@snap3",
+			"rpool/ROOT/ubuntu_5678",
+			"rpool/ROOT/ubuntu_1234@snap2",
+			"rpool/ROOT/ubuntu_1234@snap1",
+			"rpool/ROOT/ubuntu_1234",
+		}},
+
+		"Remove userdataset if unique and untagg shared ones": {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}},
+		"Ignore dataset on failed to untag userdataset":       {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}, setPropertyErr: true},
+
+		// remove 1234 before 5678. It’s a isNoOp as we try to remove first one
+		"Remove multiple states with clones in incorrect order": {def: "state_snapshot_with_userdata_01.yaml", states: []string{
+			"rpool/ROOT/ubuntu_1234",
+			"rpool/ROOT/ubuntu_1234@snap1",
+			"rpool/ROOT/ubuntu_1234@snap2",
+			"rpool/ROOT/ubuntu_5678",
+			"rpool/ROOT/ubuntu_1234@snap3",
+		}, wantErr: true, isNoOp: true},
+
+		"Snapshots are removed even if provided after main dataset": {def: "state_snapshot_with_userdata_02.yaml", states: []string{
+			"rpool/ROOT/ubuntu_1234",
+			"rpool/ROOT/ubuntu_1234@snap1",
+			"rpool/ROOT/ubuntu_1234@snap2",
+			"rpool/ROOT/ubuntu_1234@snap3",
+		}},
+
+		"No state given": {def: "m_with_userdata.yaml", isNoOp: true},
+		"Error on trying to remove current state":                                        {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true, isNoOp: true},
+		"Error on missing dependent state":                                               {def: "state_snapshot_with_userdata_01.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true},
+		"Error on userdata manual clone on which our userdata for this state depends on": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}, wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			initMachines, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			ms := initMachines
+			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+
+			var states []machines.State
+		nextState:
+			for _, n := range tc.states {
+				for _, m := range ms.AllMachines() {
+					if m.ID == n {
+						states = append(states, m.State)
+						continue nextState
+					}
+					for _, h := range m.History {
+						if h.ID == n {
+							states = append(states, *h)
+							continue nextState
+						}
+					}
+				}
+				t.Fatalf("Setup error: can't find %s in machine list", n)
+			}
+
+			err = ms.RemoveSystemStates(context.Background(), states)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			machinesAfterRescan, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()

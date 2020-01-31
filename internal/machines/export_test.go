@@ -88,3 +88,6 @@ func (m *Machines) MakeComparable() {
 
 // SplitSnapshotName calls internal splitSnapshotName to split a snapshot name in base and id of a snapshot
 func SplitSnapshotName(s string) (string, string) { return splitSnapshotName(s) }
+
+// AllMachines exports machines lists for tests
+func (m *Machines) AllMachines() map[string]*Machine { return m.all }
