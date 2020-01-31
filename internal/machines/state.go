@@ -9,6 +9,7 @@ import (
 
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
+	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
@@ -215,6 +216,76 @@ func (m Machine) getUserStateDependencies(user string, s UserState) (deps []User
 	}
 
 	return deps
+}
+
+// RemoveSystemStates remove this and all depending states from entry. It starts the removal in the slice order.
+func (ms *Machines) RemoveSystemStates(ctx context.Context, states []State) error {
+	nt := ms.z.NewNoTransaction(ctx)
+
+	var currentID string
+	if ms.current != nil {
+		currentID = ms.current.ID
+	}
+
+	var notSnapshotID []string
+	for _, s := range states {
+		if s.ID == currentID {
+			return fmt.Errorf(i18n.G("cannot remove current state: %s"), currentID)
+		}
+		if !s.isSnapshot() {
+			notSnapshotID = append(notSnapshotID, s.ID)
+		}
+
+	}
+
+nextState:
+	for _, s := range states {
+
+		// Removing a main dataset will remove all its snapshots, we can skip those states
+		for _, n := range notSnapshotID {
+			if strings.HasPrefix(s.ID, n+"@") {
+				continue nextState
+			}
+		}
+
+		for route := range s.SystemDatasets {
+			if err := nt.Destroy(route); err != nil {
+				return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
+			}
+		}
+
+		for route, ds := range s.UserDatasets {
+			r := s.UserDatasets[route][0]
+			var newTags []string
+			for _, n := range strings.Split(r.BootfsDatasets, bootfsdatasetsSeparator) {
+				if n != s.ID {
+					newTags = append(newTags, n)
+					break
+				}
+			}
+			newTag := strings.Join(newTags, bootfsdatasetsSeparator)
+
+			if newTag != "" {
+				// Associated with more than one: untag this one and all children
+				t, _ := ms.z.NewTransaction(ctx)
+				defer t.Done()
+				for _, d := range ds {
+					if err := t.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+						// The error is only an untag issue, and so, the dataset will now be linked via bootfsdataset to an unexisting one.
+						// This will be fixed by next GC run.
+						log.Warningf(ctx, i18n.G("couldn't remove %q to BootfsDatasets property of %q. Ignoring: ")+config.ErrorFormat, route, d.Name, err)
+					}
+				}
+			} else {
+				// Associated with only this one: destroy (recursively)
+				if err := nt.Destroy(route); err != nil {
+					return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
+				}
+			}
+		}
+	}
+	ms.refresh(ctx)
+	return nil
 }
 
 func (s State) isSnapshot() bool {
