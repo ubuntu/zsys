@@ -252,24 +252,43 @@ func (ms *Machines) RemoveSystemStates(ctx context.Context, states []State) erro
 		currentID = ms.current.ID
 	}
 
-	var notSnapshotID []string
+	var fsDatasetsID []string
 	for _, s := range states {
 		if s.ID == currentID {
 			return fmt.Errorf(i18n.G("cannot remove current state: %s"), currentID)
 		}
 		if !s.isSnapshot() {
-			notSnapshotID = append(notSnapshotID, s.ID)
+			fsDatasetsID = append(fsDatasetsID, s.ID)
 		}
 
 	}
 
 nextState:
 	for _, s := range states {
+		if s.isSnapshot() {
+			// If there is a matching fsDatasetsID for a snapshot, don’t remove it: destroy will take care of it (recursively)
+			for _, n := range fsDatasetsID {
+				if strings.HasPrefix(s.ID, n+"@") {
+					continue nextState
+				}
+			}
+		}
 
-		// Removing a main dataset will remove all its snapshots, we can skip those states
-		for _, n := range notSnapshotID {
-			if strings.HasPrefix(s.ID, n+"@") {
-				continue nextState
+		for route, ds := range s.UserDatasets {
+			user := userFromDatasetName(route)
+			us, err := ms.GetUserStateAndDependencies(user, route, true)
+			if err != nil {
+				log.Warningf(ctx, i18n.G("Cannot get list of dependencies for user %s and state %s: %v"), user, route, err)
+				continue
+			}
+			userStatesToRemove := []UserState{UserState{ID: route, Datasets: ds}}
+
+			for i := len(us) - 1; i >= 0; i-- {
+				userStatesToRemove = append(userStatesToRemove, us[i])
+			}
+
+			if err := ms.RemoveUserStates(ctx, userStatesToRemove, s.ID); err != nil {
+				log.Warningf(ctx, i18n.G("Can't untag or destroy user dataset for %s: %v"), s.ID, err)
 			}
 		}
 
@@ -278,37 +297,73 @@ nextState:
 				return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
 			}
 		}
+	}
 
-		for route, ds := range s.UserDatasets {
-			r := s.UserDatasets[route][0]
+	ms.refresh(ctx)
+	return nil
+}
+
+// RemoveUserStates remove this and all depending states from entry. It starts the removal in the slice order.
+func (ms *Machines) RemoveUserStates(ctx context.Context, states []UserState, systemStateID string) error {
+	nt := ms.z.NewNoTransaction(ctx)
+
+	var candidates []UserState
+	// If we have a snapshot and a filesystem userstate, only keep the filesystem userstate
+	// which will destroy the snapshot.
+	// Snapshots don’t have bootfsdatasets tags, so we need this logic
+nextState:
+	for _, s := range states {
+		if !s.isSnapshot() {
+			candidates = append(candidates, s)
+		}
+		base, _ := splitSnapshotName(s.ID)
+		// check for parents
+		for _, parent := range states {
+			if parent.ID == base {
+				continue nextState
+			}
+		}
+		candidates = append(candidates, s)
+	}
+
+	var datasetsToDelete []*zfs.Dataset
+	for route, s := range candidates {
+		for _, d := range s.Datasets {
 			var newTags []string
-			for _, n := range strings.Split(r.BootfsDatasets, bootfsdatasetsSeparator) {
-				if n != s.ID {
-					newTags = append(newTags, n)
-					break
+			if systemStateID != "" {
+				for _, n := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
+					if n != systemStateID {
+						newTags = append(newTags, n)
+						break
+					}
 				}
 			}
+
 			newTag := strings.Join(newTags, bootfsdatasetsSeparator)
 
 			if newTag != "" {
 				// Associated with more than one: untag this one and all children
-				t, _ := ms.z.NewTransaction(ctx)
+				t, cancel := ms.z.NewTransaction(ctx)
 				defer t.Done()
-				for _, d := range ds {
-					if err := t.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-						// The error is only an untag issue, and so, the dataset will now be linked via bootfsdataset to an unexisting one.
-						// This will be fixed by next GC run.
-						log.Warningf(ctx, i18n.G("couldn't remove %q to BootfsDatasets property of %q. Ignoring: ")+config.ErrorFormat, route, d.Name, err)
-					}
+				if err := t.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+					cancel()
+					return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, route, d.Name, err)
 				}
 			} else {
-				// Associated with only this one: destroy (recursively)
-				if err := nt.Destroy(route); err != nil {
-					return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
-				}
+				// Associated with only this one: destroy (in reverse order)
+				datasetsToDelete = prependDataset(datasetsToDelete, d)
 			}
 		}
 	}
+
+	// Remove all datasets (and its children if any not destroyed yet). The predicate is that base datasets
+	// should have more or the same bootfs datasets association than its children to be valid.
+	for _, d := range datasetsToDelete {
+		if err := nt.Destroy(d.Name); err != nil {
+			return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), d.Name, err)
+		}
+	}
+
 	ms.refresh(ctx)
 	return nil
 }
@@ -319,4 +374,11 @@ func (s State) isSnapshot() bool {
 
 func (s UserState) isSnapshot() bool {
 	return strings.Contains(s.ID, "@")
+}
+
+func prependDataset(ds []*zfs.Dataset, d *zfs.Dataset) []*zfs.Dataset {
+	ds = append(ds, nil)
+	copy(ds[1:], ds)
+	ds[0] = d
+	return ds
 }
