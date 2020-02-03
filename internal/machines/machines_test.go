@@ -988,9 +988,10 @@ func TestGetStateAndDependencies(t *testing.T) {
 func TestGetUserStateAndDependencies(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def     string
-		depsFor string
-		user    string
+		def               string
+		depsFor           string
+		user              string
+		onlyUserStateSave bool
 
 		wantDeps []string
 		wantErr  bool
@@ -1041,7 +1042,7 @@ func TestGetUserStateAndDependencies(t *testing.T) {
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-			stateDeps, err := ms.GetUserStateAndDependencies(tc.user, tc.depsFor)
+			stateDeps, err := ms.GetUserStateAndDependencies(tc.user, tc.depsFor, tc.onlyUserStateSave)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)

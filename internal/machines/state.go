@@ -93,7 +93,9 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, error) {
 //   * dataset path (fully determinated)
 //   * dataset ID (can match basename, multiple results)
 //   * snapshot name (can match snapshot, multiple results)
-func (ms Machines) GetUserStateAndDependencies(user, s string) ([]UserState, error) {
+// onlyUserStateSave will only list "pure" user state (not linked to any system state) and won't error out
+// if it finds any.
+func (ms Machines) GetUserStateAndDependencies(user, s string, onlyUserStateSave bool) ([]UserState, error) {
 	if user == "" {
 		return nil, errors.New(i18n.G("user is mandatory"))
 	}
@@ -101,37 +103,40 @@ func (ms Machines) GetUserStateAndDependencies(user, s string) ([]UserState, err
 		return nil, errors.New(i18n.G("state id is mandatory"))
 	}
 
-	var matches, deps []UserState
+	var matches, candidates, deps []UserState
 	for _, m := range ms.all {
 		for id, state := range m.Users[user] {
 			if s == id || s == filepath.Base(id) || fmt.Sprintf("%s_%s", user, s) == filepath.Base(id) || strings.HasSuffix(id, "@"+s) {
-				matches = append(matches, state)
+				candidates = append(candidates, state)
 				deps = m.getUserStateDependencies(user, state)
 			}
 		}
 	}
 
-	if len(matches) == 0 {
+	if len(candidates) == 0 {
 		return nil, fmt.Errorf(i18n.G("no matching user state for %s"), s)
-	} else if len(matches) > 1 {
+	} else if len(candidates) > 1 {
 		var errmsg string
-		for _, match := range matches {
+		for _, match := range candidates {
 			errmsg += fmt.Sprintf(i18n.G("  - %s (%s)\n"), match.ID, match.LastUsed.Format("2006-01-02 15:04:05"))
 		}
 		return nil, fmt.Errorf(i18n.G("multiple user states are matching %s:\n%sPlease use full user state path."), s, errmsg)
 	}
 
-	matches = append(matches, deps...)
+	candidates = append(candidates, deps...)
 
 	// Check that no system states or in the dep list from this user state
 	matchingSystemStates := make(map[string][]string)
-	for _, userState := range matches {
+nextUserState:
+	for _, userState := range candidates {
 		userStateID := userState.ID
 		for _, m := range ms.all {
-
 			for _, ds := range m.UserDatasets {
 				for _, d := range ds {
 					if d.Name == userStateID {
+						if onlyUserStateSave {
+							continue nextUserState
+						}
 						matchingSystemStates[userStateID] = append(matchingSystemStates[userStateID], m.ID)
 					}
 				}
@@ -141,12 +146,16 @@ func (ms Machines) GetUserStateAndDependencies(user, s string) ([]UserState, err
 				for _, ds := range state.UserDatasets {
 					for _, d := range ds {
 						if d.Name == userStateID {
+							if onlyUserStateSave {
+								continue nextUserState
+							}
 							matchingSystemStates[userStateID] = append(matchingSystemStates[userStateID], m.ID)
 						}
 					}
 				}
 			}
 		}
+		matches = append(matches, userState)
 	}
 
 	if len(matchingSystemStates) > 0 {
