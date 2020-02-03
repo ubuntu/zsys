@@ -996,7 +996,7 @@ func TestGetUserStateAndDependencies(t *testing.T) {
 		wantDeps []string
 		wantErr  bool
 	}{
-		"User manual snapshot, no clone":             {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser2", wantDeps: []string{"rpool/USERDATA/user1_efgh@snapuser2"}},
+		"User manual snapshot, no clone":             {def: "state_snapshot_with_userdata_03.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_abcd@snapuser1", wantDeps: []string{"rpool/USERDATA/user1_abcd@snapuser1"}},
 		"User manual clone":                          {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_ijkl", wantDeps: []string{"rpool/USERDATA/user1_ijkl"}},
 		"User manual clone with snapshots, no clone": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_mnop", wantDeps: []string{"rpool/USERDATA/user1_mnop", "rpool/USERDATA/user1_mnop@snapuser3"}},
 		"User manual clone with snapshots, with clone and snapshots": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_qrst",

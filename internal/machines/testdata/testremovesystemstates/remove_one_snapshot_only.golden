@@ -100,20 +100,6 @@
                         "LastUsed": 1555555555
                      }
                   ]
-               },
-               "rpool/USERDATA/root_bcde@snaproot1": {
-                  "ID": "rpool/USERDATA/root_bcde@snaproot1",
-                  "LastUsed": "2019-03-18T03:45:55+01:00",
-                  "Datasets": [
-                     {
-                        "Name": "rpool/USERDATA/root_bcde@snaproot1",
-                        "IsSnapshot": true,
-                        "Mountpoint": "/home/user1",
-                        "CanMount": "on",
-                        "BootFS": true,
-                        "LastUsed": 1552877155
-                     }
-                  ]
                }
             },
             "user1": {
@@ -155,20 +141,6 @@
                         "CanMount": "on",
                         "BootFS": true,
                         "LastUsed": 1555555555
-                     }
-                  ]
-               },
-               "rpool/USERDATA/user1_abcd@snapuser1": {
-                  "ID": "rpool/USERDATA/user1_abcd@snapuser1",
-                  "LastUsed": "2019-02-18T03:45:55+01:00",
-                  "Datasets": [
-                     {
-                        "Name": "rpool/USERDATA/user1_abcd@snapuser1",
-                        "IsSnapshot": true,
-                        "Mountpoint": "/home/user1",
-                        "CanMount": "on",
-                        "BootFS": true,
-                        "LastUsed": 1550457955
                      }
                   ]
                }
@@ -428,14 +400,6 @@
          "LastUsed": 1555555555
       },
       {
-         "Name": "rpool/USERDATA/root_bcde@snaproot1",
-         "IsSnapshot": true,
-         "Mountpoint": "/home/user1",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 1552877155
-      },
-      {
          "Name": "rpool/USERDATA/user1_abcd",
          "Mountpoint": "/home/user1",
          "CanMount": "on",
@@ -457,14 +421,6 @@
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1555555555
-      },
-      {
-         "Name": "rpool/USERDATA/user1_abcd@snapuser1",
-         "IsSnapshot": true,
-         "Mountpoint": "/home/user1",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 1550457955
       }
    ],
    "UnmanagedDatasets": [
