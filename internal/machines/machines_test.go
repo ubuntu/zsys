@@ -878,8 +878,9 @@ func TestGetStateAndDependencies(t *testing.T) {
 		promoteState string
 		depsFor      string
 
-		wantDeps []string
-		wantErr  bool
+		wantDeps     []string
+		wantUserDeps []string
+		wantErr      bool
 	}{
 		"Get itself, no snapshot": {def: "m_with_userdata.yaml", depsFor: "rpool/ROOT/ubuntu_1234", wantDeps: []string{"rpool/ROOT/ubuntu_1234"}},
 		"Get snapshots on one state, no clone": {def: "state_snapshot_with_userdata_02.yaml", depsFor: "rpool/ROOT/ubuntu_1234",
@@ -947,7 +948,7 @@ func TestGetStateAndDependencies(t *testing.T) {
 					t.Fatalf("Setup fail: %v", err)
 				}
 			}
-			stateDeps, err := ms.GetStateAndDependencies(tc.depsFor)
+			stateDeps, userStateDeps, err := ms.GetStateAndDependencies(tc.depsFor)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -963,6 +964,11 @@ func TestGetStateAndDependencies(t *testing.T) {
 				deps = append(deps, s.ID)
 			}
 
+			var userDeps []string
+			for _, s := range userStateDeps {
+				userDeps = append(userDeps, s.ID)
+			}
+
 			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
 			// However, we identified 4 rules to ensure that the dependency order (from root to leaf) is respected.
 
@@ -972,15 +978,23 @@ func TestGetStateAndDependencies(t *testing.T) {
 			} else {
 				assert.ElementsMatch(t, tc.wantDeps, deps, "didn't get matching dep list content")
 			}
+			if len(userDeps) != len(tc.wantUserDeps) {
+				t.Fatalf("user deps content doesn't have enough elements:\nGot:  %v\nWant: %v", userDeps, tc.wantUserDeps)
+			} else {
+				assert.ElementsMatch(t, tc.wantUserDeps, userDeps, "didn't get matching user dep list content")
+			}
 
 			// rule 2: ensure that no snapshot from a base appears before that base
 			assertSnapshotAfterItsBaseState(t, deps)
+			assertSnapshotAfterItsBaseState(t, userDeps)
 
 			// rule 3: ensure that the order between a snapshot and an immediately following dataset is preserved (snapshot to clone)
 			assertSnapshotToCloneOrderIsPreserved(t, tc.wantDeps, deps)
+			assertSnapshotToCloneOrderIsPreserved(t, tc.wantUserDeps, userDeps)
 
 			// rule 4: snapshots from a parent datasets appear before OR only after any snapshots on a child dataset
 			assertNoParentSnapshotBeforeChildren(t, deps)
+			assertNoParentSnapshotBeforeChildren(t, userDeps)
 		})
 	}
 }

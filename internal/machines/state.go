@@ -18,7 +18,7 @@ import (
 //   * dataset path (fully determinated)
 //   * dataset ID (can match basename, multiple results)
 //   * snapshot name (can match snapshot, multiple results)
-func (ms Machines) GetStateAndDependencies(s string) ([]State, error) {
+func (ms Machines) GetStateAndDependencies(s string) ([]State, []UserState, error) {
 	var matches, deps []State
 	for _, m := range ms.all {
 		if s == m.ID || s == filepath.Base(m.ID) {
@@ -35,13 +35,13 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, error) {
 	}
 
 	if len(matches) == 0 {
-		return nil, fmt.Errorf(i18n.G("no matching state for %s"), s)
+		return nil, nil, fmt.Errorf(i18n.G("no matching state for %s"), s)
 	} else if len(matches) > 1 {
 		var errmsg string
 		for _, match := range matches {
 			errmsg += fmt.Sprintf(i18n.G("  - %s (%s)\n"), match.ID, match.LastUsed.Format("2006-01-02 15:04:05"))
 		}
-		return nil, fmt.Errorf(i18n.G("multiple states are matching %s:\n%s\nPlease use full state path."), s, errmsg)
+		return nil, nil, fmt.Errorf(i18n.G("multiple states are matching %s:\n%s\nPlease use full state path."), s, errmsg)
 	}
 
 	matches = append(matches, deps...)
@@ -82,10 +82,26 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, error) {
 		}
 	}
 	if errmsg != "" {
-		return nil, fmt.Errorf(i18n.G("one or multiple manually cloned datasets should be removed first.\n%s\nPlease use \"zfs destroy\" to remove them manually."), errmsg)
+		return nil, nil, fmt.Errorf(i18n.G("one or multiple manually cloned datasets should be removed first.\n%s\nPlease use \"zfs destroy\" to remove them manually."), errmsg)
 	}
 
-	return matches, nil
+	// Get clones and snapshots for our userdatasets state save which aren’t linked to a system state
+	var matchesOtherUsers []UserState
+	errmsg = ""
+	for dName := range matches[0].UserDatasets {
+		user := userFromDatasetName(dName)
+		match, err := ms.GetUserStateAndDependencies(user, dName, true)
+		if err != nil {
+			errmsg += fmt.Sprintf(i18n.G("one or multiple manually cloned datasets on user %q: %v\n"), user, err)
+		} else {
+			matchesOtherUsers = append(matchesOtherUsers, match...)
+		}
+	}
+	if errmsg != "" {
+		return nil, nil, errors.New(errmsg)
+	}
+
+	return matches, matchesOtherUsers, nil
 }
 
 // GetUserStateAndDependencies fetches a given state and all its deps
