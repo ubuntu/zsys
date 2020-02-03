@@ -1016,6 +1016,12 @@ func TestGetUserStateAndDependencies(t *testing.T) {
 		"Is snapshot linked to a system state":               {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snap2", wantErr: true},
 		"Is snapshot linked via its clone to a system state": {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snaproot1", wantErr: true},
 
+		"Ignore, with onlyUserStateSave, the only dataset linked to a system state": {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_abcd", onlyUserStateSave: true},
+		"Ignore, with onlyUserStateSave, the snapshot and clone linked to a system state but list other": {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snap2", onlyUserStateSave: true,
+			wantDeps: []string{"rpool/USERDATA/root_cdef@snaproot2"}},
+		"Ignore, with onlyUserStateSave, the snapshot linked via its clone but list itself": {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snaproot1", onlyUserStateSave: true,
+			wantDeps: []string{"rpool/USERDATA/root_bcde@snaproot1"}},
+
 		"Manual clone on our removal list on remaining datatasets":  {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser5", wantErr: true},
 		"Manual clone on our removal list on persistent datatasets": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser3", wantErr: true},
 
