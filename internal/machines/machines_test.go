@@ -1149,8 +1149,9 @@ func TestRemoveSystemStates(t *testing.T) {
 			"rpool/ROOT/ubuntu_1234",
 		}},
 
-		"Remove userdataset if unique and untagg shared ones": {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}},
-		"Ignore dataset on failed to untag userdataset":       {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}, setPropertyErr: true},
+		"Remove userdataset if unique and untagg shared ones":                                           {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}},
+		"Ignore dataset on failed to untag userdataset":                                                 {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}, setPropertyErr: true},
+		"Issue a warning only on userdata manual clone on which our userdata for this state depends on": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}},
 
 		// remove 1234 before 5678. It’s a isNoOp as we try to remove first one
 		"Remove multiple states with clones in incorrect order": {def: "state_snapshot_with_userdata_01.yaml", states: []string{
@@ -1169,9 +1170,8 @@ func TestRemoveSystemStates(t *testing.T) {
 		}},
 
 		"No state given": {def: "m_with_userdata.yaml", isNoOp: true},
-		"Error on trying to remove current state":                                        {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true, isNoOp: true},
-		"Error on missing dependent state":                                               {def: "state_snapshot_with_userdata_01.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true},
-		"Error on userdata manual clone on which our userdata for this state depends on": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}, wantErr: true},
+		"Error on trying to remove current state": {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true, isNoOp: true},
+		"Error on missing dependent state":        {def: "state_snapshot_with_userdata_01.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true},
 	}
 
 	for name, tc := range tests {
