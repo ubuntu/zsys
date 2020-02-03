@@ -911,6 +911,23 @@ func TestGetStateAndDependencies(t *testing.T) {
 			},
 		},
 
+		// User deps unlinked to system state
+		"Get user snapshots on one state, no clone": {def: "state_snapshot_with_userdata_07.yaml", depsFor: "rpool/ROOT/ubuntu_5678",
+			wantDeps:     []string{"rpool/ROOT/ubuntu_5678"},
+			wantUserDeps: []string{"rpool/USERDATA/root_cdef@snaproot1"},
+		},
+		"Get user manual clone on one state": {def: "state_snapshot_with_userdata_07.yaml", depsFor: "rpool/ROOT/ubuntu_1234@snap3",
+			wantDeps: []string{
+				"rpool/ROOT/ubuntu_1234@snap3",
+				"rpool/ROOT/ubuntu_9999",
+			},
+			wantUserDeps: []string{
+				"rpool/USERDATA/root_defg@snaproot2",
+				"rpool/USERDATA/root_ghij",
+			},
+		},
+		"Err if getting user manual clone errors out (user manual clone in persistent or remaining datasets)": {def: "state_snapshot_with_userdata_05.yaml", depsFor: "rpool/ROOT/ubuntu_5678", wantErr: true},
+
 		// Match tests
 		"Match current machine on base name":     {def: "m_with_userdata.yaml", depsFor: "ubuntu_1234", wantDeps: []string{"rpool/ROOT/ubuntu_1234"}},
 		"Match history machine on snapshot name": {def: "state_snapshot_with_userdata_01.yaml", depsFor: "snap1", wantDeps: []string{"rpool/ROOT/ubuntu_1234@snap1"}},
