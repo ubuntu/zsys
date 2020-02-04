@@ -254,7 +254,7 @@ func (l *LibZFSMock) DatasetCreate(path string, dtype libzfs.DatasetType, props 
 
 // DatasetSnapshot creates a snapshot
 func (l *LibZFSMock) DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (DZFSInterface, error) {
-	if strings.Split(path, "@")[1] == "" {
+	if len(strings.Split(path, "@")) != 2 || strings.Split(path, "@")[1] == "" {
 		return nil, fmt.Errorf("%q is not a valid snapshot name", path)
 	}
 	return l.createSnapshot(path, recur, props)
