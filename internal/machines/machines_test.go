@@ -1153,6 +1153,9 @@ func TestRemoveSystemStates(t *testing.T) {
 		"Ignore dataset on failed to untag userdataset":                                                 {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}, setPropertyErr: true},
 		"Issue a warning only on userdata manual clone on which our userdata for this state depends on": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}},
 
+		// Complex case, with clone of userdatasets associated to multiple systems
+		"Complex": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234"}},
+
 		// remove 1234 before 5678. It’s a isNoOp as we try to remove first one
 		"Remove multiple states with clones in incorrect order": {def: "state_snapshot_with_userdata_01.yaml", states: []string{
 			"rpool/ROOT/ubuntu_1234",
