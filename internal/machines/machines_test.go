@@ -796,8 +796,9 @@ func TestCreateUserSnapshot(t *testing.T) {
 		wantErr bool
 		isNoOp  bool
 	}{
-		"Take one snapshot":       {def: "m_with_userdata.yaml"},
-		"Give a name to snapshot": {def: "m_with_userdata.yaml", snapshotName: "my_snapshot"},
+		"Take one snapshot":                                   {def: "m_with_userdata.yaml"},
+		"Give a name to snapshot":                             {def: "m_with_userdata.yaml", snapshotName: "my_snapshot"},
+		"Take one snapshot on a machine with other snapshots": {def: "m_snapshot_with_userdata.yaml"},
 
 		"Children on user datasets": {def: "m_with_userdata_children_on_user.yaml"},
 		"Children on user datasets with one child non associated with current machine": {def: "m_with_userdata_child_associated_one_state.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9999")},
