@@ -1238,6 +1238,113 @@ func TestRemoveSystemStates(t *testing.T) {
 		})
 	}
 }
+
+func TestRemoveUserStates(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def           string
+		states        []string
+		systemStateID string
+
+		setPropertyErr bool
+		destroyErr     bool
+
+		isNoOp  bool
+		wantErr bool
+	}{
+		"User snapshot": {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd@automatedusersnapshot"}},
+		"Filesystem dataset without considering tag": {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}},
+		"Filesystem dataset with children":           {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd"}},
+
+		"Filesystem dataset having snapshot without listing it":                                       {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd"}},
+		"Filesystem dataset having snapshot listing it":                                               {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd", "rpool/USERDATA/user1_abcd@automatedusersnapshot"}},
+		"Filesystem dataset with children, having snapshot with different names without listing them": {def: "m_with_userdata_and_multiple_snapshots.yaml", states: []string{"rpool/USERDATA/user1_abcd"}},
+		"Filesystem dataset with clones listing them":                                                 {def: "m_clone_with_userdata_with_children.yaml", states: []string{"rpool/USERDATA/user1_abcd", "rpool/USERDATA/user1_efgh"}},
+
+		// Untag cases
+		"User snapshot ignores tags":                           {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd@automatedusersnapshot"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
+		"Filesystem dataset with only this tag is removed":     {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
+		"Filesystem dataset with different tag is kept":        {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}, systemStateID: "rpool/ROOT/ubuntu_doesntexit", isNoOp: true},
+		"Filesystem dataset associated with 2 tags only untag": {def: "m_two_machines_with_same_userdata.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
+
+		"Parent is associated with 2 tags, child with only one, remove common one destroys child":                            {def: "m_with_userdata_child_associated_one_state.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
+		"Parent is associated with 2 tags, child with only one, remove the one only on parent don't destroy parent or child": {def: "m_with_userdata_child_associated_one_state.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, systemStateID: "rpool/ROOT/ubuntu_9999"},
+
+		// remove when clone not associated with same machine
+		// TODO: this and the complex case dont’t give what we really expect. We will need to change the strategy for removing datasets
+		// for complex layouts.
+		//"Untag and remove clones as expected": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/USERDATA/root_bcde", "rpool/USERDATA/root_cdef", "rpool/USERDATA/root_fghi"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
+
+		"Err on failed to untag userdataset": {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}, systemStateID: "rpool/ROOT/ubuntu_doesntexit", setPropertyErr: true, wantErr: true},
+
+		// Error cases
+		"Err on filesystem dataset with clones before filesystem":    {def: "m_clone_with_userdata_with_children.yaml", states: []string{"rpool/USERDATA/user1_efgh", "rpool/USERDATA/user1_abcd"}, wantErr: true},
+		"Err on filesystem dataset with clones without listing them": {def: "m_clone_with_userdata_with_children.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := getLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			initMachines, err := machines.New(context.Background(), generateCmdLine(""), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			ms := initMachines
+			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+
+			var states []machines.UserState
+		nextState:
+			for _, n := range tc.states {
+				for _, m := range ms.AllMachines() {
+					for _, alluserstates := range m.Users {
+						for route, us := range alluserstates {
+							if route == n {
+								states = append(states, us)
+								continue nextState
+							}
+						}
+					}
+				}
+				t.Fatalf("Setup error: can't find %s in userdataset list", n)
+			}
+
+			err = ms.RemoveUserStates(context.Background(), states, tc.systemStateID)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			machinesAfterRescan, err := machines.New(context.Background(), generateCmdLine(""), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
