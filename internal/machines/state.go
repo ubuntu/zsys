@@ -303,7 +303,10 @@ nextState:
 	return nil
 }
 
-// RemoveUserStates remove this and all depending states from entry. It starts the removal in the slice order.
+// RemoveUserStates remove this or untag and all depending states from entry. It starts the removal in the slice reverse order.
+// If systemStateID is provided, it will try to untag the association to this system before considering it for removal
+// or not.
+// If systemStateID is empty, all UserStates will be removed without considering their bootfsdataset tags.
 func (ms *Machines) RemoveUserStates(ctx context.Context, states []UserState, systemStateID string) error {
 	nt := ms.z.NewNoTransaction(ctx)
 
