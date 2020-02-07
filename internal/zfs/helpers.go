@@ -65,7 +65,9 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 		log.Warningf(ctx, i18n.G("MountPoint property for %q has an unexpected source: %q"), name, sourceMountPoint)
 		fallthrough
 	default:
-		sources.Mountpoint = "inherited"
+		if mountpoint != "" {
+			sources.Mountpoint = "inherited"
+		}
 	}
 
 	switch sourceCanMount {
