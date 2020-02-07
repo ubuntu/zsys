@@ -454,7 +454,6 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 		SnapshotCanmountProp:   srcProps.CanMount + ":" + srcProps.sources.CanMount,
 		BootfsProp:             bootFS + ":" + srcProps.sources.BootFS,
 		LastBootedKernelProp:   srcProps.LastBootedKernel + ":" + srcProps.sources.LastBootedKernel,
-		BootfsDatasetsProp:     srcProps.BootfsDatasets + ":" + srcProps.sources.BootfsDatasets,
 	}
 	for prop, value := range userPropertiesToSet {
 		// Only set values that are not empty on parent
