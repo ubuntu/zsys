@@ -64,8 +64,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 2000000000,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_9999"
+                        "LastUsed": 2000000000
                      }
                   ]
                }
@@ -122,8 +121,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 2000000000,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_9999"
+                        "LastUsed": 2000000000
                      }
                   ]
                }
@@ -182,8 +180,7 @@
                      "IsSnapshot": true,
                      "Mountpoint": "/home/user1",
                      "CanMount": "on",
-                     "LastUsed": 2000000000,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_9999"
+                     "LastUsed": 2000000000
                   }
                ]
             }
@@ -219,8 +216,7 @@
          "IsSnapshot": true,
          "Mountpoint": "/home/user1",
          "CanMount": "on",
-         "LastUsed": 2000000000,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_9999"
+         "LastUsed": 2000000000
       },
       {
          "Name": "rpool/USERDATA/user1_abcd/childfor1234",

@@ -75,8 +75,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 1577777777,
-                        "BootfsDatasets": "rpool/main"
+                        "LastUsed": 1577777777
                      }
                   ]
                },
@@ -103,8 +102,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 1566666666,
-                        "BootfsDatasets": "rpool/clone"
+                        "LastUsed": 1566666666
                      }
                   ]
                }
@@ -161,8 +159,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 1566666666,
-                        "BootfsDatasets": "rpool/clone"
+                        "LastUsed": 1566666666
                      }
                   ]
                }
@@ -188,8 +185,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 1577777777,
-                        "BootfsDatasets": "rpool/main"
+                        "LastUsed": 1577777777
                      }
                   ]
                }
@@ -249,8 +245,7 @@
          "IsSnapshot": true,
          "Mountpoint": "/home/user1",
          "CanMount": "on",
-         "LastUsed": 1577777777,
-         "BootfsDatasets": "rpool/main"
+         "LastUsed": 1577777777
       },
       {
          "Name": "rpool2/USERDATA/user1_efgh",
@@ -265,8 +260,7 @@
          "IsSnapshot": true,
          "Mountpoint": "/home/user1",
          "CanMount": "on",
-         "LastUsed": 1566666666,
-         "BootfsDatasets": "rpool/clone"
+         "LastUsed": 1566666666
       }
    ],
    "UnmanagedDatasets": [

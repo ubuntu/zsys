@@ -22,13 +22,11 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,
-      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-      "BootfsDatasets": "SetProperty Value",
+      "LastBootedKernel": "SetProperty Value",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",
-         "LastBootedKernel": "local",
-         "BootfsDatasets": "local"
+         "LastBootedKernel": "local"
       }
    }
 ]

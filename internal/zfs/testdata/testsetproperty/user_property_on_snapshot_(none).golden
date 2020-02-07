@@ -5,23 +5,21 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 1555555555,
-      "BootfsDatasets": "rpool/ROOT/ubuntu_42",
       "Sources": {
          "Mountpoint": "local",
          "CanMount": "local",
          "BootFS": "local",
-         "LastUsed": "local",
-         "BootfsDatasets": "local"
+         "LastUsed": "local"
       }
    },
    {
       "Name": "rpool@snap1",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "SetProperty Value",
+      "LastBootedKernel": "SetProperty Value",
       "Sources": {
          "Mountpoint": "inherited",
-         "BootfsDatasets": "local"
+         "LastBootedKernel": "local"
       }
    }
 ]

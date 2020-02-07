@@ -108,13 +108,11 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "CanMount": "local",
          "BootFS": "local",
-         "LastBootedKernel": "local",
-         "BootfsDatasets": "local"
+         "LastBootedKernel": "local"
       }
    }
 ]

@@ -53,12 +53,10 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "inherited",
-         "LastBootedKernel": "inherited",
-         "BootfsDatasets": "inherited"
+         "LastBootedKernel": "inherited"
       }
    },
    {
@@ -111,13 +109,11 @@
       "CanMount": "on",
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
-      "BootfsDatasets": "rpool/path/to/another_local/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
          "BootFS": "inherited",
-         "LastBootedKernel": "inherited",
-         "BootfsDatasets": "inherited"
+         "LastBootedKernel": "inherited"
       }
    },
    {
@@ -127,13 +123,11 @@
       "CanMount": "on",
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
-      "BootfsDatasets": "rpool/path/to/another_local/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
          "BootFS": "local",
-         "LastBootedKernel": "inherited",
-         "BootfsDatasets": "local"
+         "LastBootedKernel": "inherited"
       }
    },
    {
@@ -144,13 +138,11 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
          "BootFS": "inherited",
-         "LastBootedKernel": "inherited",
-         "BootfsDatasets": "inherited"
+         "LastBootedKernel": "inherited"
       }
    },
    {
@@ -161,13 +153,11 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-      "BootfsDatasets": "rpool/path/to/otherdataset",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
          "BootFS": "inherited",
-         "LastBootedKernel": "inherited",
-         "BootfsDatasets": "inherited"
+         "LastBootedKernel": "inherited"
       }
    },
    {
@@ -178,12 +168,10 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
-      "BootfsDatasets": "rpool/path/to/dataset",
       "Sources": {
          "Mountpoint": "local",
          "BootFS": "local",
-         "LastBootedKernel": "local",
-         "BootfsDatasets": "local"
+         "LastBootedKernel": "local"
       }
    },
    {
@@ -193,12 +181,10 @@
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "rpool/path/to/otherdataset",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
-         "BootFS": "inherited",
-         "BootfsDatasets": "local"
+         "BootFS": "inherited"
       }
    }
 ]
