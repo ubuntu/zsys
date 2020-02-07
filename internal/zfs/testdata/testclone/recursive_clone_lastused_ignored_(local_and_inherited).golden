@@ -47,9 +47,7 @@
       "Name": "rpool/ROOT/ubuntu/inherited@snap_local_inherited",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "Sources": {
-         "Mountpoint": "inherited"
-      }
+      "Sources": {}
    },
    {
       "Name": "rpool/ROOT/ubuntu2",
@@ -64,17 +62,13 @@
       "Name": "rpool/ROOT/ubuntu2@snap_default",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "Sources": {
-         "Mountpoint": "inherited"
-      }
+      "Sources": {}
    },
    {
       "Name": "rpool/ROOT/ubuntu@snap_local_inherited",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "Sources": {
-         "Mountpoint": "inherited"
-      }
+      "Sources": {}
    },
    {
       "Name": "rpool/ROOT/ubuntu_5678",

@@ -18,8 +18,6 @@
       "Name": "rpool@snap1",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "Sources": {
-         "Mountpoint": "inherited"
-      }
+      "Sources": {}
    }
 ]

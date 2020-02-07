@@ -48,7 +48,6 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "Sources": {
-         "Mountpoint": "inherited",
          "BootFS": "inherited"
       }
    },
@@ -57,7 +56,6 @@
       "IsSnapshot": true,
       "LastUsed": 2000000000,
       "Sources": {
-         "Mountpoint": "inherited",
          "BootFS": "default"
       }
    },
@@ -67,7 +65,6 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "Sources": {
-         "Mountpoint": "inherited",
          "BootFS": "local"
       }
    },
@@ -77,7 +74,6 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "Sources": {
-         "Mountpoint": "inherited",
          "BootFS": "local"
       }
    },

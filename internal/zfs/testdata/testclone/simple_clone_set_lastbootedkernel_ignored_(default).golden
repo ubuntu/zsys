@@ -48,7 +48,6 @@
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
-         "Mountpoint": "inherited",
          "LastBootedKernel": "inherited"
       }
    },
@@ -58,7 +57,6 @@
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
-         "Mountpoint": "inherited",
          "LastBootedKernel": "default"
       }
    },
@@ -68,7 +66,6 @@
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
-         "Mountpoint": "inherited",
          "LastBootedKernel": "local"
       }
    },
@@ -78,7 +75,6 @@
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
-         "Mountpoint": "inherited",
          "LastBootedKernel": "local"
       }
    },
