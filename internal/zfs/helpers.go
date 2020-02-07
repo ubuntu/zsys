@@ -14,7 +14,6 @@ import (
 )
 
 // RefreshProperties refreshes all the properties for a given dataset and the source of them.
-// for snapshots, we'll take the parent dataset for the mount properties.
 func (d *Dataset) refreshProperties(ctx context.Context) error {
 	sources := datasetSources{}
 	dZFSprops := *d.dZFS.Properties()
@@ -86,7 +85,7 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 
 	bfs, srcBootFS, err := getUserPropertyFromSys(ctx, BootfsProp, d.dZFS)
 	if err != nil {
-		log.Warningf(ctx, i18n.G("can't read bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
+		log.Warningf(ctx, i18n.G("can't read bootfs property, ignoring: ")+config.ErrorFormat, err)
 	}
 	var bootFS bool
 	if bfs == "yes" {
