@@ -270,6 +270,66 @@ func (z *ZsysLogServer) SaveUserState(req *SaveUserStateRequest, stream Zsys_Sav
 }
 
 /*
+ * Zsys.RemoveSystemState()
+ */
+
+// zsysRemoveSystemStateLogStream is a Zsys_RemoveSystemStateServer augmented by its own Context containing the log streamer
+type zsysRemoveSystemStateLogStream struct {
+	Zsys_RemoveSystemStateServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysRemoveSystemStateLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// RemoveSystemState overrides ZsysServer RemoveSystemState, installing a logger first
+func (z *ZsysLogServer) RemoveSystemState(req *RemoveSystemStateRequest, stream Zsys_RemoveSystemStateServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "RemoveSystemState")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.RemoveSystemState(req, &zsysRemoveSystemStateLogStream{
+		Zsys_RemoveSystemStateServer: stream,
+		ctx:                          ctx,
+	})
+}
+
+/*
+ * Zsys.RemoveUserState()
+ */
+
+// zsysRemoveUserStateLogStream is a Zsys_RemoveUserStateServer augmented by its own Context containing the log streamer
+type zsysRemoveUserStateLogStream struct {
+	Zsys_RemoveUserStateServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysRemoveUserStateLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// RemoveUserState overrides ZsysServer RemoveUserState, installing a logger first
+func (z *ZsysLogServer) RemoveUserState(req *RemoveUserStateRequest, stream Zsys_RemoveUserStateServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "RemoveUserState")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.RemoveUserState(req, &zsysRemoveUserStateLogStream{
+		Zsys_RemoveUserStateServer: stream,
+		ctx:                        ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -356,6 +416,32 @@ func (s *zsysSaveUserStateServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&CreateSaveStateResponse{
 			Reply: &CreateSaveStateResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysRemoveSystemStateServer to an io.Writer
+func (s *zsysRemoveSystemStateServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&RemoveStateResponse{
+			Reply: &RemoveStateResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysRemoveUserStateServer to an io.Writer
+func (s *zsysRemoveUserStateServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&RemoveStateResponse{
+			Reply: &RemoveStateResponse_Log{Log: string(p)},
 		})
 	if err != nil {
 		return 0, err
