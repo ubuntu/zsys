@@ -427,7 +427,7 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 
 	dZFS, err := t.Zfs.libzfs.DatasetSnapshot(parent.Name+"@"+snapName, false, props)
 	if err != nil {
-		return fmt.Errorf(i18n.G("couldn't snapshot %q: %v"), parent.Name, err)
+		return fmt.Errorf(i18n.G("couldn't create snapshot %q: %v"), parent.Name+"@"+snapName, err)
 	}
 
 	d := Dataset{
@@ -848,10 +848,6 @@ func (t *Transaction) SetProperty(name, value, datasetName string, force bool) e
 	d, err := t.Zfs.findDatasetByName(datasetName)
 	if err != nil {
 		return fmt.Errorf(i18n.G("can't get dataset to change property on %q: ")+config.ErrorFormat, datasetName, err)
-	}
-
-	if d.IsSnapshot {
-		value = fmt.Sprintf("%s:local", value)
 	}
 
 	origV, origS := d.getPropertyFromName(name)

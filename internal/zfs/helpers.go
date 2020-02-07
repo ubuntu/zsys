@@ -161,7 +161,7 @@ func getUserPropertyFromSys(ctx context.Context, prop string, dZFS DZFSInterface
 	}
 
 	if dZFS.IsSnapshot() {
-		log.Debugf(ctx, "property %q on snapshot %q: %q", prop, name, value)
+		log.Debugf(ctx, "property %q on snapshot %q: %q", prop, name, p.Value)
 		idx := strings.LastIndex(p.Value, ":")
 		if idx < 0 {
 			log.Warningf(ctx, i18n.G("%q isn't a 'value:source' format type for %q"), prop, name)
@@ -314,7 +314,9 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 		v := value
 		// we set value:source for values on snapshots to retain original state
 		if d.IsSnapshot {
-			v = fmt.Sprintf("%s:%s", value, source)
+			if source != "" {
+				v = fmt.Sprintf("%s:%s", value, source)
+			}
 		}
 
 		// Ensure LastUsedProp is valid before setting it
