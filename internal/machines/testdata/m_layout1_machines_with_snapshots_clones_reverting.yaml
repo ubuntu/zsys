@@ -473,7 +473,6 @@ pools:
           - name: snap1
             mountpoint: /home/user1:local
             canmount: on:local
-            bootfs_datasets: rpool/ROOT/ubuntu_1234:local
             creation_time: 2020-05-07T22:01:28+00:00
       - name: USERDATA/user1_efgh
         canmount: noauto
@@ -485,12 +484,10 @@ pools:
           - name: snap2
             mountpoint: /home/user1:local
             canmount: on:local
-            bootfs_datasets: rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678:local
             creation_time: 2019-12-31T07:36:17+00:00
           - name: snap3
             mountpoint: /home/user1:local
             canmount: on:local
-            bootfs_datasets: rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678:local
             creation_time: 2018-03-28T07:30:22+00:00
       - name: USERDATA/user2_aaaa
         canmount: noauto
@@ -505,7 +502,6 @@ pools:
           - name: snap1
             mountpoint: /root:local
             canmount: on:local
-            bootfs_datasets: rpool/ROOT/ubuntu_1234:local
             creation_time: 2020-05-07T22:01:28+00:00
   - name: bpool
     datasets:

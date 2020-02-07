@@ -14,13 +14,11 @@ pools:
             mountpoint: /:local
             canmount: on:local
             last_booted_kernel: vmlinuz-5.2.0-8-generic:local
-            bootfs_datasets: rpool/path/to/dataset:local
           - name: snap_r2
             zsys_bootfs: yes:local
             mountpoint: /:local
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-0-generic:local
-            bootfs_datasets: rpool/path/to/otherdataset:local
       - name: ROOT/ubuntu_1234/var
         snapshots:
           - name: snap_r2
@@ -28,7 +26,6 @@ pools:
             mountpoint: /var:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-0-generic:inherited
-            bootfs_datasets: rpool/path/to/otherdataset:inherited
       - name: ROOT/ubuntu_1234/var/lib
         zsys_bootfs: no
         snapshots:
@@ -37,13 +34,11 @@ pools:
             mountpoint: /var/lib:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.2.0-8-generic:inherited
-            bootfs_datasets: rpool/path/to/dataset:inherited
           - name: snap_r2
             zsys_bootfs: no:local
             mountpoint: /var/lib:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-0-generic:inherited
-            bootfs_datasets: rpool/path/to/otherdataset:inherited
       - name: ROOT/ubuntu_1234/var/lib/apt
         snapshots:
           - name: snap_r1
@@ -51,13 +46,11 @@ pools:
             mountpoint: /var/lib/apt:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.2.0-8-generic:inherited
-            bootfs_datasets: rpool/path/to/dataset:inherited
           - name: snap_r2
             zsys_bootfs: no:inherited
             mountpoint: /var/lib/apt:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-0-generic:inherited
-            bootfs_datasets: rpool/path/to/otherdataset:inherited
       - name: ROOT/ubuntu_1234/opt
         snapshots:
           - name: snap_r1
@@ -65,10 +58,8 @@ pools:
             mountpoint: /opt:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.2.0-8-generic:inherited
-            bootfs_datasets: rpool/path/to/dataset:inherited
           - name: snap_r2
             zsys_bootfs: yes:inherited
             mountpoint: /opt:inherited
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-0-generic:inherited
-            bootfs_datasets: rpool/path/to/otherdataset:inherited

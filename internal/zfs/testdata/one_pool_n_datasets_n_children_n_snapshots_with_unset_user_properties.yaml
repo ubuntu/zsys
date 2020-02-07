@@ -15,7 +15,6 @@ pools:
             mountpoint: /:local
             canmount: on:local
             last_booted_kernel: vmlinuz-5.0.0-0-generic:local
-            bootfs_datasets: something else:local
       - name: ROOT/ubuntu/inherit
         snapshots:
           - name: snap_r1
@@ -23,7 +22,6 @@ pools:
             mountpoint: /inherit:inherited
             canmount: on:default
             last_booted_kernel: vmlinuz-5.0.0-0-generic:inherited
-            bootfs_datasets: something else:inherited
       - name: ROOT/ubuntu/overriden
         zsys_bootfs: yes
         last_used: 2018-12-10T12:20:44+00:00
@@ -35,4 +33,3 @@ pools:
             mountpoint: /overriden:inherited
             canmount: on:default
             last_booted_kernel: vmlinuz-4.0.0-0-generic:local
-            bootfs_datasets: something else on dataset:local

@@ -9,14 +9,11 @@ pools:
         mountpoint: /
         snapshots:
           - name: snap_local_inherited
-            bootfs_datasets: bootfsDatasetValue:local
       - name: ROOT/ubuntu/inherited
         snapshots:
         - name: snap_local_inherited
-          bootfs_datasets: bootfsDatasetValue:inherited
       - name: ROOT/ubuntu2
         snapshots:
         - name: snap_default
-          bootfs_datasets: bootfsDatasetValue:default
 
 

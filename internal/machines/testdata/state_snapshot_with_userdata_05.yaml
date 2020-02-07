@@ -62,7 +62,6 @@ pools:
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
-          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
         - name: snaproot1
           zsys_bootfs: yes:local
           mountpoint: /home/user1:local
@@ -88,17 +87,14 @@ pools:
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
-          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
         - name: snapuser3
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
-          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
         - name: snapuser5
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
-          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
     - name: USERDATA/user1_ijkl
       origin: rpool/USERDATA/user1_efgh@snapuser2
     - name: USERDATA/user1_mnop
@@ -144,7 +140,6 @@ pools:
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
-          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
   - name: bpool
     datasets:
     - name: BOOT
