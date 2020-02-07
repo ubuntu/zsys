@@ -330,6 +330,36 @@ func (z *ZsysLogServer) RemoveUserState(req *RemoveUserStateRequest, stream Zsys
 }
 
 /*
+ * Zsys.DumpStates()
+ */
+
+// zsysDumpStatesLogStream is a Zsys_DumpStatesServer augmented by its own Context containing the log streamer
+type zsysDumpStatesLogStream struct {
+	Zsys_DumpStatesServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysDumpStatesLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// DumpStates overrides ZsysServer DumpStates, installing a logger first
+func (z *ZsysLogServer) DumpStates(req *Empty, stream Zsys_DumpStatesServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "DumpStates")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.DumpStates(req, &zsysDumpStatesLogStream{
+		Zsys_DumpStatesServer: stream,
+		ctx:                   ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -442,6 +472,19 @@ func (s *zsysRemoveUserStateServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&RemoveStateResponse{
 			Reply: &RemoveStateResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysDumpStatesServer to an io.Writer
+func (s *zsysDumpStatesServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&DumpStatesResponse{
+			Reply: &DumpStatesResponse_Log{Log: string(p)},
 		})
 	if err != nil {
 		return 0, err

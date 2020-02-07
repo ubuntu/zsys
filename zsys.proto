@@ -13,6 +13,8 @@ service Zsys {
   rpc SaveUserState(SaveUserStateRequest) returns (stream CreateSaveStateResponse);
   rpc RemoveSystemState(RemoveSystemStateRequest) returns (stream RemoveStateResponse);
   rpc RemoveUserState(RemoveUserStateRequest) returns (stream RemoveStateResponse);
+
+  rpc DumpStates(Empty) returns (stream DumpStatesResponse);
 }
 
 message Empty {}
@@ -27,6 +29,7 @@ message VersionResponse {
     string version = 2;
   }
 }
+
 message CreateUserDataRequest {
   string user = 1;
   string homepath = 2;
@@ -82,5 +85,12 @@ message RemoveStateResponse {
   oneof reply {
     string log = 1;
     string additionalRemovals = 2;
+  }
+}
+
+message DumpStatesResponse {
+  oneof reply {
+    string log = 1;
+    string states = 2;
   }
 }
