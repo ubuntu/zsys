@@ -254,8 +254,7 @@
       "LastUsed": 2000000000,
       "Sources": {
          "Mountpoint": "inherited",
-         "CanMount": "local",
-         "BootFS": "inherited"
+         "CanMount": "local"
       }
    }
 ]
