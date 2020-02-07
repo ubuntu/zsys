@@ -118,9 +118,11 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 	}
 	sources.LastBootedKernel = srcLastBootedKernel
 
-	bootfsDatasets, srcBootfsDatasets, err := getUserPropertyFromSys(ctx, BootfsDatasetsProp, d.dZFS)
-	if err != nil {
-		log.Warningf(ctx, i18n.G("can't read bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
+	var bootfsDatasets, srcBootfsDatasets string
+	if !d.IsSnapshot {
+		if bootfsDatasets, srcBootfsDatasets, err = getUserPropertyFromSys(ctx, BootfsDatasetsProp, d.dZFS); err != nil {
+			log.Warningf(ctx, i18n.G("can't read bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
+		}
 	}
 	sources.BootfsDatasets = srcBootfsDatasets
 
@@ -333,6 +335,11 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 
 	if err != nil {
 		return err
+	}
+
+	// Don’t propagate BootfsDataset on snapshot which is ignored on refresh
+	if d.IsSnapshot && name == BootfsDatasetsProp {
+		return nil
 	}
 
 	// In case we change the mountpoint, we need to translate the whole hierarchy for children.
