@@ -445,16 +445,22 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 
 	// Set user properties that we couldn't set before creating the snapshot dataset.
 	// We don't set LastUsed here as Creation time will be used.
-	bootFS := "no"
-	if srcProps.BootFS {
-		bootFS = "yes"
-	}
 	userPropertiesToSet := map[string]string{
 		SnapshotMountpointProp: srcProps.Mountpoint + ":" + srcProps.sources.Mountpoint,
 		SnapshotCanmountProp:   srcProps.CanMount + ":" + srcProps.sources.CanMount,
-		BootfsProp:             bootFS + ":" + srcProps.sources.BootFS,
-		LastBootedKernelProp:   srcProps.LastBootedKernel + ":" + srcProps.sources.LastBootedKernel,
 	}
+	if srcProps.sources.BootFS != "" {
+		bootFS := "no"
+		if srcProps.BootFS {
+			bootFS = "yes"
+		}
+		userPropertiesToSet[BootfsProp] = bootFS + ":" + srcProps.sources.BootFS
+	}
+
+	if srcProps.sources.LastBootedKernel != "" {
+		userPropertiesToSet[LastBootedKernelProp] = srcProps.LastBootedKernel + ":" + srcProps.sources.LastBootedKernel
+	}
+
 	for prop, value := range userPropertiesToSet {
 		// Only set values that are not empty on parent
 		if strings.HasPrefix(value, ":") {
