@@ -18,7 +18,7 @@
    {
       "Name": "rpool@snap1",
       "IsSnapshot": true,
-      "Mountpoint": "/home/a/path:local",
+      "Mountpoint": "/home/a/path",
       "CanMount": "on",
       "BootFS": true,
       "LastUsed": 2000000000,

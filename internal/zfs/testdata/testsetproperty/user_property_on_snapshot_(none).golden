@@ -18,7 +18,7 @@
       "Name": "rpool@snap1",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "SetProperty Value:local",
+      "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "inherited",
          "BootfsDatasets": "local"

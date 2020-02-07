@@ -23,7 +23,7 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-      "BootfsDatasets": "SetProperty Value:local",
+      "BootfsDatasets": "SetProperty Value",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",
