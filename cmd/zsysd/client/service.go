@@ -56,6 +56,13 @@ var (
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = trace() },
 	}
+
+	statusCmd = &cobra.Command{
+		Use:   "status",
+		Short: i18n.G("Shows the status of the daemon."),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = daemonStatus() },
+	}
 )
 
 var (
@@ -75,6 +82,9 @@ func init() {
 	traceCmd.Flags().StringVarP(&traceOutput, "output", "o", "", i18n.G("Dump the trace to a file. Default is ./zsys.<trace-type>.pprof"))
 	traceCmd.Flags().StringVarP(&traceType, "type", "t", "cpu", i18n.G("Type of profiling cpu or mem. Default is cpu."))
 	traceCmd.Flags().IntVarP(&traceDuration, "duration", "", 30, i18n.G("Duration of the capture. Default is 30 seconds."))
+
+	serviceCmd.AddCommand(statusCmd)
+
 }
 
 func daemonStop() error {
@@ -277,6 +287,38 @@ func trace() error {
 		b := r.GetTrace()
 		if _, err := f.Write(b); err != nil {
 			return fmt.Errorf(i18n.G("Couldn’t write to file: %v"), err)
+		}
+	}
+
+	return nil
+}
+
+func daemonStatus() error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.Status(ctx, &zsys.Empty{})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
+			fmt.Println("OK")
+			break
+		}
+		if err != nil {
+			return err
 		}
 	}
 

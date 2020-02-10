@@ -19,6 +19,7 @@ service Zsys {
   rpc LoggingLevel(LoggingLevelRequest) returns (stream LogResponse);
   rpc Refresh(Empty) returns  (stream LogResponse);
   rpc Trace(TraceRequest) returns  (stream TraceResponse);
+  rpc Status(Empty) returns (stream LogResponse);
 }
 
 message Empty {}

@@ -125,3 +125,28 @@ func (s *Server) Trace(req *zsys.TraceRequest, stream zsys.Zsys_TraceServer) err
 
 	return nil
 }
+
+// Status returns the status of the daemion
+func (s *Server) Status(req *zsys.Empty, stream zsys.Zsys_StatusServer) error {
+	rErr := make(chan error)
+	go func() {
+		if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionAlwaysAllowed); err != nil {
+			rErr <- err
+			return
+		}
+		log.Info(stream.Context(), i18n.G("Requesting zsys daemon status"))
+		s.RWRequest.RLock()
+		defer s.RWRequest.RUnlock()
+
+		// TODO: replace with machines.List
+		_, err := s.Machines.EnsureBoot(stream.Context())
+		rErr <- err
+	}()
+
+	select {
+	case err := <-rErr:
+		return err
+	case <-time.After(3 * time.Second):
+		return errors.New(i18n.G("No response within few seconds"))
+	}
+}

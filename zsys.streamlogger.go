@@ -480,6 +480,36 @@ func (z *ZsysLogServer) Trace(req *TraceRequest, stream Zsys_TraceServer) error 
 }
 
 /*
+ * Zsys.Status()
+ */
+
+// zsysStatusLogStream is a Zsys_StatusServer augmented by its own Context containing the log streamer
+type zsysStatusLogStream struct {
+	Zsys_StatusServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysStatusLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// Status overrides ZsysServer Status, installing a logger first
+func (z *ZsysLogServer) Status(req *Empty, stream Zsys_StatusServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "Status")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.Status(req, &zsysStatusLogStream{
+		Zsys_StatusServer: stream,
+		ctx:               ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -657,6 +687,19 @@ func (s *zsysTraceServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&TraceResponse{
 			Reply: &TraceResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysStatusServer to an io.Writer
+func (s *zsysStatusServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
 		})
 	if err != nil {
 		return 0, err
