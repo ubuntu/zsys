@@ -15,6 +15,7 @@ service Zsys {
   rpc RemoveUserState(RemoveUserStateRequest) returns (stream RemoveStateResponse);
 
   rpc DumpStates(Empty) returns (stream DumpStatesResponse);
+  rpc DaemonStop(Empty) returns (stream LogResponse);
 }
 
 message Empty {}

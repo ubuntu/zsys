@@ -20,6 +20,12 @@ var (
 		Args:  cmdhandler.SubcommandsRequiredWithSuggestions,
 		Run:   cmdhandler.NoCmd,
 	}
+	daemonstopCmd = &cobra.Command{
+		Use:   "stop",
+		Short: i18n.G("stops zsys daemon."),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = daemonStop() },
+	}
 	servicedumpCmd = &cobra.Command{
 		Use:   "dump",
 		Short: i18n.G("Dumps the current state of zsys."),
@@ -30,7 +36,39 @@ var (
 
 func init() {
 	rootCmd.AddCommand(serviceCmd)
+	serviceCmd.AddCommand(daemonstopCmd)
 	serviceCmd.AddCommand(servicedumpCmd)
+}
+
+func daemonStop() error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.DaemonStop(ctx, &zsys.Empty{})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func dumpService() error {

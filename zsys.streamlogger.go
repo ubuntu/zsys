@@ -360,6 +360,36 @@ func (z *ZsysLogServer) DumpStates(req *Empty, stream Zsys_DumpStatesServer) err
 }
 
 /*
+ * Zsys.DaemonStop()
+ */
+
+// zsysDaemonStopLogStream is a Zsys_DaemonStopServer augmented by its own Context containing the log streamer
+type zsysDaemonStopLogStream struct {
+	Zsys_DaemonStopServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysDaemonStopLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// DaemonStop overrides ZsysServer DaemonStop, installing a logger first
+func (z *ZsysLogServer) DaemonStop(req *Empty, stream Zsys_DaemonStopServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "DaemonStop")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.DaemonStop(req, &zsysDaemonStopLogStream{
+		Zsys_DaemonStopServer: stream,
+		ctx:                   ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -485,6 +515,19 @@ func (s *zsysDumpStatesServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&DumpStatesResponse{
 			Reply: &DumpStatesResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysDaemonStopServer to an io.Writer
+func (s *zsysDaemonStopServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
 		})
 	if err != nil {
 		return 0, err
