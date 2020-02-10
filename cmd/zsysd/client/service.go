@@ -2,8 +2,11 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -11,6 +14,7 @@ import (
 	"github.com/ubuntu/zsys/cmd/zsysd/cmdhandler"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
+	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/streamlogger"
 )
 
@@ -45,6 +49,19 @@ var (
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = refresh() },
 	}
+
+	traceCmd = &cobra.Command{
+		Use:   "trace",
+		Short: i18n.G("Start profiling until you exit this command yourself or when duration is done. Default is CPU profiling with a 30s timeout."),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = trace() },
+	}
+)
+
+var (
+	traceOutput   string
+	traceType     string
+	traceDuration int
 )
 
 func init() {
@@ -53,6 +70,11 @@ func init() {
 	serviceCmd.AddCommand(servicedumpCmd)
 	serviceCmd.AddCommand(logginglevelCmd)
 	serviceCmd.AddCommand(refreshCmd)
+	serviceCmd.AddCommand(traceCmd)
+
+	traceCmd.Flags().StringVarP(&traceOutput, "output", "o", "", i18n.G("Dump the trace to a file. Default is ./zsys.<trace-type>.pprof"))
+	traceCmd.Flags().StringVarP(&traceType, "type", "t", "cpu", i18n.G("Type of profiling cpu or mem. Default is cpu."))
+	traceCmd.Flags().IntVarP(&traceDuration, "duration", "", 30, i18n.G("Duration of the capture. Default is 30 seconds."))
 }
 
 func daemonStop() error {
@@ -179,6 +201,82 @@ func refresh() error {
 		}
 		if err != nil {
 			return err
+		}
+	}
+
+	return nil
+}
+
+func trace() error {
+	switch traceType {
+	case "":
+		traceType = "cpu"
+	case "cpu":
+	case "mem":
+	default:
+		return fmt.Errorf(i18n.G("Unsupported trace type: %s"), traceType)
+	}
+
+	if traceOutput == "" {
+		dir, err := os.Getwd()
+		if err != nil {
+			return err
+		}
+		traceOutput = filepath.Join(dir, fmt.Sprintf("zsys.%s.pprof", traceType))
+	}
+	f, err := os.Create(traceOutput)
+	if err != nil {
+		return fmt.Errorf(i18n.G("Couldn’t open trace file %s: %v"), traceOutput, err)
+	}
+	defer f.Close()
+
+	if traceDuration < 0 {
+		return errors.New(i18n.G("duration must be a positive integer"))
+	}
+
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx := client.Ctx
+	// TODO: ctrl+C handling and receive everything on close. Control with timeout
+	/*if traceDuration > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Second*time.Duration(traceDuration))
+		defer cancel()
+		log.Infof(ctx, "Enabling %s profiling for %ds.", traceType, traceDuration)
+	} else {
+		log.Infof(ctx, "Enabling %s profiling. Press CTRL+C to terminate.", traceType)
+	}*/
+
+	log.Infof(ctx, "Trace saved to %s", traceOutput)
+
+	stream, err := client.Trace(ctx, &zsys.TraceRequest{
+		Type:     traceType,
+		Duration: int32(traceDuration),
+	})
+
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		r, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		b := r.GetTrace()
+		if _, err := f.Write(b); err != nil {
+			return fmt.Errorf(i18n.G("Couldn’t write to file: %v"), err)
 		}
 	}
 

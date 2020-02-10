@@ -18,6 +18,7 @@ service Zsys {
   rpc DaemonStop(Empty) returns (stream LogResponse);
   rpc LoggingLevel(LoggingLevelRequest) returns (stream LogResponse);
   rpc Refresh(Empty) returns  (stream LogResponse);
+  rpc Trace(TraceRequest) returns  (stream TraceResponse);
 }
 
 message Empty {}
@@ -100,4 +101,16 @@ message DumpStatesResponse {
 
 message LoggingLevelRequest {
   int32 logginglevel = 1;
+}
+
+message TraceRequest {
+  string type = 1;
+  int32 duration = 2;
+}
+
+message TraceResponse {
+  oneof reply {
+    string log = 1;
+    bytes trace = 2;
+  }
 }

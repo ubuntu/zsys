@@ -1,7 +1,10 @@
 package daemon
 
 import (
+	"errors"
 	"fmt"
+	"runtime"
+	"runtime/pprof"
 	"time"
 
 	"github.com/k0kubun/pp"
@@ -73,4 +76,52 @@ func (s *Server) Refresh(req *zsys.Empty, stream zsys.Zsys_RefreshServer) error 
 	log.Info(stream.Context(), i18n.G("Requesting a refresh"))
 
 	return s.Machines.Refresh(stream.Context())
+}
+
+type traceForwarder struct {
+	zsys.Zsys_TraceServer
+}
+
+func (t traceForwarder) Write(p []byte) (int, error) {
+	err := t.Send(&zsys.TraceResponse{
+		Reply: &zsys.TraceResponse_Trace{
+			Trace: p,
+		},
+	})
+
+	return len(p), err
+}
+
+const defaultMemProfileRate = 4096
+
+// Trace performs CPU of MEM profiling and returns the trace to the client
+func (s *Server) Trace(req *zsys.TraceRequest, stream zsys.Zsys_TraceServer) error {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionManageService); err != nil {
+		return err
+	}
+
+	traceType := req.GetType()
+	traceDuration := req.GetDuration()
+	log.Infof(stream.Context(), i18n.G("Requesting %s profiling"), traceType)
+
+	w := traceForwarder{Zsys_TraceServer: stream}
+
+	switch traceType {
+	case "cpu":
+		pprof.StartCPUProfile(w)
+		defer pprof.StopCPUProfile()
+	case "mem":
+		old := runtime.MemProfileRate
+		runtime.MemProfileRate = defaultMemProfileRate
+		defer func() {
+			pprof.Lookup("heap").WriteTo(w, 0)
+			runtime.MemProfileRate = old
+		}()
+	default:
+		return errors.New(i18n.G("unknown type of profiling"))
+	}
+
+	time.Sleep(time.Duration(traceDuration) * time.Second)
+
+	return nil
 }
