@@ -51,3 +51,16 @@ func (s *Server) DumpStates(req *zsys.Empty, stream zsys.Zsys_DumpStatesServer) 
 
 	return nil
 }
+
+// LoggingLevel set the verbosity of the logger
+func (s *Server) LoggingLevel(req *zsys.LoggingLevelRequest, stream zsys.Zsys_LoggingLevelServer) error {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionManageService); err != nil {
+		return err
+	}
+
+	logginglevel := req.GetLogginglevel()
+	log.Infof(stream.Context(), i18n.G("Setting logging level to %d"), logginglevel)
+
+	config.SetVerboseMode(int(logginglevel))
+	return nil
+}

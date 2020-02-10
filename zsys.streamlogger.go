@@ -390,6 +390,36 @@ func (z *ZsysLogServer) DaemonStop(req *Empty, stream Zsys_DaemonStopServer) err
 }
 
 /*
+ * Zsys.LoggingLevel()
+ */
+
+// zsysLoggingLevelLogStream is a Zsys_LoggingLevelServer augmented by its own Context containing the log streamer
+type zsysLoggingLevelLogStream struct {
+	Zsys_LoggingLevelServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysLoggingLevelLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// LoggingLevel overrides ZsysServer LoggingLevel, installing a logger first
+func (z *ZsysLogServer) LoggingLevel(req *LoggingLevelRequest, stream Zsys_LoggingLevelServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "LoggingLevel")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.LoggingLevel(req, &zsysLoggingLevelLogStream{
+		Zsys_LoggingLevelServer: stream,
+		ctx:                     ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -525,6 +555,19 @@ func (s *zsysDumpStatesServer) Write(p []byte) (n int, err error) {
 
 // Write promote zsysDaemonStopServer to an io.Writer
 func (s *zsysDaemonStopServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysLoggingLevelServer to an io.Writer
+func (s *zsysLoggingLevelServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),
