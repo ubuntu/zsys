@@ -17,6 +17,7 @@ service Zsys {
   rpc DumpStates(Empty) returns (stream DumpStatesResponse);
   rpc DaemonStop(Empty) returns (stream LogResponse);
   rpc LoggingLevel(LoggingLevelRequest) returns (stream LogResponse);
+  rpc Refresh(Empty) returns  (stream LogResponse);
 }
 
 message Empty {}

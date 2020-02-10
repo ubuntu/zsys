@@ -39,6 +39,12 @@ var (
 		Args:  cobra.ExactArgs(1),
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = loggingLevel(args) },
 	}
+	refreshCmd = &cobra.Command{
+		Use:   "refresh",
+		Short: i18n.G("refresh machines states."),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = refresh() },
+	}
 )
 
 func init() {
@@ -46,6 +52,7 @@ func init() {
 	serviceCmd.AddCommand(daemonstopCmd)
 	serviceCmd.AddCommand(servicedumpCmd)
 	serviceCmd.AddCommand(logginglevelCmd)
+	serviceCmd.AddCommand(refreshCmd)
 }
 
 func daemonStop() error {
@@ -127,6 +134,37 @@ func loggingLevel(args []string) error {
 	defer cancel()
 
 	stream, err := client.LoggingLevel(ctx, &zsys.LoggingLevelRequest{Logginglevel: int32(level)})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func refresh() error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.Refresh(ctx, &zsys.Empty{})
 	if err = checkConn(err); err != nil {
 		return err
 	}

@@ -64,3 +64,13 @@ func (s *Server) LoggingLevel(req *zsys.LoggingLevelRequest, stream zsys.Zsys_Lo
 	config.SetVerboseMode(int(logginglevel))
 	return nil
 }
+
+// Refresh reloads the state of zfs from the system
+func (s *Server) Refresh(req *zsys.Empty, stream zsys.Zsys_RefreshServer) error {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionManageService); err != nil {
+		return err
+	}
+	log.Info(stream.Context(), i18n.G("Requesting a refresh"))
+
+	return s.Machines.Refresh(stream.Context())
+}
