@@ -1,11 +1,15 @@
 package machines
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/k0kubun/pp"
@@ -572,4 +576,191 @@ func (m *Machine) isZsys() bool {
 		return false
 	}
 	return m.IsZsys
+}
+
+// GetMachine returns matching machine.
+// If ID is empty, it will fetch current machine
+func (ms Machines) GetMachine(ID string) (*Machine, error) {
+	if ID == "" {
+		if ms.current == nil {
+			return nil, errors.New(i18n.G("no ID given and cannot retrieve current machine. Please specify one ID."))
+		}
+		return ms.current, nil
+	}
+
+	var machines []*Machine
+	for id, m := range ms.all {
+		var sID string
+
+		tokens := strings.Split(filepath.Base(id), "_")
+		if len(tokens) > 0 {
+			sID = tokens[len(tokens)-1]
+		}
+		if id == ID || filepath.Base(id) == ID || sID == ID {
+			machines = append(machines, m)
+			continue
+		}
+		for id := range m.History {
+			tokens := strings.Split(filepath.Base(id), "_")
+			if len(tokens) > 0 {
+				sID = tokens[len(tokens)-1]
+			}
+			if id == ID || filepath.Base(id) == ID || sID == ID {
+				machines = append(machines, m)
+				break
+			}
+		}
+	}
+
+	if len(machines) == 0 {
+		return nil, fmt.Errorf(i18n.G("no machine matches %s"), ID)
+	} else if len(machines) > 1 {
+		var errMsg string
+		for id := range machines {
+			errMsg += fmt.Sprintf(i18n.G("  - %s\n"), id)
+		}
+		return nil, fmt.Errorf(i18n.G("multiple machines match %s:\n%s"), ID, errMsg)
+	}
+
+	return machines[0], nil
+}
+
+// Info returns detailed machine informations.
+func (m Machine) Info(full bool) (string, error) {
+	var out bytes.Buffer
+	w := tabwriter.NewWriter(&out, 0, 0, 1, ' ', 0)
+
+	// Main machine
+	m.toWriter(w, false, full)
+
+	// History
+	fmt.Fprintf(w, i18n.G("History:\n"))
+	timeToState := make(map[string]*State)
+	for id, s := range m.History {
+		k := fmt.Sprintf("%010d_%s", s.LastUsed.Unix(), id)
+		timeToState[k] = s
+	}
+	var keys []string
+	for k := range timeToState {
+		keys = append(keys, k)
+	}
+	sort.Sort(sort.Reverse(sort.StringSlice(keys)))
+
+	for _, k := range keys {
+		timeToState[k].toWriter(w, true, full)
+	}
+
+	// Users
+	keys = nil
+	for k := range m.Users {
+		keys = append(keys, k)
+	}
+	sort.Sort(sort.StringSlice(keys))
+
+	fmt.Fprintf(w, i18n.G("Users:\n"))
+
+	for _, user := range keys {
+		fmt.Fprintf(w, i18n.G("  - Name:\t%s\n"), user)
+
+		if len(m.Users[user]) == 0 {
+			fmt.Fprintf(w, i18n.G("    History:\tEmpty\n"))
+			continue
+		}
+
+		fmt.Fprintf(w, i18n.G("    History:\t\n"))
+
+		timeToState := make(map[string]UserState)
+		for id, s := range m.Users[user] {
+			k := fmt.Sprintf("%010d_%s", s.LastUsed.Unix(), id)
+			timeToState[k] = s
+		}
+		var keys []string
+		for k := range timeToState {
+			keys = append(keys, k)
+		}
+		sort.Sort(sort.Reverse(sort.StringSlice(keys)))
+
+		for _, k := range keys {
+			s := timeToState[k]
+
+			if full {
+				var ud []string
+				for _, d := range s.Datasets {
+					ud = append(ud, d.Name)
+				}
+				fmt.Fprintf(w, i18n.G("     - %s: %s\n"), s.LastUsed.Format("2006-01-02 15:04:05"), strings.Join(ud, ", "))
+				continue
+			}
+			fmt.Fprintf(w, i18n.G("     - %s\n"), s.LastUsed.Format("2006-01-02 15:04:05"))
+		}
+	}
+	if err := w.Flush(); err != nil {
+		return "", err
+	}
+
+	return out.String(), nil
+}
+
+// sortedDatasetNames returns a sorted dataset name list
+func sortedDatasetNames(datasets map[string][]*zfs.Dataset) (dNames []string) {
+	var keys []string
+	for k := range datasets {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		for _, d := range datasets[k] {
+			dNames = append(dNames, d.Name)
+		}
+	}
+	return dNames
+}
+
+// toWriter forwards dataset state to a writer
+func (s State) toWriter(w io.Writer, isHistory, full bool) {
+	var prefix string
+	if isHistory {
+		prefix = "  - "
+	}
+	fmt.Fprintf(w, i18n.G("%sName:\t%s\n"), prefix, s.ID)
+	lu := s.LastUsed.Format("2006-01-02 15:04:05")
+
+	if isHistory {
+		prefix = "    "
+	}
+	if !isHistory {
+		if s.SystemDatasets[s.ID][0].Mounted {
+			lu = i18n.G("current")
+		}
+		fmt.Fprintf(w, i18n.G("%sLast Used:\t%s\n"), prefix, lu)
+		fmt.Fprintf(w, i18n.G("%sZSys:\t%t\n"), prefix, s.SystemDatasets[s.ID][0].BootFS)
+	} else {
+		fmt.Fprintf(w, i18n.G("%sCreated on:\t%s\n"), prefix, lu)
+	}
+
+	if full {
+		fmt.Fprintf(w, i18n.G("%sLast Booted Kernel:\t%s\n"), prefix, s.SystemDatasets[s.ID][0].LastBootedKernel)
+		fmt.Fprintf(w, i18n.G("%sSystem Datasets:\n"), prefix)
+
+		for _, n := range sortedDatasetNames(s.SystemDatasets) {
+			fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
+		}
+
+		if len(s.UserDatasets) > 0 {
+			fmt.Fprintf(w, i18n.G("%sUser Datasets:\n"), prefix)
+			for _, n := range sortedDatasetNames(s.UserDatasets) {
+				fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
+			}
+		}
+
+		if len(s.PersistentDatasets) == 0 {
+			fmt.Fprintf(w, i18n.G("%sPersistent Datasets: None\n"), prefix)
+		} else {
+			fmt.Fprintf(w, i18n.G("%sPersistent Datasets:\n"), prefix)
+			for _, n := range s.PersistentDatasets {
+				fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
+			}
+		}
+
+	}
 }

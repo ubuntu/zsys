@@ -510,6 +510,36 @@ func (z *ZsysLogServer) Status(req *Empty, stream Zsys_StatusServer) error {
 }
 
 /*
+ * Zsys.MachineShow()
+ */
+
+// zsysMachineShowLogStream is a Zsys_MachineShowServer augmented by its own Context containing the log streamer
+type zsysMachineShowLogStream struct {
+	Zsys_MachineShowServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysMachineShowLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// MachineShow overrides ZsysServer MachineShow, installing a logger first
+func (z *ZsysLogServer) MachineShow(req *MachineShowRequest, stream Zsys_MachineShowServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "MachineShow")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.MachineShow(req, &zsysMachineShowLogStream{
+		Zsys_MachineShowServer: stream,
+		ctx:                    ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -700,6 +730,19 @@ func (s *zsysStatusServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysMachineShowServer to an io.Writer
+func (s *zsysMachineShowServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&MachineShowResponse{
+			Reply: &MachineShowResponse_Log{Log: string(p)},
 		})
 	if err != nil {
 		return 0, err
