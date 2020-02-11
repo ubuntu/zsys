@@ -529,9 +529,9 @@ func (m *Machine) attachRemainingDatasets(ctx context.Context, boots, persistent
 
 // attachRemainingDatasetsForHistory attaches to a given history state boot and persistent datasets if they fit.
 // It's similar to attachRemainingDatasets with some particular rules on snapshots.
-func (h *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Dataset) {
+func (s *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Dataset) {
 	// stateID is the basename of the State.
-	stateID := filepath.Base(h.ID)
+	stateID := filepath.Base(s.ID)
 
 	var snapshot string
 	if j := strings.LastIndex(stateID, "@"); j > 0 {
@@ -546,12 +546,12 @@ func (h *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Data
 			// its name and take the first route we find.
 			if bootDatasetsID == "" && strings.HasSuffix(d.Name, "@"+snapshot) {
 				bootDatasetsID = d.Name
-				h.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+				s.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
 				continue
 			} else if bootDatasetsID != "" {
 				baseBootDatasetsID, _ := splitSnapshotName(bootDatasetsID)
 				if strings.HasPrefix(d.Name, baseBootDatasetsID+"/") && strings.HasSuffix(d.Name, "@"+snapshot) { // child
-					h.SystemDatasets[bootDatasetsID] = append(h.SystemDatasets[bootDatasetsID], d)
+					s.SystemDatasets[bootDatasetsID] = append(s.SystemDatasets[bootDatasetsID], d)
 				}
 			}
 		}
@@ -560,14 +560,14 @@ func (h *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Data
 		// Main boot base dataset (matching machine ID)
 		if strings.HasSuffix(d.Name, "/"+stateID) {
 			bootDatasetsID = d.Name
-			h.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+			s.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
 		} else if bootDatasetsID != "" && strings.HasPrefix(d.Name, bootDatasetsID+"/") { // child
-			h.SystemDatasets[bootDatasetsID] = append(h.SystemDatasets[bootDatasetsID], d)
+			s.SystemDatasets[bootDatasetsID] = append(s.SystemDatasets[bootDatasetsID], d)
 		}
 	}
 
 	// Persistent datasets
-	h.PersistentDatasets = persistents
+	s.PersistentDatasets = persistents
 }
 
 // isZsys returns if there is a current machine, and if it's the case, if it's zsys.

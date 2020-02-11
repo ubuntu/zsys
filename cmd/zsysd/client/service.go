@@ -45,7 +45,7 @@ var (
 	}
 	refreshCmd = &cobra.Command{
 		Use:   "refresh",
-		Short: i18n.G("refresh machines states."),
+		Short: i18n.G("Refreshes machines states."),
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = refresh() },
 	}
