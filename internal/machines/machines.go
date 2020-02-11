@@ -3,6 +3,7 @@ package machines
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -805,4 +806,32 @@ func (ms Machines) List() (string, error) {
 	}
 
 	return out.String(), nil
+}
+
+// Machinesdump represents the structure of a machine to be exported
+type Machinesdump struct {
+	All                   map[string]*Machine `json:",omitempty"`
+	Cmdline               string              `json:",omitempty"`
+	Current               *Machine            `json:",omitempty"`
+	NextState             *State              `json:",omitempty"`
+	AllSystemDatasets     []*zfs.Dataset      `json:",omitempty"`
+	AllUsersDatasets      []*zfs.Dataset      `json:",omitempty"`
+	AllPersistentDatasets []*zfs.Dataset      `json:",omitempty"`
+	UnmanagedDatasets     []*zfs.Dataset      `json:",omitempty"`
+}
+
+// MarshalJSON exports for json Marshmalling all private fields
+func (ms Machines) MarshalJSON() ([]byte, error) {
+	mt := Machinesdump{}
+
+	mt.All = ms.all
+	mt.Cmdline = ms.cmdline
+	mt.Current = ms.current
+	mt.NextState = ms.nextState
+	mt.AllSystemDatasets = ms.allSystemDatasets
+	mt.AllUsersDatasets = ms.allUsersDatasets
+	mt.AllPersistentDatasets = ms.allPersistentDatasets
+	mt.UnmanagedDatasets = ms.unmanagedDatasets
+
+	return json.Marshal(mt)
 }

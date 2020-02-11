@@ -12,17 +12,6 @@ const (
 	RevertUserDataTag = zfsRevertUserDataTag
 )
 
-type MachinesTest struct {
-	All                   map[string]*Machine `json:",omitempty"`
-	Cmdline               string              `json:",omitempty"`
-	Current               *Machine            `json:",omitempty"`
-	NextState             *State              `json:",omitempty"`
-	AllSystemDatasets     []*zfs.Dataset      `json:",omitempty"`
-	AllUsersDatasets      []*zfs.Dataset      `json:",omitempty"`
-	AllPersistentDatasets []*zfs.Dataset      `json:",omitempty"`
-	UnmanagedDatasets     []*zfs.Dataset      `json:",omitempty"`
-}
-
 type SortedDatasets []*zfs.Dataset
 
 func (s SortedDatasets) Len() int { return len(s) }
@@ -31,25 +20,9 @@ func (s SortedDatasets) Less(i, j int) bool {
 }
 func (s SortedDatasets) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-// Export for json Marshmalling all private fields
-func (m Machines) MarshalJSON() ([]byte, error) {
-	mt := MachinesTest{}
-
-	mt.All = m.all
-	mt.Cmdline = m.cmdline
-	mt.Current = m.current
-	mt.NextState = m.nextState
-	mt.AllSystemDatasets = m.allSystemDatasets
-	mt.AllUsersDatasets = m.allUsersDatasets
-	mt.AllPersistentDatasets = m.allPersistentDatasets
-	mt.UnmanagedDatasets = m.unmanagedDatasets
-
-	return json.Marshal(mt)
-}
-
 // Import from json to export the private fields
 func (m *Machines) UnmarshalJSON(b []byte) error {
-	mt := MachinesTest{}
+	mt := Machinesdump{}
 
 	if err := json.Unmarshal(b, &mt); err != nil {
 		return err
