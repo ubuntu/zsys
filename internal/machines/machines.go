@@ -764,3 +764,45 @@ func (s State) toWriter(w io.Writer, isHistory, full bool) {
 
 	}
 }
+
+// List all the machines and a summary
+func (ms Machines) List() (string, error) {
+	var out bytes.Buffer
+	w := tabwriter.NewWriter(&out, 0, 0, 2, ' ', 0)
+
+	fmt.Fprint(w, i18n.G("ID\tZSys\tLast Used\n"))
+	fmt.Fprint(w, i18n.G("--\t----\t---------\n"))
+
+	var keys, presentationOrder []string
+	for k := range ms.all {
+		keys = append(keys, k)
+	}
+	sort.Sort(sort.StringSlice(keys))
+	var currentID string
+	if ms.current != nil {
+		currentID = ms.current.ID
+		presentationOrder = []string{currentID}
+	}
+
+	for _, k := range keys {
+		if k == currentID {
+			continue
+		}
+		presentationOrder = append(presentationOrder, k)
+	}
+
+	for _, id := range presentationOrder {
+		m := ms.all[id]
+		lu := m.LastUsed.Format("2006-01-02 15:04:05")
+		if id == currentID {
+			lu = i18n.G("current")
+		}
+		fmt.Fprintf(w, i18n.G("%s\t%t\t%s\n"), m.ID, m.IsZsys, lu)
+	}
+
+	if err := w.Flush(); err != nil {
+		return "", err
+	}
+
+	return out.String(), nil
+}

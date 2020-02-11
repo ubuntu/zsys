@@ -38,3 +38,26 @@ func (s *Server) MachineShow(req *zsys.MachineShowRequest, stream zsys.Zsys_Mach
 	return nil
 
 }
+
+// MachineList returns a list of machines and their summary
+func (s *Server) MachineList(req *zsys.Empty, stream zsys.Zsys_MachineListServer) error {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionAlwaysAllowed); err != nil {
+		return err
+	}
+
+	log.Infof(stream.Context(), i18n.G("Retrieving list of machines."))
+
+	machinesList, err := s.Machines.List()
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't fetch list of machines: %v"), err)
+	}
+
+	stream.Send(&zsys.MachineListResponse{
+		Reply: &zsys.MachineListResponse_MachineList{
+			MachineList: machinesList,
+		},
+	})
+
+	return nil
+
+}

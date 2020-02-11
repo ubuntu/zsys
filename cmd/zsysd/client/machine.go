@@ -27,6 +27,13 @@ var (
 		Args:  cobra.MaximumNArgs(1),
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = show(args) },
 	}
+
+	listCmd = &cobra.Command{
+		Use:   "list",
+		Short: i18n.G("List all the machines and basic information."),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = list(args) },
+	}
 )
 
 var (
@@ -36,6 +43,7 @@ var (
 func init() {
 	rootCmd.AddCommand(machineCmd)
 	machineCmd.AddCommand(showCmd)
+	machineCmd.AddCommand(listCmd)
 
 	showCmd.Flags().BoolVarP(&fullInfo, "full", "", false, i18n.G("Give more detail informations on each machine."))
 }
@@ -72,6 +80,38 @@ func show(args []string) error {
 			return err
 		}
 		fmt.Printf(r.GetMachineInfo())
+	}
+
+	return nil
+}
+func list(args []string) error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.MachineList(ctx, &zsys.Empty{})
+
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		r, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		fmt.Printf(r.GetMachineList())
 	}
 
 	return nil
