@@ -1,13 +1,13 @@
 package daemon
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"runtime"
 	"runtime/pprof"
 	"time"
 
-	"github.com/k0kubun/pp"
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/authorizer"
 	"github.com/ubuntu/zsys/internal/config"
@@ -44,9 +44,14 @@ func (s *Server) DumpStates(req *zsys.Empty, stream zsys.Zsys_DumpStatesServer) 
 
 	log.Info(stream.Context(), i18n.G("Requesting service states dump"))
 
+	b, err := json.MarshalIndent(s.Machines, "", "   ")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't convert internal state to json: %v"), err)
+	}
+
 	if err := stream.Send(&zsys.DumpStatesResponse{
 		Reply: &zsys.DumpStatesResponse_States{
-			States: pp.Sprint(s.Machines),
+			States: string(b),
 		},
 	}); err != nil {
 		return fmt.Errorf(i18n.G("couldn't dump machine state")+config.ErrorFormat, err)
