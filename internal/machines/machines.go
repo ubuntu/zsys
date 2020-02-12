@@ -32,7 +32,8 @@ type Machines struct {
 	// cantmount noauto or off datasets, which are not system, users or persistent
 	unmanagedDatasets []*zfs.Dataset
 
-	z *zfs.Zfs
+	z    *zfs.Zfs
+	conf config.ZConfig
 }
 
 // Machine is a group of Main and its History children states
@@ -113,10 +114,16 @@ func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) 
 		return Machines{}, fmt.Errorf(i18n.G("couldn't scan zfs filesystem"), err)
 	}
 
+	conf, err := config.Load(ctx, config.DefaultPath)
+	if err != nil {
+		return Machines{}, fmt.Errorf(i18n.G("couldn't load zsys configuration"), err)
+	}
+
 	machines := Machines{
 		all:     make(map[string]*Machine),
 		cmdline: cmdline,
 		z:       z,
+		conf:    conf,
 	}
 	machines.refresh(ctx)
 	return machines, nil
@@ -138,6 +145,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 		all:     make(map[string]*Machine),
 		cmdline: ms.cmdline,
 		z:       ms.z,
+		conf:    ms.conf,
 	}
 
 	zDatasets := machines.z.Datasets()
