@@ -13,7 +13,6 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/k0kubun/pp"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
@@ -336,7 +335,16 @@ func (ms *Machines) refresh(ctx context.Context) {
 	machines.current = m
 
 	*ms = machines
-	log.Debugf(ctx, i18n.G("current machines scanning layout:\n"+pp.Sprint(ms)))
+	l, err := log.LevelFromContext(ctx)
+	if (err == nil && l == log.DebugLevel) || // remote connected and send logs
+		log.GetLevel() == log.DebugLevel { // local log output
+		b, err := json.MarshalIndent(ms, "", "   ")
+		if err != nil {
+			log.Warningf(ctx, i18n.G("couldn't convert internal state to json: %v"), err)
+			return
+		}
+		log.Debugf(ctx, i18n.G("current machines scanning layout:\n%s\n"), string(b))
+	}
 }
 
 // populate attach main system datasets to machines and returns other types of datasets for later triage/attachment, alongside
