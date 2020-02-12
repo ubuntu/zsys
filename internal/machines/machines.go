@@ -824,6 +824,17 @@ func (ms Machines) List() (string, error) {
 	return out.String(), nil
 }
 
+// Reload reloads the configuration from disk
+func (ms *Machines) Reload(ctx context.Context) error {
+	conf, err := config.Load(ctx, ms.conf.Path)
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't load zsys configuration"), err)
+	}
+
+	ms.conf = conf
+	return nil
+}
+
 // Machinesdump represents the structure of a machine to be exported
 type Machinesdump struct {
 	All                   map[string]*Machine `json:",omitempty"`

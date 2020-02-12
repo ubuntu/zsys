@@ -20,6 +20,7 @@ service Zsys {
   rpc Refresh(Empty) returns  (stream LogResponse);
   rpc Trace(TraceRequest) returns  (stream TraceResponse);
   rpc Status(Empty) returns (stream LogResponse);
+  rpc Reload(Empty) returns (stream LogResponse);
 
   rpc MachineShow(MachineShowRequest) returns (stream MachineShowResponse);
   rpc MachineList(Empty) returns (stream MachineListResponse);

@@ -155,3 +155,13 @@ func (s *Server) Status(req *zsys.Empty, stream zsys.Zsys_StatusServer) error {
 		return errors.New(i18n.G("No response within few seconds"))
 	}
 }
+
+// Reload reloads daemon configuration
+func (s *Server) Reload(req *zsys.Empty, stream zsys.Zsys_ReloadServer) error {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionManageService); err != nil {
+		return err
+	}
+	log.Info(stream.Context(), i18n.G("Reloading daemon configuration"))
+
+	return s.Machines.Reload(stream.Context())
+}

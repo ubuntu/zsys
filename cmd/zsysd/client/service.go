@@ -49,19 +49,23 @@ var (
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = refresh() },
 	}
-
 	traceCmd = &cobra.Command{
 		Use:   "trace",
 		Short: i18n.G("Start profiling until you exit this command yourself or when duration is done. Default is CPU profiling with a 30s timeout."),
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = trace() },
 	}
-
 	statusCmd = &cobra.Command{
 		Use:   "status",
 		Short: i18n.G("Shows the status of the daemon."),
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = daemonStatus() },
+	}
+	reloadCmd = &cobra.Command{
+		Use:   "reload",
+		Short: i18n.G("Reloads daemon configuration."),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = reloadConfig() },
 	}
 )
 
@@ -78,6 +82,7 @@ func init() {
 	serviceCmd.AddCommand(logginglevelCmd)
 	serviceCmd.AddCommand(refreshCmd)
 	serviceCmd.AddCommand(traceCmd)
+	serviceCmd.AddCommand(reloadCmd)
 
 	traceCmd.Flags().StringVarP(&traceOutput, "output", "o", "", i18n.G("Dump the trace to a file. Default is ./zsys.<trace-type>.pprof"))
 	traceCmd.Flags().StringVarP(&traceType, "type", "t", "cpu", i18n.G("Type of profiling cpu or mem. Default is cpu."))
@@ -315,6 +320,36 @@ func daemonStatus() error {
 		}
 		if err == io.EOF {
 			fmt.Println("OK")
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+func reloadConfig() error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.Reload(ctx, &zsys.Empty{})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
 			break
 		}
 		if err != nil {

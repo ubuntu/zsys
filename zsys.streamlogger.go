@@ -510,6 +510,36 @@ func (z *ZsysLogServer) Status(req *Empty, stream Zsys_StatusServer) error {
 }
 
 /*
+ * Zsys.Reload()
+ */
+
+// zsysReloadLogStream is a Zsys_ReloadServer augmented by its own Context containing the log streamer
+type zsysReloadLogStream struct {
+	Zsys_ReloadServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysReloadLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// Reload overrides ZsysServer Reload, installing a logger first
+func (z *ZsysLogServer) Reload(req *Empty, stream Zsys_ReloadServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "Reload")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.Reload(req, &zsysReloadLogStream{
+		Zsys_ReloadServer: stream,
+		ctx:               ctx,
+	})
+}
+
+/*
  * Zsys.MachineShow()
  */
 
@@ -757,6 +787,19 @@ func (s *zsysTraceServer) Write(p []byte) (n int, err error) {
 
 // Write promote zsysStatusServer to an io.Writer
 func (s *zsysStatusServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysReloadServer to an io.Writer
+func (s *zsysReloadServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),
