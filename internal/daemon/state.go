@@ -133,6 +133,7 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 	return nil
 }
 
+// RemoveUserState removes a user state
 func (s *Server) RemoveUserState(req *zsys.RemoveUserStateRequest, stream zsys.Zsys_RemoveUserStateServer) error {
 	userName := req.GetUserName()
 

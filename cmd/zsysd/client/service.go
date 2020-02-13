@@ -27,7 +27,7 @@ var (
 	}
 	daemonstopCmd = &cobra.Command{
 		Use:   "stop",
-		Short: i18n.G("stops zsys daemon."),
+		Short: i18n.G("Stops zsys daemon."),
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = daemonStop() },
 	}
@@ -241,7 +241,7 @@ func trace() error {
 	}
 	f, err := os.Create(traceOutput)
 	if err != nil {
-		return fmt.Errorf(i18n.G("Couldn’t open trace file %s: %v"), traceOutput, err)
+		return fmt.Errorf(i18n.G("Couldn't open trace file %s: %v"), traceOutput, err)
 	}
 	defer f.Close()
 
@@ -291,7 +291,7 @@ func trace() error {
 
 		b := r.GetTrace()
 		if _, err := f.Write(b); err != nil {
-			return fmt.Errorf(i18n.G("Couldn’t write to file: %v"), err)
+			return fmt.Errorf(i18n.G("Couldn't write to file: %v"), err)
 		}
 	}
 
