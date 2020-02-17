@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"strings"
 
-	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
 // RefreshProperties refreshes all the properties for a given dataset and the source of them.
@@ -26,14 +26,14 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 	if d.IsSnapshot {
 		var err error
 
-		mountpoint, sourceMountPoint, err = getUserPropertyFromSys(ctx, SnapshotMountpointProp, d.dZFS)
+		mountpoint, sourceMountPoint, err = getUserPropertyFromSys(ctx, libzfs.SnapshotMountpointProp, d.dZFS)
 		if err != nil {
-			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, SnapshotMountpointProp, err)
+			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, libzfs.SnapshotMountpointProp, err)
 		}
 
-		canMount, sourceCanMount, err = getUserPropertyFromSys(ctx, SnapshotCanmountProp, d.dZFS)
+		canMount, sourceCanMount, err = getUserPropertyFromSys(ctx, libzfs.SnapshotCanmountProp, d.dZFS)
 		if err != nil {
-			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, SnapshotCanmountProp, err)
+			log.Debugf(ctx, i18n.G("%q isn't a zsys snapshot with a valid %q property: %v"), name, libzfs.SnapshotCanmountProp, err)
 		}
 	} else {
 		mp := dZFSprops[libzfs.DatasetPropMountpoint]
@@ -85,7 +85,7 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 
 	origin := dZFSprops[libzfs.DatasetPropOrigin].Value
 
-	bfs, srcBootFS, err := getUserPropertyFromSys(ctx, BootfsProp, d.dZFS)
+	bfs, srcBootFS, err := getUserPropertyFromSys(ctx, libzfs.BootfsProp, d.dZFS)
 	if err != nil {
 		log.Warningf(ctx, i18n.G("can't read bootfs property, ignoring: ")+config.ErrorFormat, err)
 	}
@@ -97,7 +97,7 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 
 	var lu, srcLastUsed string
 	if !d.IsSnapshot {
-		lu, srcLastUsed, err = getUserPropertyFromSys(ctx, LastUsedProp, d.dZFS)
+		lu, srcLastUsed, err = getUserPropertyFromSys(ctx, libzfs.LastUsedProp, d.dZFS)
 		if err != nil {
 			log.Warningf(ctx, i18n.G("can't read source of LastUsed property, ignoring:")+config.ErrorFormat, err)
 		}
@@ -109,12 +109,12 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 	}
 	lastUsed, err := strconv.Atoi(lu)
 	if err != nil {
-		log.Warningf(ctx, i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+		log.Warningf(ctx, i18n.G("%q property isn't an int: ")+config.ErrorFormat, libzfs.LastUsedProp, err)
 		srcLastUsed = ""
 	}
 	sources.LastUsed = srcLastUsed
 
-	lastBootedKernel, srcLastBootedKernel, err := getUserPropertyFromSys(ctx, LastBootedKernelProp, d.dZFS)
+	lastBootedKernel, srcLastBootedKernel, err := getUserPropertyFromSys(ctx, libzfs.LastBootedKernelProp, d.dZFS)
 	if err != nil {
 		log.Warningf(ctx, i18n.G("can't read lastBootedKernel property, ignoring: ")+config.ErrorFormat, err)
 	}
@@ -122,7 +122,7 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 
 	var bootfsDatasets, srcBootfsDatasets string
 	if !d.IsSnapshot {
-		if bootfsDatasets, srcBootfsDatasets, err = getUserPropertyFromSys(ctx, BootfsDatasetsProp, d.dZFS); err != nil {
+		if bootfsDatasets, srcBootfsDatasets, err = getUserPropertyFromSys(ctx, libzfs.BootfsDatasetsProp, d.dZFS); err != nil {
 			log.Warningf(ctx, i18n.G("can't read bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
 		}
 	}
@@ -145,7 +145,7 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 // getUserPropertyFromSys returns the value of a user property and its source from the underlying
 // ZFS system dataset state.
 // It also sanitize the sources to only return "local" or "inherited".
-func getUserPropertyFromSys(ctx context.Context, prop string, dZFS DZFSInterface) (value, source string, err error) {
+func getUserPropertyFromSys(ctx context.Context, prop string, dZFS libzfs.DZFSInterface) (value, source string, err error) {
 	name := (*dZFS.Properties())[libzfs.DatasetPropName].Value
 
 	p, err := dZFS.GetUserProperty(prop)
@@ -186,7 +186,7 @@ func getUserPropertyFromSys(ctx context.Context, prop string, dZFS DZFSInterface
 }
 
 // newDatasetTree returns a Dataset and a populated tree of all its children
-func newDatasetTree(ctx context.Context, dZFS DZFSInterface, allDatasets *map[string]*Dataset) (*Dataset, error) {
+func newDatasetTree(ctx context.Context, dZFS libzfs.DZFSInterface, allDatasets *map[string]*Dataset) (*Dataset, error) {
 	// Skip non file system or snapshot datasets
 	if dZFS.Type() == libzfs.DatasetTypeVolume || dZFS.Type() == libzfs.DatasetTypeBookmark {
 		return nil, nil
@@ -205,10 +205,10 @@ func newDatasetTree(ctx context.Context, dZFS DZFSInterface, allDatasets *map[st
 
 	var children []*Dataset
 	for i := range dZFS.Children() {
-		// WARNING: We are using a single Dataset reference to avoid desync between libzfs.Dataset state and our
-		// internal dZFS elements. libzfs.Dataset doesn't handle Children properly and don't have a way to reach
+		// WARNING: We are using a single Dataset reference to avoid desync between golibzfs.Dataset state and our
+		// internal dZFS elements. golibzfs.Dataset doesn't handle Children properly and don't have a way to reach
 		// out to other datasets, like parents, without a full rescan.
-		// We are using our own dZFS as the primary reference object. As we always copy the libzfs.Dataset object,
+		// We are using our own dZFS as the primary reference object. As we always copy the golibzfs.Dataset object,
 		// we are using the same Dataset.list internal C reference pointer, having thus only one dataset in C cache.
 		// This is why we don't .Close() libzfs Datasets after the copy, as it references the same underlying pointed
 		// element.
@@ -322,13 +322,13 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 			}
 		}
 
-		// Ensure LastUsedProp is valid before setting it
-		if name == LastUsedProp {
+		// Ensure libzfs.LastUsedProp is valid before setting it
+		if name == libzfs.LastUsedProp {
 			if value == "" {
 				value = "0"
 			}
 			if _, err := strconv.Atoi(value); err != nil {
-				return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, LastUsedProp, err)
+				return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, libzfs.LastUsedProp, err)
 			}
 		}
 
@@ -340,7 +340,7 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 	}
 
 	// Don’t propagate BootfsDataset on snapshot which is ignored on refresh
-	if d.IsSnapshot && name == BootfsDatasetsProp {
+	if d.IsSnapshot && name == libzfs.BootfsDatasetsProp {
 		return nil
 	}
 
@@ -349,19 +349,19 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 	var oldMountPoint string
 	// Refresh local values on dataset object
 	switch name {
-	case BootfsProp:
+	case libzfs.BootfsProp:
 		var bootFS bool
 		if value == "yes" {
 			bootFS = true
 		}
 		d.BootFS = bootFS
-	case LastUsedProp:
+	case libzfs.LastUsedProp:
 		lastUsed, err := strconv.Atoi(value)
 		if err != nil {
-			panic(fmt.Sprintf("%q property isn't an int: %v, while it has already been checked for main dataset and passed", LastUsedProp, err))
+			panic(fmt.Sprintf("%q property isn't an int: %v, while it has already been checked for main dataset and passed", libzfs.LastUsedProp, err))
 		}
 		d.LastUsed = lastUsed
-	case MountPointProp:
+	case libzfs.MountPointProp:
 		oldMountPoint = *destV
 		fallthrough
 	default:
@@ -409,20 +409,20 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 
 		// Refresh dataset object
 		switch name {
-		case BootfsProp:
+		case libzfs.BootfsProp:
 			var bootFS bool
 			if value == "yes" {
 				bootFS = true
 			}
 			c.BootFS = bootFS
-		case LastUsedProp:
+		case libzfs.LastUsedProp:
 			lastUsed, err := strconv.Atoi(value)
 			if err != nil {
 				// Shouldn't happen: it's been already checked above from main dataset
-				panic(fmt.Sprintf("%q property isn't an int: %v, while it has already been checked for main dataset and passed", LastUsedProp, err))
+				panic(fmt.Sprintf("%q property isn't an int: %v, while it has already been checked for main dataset and passed", libzfs.LastUsedProp, err))
 			}
 			c.LastUsed = lastUsed
-		case MountPointProp:
+		case libzfs.MountPointProp:
 			*destV = filepath.Join(value, strings.TrimPrefix(*destV, oldMountPoint))
 		default:
 			*destV = value
@@ -438,45 +438,45 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 func (d *Dataset) stringToProp(name string) (nativeProp libzfs.Prop, userProp string, value, simplifiedSource *string) {
 	userProp = name
 	switch name {
-	case CanmountProp:
+	case libzfs.CanmountProp:
 		if !d.IsSnapshot {
 			nativeProp = libzfs.DatasetPropCanmount
 		} else {
-			// this should have been called with SnapshotCanmountProp, but map it for the user
-			userProp = SnapshotCanmountProp
+			// this should have been called with libzfs.SnapshotCanmountProp, but map it for the user
+			userProp = libzfs.SnapshotCanmountProp
 		}
 		fallthrough
-	case SnapshotCanmountProp:
+	case libzfs.SnapshotCanmountProp:
 		value = &d.CanMount
 		simplifiedSource = &d.sources.CanMount
-	case MountPointProp:
+	case libzfs.MountPointProp:
 		if !d.IsSnapshot {
 			nativeProp = libzfs.DatasetPropMountpoint
 		} else {
-			// this should have been called with SnapshotMountpointProp, but map it for the user
-			userProp = SnapshotMountpointProp
+			// this should have been called with libzfs.SnapshotMountpointProp, but map it for the user
+			userProp = libzfs.SnapshotMountpointProp
 		}
 		value = &d.Mountpoint
 		simplifiedSource = &d.sources.Mountpoint
-	case SnapshotMountpointProp:
+	case libzfs.SnapshotMountpointProp:
 		value = &d.Mountpoint
 		simplifiedSource = &d.sources.Mountpoint
 	// Bootfs and LastUsed are non string. Return a local string
-	case BootfsProp:
+	case libzfs.BootfsProp:
 		bootfs := "yes"
 		if !d.BootFS {
 			bootfs = "no"
 		}
 		value = &bootfs
 		simplifiedSource = &d.sources.BootFS
-	case LastUsedProp:
+	case libzfs.LastUsedProp:
 		lu := strconv.Itoa(d.LastUsed)
 		value = &lu
 		simplifiedSource = &d.sources.LastUsed
-	case BootfsDatasetsProp:
+	case libzfs.BootfsDatasetsProp:
 		value = &d.BootfsDatasets
 		simplifiedSource = &d.sources.BootfsDatasets
-	case LastBootedKernelProp:
+	case libzfs.LastBootedKernelProp:
 		value = &d.LastBootedKernel
 		simplifiedSource = &d.sources.LastBootedKernel
 	default:

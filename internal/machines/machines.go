@@ -17,6 +17,7 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
 // Machines hold a zfs system states, with a map of main root system dataset name to a given Machine,
@@ -84,7 +85,7 @@ const (
 )
 
 // WithLibZFS allows overriding default libzfs implementations with a mock
-func WithLibZFS(libzfs zfs.LibZFSInterface) func(o *options) error {
+func WithLibZFS(libzfs libzfs.Interface) func(o *options) error {
 	return func(o *options) error {
 		o.libzfs = libzfs
 		return nil
@@ -92,7 +93,7 @@ func WithLibZFS(libzfs zfs.LibZFSInterface) func(o *options) error {
 }
 
 type options struct {
-	libzfs zfs.LibZFSInterface
+	libzfs libzfs.Interface
 }
 
 type option func(*options) error
@@ -101,7 +102,7 @@ type option func(*options) error
 func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) {
 	log.Info(ctx, i18n.G("Building new machines list"))
 	args := options{
-		libzfs: &zfs.LibZFSAdapter{},
+		libzfs: &libzfs.Adapter{},
 	}
 	for _, o := range opts {
 		if err := o(&args); err != nil {

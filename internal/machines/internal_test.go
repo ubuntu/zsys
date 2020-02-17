@@ -2,7 +2,6 @@ package machines
 
 import (
 	"context"
-	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -11,7 +10,6 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
-	"github.com/ubuntu/zsys/internal/zfs/mock"
 )
 
 func init() {
@@ -56,7 +54,7 @@ func TestResolveOrigin(t *testing.T) {
 			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
-			libzfs := getLibZFS(t)
+			libzfs := testutils.GetMockZFS(t)
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
@@ -82,19 +80,6 @@ func TestResolveOrigin(t *testing.T) {
 			assertDatasetsOrigin(t, got)
 		})
 	}
-}
-
-type testhelper interface {
-	Helper()
-}
-
-// TODO: for now, we can only run with mock zfs system
-func getLibZFS(t testhelper) testutils.LibZFSInterface {
-	t.Helper()
-
-	fmt.Println("Running tests with mocked libzfs")
-	mock := mock.New()
-	return &mock
 }
 
 // assertDatasetsOrigin compares got maps of origin to reference files, based on test name.

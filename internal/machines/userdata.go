@@ -13,6 +13,7 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
 // CreateUserData creates a new dataset for homepath and attach to current system.
@@ -86,13 +87,13 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) e
 	}
 
 	// Tag to associate with current system and lastUsed
-	if err := t.SetProperty(zfs.BootfsDatasetsProp, ms.current.ID, userdataset, false); err != nil {
+	if err := t.SetProperty(libzfs.BootfsDatasetsProp, ms.current.ID, userdataset, false); err != nil {
 		cancel()
 		return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, ms.current.ID, userdataset, err)
 	}
 
 	currentTime := strconv.Itoa(int(time.Now().Unix()))
-	if err := t.SetProperty(zfs.LastUsedProp, currentTime, userdataset, false); err != nil {
+	if err := t.SetProperty(libzfs.LastUsedProp, currentTime, userdataset, false); err != nil {
 		cancel()
 		return fmt.Errorf(i18n.G("couldn't set last used time to %q: ")+config.ErrorFormat, currentTime, err)
 	}
@@ -171,7 +172,7 @@ func (ms *Machines) tryReuseUserDataSet(t *zfs.Transaction, user string, oldhome
 			// We'll reuse that dataset
 			if match {
 				log.Infof(t.Context(), i18n.G("Reusing %q as matching user name or old mountpoint"), d.Name)
-				if err := t.SetProperty(zfs.MountPointProp, newhome, d.Name, false); err != nil {
+				if err := t.SetProperty(libzfs.MountPointProp, newhome, d.Name, false); err != nil {
 					return false, fmt.Errorf(i18n.G("couldn't set new home %q to %q: ")+config.ErrorFormat, newhome, d.Name, err)
 				}
 				return true, nil

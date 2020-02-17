@@ -6,59 +6,11 @@ import (
 	"path/filepath"
 	"strings"
 
-	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
-
-const (
-	zsysPrefix = "com.ubuntu.zsys:"
-	// BootfsProp string value
-	BootfsProp = zsysPrefix + "bootfs"
-	// LastUsedProp string value
-	LastUsedProp = zsysPrefix + "last-used"
-	// BootfsDatasetsProp string value
-	BootfsDatasetsProp = zsysPrefix + "bootfs-datasets"
-	// LastBootedKernelProp string value
-	LastBootedKernelProp = zsysPrefix + "last-booted-kernel"
-	// CanmountProp string value
-	CanmountProp = "canmount"
-	// SnapshotCanmountProp is the equivalent to CanmountProp, but as a user property to store on zsys snapshot
-	SnapshotCanmountProp = zsysPrefix + CanmountProp
-	// MountPointProp string value
-	MountPointProp = "mountpoint"
-	// SnapshotMountpointProp is the equivalent to MountPointProp, but as a user property to store on zsys snapshot
-	SnapshotMountpointProp = zsysPrefix + MountPointProp
-)
-
-// LibZFSInterface is the interface to use real libzfs or our in memory mock.
-type LibZFSInterface interface {
-	DatasetOpenAll() (datasets []DZFSInterface, err error)
-	DatasetOpen(name string) (d DZFSInterface, err error)
-	DatasetCreate(path string, dtype libzfs.DatasetType, props map[libzfs.Prop]libzfs.Property) (d DZFSInterface, err error)
-	DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (rd DZFSInterface, err error)
-	GenerateID(length int) string
-}
-
-// DZFSInterface is the interface to use real libzfs Dataset object or in memory mock.
-type DZFSInterface interface {
-	DZFSChildren() *[]libzfs.Dataset
-	Children() []DZFSInterface
-	Clone(target string, props map[libzfs.Prop]libzfs.Property) (rd DZFSInterface, err error)
-	Clones() (clones []string, err error)
-	Close()
-	Destroy(Defer bool) (err error)
-	GetUserProperty(p string) (prop libzfs.Property, err error)
-	IsSnapshot() (ok bool)
-	Pool() (p libzfs.Pool, err error)
-	Promote() (err error)
-	Properties() *map[libzfs.Prop]libzfs.Property
-	ReloadProperties() (err error)
-	SetUserProperty(prop, value string) error
-	SetProperty(p libzfs.Prop, value string) error
-	Type() libzfs.DatasetType
-}
 
 // Dataset is the abstraction of a physical dataset and exposes only properties that must are accessible by the user.
 type Dataset struct {
@@ -68,7 +20,7 @@ type Dataset struct {
 	DatasetProp
 
 	children []*Dataset
-	dZFS     DZFSInterface
+	dZFS     libzfs.DZFSInterface
 }
 
 // DatasetProp abstracts some properties for a given dataset
@@ -112,11 +64,11 @@ type Zfs struct {
 	root        *Dataset
 	allDatasets map[string]*Dataset
 
-	libzfs LibZFSInterface
+	libzfs libzfs.Interface
 }
 
 // WithLibZFS allows overriding default libzfs implementations with a mock
-func WithLibZFS(libzfs LibZFSInterface) func(*Zfs) {
+func WithLibZFS(libzfs libzfs.Interface) func(*Zfs) {
 	return func(z *Zfs) {
 		z.libzfs = libzfs
 	}
@@ -127,7 +79,7 @@ func New(ctx context.Context, options ...func(*Zfs)) (*Zfs, error) {
 	log.Debug(ctx, i18n.G("ZFS: new scan"))
 
 	z := Zfs{
-		libzfs: &LibZFSAdapter{},
+		libzfs: &libzfs.Adapter{},
 	}
 	for _, options := range options {
 		options(&z)
@@ -446,19 +398,19 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 	// Set user properties that we couldn't set before creating the snapshot dataset.
 	// We don't set LastUsed here as Creation time will be used.
 	userPropertiesToSet := map[string]string{
-		SnapshotMountpointProp: srcProps.Mountpoint + ":" + srcProps.sources.Mountpoint,
-		SnapshotCanmountProp:   srcProps.CanMount + ":" + srcProps.sources.CanMount,
+		libzfs.SnapshotMountpointProp: srcProps.Mountpoint + ":" + srcProps.sources.Mountpoint,
+		libzfs.SnapshotCanmountProp:   srcProps.CanMount + ":" + srcProps.sources.CanMount,
 	}
 	if srcProps.sources.BootFS != "" {
 		bootFS := "no"
 		if srcProps.BootFS {
 			bootFS = "yes"
 		}
-		userPropertiesToSet[BootfsProp] = bootFS + ":" + srcProps.sources.BootFS
+		userPropertiesToSet[libzfs.BootfsProp] = bootFS + ":" + srcProps.sources.BootFS
 	}
 
 	if srcProps.sources.LastBootedKernel != "" {
-		userPropertiesToSet[LastBootedKernelProp] = srcProps.LastBootedKernel + ":" + srcProps.sources.LastBootedKernel
+		userPropertiesToSet[libzfs.LastBootedKernelProp] = srcProps.LastBootedKernel + ":" + srcProps.sources.LastBootedKernel
 	}
 
 	for prop, value := range userPropertiesToSet {
@@ -656,14 +608,14 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string, ignoreErrorOn
 		if d.BootFS {
 			bootFS = "yes"
 		}
-		if err := newDataset.dZFS.SetUserProperty(BootfsProp, bootFS); err != nil {
-			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, BootfsProp, bootFS, newDataset.Name, err)
+		if err := newDataset.dZFS.SetUserProperty(libzfs.BootfsProp, bootFS); err != nil {
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, libzfs.BootfsProp, bootFS, newDataset.Name, err)
 		}
 	}
 
 	if d.sources.LastBootedKernel == "local" {
-		if err := newDataset.dZFS.SetUserProperty(LastBootedKernelProp, d.LastBootedKernel); err != nil {
-			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, LastBootedKernelProp, d.LastBootedKernel, newDataset.Name, err)
+		if err := newDataset.dZFS.SetUserProperty(libzfs.LastBootedKernelProp, d.LastBootedKernel); err != nil {
+			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, libzfs.LastBootedKernelProp, d.LastBootedKernel, newDataset.Name, err)
 		}
 	}
 

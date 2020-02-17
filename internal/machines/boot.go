@@ -11,6 +11,7 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
 // EnsureBoot consolidates canmount states for early boot.
@@ -148,7 +149,7 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	// displayed for current system dataset.
 	log.Infof(ctx, i18n.G("set current time to %q"), currentTime)
 	for _, d := range append(systemDatasets, userDatasets...) {
-		if err := t.SetProperty(zfs.LastUsedProp, currentTime, d.Name, false); err != nil {
+		if err := t.SetProperty(libzfs.LastUsedProp, currentTime, d.Name, false); err != nil {
 			cancel()
 			return false, fmt.Errorf(i18n.G("couldn't set last used time to %q: ")+config.ErrorFormat, currentTime, err)
 		}
@@ -162,7 +163,7 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 		// Signal last booted kernel changes.
 		// This will help the bootloader, like grub, to rebuild and adjust the marker for last successfully booted kernel in advanced options.
 		changed = true
-		if err := t.SetProperty(zfs.LastBootedKernelProp, kernel, bootedState.ID, false); err != nil {
+		if err := t.SetProperty(libzfs.LastBootedKernelProp, kernel, bootedState.ID, false); err != nil {
 			cancel()
 			return false, fmt.Errorf(i18n.G("couldn't set last booted kernel to %q ")+config.ErrorFormat, kernel, err)
 		}
@@ -244,7 +245,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 		// Reformat the name with the new uuid and clone now the dataset.
 		suffixIndex := strings.LastIndex(base, "_")
 		userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
-		if err := t.SetProperty(zfs.BootfsDatasetsProp, bootedStateID, userdatasetName, false); err != nil {
+		if err := t.SetProperty(libzfs.BootfsDatasetsProp, bootedStateID, userdatasetName, false); err != nil {
 			return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, bootedStateID, route, err)
 		}
 	}
@@ -264,7 +265,7 @@ func switchDatasetsCanMount(t *zfs.Transaction, ds []*zfs.Dataset, canMount stri
 			continue
 		}
 		log.Infof(t.Context(), i18n.G("Switch dataset %q to mount %q"), d.Name, canMount)
-		if err := t.SetProperty(zfs.CanmountProp, canMount, d.Name, false); err != nil {
+		if err := t.SetProperty(libzfs.CanmountProp, canMount, d.Name, false); err != nil {
 			return false, fmt.Errorf(i18n.G("couldn't switch %q canmount property to %q: ")+config.ErrorFormat, d.Name, canMount, err)
 		}
 		hasChanges = true
@@ -290,7 +291,7 @@ func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, cu
 			continue
 		}
 		log.Infof(t.Context(), i18n.G("Untagging user dataset: %q"), d.Name)
-		if err := t.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+		if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 			return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, id, d.Name, err)
 		}
 	}
@@ -311,7 +312,7 @@ func switchUsersDatasetsTags(t *zfs.Transaction, id string, allUsersDatasets, cu
 		if d.BootfsDatasets == id && d.LastUsed == 0 {
 			newTag = d.BootfsDatasets
 		}
-		if err := t.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+		if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 			return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, id, d.Name, err)
 		}
 	}

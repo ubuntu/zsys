@@ -11,6 +11,7 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
 // GetStateAndDependencies fetches a given state and all its deps
@@ -348,7 +349,7 @@ nextState:
 				// Associated with more than one: untag this one and all children
 				t, cancel := ms.z.NewTransaction(ctx)
 				defer t.Done()
-				if err := t.SetProperty(zfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+				if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 					cancel()
 					return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, route, d.Name, err)
 				}

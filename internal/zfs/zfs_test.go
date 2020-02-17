@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	libzfsorig "github.com/bicomsystems/go-libzfs"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/k0kubun/pp"
@@ -19,7 +18,7 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
-	"github.com/ubuntu/zsys/internal/zfs/mock"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
 func init() {
@@ -71,8 +70,8 @@ func TestNew(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
 
 			if tc.mounted != "" {
@@ -87,11 +86,11 @@ func TestNew(t *testing.T) {
 					}
 				} else {
 
-					d, err := libzfs.DatasetOpen(tc.mounted)
+					d, err := adapter.DatasetOpen(tc.mounted)
 					if err != nil {
 						t.Fatalf("couldn't open dataset %q", tc.mounted)
 					}
-					if err := d.SetProperty(libzfsorig.DatasetPropMounted, "yes"); err != nil {
+					if err := d.SetProperty(libzfs.DatasetPropMounted, "yes"); err != nil {
 						t.Fatalf("couldn't set mounted attribute on %q", tc.mounted)
 					}
 				}
@@ -99,16 +98,16 @@ func TestNew(t *testing.T) {
 			}
 
 			if tc.setInvalidLastUsed != "" {
-				d, err := libzfs.DatasetOpen(tc.setInvalidLastUsed)
+				d, err := adapter.DatasetOpen(tc.setInvalidLastUsed)
 				if err != nil {
 					t.Fatalf("couldn't open %q to set invalid LastUsed: %v", tc.setInvalidLastUsed, err)
 				}
-				if err := d.SetUserProperty(zfs.LastUsedProp, "invalid"); err != nil {
+				if err := d.SetUserProperty(libzfs.LastUsedProp, "invalid"); err != nil {
 					t.Fatalf("couldn't set invalid LastUsed on %q: %v", tc.setInvalidLastUsed, err)
 				}
 			}
 
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -131,11 +130,11 @@ func TestRefresh(t *testing.T) {
 	defer cleanup()
 
 	ta := timeAsserter(time.Now())
-	libzfs := getLibZFS(t)
-	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"), testutils.WithLibZFS(libzfs))
+	adapter := testutils.GetLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_one_dataset.yaml"), testutils.WithLibZFS(adapter))
 	defer fPools.Create(dir)()
 
-	z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
@@ -176,10 +175,10 @@ func TestCreate(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -203,7 +202,7 @@ func TestCreate(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+			assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 		})
 	}
 }
@@ -241,10 +240,10 @@ func TestSnapshot(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -270,7 +269,7 @@ func TestSnapshot(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+			assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 		})
 	}
 }
@@ -337,10 +336,10 @@ func TestClone(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -365,7 +364,7 @@ func TestClone(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+			assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 		})
 	}
 }
@@ -404,10 +403,10 @@ func TestPromote(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -447,7 +446,7 @@ func TestPromote(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+			assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 		})
 	}
 }
@@ -458,10 +457,10 @@ func TestPromoteCloneTree(t *testing.T) {
 	defer cleanup()
 
 	ta := timeAsserter(time.Now())
-	libzfs := getLibZFS(t)
-	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_n_clones.yaml"), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
+	adapter := testutils.GetLibZFS(t)
+	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_n_clones.yaml"), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(adapter))
 	defer fPools.Create(dir)()
-	z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
@@ -505,7 +504,7 @@ func TestPromoteCloneTree(t *testing.T) {
 	}
 
 	zfs.AssertNoZFSChildren(t, z)
-	assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+	assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 
 	err = trans.Promote("rpool/ROOT/ubuntu_8888")
 	if err != nil {
@@ -524,7 +523,7 @@ func TestPromoteCloneTree(t *testing.T) {
 	}
 
 	zfs.AssertNoZFSChildren(t, z)
-	assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+	assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 }
 
 func TestDestroy(t *testing.T) {
@@ -560,10 +559,10 @@ func TestDestroy(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithWaitBetweenSnapshots(), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -603,7 +602,7 @@ func TestDestroy(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+			assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 		})
 	}
 }
@@ -622,40 +621,40 @@ func TestSetProperty(t *testing.T) {
 		wantPanic bool
 		isNoOp    bool
 	}{
-		"User property (local)":         {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
-		"Authorized property (local)":   {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
-		"Authorized property (default)": {def: "one_pool_dataset_with_canmount_default.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool/ubuntu"},
-		"User property (none)":          {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.LastBootedKernelProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"User property (local)":         {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: libzfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool"},
+		"Authorized property (local)":   {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: libzfs.CanmountProp, propertyValue: "noauto", dataset: "rpool"},
+		"Authorized property (default)": {def: "one_pool_dataset_with_canmount_default.yaml", propertyName: libzfs.CanmountProp, propertyValue: "noauto", dataset: "rpool/ubuntu"},
+		"User property (none)":          {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: libzfs.LastBootedKernelProp, propertyValue: "SetProperty Value", dataset: "rpool"},
 		// There is no authorized native properties that can be "none"
 
 		// Canmount prop is already checked in authorized
-		"Mountpoint property": {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: zfs.MountPointProp, propertyValue: "/foo", dataset: "rpool"},
+		"Mountpoint property": {def: "one_pool_one_dataset_with_bootfsdatasets.yaml", propertyName: libzfs.MountPointProp, propertyValue: "/foo", dataset: "rpool"},
 
-		"User property (inherit)":            {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},
-		"User property (inherit but forced)": {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var", force: true},
+		"User property (inherit)":            {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: libzfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var"},
+		"User property (inherit but forced)": {def: "one_pool_n_datasets_n_children_with_bootfsdatasets.yaml", propertyName: libzfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool/ROOT/ubuntu/var", force: true},
 		// There is no authorized properties that can be inherited
 
 		// Property inheritance tests
-		"Inherit on authorized property (local)":         {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.MountPointProp, propertyValue: "/newroot", dataset: "rpool/ROOT/ubuntu_1234"},
-		"Don't inherit on authorized property (default)": {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.CanmountProp, propertyValue: "noauto", dataset: "rpool/ROOT/ubuntu_1234"},
-		"Inherit on user property (local)":               {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "New value", dataset: "rpool/ROOT/ubuntu_1234"},
-		"Inherit on user property (none)":                {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: zfs.LastBootedKernelProp, propertyValue: "New value", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Inherit on authorized property (local)":         {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: libzfs.MountPointProp, propertyValue: "/newroot", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Don't inherit on authorized property (default)": {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: libzfs.CanmountProp, propertyValue: "noauto", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Inherit on user property (local)":               {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: libzfs.BootfsDatasetsProp, propertyValue: "New value", dataset: "rpool/ROOT/ubuntu_1234"},
+		"Inherit on user property (none)":                {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml", propertyName: libzfs.LastBootedKernelProp, propertyValue: "New value", dataset: "rpool/ROOT/ubuntu_1234"},
 
-		"User property on snapshot (local)":                       {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.LastBootedKernelProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
-		"User property on snapshot (none)":                        {def: "one_pool_one_dataset_one_snapshot_without_user_properties.yaml", propertyName: zfs.LastBootedKernelProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
-		"User property on snapshot (inherit)":                     {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1"},
-		"User property on snapshot (inherit but forced)":          {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1", force: true},
-		"SnapshotMountpointProp is MountPointProp":                {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.SnapshotMountpointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1", force: true},
-		"Let set on BootfsDatasetsProp but don't load it (local)": {def: "one_pool_one_dataset_one_snapshot_with_bootfsdatasets.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
-		"Let set on BootfsDatasetsProp but don't load it (none)":  {def: "one_pool_one_dataset_one_snapshot_without_user_properties.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (local)":                       {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: libzfs.LastBootedKernelProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (none)":                        {def: "one_pool_one_dataset_one_snapshot_without_user_properties.yaml", propertyName: libzfs.LastBootedKernelProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"User property on snapshot (inherit)":                     {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: libzfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1"},
+		"User property on snapshot (inherit but forced)":          {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: libzfs.MountPointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1", force: true},
+		"SnapshotMountpointProp is MountPointProp":                {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: libzfs.SnapshotMountpointProp, propertyValue: "/home/a/path", dataset: "rpool@snap1", force: true},
+		"Let set on BootfsDatasetsProp but don't load it (local)": {def: "one_pool_one_dataset_one_snapshot_with_bootfsdatasets.yaml", propertyName: libzfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
+		"Let set on BootfsDatasetsProp but don't load it (none)":  {def: "one_pool_one_dataset_one_snapshot_without_user_properties.yaml", propertyName: libzfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool@snap1"},
 
-		"LastUsed with children":            {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.LastUsedProp, propertyValue: "42", dataset: "rpool"},
-		"LastUsed is not a number":          {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: zfs.LastUsedProp, propertyValue: "not a number", dataset: "rpool", wantErr: true, isNoOp: true},
-		"LastUsed is inherited by children": {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.LastUsedProp, propertyValue: "42", dataset: "rpool/ROOT/ubuntu"},
-		"LastUsed set empty":                {def: "one_pool_n_datasets_n_children.yaml", propertyName: zfs.LastUsedProp, propertyValue: "", dataset: "rpool/ROOT/ubuntu"},
+		"LastUsed with children":            {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: libzfs.LastUsedProp, propertyValue: "42", dataset: "rpool"},
+		"LastUsed is not a number":          {def: "one_pool_one_dataset_one_snapshot_with_user_properties.yaml", propertyName: libzfs.LastUsedProp, propertyValue: "not a number", dataset: "rpool", wantErr: true, isNoOp: true},
+		"LastUsed is inherited by children": {def: "one_pool_n_datasets_n_children.yaml", propertyName: libzfs.LastUsedProp, propertyValue: "42", dataset: "rpool/ROOT/ubuntu"},
+		"LastUsed set empty":                {def: "one_pool_n_datasets_n_children.yaml", propertyName: libzfs.LastUsedProp, propertyValue: "", dataset: "rpool/ROOT/ubuntu"},
 
 		"Unauthorized property":  {def: "one_pool_one_dataset.yaml", propertyName: "snapdir", propertyValue: "/setproperty/value", dataset: "rpool", wantPanic: true},
-		"Dataset doesn't exists": {def: "one_pool_one_dataset.yaml", propertyName: zfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
+		"Dataset doesn't exists": {def: "one_pool_one_dataset.yaml", propertyName: libzfs.BootfsDatasetsProp, propertyValue: "SetProperty Value", dataset: "rpool10", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -664,10 +663,10 @@ func TestSetProperty(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -698,7 +697,7 @@ func TestSetProperty(t *testing.T) {
 			}
 
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+			assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 		})
 	}
 }
@@ -758,10 +757,10 @@ func TestTransactionsWithZFS(t *testing.T) {
 			defer cleanup()
 
 			ta := timeAsserter(time.Now())
-			libzfs := getLibZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(adapter))
 			defer fPools.Create(dir)()
-			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -884,7 +883,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assert.Panics(t, func() { trans.SetProperty("snapdir", "no", "rpool/ROOT/ubuntu_1234", false) }, "Panic was expected but didn't happen")
 					assertDatasetsEquals(t, ta, state, z.Datasets())
 				} else {
-					err := trans.SetProperty(zfs.BootfsProp, "no", "rpool/ROOT/ubuntu_1234", false)
+					err := trans.SetProperty(libzfs.BootfsProp, "no", "rpool/ROOT/ubuntu_1234", false)
 					if err != nil {
 						t.Fatalf("changing property shouldn't have failed but it did: %v", err)
 					}
@@ -909,7 +908,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 				assertDatasetsEquals(t, ta, initState, z.Datasets())
 			}
 			zfs.AssertNoZFSChildren(t, z)
-			assertIdempotentWithNew(t, ta, z.Datasets(), libzfs)
+			assertIdempotentWithNew(t, ta, z.Datasets(), adapter)
 		})
 	}
 }
@@ -1124,11 +1123,11 @@ func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Data
 	datasetsNotEquals(t, want, got)
 }
 
-func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Dataset, libzfs zfs.LibZFSInterface) {
+func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Dataset, adapter libzfs.Interface) {
 	t.Helper()
 
 	// We should always have New() returning the same state than we manually updated
-	newZ, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+	newZ, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
@@ -1178,15 +1177,4 @@ func failOnZFSPermissionDenied(t *testing.T) {
 	if u.Uid != "0" {
 		t.Fatalf("you don't have permissions to interact with system zfs")
 	}
-}
-
-// TODO: duplicated between all tests, should be fixed
-func getLibZFS(t *testing.T) testutils.LibZFSInterface {
-	t.Helper()
-
-	if !testutils.UseSystemZFS() {
-		mock := mock.New()
-		return &mock
-	}
-	return &zfs.LibZFSAdapter{}
 }
