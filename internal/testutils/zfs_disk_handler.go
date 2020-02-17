@@ -13,6 +13,7 @@ import (
 
 	libzfs "github.com/bicomsystems/go-libzfs"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/mock"
 	"gopkg.in/yaml.v2"
 )
 
@@ -132,7 +133,7 @@ func (fpools FakePools) cleanup() {
 			fpools.t.Logf("couldn't delete %q: %v", p, err)
 			continue
 		}
-		if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+		if _, ok := fpools.libzfs.(*mock.LibZFSMock); !ok {
 			pool.Export(true, fmt.Sprintf("Export temporary pool %q", p))
 		}
 
@@ -235,7 +236,7 @@ func (fpools FakePools) Create(path string) func() {
 					d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
 				}
 				if dataset.Origin != "" {
-					if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+					if _, ok := fpools.libzfs.(*mock.LibZFSMock); !ok {
 						fpools.Fatalf("trying to set origin on clone for %q on real ZFS run. This is not possible", datasetName)
 					}
 					d.SetProperty(libzfs.DatasetPropOrigin, dataset.Origin)
@@ -254,7 +255,7 @@ func (fpools FakePools) Create(path string) func() {
 						}
 						props := make(map[libzfs.Prop]libzfs.Property)
 						if s.CreationTime != nil {
-							if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+							if _, ok := fpools.libzfs.(*mock.LibZFSMock); !ok {
 								fpools.Fatalf("trying to set snapshot time for %q on real ZFS run. This is not possible", datasetName)
 							}
 							props[libzfs.DatasetPropCreation] = libzfs.Property{Value: strconv.FormatInt(s.CreationTime.Unix(), 10)}

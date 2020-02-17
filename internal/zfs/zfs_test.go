@@ -19,6 +19,7 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/mock"
 )
 
 func init() {
@@ -1184,7 +1185,7 @@ func getLibZFS(t *testing.T) testutils.LibZFSInterface {
 	t.Helper()
 
 	if !testutils.UseSystemZFS() {
-		mock := zfs.NewLibZFSMock()
+		mock := mock.New()
 		return &mock
 	}
 	return &zfs.LibZFSAdapter{}

@@ -15,6 +15,7 @@ import (
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/mock"
 )
 
 func init() {
@@ -130,7 +131,7 @@ func TestNew(t *testing.T) {
 			defer fPools.Create(dir)()
 
 			if tc.mountedDataset != "" {
-				lzfs := libzfs.(*zfs.LibZFSMock)
+				lzfs := libzfs.(*mock.LibZFSMock)
 				lzfs.SetDatasetAsMounted(tc.mountedDataset, true)
 			}
 
@@ -242,7 +243,7 @@ func TestBoot(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 			if tc.mountedDataset != "" {
 				lzfs.SetDatasetAsMounted(tc.mountedDataset, true)
 			}
@@ -330,7 +331,7 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones_reverting.yaml"), testutils.WithLibZFS(libzfs))
 	defer fPools.Create(dir)()
 
-	lzfs := libzfs.(*zfs.LibZFSMock)
+	lzfs := libzfs.(*mock.LibZFSMock)
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_4242", true)
 
 	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
@@ -369,7 +370,7 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones_reverting.yaml"), testutils.WithLibZFS(libzfs))
 	defer fPools.Create(dir)()
 
-	lzfs := libzfs.(*zfs.LibZFSMock)
+	lzfs := libzfs.(*mock.LibZFSMock)
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_4242", true)
 
 	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
@@ -459,7 +460,7 @@ func TestCommit(t *testing.T) {
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 
 			lzfs.ErrOnScan(tc.scanErr)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
@@ -504,7 +505,7 @@ func TestIdempotentCommit(t *testing.T) {
 	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones_no_user_revert.yaml"), testutils.WithLibZFS(libzfs))
 	defer fPools.Create(dir)()
 
-	lzfs := libzfs.(*zfs.LibZFSMock)
+	lzfs := libzfs.(*mock.LibZFSMock)
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_9876", true)
 	lzfs.ForceLastUsedTime(true)
 
@@ -587,7 +588,7 @@ func TestCreateUserData(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 			lzfs.ForceLastUsedTime(true)
 
 			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
@@ -664,7 +665,7 @@ func TestChangeHomeOnUserData(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 			lzfs.ForceLastUsedTime(true)
 
 			initMachines, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
@@ -752,7 +753,7 @@ func TestCreateSystemSnapshot(t *testing.T) {
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 
 			lzfs.ForceLastUsedTime(true)
 			ms := initMachines
@@ -839,7 +840,7 @@ func TestCreateUserSnapshot(t *testing.T) {
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 
 			lzfs.ForceLastUsedTime(true)
 			ms := initMachines
@@ -1195,7 +1196,7 @@ func TestRemoveSystemStates(t *testing.T) {
 			}
 
 			ms := initMachines
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
 			var states []machines.State
@@ -1303,7 +1304,7 @@ func TestRemoveUserStates(t *testing.T) {
 			}
 
 			ms := initMachines
-			lzfs := libzfs.(*zfs.LibZFSMock)
+			lzfs := libzfs.(*mock.LibZFSMock)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
 			var states []machines.UserState
@@ -1531,6 +1532,6 @@ func getLibZFS(t testhelper) testutils.LibZFSInterface {
 	t.Helper()
 
 	fmt.Println("Running tests with mocked libzfs")
-	mock := zfs.NewLibZFSMock()
+	mock := mock.New()
 	return &mock
 }

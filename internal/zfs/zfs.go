@@ -43,7 +43,7 @@ type LibZFSInterface interface {
 
 // DZFSInterface is the interface to use real libzfs Dataset object or in memory mock.
 type DZFSInterface interface {
-	dZFSChildren() *[]libzfs.Dataset
+	DZFSChildren() *[]libzfs.Dataset
 	Children() []DZFSInterface
 	Clone(target string, props map[libzfs.Prop]libzfs.Property) (rd DZFSInterface, err error)
 	Clones() (clones []string, err error)

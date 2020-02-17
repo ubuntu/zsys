@@ -220,7 +220,7 @@ func newDatasetTree(ctx context.Context, dZFS DZFSInterface, allDatasets *map[st
 		children = append(children, c)
 	}
 	node.children = children
-	*node.dZFS.dZFSChildren() = nil
+	*node.dZFS.DZFSChildren() = nil
 
 	// Populate direct access map
 	(*allDatasets)[node.Name] = &node

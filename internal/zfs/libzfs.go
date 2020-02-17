@@ -89,7 +89,7 @@ func (d dZFSAdapter) Children() (children []DZFSInterface) {
 	return children
 }
 
-func (d dZFSAdapter) dZFSChildren() *[]libzfs.Dataset {
+func (d dZFSAdapter) DZFSChildren() *[]libzfs.Dataset {
 	return &d.Dataset.Children
 }
 
