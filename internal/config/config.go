@@ -70,9 +70,9 @@ func Load(ctx context.Context, path string) (ZConfig, error) {
 			return c, fmt.Errorf(i18n.G("failed to load configuration file %s: %v "), path, err)
 		}
 		log.Info(ctx, i18n.G("couldn't find default configuration path, fallback to internal default"))
-		/*if f, err = internalConfigDir.Open(filepath.Base(path)); err != nil {
+		if f, err = internalAssets.Open(filepath.Base(path)); err != nil {
 			return c, fmt.Errorf(i18n.G("couldn't read our internal configuration: %v "), path, err)
-		}*/
+		}
 	}
 	defer f.Close()
 
@@ -81,7 +81,7 @@ func Load(ctx context.Context, path string) (ZConfig, error) {
 		return c, fmt.Errorf(i18n.G("failed to read configuration file %s: %v "), path, err)
 	}
 
-	err = yaml.Unmarshal(b, c)
+	err = yaml.Unmarshal(b, &c)
 	if err != nil {
 		return c, fmt.Errorf(i18n.G("failed to unmarshal yaml: %v"), err)
 	}
