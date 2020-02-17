@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
@@ -57,6 +58,7 @@ func (ms *Machines) MakeComparable() {
 	ms.allSystemDatasets = ds
 
 	ms.z = nil
+	ms.conf = config.ZConfig{}
 }
 
 // SplitSnapshotName calls internal splitSnapshotName to split a snapshot name in base and id of a snapshot
