@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/ubuntu/zsys/internal/testutils"
 )
 
 func TestNestedTransaction(t *testing.T) {
@@ -26,7 +27,7 @@ func TestNestedTransaction(t *testing.T) {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			z, err := New(context.Background())
+			z, err := New(context.Background(), WithLibZFS(testutils.GetMockZFS(t)))
 			if err != nil {
 				t.Fatalf("couldn't create base ZFS object: %v", err)
 			}
@@ -92,7 +93,7 @@ func TestNestedTransaction(t *testing.T) {
 func TestNestedTransactionParentCancelledBeforeDone(t *testing.T) {
 	t.Parallel()
 
-	z, err := New(context.Background())
+	z, err := New(context.Background(), WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
 		t.Fatalf("couldn't create base ZFS object: %v", err)
 	}
