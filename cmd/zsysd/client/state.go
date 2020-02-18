@@ -58,7 +58,7 @@ func init() {
 	stateremoveCmd.Flags().StringVarP(&userName, "user", "u", "", i18n.G("Remove the state for a given user or current user if empty"))
 	stateremoveCmd.Flags().BoolVarP(&force, "force", "f", false, i18n.G("Force removing, even if dependencies are found"))
 
-	rootCmd.AddCommand(statesaveCmd) // Alias
+	cmdhandler.RegisterAlias(statesaveCmd, rootCmd)
 }
 
 func saveState(args []string) (err error) {

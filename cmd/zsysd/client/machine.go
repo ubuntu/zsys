@@ -46,6 +46,9 @@ func init() {
 	machineCmd.AddCommand(listCmd)
 
 	showCmd.Flags().BoolVarP(&fullInfo, "full", "", false, i18n.G("Give more detail informations on each machine."))
+
+	cmdhandler.RegisterAlias(listCmd, rootCmd)
+	cmdhandler.RegisterAlias(showCmd, rootCmd)
 }
 
 func show(args []string) error {
