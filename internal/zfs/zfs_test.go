@@ -939,7 +939,7 @@ func TestTransaction(t *testing.T) {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
-			z, err := zfs.New(context.Background())
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(testutils.GetMockZFS(t)))
 			if err != nil {
 				t.Fatalf("couldn't create base ZFS object: %v", err)
 			}
@@ -990,7 +990,7 @@ func TestTransactionContextIsSubContext(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	z, err := zfs.New(ctx)
+	z, err := zfs.New(ctx, zfs.WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
 		t.Fatalf("couldn't create base ZFS object: %v", err)
 	}
@@ -1014,7 +1014,7 @@ func TestTransactionContextIsSubContext(t *testing.T) {
 func TestInvalidatedTransactionByDone(t *testing.T) {
 	t.Parallel()
 
-	z, err := zfs.New(context.Background())
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
 		t.Fatalf("couldn't create base ZFS object: %v", err)
 	}
@@ -1028,7 +1028,7 @@ func TestInvalidatedTransactionByDone(t *testing.T) {
 func TestInvalidatedTransactionByCancel(t *testing.T) {
 	t.Parallel()
 
-	z, err := zfs.New(context.Background())
+	z, err := zfs.New(context.Background(), zfs.WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
 		t.Fatalf("couldn't create base ZFS object: %v", err)
 	}

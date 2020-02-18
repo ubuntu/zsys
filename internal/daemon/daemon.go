@@ -17,6 +17,7 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"github.com/ubuntu/zsys/internal/machines"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 	"google.golang.org/grpc"
 )
 
@@ -52,8 +53,17 @@ func WithIdleTimeout(timeout time.Duration) func(o *options) error {
 	}
 }
 
+// WithLibZFS allows overriding default libzfs implementations with a mock
+func WithLibZFS(libzfs libzfs.Interface) func(o *options) error {
+	return func(o *options) error {
+		o.libzfs = libzfs
+		return nil
+	}
+}
+
 type options struct {
 	timeout                   time.Duration
+	libzfs                    libzfs.Interface
 	authorizer                *authorizer.Authorizer
 	systemdActivationListener func() ([]net.Listener, error)
 	systemdSdNotifier         func(unsetEnvironment bool, state string) (bool, error)
@@ -68,6 +78,7 @@ func New(socket string, opts ...option) (*Server, error) {
 		timeout:                   config.DefaultServerIdleTimeout,
 		systemdActivationListener: activation.Listeners,
 		systemdSdNotifier:         daemon.SdNotify,
+		libzfs:                    &libzfs.Adapter{},
 	}
 	for _, o := range opts {
 		if err := o(&args); err != nil {
@@ -101,7 +112,7 @@ func New(socket string, opts ...option) (*Server, error) {
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("couldn't parse kernel command line: %v"), err)
 	}
-	ms, err := machines.New(context.Background(), cmdline)
+	ms, err := machines.New(context.Background(), cmdline, machines.WithLibZFS(args.libzfs))
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("couldn't create a new machine: %v"), err)
 	}

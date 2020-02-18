@@ -22,7 +22,7 @@ func TestServerStartStop(t *testing.T) {
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
 
-	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"))
+	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
 		t.Errorf("expected no error but got: %v", err)
 	}
@@ -33,7 +33,7 @@ func TestServerStartStop(t *testing.T) {
 func TestServerFailingOption(t *testing.T) {
 	t.Parallel()
 
-	if _, err := daemon.New("foo", daemon.FailingOption()); err == nil {
+	if _, err := daemon.New("foo", daemon.FailingOption(), daemon.WithLibZFS(testutils.GetMockZFS(t))); err == nil {
 		t.Error("expected an error but got none")
 	}
 }
@@ -114,7 +114,7 @@ func TestServerDontTimeoutWithMultipleRequests(t *testing.T) {
 func TestServerCannotCreateSocket(t *testing.T) {
 	t.Parallel()
 
-	_, err := daemon.New("/path/does/not/exist/daemon_test.sock")
+	_, err := daemon.New("/path/does/not/exist/daemon_test.sock", daemon.WithLibZFS(testutils.GetMockZFS(t)))
 	if err == nil {
 		t.Error("expected an error but got none")
 	}
@@ -162,7 +162,7 @@ func TestServerSocketActivation(t *testing.T) {
 				}
 			}
 
-			s, err := daemon.New("foo", daemon.WithSystemdActivationListener(f))
+			s, err := daemon.New("foo", daemon.WithSystemdActivationListener(f), daemon.WithLibZFS(testutils.GetMockZFS(t)))
 			if tc.wantErr && err == nil {
 				t.Fatal("expected an error but none")
 			} else if !tc.wantErr && err != nil {
@@ -215,7 +215,8 @@ func TestServerSdNotifier(t *testing.T) {
 						return false, errors.New("systemd notifier error")
 					}
 					return tc.sent, nil
-				}))
+				}),
+				daemon.WithLibZFS(testutils.GetMockZFS(t)))
 			if !tc.wantErr && err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -253,7 +254,7 @@ func assertServerTimeout(t *testing.T, s *daemon.Server, errs chan error) {
 func startDaemonAndListen(t *testing.T, dir string, timeout time.Duration) (*daemon.Server, chan error) {
 	t.Helper()
 
-	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.WithIdleTimeout(timeout))
+	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.WithIdleTimeout(timeout), daemon.WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
