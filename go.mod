@@ -3,7 +3,7 @@ module github.com/ubuntu/zsys
 go 1.13
 
 require (
-	github.com/bicomsystems/go-libzfs v0.3.1
+	github.com/bicomsystems/go-libzfs v0.3.3
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
 	github.com/godbus/dbus/v5 v5.0.3
 	github.com/golang/protobuf v1.3.2
