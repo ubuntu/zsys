@@ -6,12 +6,10 @@ import (
 	"io/ioutil"
 	"net"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ubuntu/zsys/internal/testutils"
@@ -19,7 +17,7 @@ import (
 
 func TestIsAllowed(t *testing.T) {
 	t.Parallel()
-	defer StartLocalSystemBus(t)()
+	defer testutils.StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
 		action    Action
@@ -147,88 +145,4 @@ func TestServerPeerCredsInvalidSocket(t *testing.T) {
 
 	s := serverPeerCreds{}
 	s.ServerHandshake(nil)
-}
-
-var (
-	sdbus sync.Once
-
-	mu             sync.Mutex
-	nbRunningTests uint
-)
-
-func StartLocalSystemBus(t *testing.T) func() {
-	t.Helper()
-
-	mu.Lock()
-	defer mu.Unlock()
-	nbRunningTests++
-
-	sdbus.Do(func() {
-		dir, cleanup := testutils.TempDir(t)
-		savedDbusSystemAddress := os.Getenv("DBUS_SYSTEM_BUS_ADDRESS")
-		config := filepath.Join(dir, "dbus.config")
-		ioutil.WriteFile(config, []byte(`<!DOCTYPE busconfig PUBLIC "-//freedesktop//DTD D-Bus Bus Configuration 1.0//EN"
- "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
-<busconfig>
-  <type>system</type>
-  <keep_umask/>
-  <listen>unix:tmpdir=/tmp</listen>
-  <standard_system_servicedirs />
-  <policy context="default">
-    <allow send_destination="*" eavesdrop="true"/>
-    <allow eavesdrop="true"/>
-    <allow own="*"/>
-  </policy>
-</busconfig>`), 0666)
-		ctx, stopDbus := context.WithCancel(context.Background())
-		cmd := exec.CommandContext(ctx, "dbus-daemon", "--print-address=1", "--config-file="+config)
-		dbusStdout, err := cmd.StdoutPipe()
-		if err != nil {
-			t.Fatalf("couldn't get stdout of dbus-daemon: %v", err)
-		}
-		if err := cmd.Start(); err != nil {
-			t.Fatalf("couldn't start dbus-daemon: %v", err)
-		}
-		dbusAddr := make([]byte, 256)
-		n, err := dbusStdout.Read(dbusAddr)
-		if err != nil {
-			t.Fatalf("couldn't get dbus address: %v", err)
-		}
-		dbusAddr = dbusAddr[:n]
-		if err := os.Setenv("DBUS_SYSTEM_BUS_ADDRESS", string(dbusAddr)); err != nil {
-			t.Fatalf("couldn't set DBUS_SYSTEM_BUS_ADDRESS: %v", err)
-		}
-
-		go func() {
-			for {
-				time.Sleep(time.Second)
-				mu.Lock()
-
-				// Wait for all tests that started to be done to cleanup properly
-				if nbRunningTests != 0 {
-					mu.Unlock()
-					continue
-				}
-
-				stopDbus()
-				cmd.Wait()
-
-				if err := os.Setenv("DBUS_SYSTEM_BUS_ADDRESS", savedDbusSystemAddress); err != nil {
-					t.Errorf("couldn't restore DBUS_SYSTEM_BUS_ADDRESS: %v", err)
-				}
-				cleanup()
-
-				// Restore dbus system launcher
-				sdbus = sync.Once{}
-				mu.Unlock()
-				break
-			}
-		}()
-	})
-
-	return func() {
-		mu.Lock()
-		defer mu.Unlock()
-		nbRunningTests--
-	}
 }

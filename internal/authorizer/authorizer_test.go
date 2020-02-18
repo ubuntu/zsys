@@ -8,12 +8,13 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ubuntu/zsys/internal/authorizer"
+	"github.com/ubuntu/zsys/internal/testutils"
 	"google.golang.org/grpc/peer"
 )
 
 func TestIsAllowedFromContext(t *testing.T) {
 	t.Parallel()
-	defer authorizer.StartLocalSystemBus(t)()
+	defer testutils.StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
 		action authorizer.Action
@@ -80,7 +81,7 @@ func TestIsAllowedFromContext(t *testing.T) {
 
 func TestIsAllowedFromContextWithoutPeer(t *testing.T) {
 	t.Parallel()
-	defer authorizer.StartLocalSystemBus(t)()
+	defer testutils.StartLocalSystemBus(t)()
 
 	a, err := authorizer.New()
 	if err != nil {
@@ -93,7 +94,7 @@ func TestIsAllowedFromContextWithoutPeer(t *testing.T) {
 
 func TestIsAllowedFromContextWithInvalidPeerCreds(t *testing.T) {
 	t.Parallel()
-	defer authorizer.StartLocalSystemBus(t)()
+	defer testutils.StartLocalSystemBus(t)()
 
 	a, err := authorizer.New()
 	if err != nil {
@@ -111,7 +112,7 @@ func TestIsAllowedFromContextWithInvalidPeerCreds(t *testing.T) {
 
 func TestIsAllowedFromContextWithoutUserKey(t *testing.T) {
 	t.Parallel()
-	defer authorizer.StartLocalSystemBus(t)()
+	defer testutils.StartLocalSystemBus(t)()
 
 	p := peer.Peer{
 		AuthInfo: authorizer.NewTestPeerCredsInfo(1000, 10000),

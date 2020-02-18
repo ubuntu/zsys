@@ -18,6 +18,7 @@ func TestServerStartStop(t *testing.T) {
 	   It can be reenabled once the race is fixed
 	*/
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -32,6 +33,7 @@ func TestServerStartStop(t *testing.T) {
 
 func TestServerFailingOption(t *testing.T) {
 	t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	if _, err := daemon.New("foo", daemon.FailingOption(), daemon.WithLibZFS(testutils.GetMockZFS(t))); err == nil {
 		t.Fatal("expected an error but got none")
@@ -40,6 +42,7 @@ func TestServerFailingOption(t *testing.T) {
 
 func TestServerStartListenStop(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -61,6 +64,7 @@ func TestServerStartListenStop(t *testing.T) {
 
 func TestServerStartListenTimeout(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -71,6 +75,7 @@ func TestServerStartListenTimeout(t *testing.T) {
 
 func TestServerDontTimeoutOnRequest(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -91,6 +96,7 @@ func TestServerDontTimeoutOnRequest(t *testing.T) {
 
 func TestServerDontTimeoutWithMultipleRequests(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -121,6 +127,7 @@ func TestServerCannotCreateSocket(t *testing.T) {
 }
 
 func TestServerSocketActivation(t *testing.T) {
+	defer testutils.StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
 		sockets      []string
@@ -185,6 +192,7 @@ func TestServerSocketActivation(t *testing.T) {
 }
 
 func TestServerSdNotifier(t *testing.T) {
+	defer testutils.StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
 		sent         bool
