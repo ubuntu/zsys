@@ -133,11 +133,13 @@ func (ms *Machines) GC(ctx context.Context) error {
 						keep = keepYes
 					} else {
 						// We only collect systems because users will be untagged if they have any dependency
+					analyzeSystemDataset:
 						for _, ds := range s.SystemDatasets {
 							for _, d := range ds {
 								// keep the whole state if any dataset is the origin of a clone of if it’s a clone with snapshots on it
 								if byOrigin[d.Name] != nil || snapshotsByDS[d.Name] != nil {
 									keep = keepYes
+									break analyzeSystemDataset
 								}
 							}
 						}
@@ -275,12 +277,15 @@ func (ms *Machines) GC(ctx context.Context) error {
 							}
 						} else if keep == keepUnknown {
 							// check if any dataset has a automated or manual clone
+						analyzeUserDataset:
 							for _, d := range s.Datasets {
 								// We only treat snapshots as clones are necessarily associated with one system state or
 								// has already been destroyed and not associated.
 								// do we have clones of us?
 								if byOrigin[d.Name] != nil {
 									keep = keepYes
+									break analyzeUserDataset
+
 								}
 							}
 						}
