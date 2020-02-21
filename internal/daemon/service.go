@@ -173,5 +173,8 @@ func (s *Server) GC(req *zsys.Empty, stream zsys.Zsys_GCServer) error {
 	}
 	log.Info(stream.Context(), i18n.G("Requesting zsys daemon to garbage collect"))
 
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
 	return s.Machines.GC(stream.Context())
 }
