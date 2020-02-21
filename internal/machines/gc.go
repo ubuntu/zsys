@@ -98,13 +98,17 @@ func (ms *Machines) GC(ctx context.Context) error {
 			sort.Sort(sortedStates)
 
 			for _, bucket := range buckets {
+				log.Debugf(ctx, i18n.G("Processing bucket %v"), bucket)
+
 				// End of the array, nothing else to do.
 				if lastStateIndex > len(sortedStates) {
+					log.Debug(ctx, i18n.G("lastStateIndex > len(sortedStates). Breaking"))
 					break
 				}
 
 				// No states for this bucket, advance to next one.
 				if sortedStates[lastStateIndex].LastUsed.After(bucket.start) {
+					log.Debug(ctx, i18n.G("state.LastUsed > bucket.start. Continuing"))
 					continue
 				}
 
@@ -114,6 +118,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 					for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
 					}
 					lastStateIndex = i
+					log.Debug(ctx, i18n.G("Keeping all snapshots for this bucket"))
 					continue
 				}
 
@@ -122,14 +127,19 @@ func (ms *Machines) GC(ctx context.Context) error {
 				for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
 				}
 				firstStateIndex := i - 1
+				log.Debug(ctx, i18n.G("First state matching for this bucket:"), sortedStates[firstStateIndex].LastUsed)
 
 				// Collect all states for current bucket and mark those having constraints
 				states := make([]stateWithKeep, 0, lastStateIndex-firstStateIndex+1)
+				log.Debug(ctx, i18n.G("Collecting all states for current bucket"))
 				for i := lastStateIndex; i < firstStateIndex; i++ {
+					log.Debug(ctx, i18n.G("Analyzing state:"), sortedStates[i].LastUsed)
+
 					s := sortedStates[i]
 
 					keep := keepUnknown
 					if s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 						keep = keepYes
 					} else {
 						// We only collect systems because users will be untagged if they have any dependency
@@ -138,6 +148,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 							for _, d := range ds {
 								// keep the whole state if any dataset is the origin of a clone of if it’s a clone with snapshots on it
 								if byOrigin[d.Name] != nil || snapshotsByDS[d.Name] != nil {
+									log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
 									keep = keepYes
 									break analyzeSystemDataset
 								}
@@ -153,6 +164,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 
 				// Ensure we have the minimum amount of states on this bucket.
 				nStatesToRemove := len(states) - bucket.samples
+				log.Debugf(ctx, i18n.G("This bucket should remove at most %d states"), nStatesToRemove)
 				if nStatesToRemove <= 0 {
 					continue
 				}
@@ -189,7 +201,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 			}
 		}
 
-		// Skip uneeded refresh that way
+		// Skip unneeded refresh that way
 		if !statesChanges {
 			break
 		}
@@ -227,13 +239,17 @@ func (ms *Machines) GC(ctx context.Context) error {
 				sort.Sort(sortedStates)
 
 				for _, bucket := range buckets {
+					log.Debugf(ctx, i18n.G("Processing bucket %v"), bucket)
+
 					// End of the array, nothing else to do.
 					if lastStateIndex > len(sortedStates) {
+						log.Debug(ctx, i18n.G("lastStateIndex > len(sortedStates). Breaking"))
 						break
 					}
 
 					// No states for this bucket, advance to next one.
 					if sortedStates[lastStateIndex].LastUsed.After(bucket.start) {
+						log.Debug(ctx, i18n.G("state.LastUsed > bucket.start. Continuing"))
 						continue
 					}
 
@@ -243,6 +259,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 						for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
 						}
 						lastStateIndex = i
+						log.Debug(ctx, i18n.G("Keeping all snapshots for this bucket"))
 						continue
 					}
 
@@ -251,15 +268,19 @@ func (ms *Machines) GC(ctx context.Context) error {
 					for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
 					}
 					firstStateIndex := i - 1
+					log.Debug(ctx, i18n.G("First state matching for this bucket:"), sortedStates[firstStateIndex].LastUsed)
 
 					// Collect all states for current bucket and mark those having constraints
 					states := make([]userStateWithKeep, 0, lastStateIndex-firstStateIndex+1)
+					log.Debug(ctx, i18n.G("Collecting all states for current bucket"))
 					for i := lastStateIndex; i < firstStateIndex; i++ {
+						log.Debug(ctx, i18n.G("Analyzing state:"), sortedStates[i].LastUsed)
 						s := sortedStates[i]
 
 						keep := keepUnknown
 						// We can only collect snapshots here for user datasets, or they are unassociated clones that we will clean up later
 						if !s.isSnapshot() {
+							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot, and necessarily associatged to a system state"), s.ID)
 							keep = keepYes
 						} else if keep == keepUnknown {
 							_, snapshotName := splitSnapshotName(s.ID)
@@ -271,6 +292,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 								}
 								_, n := splitSnapshotName(k)
 								if n == snapshotName {
+									log.Debugf(ctx, i18n.G("Keeping as snapshot %v is associated to a system snapshot"), s.ID)
 									keep = keepYes
 									break
 								}
@@ -283,6 +305,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 								// has already been destroyed and not associated.
 								// do we have clones of us?
 								if byOrigin[d.Name] != nil {
+									log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
 									keep = keepYes
 									break analyzeUserDataset
 
@@ -298,6 +321,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 
 					// Ensure we have the minimum amount of states on this bucket.
 					nStatesToRemove := len(states) - bucket.samples
+					log.Debugf(ctx, i18n.G("This bucket should remove at most %d states"), nStatesToRemove)
 					if nStatesToRemove <= 0 {
 						continue
 					}
