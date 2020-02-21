@@ -10,6 +10,8 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
+const automatedSnapshotPrefix = "autozsys_"
+
 // CreateSystemSnapshot creates a snapshot of a system and all users datasets.
 // If snapshotname is not empty, it is used as the id of the snapshot otherwise an id
 // is generated with a random string.
@@ -40,7 +42,7 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 	}
 
 	if name == "" {
-		name = "autozsys_" + ms.z.GenerateID(6)
+		name = automatedSnapshotPrefix + ms.z.GenerateID(6)
 	}
 
 	t, cancel := ms.z.NewTransaction(ctx)
