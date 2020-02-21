@@ -67,6 +67,12 @@ var (
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = reloadConfig() },
 	}
+	gcCmd = &cobra.Command{
+		Use:   "gc",
+		Short: i18n.G("Run daemon state saves garbage collection."),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = gc() },
+	}
 )
 
 var (
@@ -340,6 +346,37 @@ func reloadConfig() error {
 	defer cancel()
 
 	stream, err := client.Reload(ctx, &zsys.Empty{})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func gc() error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.GC(ctx, &zsys.Empty{})
 	if err = checkConn(err); err != nil {
 		return err
 	}

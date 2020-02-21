@@ -165,3 +165,13 @@ func (s *Server) Reload(req *zsys.Empty, stream zsys.Zsys_ReloadServer) error {
 
 	return s.Machines.Reload(stream.Context())
 }
+
+// GC call machine garbage collection stops zsys daemon
+func (s *Server) GC(req *zsys.Empty, stream zsys.Zsys_GCServer) error {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionAlwaysAllowed); err != nil {
+		return err
+	}
+	log.Info(stream.Context(), i18n.G("Requesting zsys daemon to garbage collect"))
+
+	return s.Machines.GC(stream.Context())
+}
