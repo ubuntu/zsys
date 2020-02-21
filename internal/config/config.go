@@ -21,24 +21,25 @@ const TEXTDOMAIN = "zsys"
 // ErrorFormat switch between "%v" and "%+v" depending if we want more verbose info
 var ErrorFormat = "%v"
 
-// ZConfig stores the configiuration of zsys
+// ZConfig stores the configuration of zsys
 type ZConfig struct {
-	History struct {
-		Users  GCRules
-		System GCRules
-	}
+	History HistoryRules
 	General struct {
 		Timeout int
 	}
 	Path string
 }
 
-// GCRules stores the rules of the garbage collector
-type GCRules struct {
-	PerDay   int
-	PerWeek  int
-	PerMonth int
-	PerYear  int
+// HistoryRules store the rules for each GC element
+type HistoryRules struct {
+	GCStartAfter int
+	KeepLast     int
+	GCRules      []struct {
+		Name             string
+		Buckets          int
+		BucketLength     int
+		SamplesPerBucket int
+	}
 }
 
 // SetVerboseMode change ErrorFormat and logs between very, middly and non verbose
