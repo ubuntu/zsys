@@ -391,7 +391,7 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 
 		// Extract zsys user datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
-		if strings.Contains(strings.ToLower(d.Name), userdatasetsContainerName) {
+		if isUserDataset(d.Name) {
 			userdatas = append(userdatas, &d)
 			continue
 		}

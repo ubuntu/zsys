@@ -197,3 +197,7 @@ func userFromDatasetName(n string) string {
 	return user
 
 }
+
+func isUserDataset(path string) bool {
+	return strings.Contains(strings.ToLower(path), userdatasetsContainerName)
+}
