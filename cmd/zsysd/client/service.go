@@ -89,6 +89,7 @@ func init() {
 	serviceCmd.AddCommand(refreshCmd)
 	serviceCmd.AddCommand(traceCmd)
 	serviceCmd.AddCommand(reloadCmd)
+	serviceCmd.AddCommand(gcCmd)
 
 	traceCmd.Flags().StringVarP(&traceOutput, "output", "o", "", i18n.G("Dump the trace to a file. Default is ./zsys.<trace-type>.pprof"))
 	traceCmd.Flags().StringVarP(&traceType, "type", "t", "cpu", i18n.G("Type of profiling cpu or mem. Default is cpu."))
