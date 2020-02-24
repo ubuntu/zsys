@@ -61,6 +61,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	now := time.Now()
 
 	buckets := computeBuckets(now, ms.conf.History)
+	keepLast := ms.conf.History.KeepLast
 
 	allDatasets := make([]*zfs.Dataset, 0, len(ms.allSystemDatasets)+len(ms.allPersistentDatasets)+len(ms.allUsersDatasets)+len(ms.unmanagedDatasets))
 
@@ -141,6 +142,9 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					keep := keepUnknown
 					if !all && s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
+						keep = keepYes
+					} else if keep == keepUnknown && i < keepLast {
+						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
 						keep = keepYes
 					} else {
 						// We only collect systems because users will be untagged if they have any dependency
@@ -292,6 +296,9 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 							keep = keepYes
 						} else if keep == keepUnknown && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
+							keep = keepYes
+						} else if keep == keepUnknown && i < keepLast {
+							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
 							keep = keepYes
 						} else if keep == keepUnknown {
 							_, snapshotName := splitSnapshotName(s.ID)
