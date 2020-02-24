@@ -20,6 +20,7 @@ type bucket struct {
 }
 
 const timeDay = 24 * int(time.Hour)
+const timeFormat = "2006-01-02 15:04:05"
 
 type sortedReverseByTimeStates []*State
 
@@ -90,7 +91,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 		statesChanges := false
 
 		for _, m := range ms.all {
-			var lastStateIndex int
+			var newestStateIndex int
 			var sortedStates sortedReverseByTimeStates
 			for _, s := range m.History {
 				sortedStates = append(sortedStates, s)
@@ -98,42 +99,42 @@ func (ms *Machines) GC(ctx context.Context) error {
 			sort.Sort(sortedStates)
 
 			for _, bucket := range buckets {
-				log.Debugf(ctx, i18n.G("Processing bucket %v"), bucket)
+				log.Debugf(ctx, i18n.G("bucket %+v"), bucket)
 
 				// End of the array, nothing else to do.
-				if lastStateIndex > len(sortedStates) {
-					log.Debug(ctx, i18n.G("lastStateIndex > len(sortedStates). Breaking"))
+				if newestStateIndex >= len(sortedStates) {
+					log.Debug(ctx, i18n.G("No more system states left. Stopping analyzing buckets"))
 					break
 				}
 
-				// No states for this bucket, advance to next one.
-				if sortedStates[lastStateIndex].LastUsed.After(bucket.start) {
-					log.Debug(ctx, i18n.G("state.LastUsed > bucket.start. Continuing"))
-					continue
-				}
+				log.Debugf(ctx, i18n.G("current state: %s"), sortedStates[newestStateIndex].ID)
 
-				// Don't touch anything for this bucket, skip all states in here and advance to next one.
-				if bucket.samples == -1 {
-					var i int
-					for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
-					}
-					lastStateIndex = i
-					log.Debug(ctx, i18n.G("Keeping all snapshots for this bucket"))
+				// No states for this bucket, advance to next one.
+				if sortedStates[newestStateIndex].LastUsed.Before(bucket.start) {
+					log.Debugf(ctx, i18n.G("state.LastUsed (%s) before bucket.start (%s). Continuing"),
+						sortedStates[newestStateIndex].LastUsed.Format(timeFormat), bucket.start.Format(timeFormat))
 					continue
 				}
 
 				// Advance to first state matching this bucket.
 				var i int
-				for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
+				for i = newestStateIndex; i < len(sortedStates) && sortedStates[i].LastUsed.After(bucket.start); i++ {
 				}
-				firstStateIndex := i - 1
-				log.Debug(ctx, i18n.G("First state matching for this bucket:"), sortedStates[firstStateIndex].LastUsed)
+				oldestStateIndex := i - 1
+				log.Debugf(ctx, i18n.G("First state matching for this bucket: %s (%s)"), sortedStates[oldestStateIndex].ID, sortedStates[oldestStateIndex].LastUsed.Format(timeFormat))
+
+				// Don't touch anything for this bucket, skip all states in here and advance to next one.
+				if bucket.samples == -1 {
+					log.Debug(ctx, i18n.G("Keeping all snapshots for this bucket"))
+					newestStateIndex = oldestStateIndex + 1
+					continue
+				}
 
 				// Collect all states for current bucket and mark those having constraints
-				states := make([]stateWithKeep, 0, lastStateIndex-firstStateIndex+1)
+				states := make([]stateWithKeep, 0, oldestStateIndex-newestStateIndex+1)
 				log.Debug(ctx, i18n.G("Collecting all states for current bucket"))
-				for i := lastStateIndex; i < firstStateIndex; i++ {
-					log.Debug(ctx, i18n.G("Analyzing state:"), sortedStates[i].LastUsed)
+				for i := newestStateIndex; i <= oldestStateIndex; i++ {
+					log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), sortedStates[i].ID, sortedStates[i].LastUsed.Format(timeFormat))
 
 					s := sortedStates[i]
 
@@ -164,10 +165,12 @@ func (ms *Machines) GC(ctx context.Context) error {
 
 				// Ensure we have the minimum amount of states on this bucket.
 				nStatesToRemove := len(states) - bucket.samples
-				log.Debugf(ctx, i18n.G("This bucket should remove at most %d states"), nStatesToRemove)
 				if nStatesToRemove <= 0 {
+					log.Debugf(ctx, i18n.G("No exceeding states for this bucket (delta: %d). Moving on."), nStatesToRemove)
+					newestStateIndex = oldestStateIndex + 1
 					continue
 				}
+				log.Debugf(ctx, i18n.G("There are %d exceeding states to potentially remove"), nStatesToRemove)
 
 				// FIXME: easy path: Remove first states that we don't keep
 				for _, s := range states {
@@ -197,7 +200,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 					nStatesToRemove--
 					statesChanges = true
 				}
-				lastStateIndex = firstStateIndex + 1
+				newestStateIndex = oldestStateIndex + 1
 			}
 		}
 
@@ -229,8 +232,8 @@ func (ms *Machines) GC(ctx context.Context) error {
 		statesChanges := false
 
 		for _, m := range ms.all {
-			var lastStateIndex int
 			for _, us := range m.Users {
+				var newestStateIndex int
 				var sortedStates sortedReverseByTimeUserStates
 
 				for _, s := range us {
@@ -239,48 +242,51 @@ func (ms *Machines) GC(ctx context.Context) error {
 				sort.Sort(sortedStates)
 
 				for _, bucket := range buckets {
-					log.Debugf(ctx, i18n.G("Processing bucket %v"), bucket)
+					log.Debugf(ctx, i18n.G("bucket %+v"), bucket)
 
 					// End of the array, nothing else to do.
-					if lastStateIndex > len(sortedStates) {
-						log.Debug(ctx, i18n.G("lastStateIndex > len(sortedStates). Breaking"))
+					if newestStateIndex >= len(sortedStates) {
+						log.Debug(ctx, i18n.G("No more user states left. Stopping analyzing buckets"))
 						break
 					}
 
-					// No states for this bucket, advance to next one.
-					if sortedStates[lastStateIndex].LastUsed.After(bucket.start) {
-						log.Debug(ctx, i18n.G("state.LastUsed > bucket.start. Continuing"))
-						continue
-					}
+					log.Debugf(ctx, i18n.G("current state: %s"), sortedStates[newestStateIndex].ID)
 
-					// Don't touch anything for this bucket, skip all states in here and advance to next one.
-					if bucket.samples == -1 {
-						var i int
-						for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
-						}
-						lastStateIndex = i
-						log.Debug(ctx, i18n.G("Keeping all snapshots for this bucket"))
+					// No states for this bucket, advance to next one.
+					if sortedStates[newestStateIndex].LastUsed.Before(bucket.start) {
+						log.Debugf(ctx, i18n.G("state.LastUsed (%s) before bucket.start (%s). Continuing"),
+							sortedStates[newestStateIndex].LastUsed.Format(timeFormat), bucket.start.Format(timeFormat))
 						continue
 					}
 
 					// Advance to first state matching this bucket.
 					var i int
-					for i = lastStateIndex; sortedStates[i].LastUsed.After(bucket.start); i++ {
+					for i = newestStateIndex; i < len(sortedStates) && sortedStates[i].LastUsed.After(bucket.start); i++ {
 					}
-					firstStateIndex := i - 1
-					log.Debug(ctx, i18n.G("First state matching for this bucket:"), sortedStates[firstStateIndex].LastUsed)
+					oldestStateIndex := i - 1
+					log.Debugf(ctx, i18n.G("First state matching for this bucket: %s (%s)"), sortedStates[oldestStateIndex].ID, sortedStates[oldestStateIndex].LastUsed.Format(timeFormat))
+
+					// Don't touch anything for this bucket, skip all states in here and advance to next one.
+					if bucket.samples == -1 {
+						log.Debug(ctx, i18n.G("Keeping all snapshots for this bucket"))
+						newestStateIndex = oldestStateIndex + 1
+						continue
+					}
 
 					// Collect all states for current bucket and mark those having constraints
-					states := make([]userStateWithKeep, 0, lastStateIndex-firstStateIndex+1)
+					states := make([]userStateWithKeep, 0, oldestStateIndex-newestStateIndex+1)
 					log.Debug(ctx, i18n.G("Collecting all states for current bucket"))
-					for i := lastStateIndex; i < firstStateIndex; i++ {
-						log.Debug(ctx, i18n.G("Analyzing state:"), sortedStates[i].LastUsed)
+					for i := newestStateIndex; i <= oldestStateIndex; i++ {
+						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), sortedStates[i].ID, sortedStates[i].LastUsed.Format(timeFormat))
 						s := sortedStates[i]
 
 						keep := keepUnknown
 						// We can only collect snapshots here for user datasets, or they are unassociated clones that we will clean up later
 						if !s.isSnapshot() {
-							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot, and necessarily associatged to a system state"), s.ID)
+							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot, and necessarily associated to a system state"), s.ID)
+							keep = keepYes
+						} else if keep == keepUnknown && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 							keep = keepYes
 						} else if keep == keepUnknown {
 							_, snapshotName := splitSnapshotName(s.ID)
@@ -321,10 +327,12 @@ func (ms *Machines) GC(ctx context.Context) error {
 
 					// Ensure we have the minimum amount of states on this bucket.
 					nStatesToRemove := len(states) - bucket.samples
-					log.Debugf(ctx, i18n.G("This bucket should remove at most %d states"), nStatesToRemove)
 					if nStatesToRemove <= 0 {
+						log.Debugf(ctx, i18n.G("No exceeding states for this bucket (delta: %d). Moving on."), nStatesToRemove)
+						newestStateIndex = oldestStateIndex + 1
 						continue
 					}
+					log.Debugf(ctx, i18n.G("There are %d exceeding states to potentially remove"), nStatesToRemove)
 
 					// FIXME: easy path: Remove first states that we don't keep
 					for _, s := range states {
@@ -351,7 +359,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 						nStatesToRemove--
 						statesChanges = true
 					}
-					lastStateIndex = firstStateIndex + 1
+					newestStateIndex = oldestStateIndex + 1
 				}
 			}
 		}
@@ -488,4 +496,8 @@ func (b bucket) validate(oldState, newState []*stateWithKeep) bool {
 		return false
 	}
 	return true
+}
+
+func (b bucket) String() string {
+	return fmt.Sprintf("start: %s end:%s samples: %d", b.start.Format(timeFormat), b.end.Format(timeFormat), b.samples)
 }
