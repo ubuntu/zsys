@@ -689,6 +689,11 @@ func (m Machine) Info(full bool) (string, error) {
 
 		timeToState := make(map[string]UserState)
 		for id, s := range m.Users[user] {
+			// exclude "current" user state fom history
+			if _, exists := m.UserDatasets[s.ID]; exists {
+				continue
+			}
+
 			k := fmt.Sprintf("%010d_%s", s.LastUsed.Unix(), id)
 			timeToState[k] = s
 		}
