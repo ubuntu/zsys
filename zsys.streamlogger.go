@@ -555,7 +555,7 @@ func (s *zsysGCLogStream) Context() context.Context {
 }
 
 // GC overrides ZsysServer GC, installing a logger first
-func (z *ZsysLogServer) GC(req *Empty, stream Zsys_GCServer) error {
+func (z *ZsysLogServer) GC(req *GCRequest, stream Zsys_GCServer) error {
 	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
 	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "GC")
 	if err != nil {

@@ -167,7 +167,7 @@ func (s *Server) Reload(req *zsys.Empty, stream zsys.Zsys_ReloadServer) error {
 }
 
 // GC call machine garbage collection stops zsys daemon
-func (s *Server) GC(req *zsys.Empty, stream zsys.Zsys_GCServer) error {
+func (s *Server) GC(req *zsys.GCRequest, stream zsys.Zsys_GCServer) error {
 	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionAlwaysAllowed); err != nil {
 		return err
 	}
@@ -176,5 +176,5 @@ func (s *Server) GC(req *zsys.Empty, stream zsys.Zsys_GCServer) error {
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
-	return s.Machines.GC(stream.Context())
+	return s.Machines.GC(stream.Context(), req.GetAll())
 }

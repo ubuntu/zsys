@@ -57,7 +57,7 @@ type userStateWithKeep struct {
 }
 
 // GC starts garbage collection for system and users
-func (ms *Machines) GC(ctx context.Context) error {
+func (ms *Machines) GC(ctx context.Context, all bool) error {
 	now := time.Now()
 
 	buckets := computeBuckets(now, ms.conf.History)
@@ -139,7 +139,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 					s := sortedStates[i]
 
 					keep := keepUnknown
-					if s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+					if !all && s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 						keep = keepYes
 					} else {
@@ -285,7 +285,7 @@ func (ms *Machines) GC(ctx context.Context) error {
 						if !s.isSnapshot() {
 							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot, and necessarily associated to a system state"), s.ID)
 							keep = keepYes
-						} else if keep == keepUnknown && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						} else if keep == keepUnknown && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 							keep = keepYes
 						} else if keep == keepUnknown {

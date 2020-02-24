@@ -21,7 +21,7 @@ service Zsys {
   rpc Trace(TraceRequest) returns  (stream TraceResponse);
   rpc Status(Empty) returns (stream LogResponse);
   rpc Reload(Empty) returns (stream LogResponse);
-  rpc GC(Empty) returns (stream LogResponse);
+  rpc GC(GCRequest) returns (stream LogResponse);
 
   rpc MachineShow(MachineShowRequest) returns (stream MachineShowResponse);
   rpc MachineList(Empty) returns (stream MachineListResponse);
@@ -120,6 +120,10 @@ message TraceResponse {
     string log = 1;
     bytes trace = 2;
   }
+}
+
+message GCRequest {
+  bool all = 1;
 }
 
 message MachineShowRequest {

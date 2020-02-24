@@ -71,7 +71,7 @@ var (
 		Use:   "gc",
 		Short: i18n.G("Run daemon state saves garbage collection."),
 		Args:  cobra.NoArgs,
-		Run:   func(cmd *cobra.Command, args []string) { cmdErr = gc() },
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = gc(gcAll) },
 	}
 )
 
@@ -79,6 +79,7 @@ var (
 	traceOutput   string
 	traceType     string
 	traceDuration int
+	gcAll         bool
 )
 
 func init() {
@@ -97,6 +98,7 @@ func init() {
 
 	serviceCmd.AddCommand(statusCmd)
 
+	gcCmd.Flags().BoolVarP(&gcAll, "all", "a", false, i18n.G("Collects all the datasets including manual snapshots and clones."))
 }
 
 func daemonStop() error {
@@ -367,7 +369,7 @@ func reloadConfig() error {
 	return nil
 }
 
-func gc() error {
+func gc(gcAll bool) error {
 	client, err := newClient()
 	if err != nil {
 		return err
@@ -377,7 +379,7 @@ func gc() error {
 	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
-	stream, err := client.GC(ctx, &zsys.Empty{})
+	stream, err := client.GC(ctx, &zsys.GCRequest{All: gcAll})
 	if err = checkConn(err); err != nil {
 		return err
 	}
