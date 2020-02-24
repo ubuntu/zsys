@@ -1,0 +1,16 @@
+#!/bin/sh
+
+set -eu
+
+STAMPFILE=/var/run/zsys.system-autosnapshots
+DELAY=1200    # time in second after which this script can be reexecuted
+LASTRUN=0
+RUNAFTER=$(date -d "${DELAY} seconds ago" "+%s")
+
+[ -f "${STAMPFILE}" ] && LASTRUN=$(stat --format "+%Z" "${STAMPFILE}")
+
+[ ${RUNAFTER} -lt ${LASTRUN} ] && exit 0
+
+echo "Snapshotting system"
+touch "${STAMPFILE}"
+zsysctl snapshot --system
