@@ -4,16 +4,18 @@
          "ID": "rpool",
          "IsZsys": true,
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1599999999,
-               "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
-            }
-         ]
+         "SystemDatasets": {
+            "rpool": [
+               {
+                  "Name": "rpool",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1599999999,
+                  "LastBootedKernel": "vmlinuz-5.2.0-8-generic"
+               }
+            ]
+         }
       }
    },
    "AllSystemDatasets": [

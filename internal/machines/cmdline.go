@@ -71,12 +71,12 @@ func (machines *Machines) findFromRoot(rootName string) (*Machine, *State) {
 
 		// We have a snapshot, we need to find the corresponding mounted main dataset on /.
 		// Look first on current machine
-		if m.SystemDatasets[0].Mounted && m.SystemDatasets[0].Mountpoint == "/" {
+		if m.SystemDatasets[m.ID][0].Mounted && m.SystemDatasets[m.ID][0].Mountpoint == "/" {
 			return m, &m.State
 		}
 		// Look now on History
 		for _, h := range m.History {
-			if h.SystemDatasets[0].Mounted && h.SystemDatasets[0].Mountpoint == "/" {
+			if h.SystemDatasets[h.ID][0].Mounted && h.SystemDatasets[h.ID][0].Mountpoint == "/" {
 				return m, h
 			}
 		}

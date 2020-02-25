@@ -13,4 +13,3 @@ pools:
             mountpoint: /:inherited
             canmount: on:default
             last_booted_kernel: vmlinuz-5.0.0-0-generic:local
-            bootfs_datasets: something else:local

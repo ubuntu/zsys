@@ -1,1 +1,9 @@
-{}
+{
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      }
+   ]
+}

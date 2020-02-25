@@ -90,8 +90,30 @@ jobs:
         run: go vet ./...
       # TODO: add statichecks and others?
 
-  tests:
-    name: Tests
+  local-tests:
+    name: Tests with mocks
+    runs-on: ubuntu-latest
+    container: ubuntu:devel
+    steps:
+      - uses: actions/checkout@v2
+      # Install go
+      - uses: actions/setup-go@v1
+        with:
+          go-version: '1.13.x'
+      # Add dependencies
+      - name: Install dependencies
+        run: |
+          apt update
+          DEBIAN_FRONTEND=noninteractive apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install ca-certificates gcc libzfslinux-dev dbus gettext
+      - name: Run tests with mock
+        run: |
+          go test -coverprofile=coverage.txt -covermode=atomic ./...
+      - name: Run tests (with race detector)
+        run: |
+          go test -race ./...
+
+  integration-tests:
+    name: Tests with system zfs
     runs-on: ubuntu-latest
     steps:
       # Checkout code
@@ -104,6 +126,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y eatmydata
+          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
           sudo sed -i s/bionic/focal/g /etc/apt/sources.list
           sudo eatmydata apt update
           sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade

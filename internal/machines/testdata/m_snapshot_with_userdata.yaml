@@ -24,7 +24,6 @@ pools:
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
-          bootfs_datasets: rpool/ROOT/ubuntu_1234:local
     - name: USERDATA/root_bcde
       mountpoint: /root
       bootfs_datasets: rpool/ROOT/ubuntu_1234

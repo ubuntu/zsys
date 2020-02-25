@@ -47,11 +47,7 @@
       "Name": "rpool/ROOT/ubuntu/inherited@snap_local_inherited",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "bootfsDatasetValue",
-      "Sources": {
-         "Mountpoint": "inherited",
-         "BootfsDatasets": "inherited"
-      }
+      "Sources": {}
    },
    {
       "Name": "rpool/ROOT/ubuntu2",
@@ -66,11 +62,7 @@
       "Name": "rpool/ROOT/ubuntu2@snap_default",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "bootfsDatasetValue",
-      "Sources": {
-         "Mountpoint": "inherited",
-         "BootfsDatasets": "default"
-      }
+      "Sources": {}
    },
    {
       "Name": "rpool/ROOT/ubuntu2_5678",
@@ -85,10 +77,6 @@
       "Name": "rpool/ROOT/ubuntu@snap_local_inherited",
       "IsSnapshot": true,
       "LastUsed": 2000000000,
-      "BootfsDatasets": "bootfsDatasetValue",
-      "Sources": {
-         "Mountpoint": "inherited",
-         "BootfsDatasets": "local"
-      }
+      "Sources": {}
    }
 ]

@@ -30,7 +30,6 @@ pools:
             mountpoint: /home/user1:local
             canmount: on:local
             creation_time: 2018-03-28T07:30:22+00:00
-            bootfs_datasets: rpool/ROOT/ubuntu_1234:local
       - name: ROOT/ubuntu_4242
         zsys_bootfs: yes
         mountpoint: /
@@ -41,7 +40,6 @@ pools:
             mountpoint: /home/user1/tools:inherited
             canmount: on:local
             creation_time: 2018-03-28T07:30:22+00:00
-            bootfs_datasets: rpool/ROOT/ubuntu_1234:inherited
       - name: USERDATA/user1_efgh
         mountpoint: /home/user1
         canmount: noauto

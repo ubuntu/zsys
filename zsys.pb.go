@@ -594,6 +594,680 @@ func (*CreateSaveStateResponse) XXX_OneofWrappers() []interface{} {
 	}
 }
 
+type RemoveSystemStateRequest struct {
+	StateName            string   `protobuf:"bytes,1,opt,name=stateName,proto3" json:"stateName,omitempty"`
+	Force                bool     `protobuf:"varint,2,opt,name=force,proto3" json:"force,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RemoveSystemStateRequest) Reset()         { *m = RemoveSystemStateRequest{} }
+func (m *RemoveSystemStateRequest) String() string { return proto.CompactTextString(m) }
+func (*RemoveSystemStateRequest) ProtoMessage()    {}
+func (*RemoveSystemStateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{10}
+}
+
+func (m *RemoveSystemStateRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveSystemStateRequest.Unmarshal(m, b)
+}
+func (m *RemoveSystemStateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveSystemStateRequest.Marshal(b, m, deterministic)
+}
+func (m *RemoveSystemStateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveSystemStateRequest.Merge(m, src)
+}
+func (m *RemoveSystemStateRequest) XXX_Size() int {
+	return xxx_messageInfo_RemoveSystemStateRequest.Size(m)
+}
+func (m *RemoveSystemStateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveSystemStateRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveSystemStateRequest proto.InternalMessageInfo
+
+func (m *RemoveSystemStateRequest) GetStateName() string {
+	if m != nil {
+		return m.StateName
+	}
+	return ""
+}
+
+func (m *RemoveSystemStateRequest) GetForce() bool {
+	if m != nil {
+		return m.Force
+	}
+	return false
+}
+
+type RemoveUserStateRequest struct {
+	UserName             string   `protobuf:"bytes,1,opt,name=userName,proto3" json:"userName,omitempty"`
+	StateName            string   `protobuf:"bytes,2,opt,name=stateName,proto3" json:"stateName,omitempty"`
+	Force                bool     `protobuf:"varint,3,opt,name=force,proto3" json:"force,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *RemoveUserStateRequest) Reset()         { *m = RemoveUserStateRequest{} }
+func (m *RemoveUserStateRequest) String() string { return proto.CompactTextString(m) }
+func (*RemoveUserStateRequest) ProtoMessage()    {}
+func (*RemoveUserStateRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{11}
+}
+
+func (m *RemoveUserStateRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveUserStateRequest.Unmarshal(m, b)
+}
+func (m *RemoveUserStateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveUserStateRequest.Marshal(b, m, deterministic)
+}
+func (m *RemoveUserStateRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveUserStateRequest.Merge(m, src)
+}
+func (m *RemoveUserStateRequest) XXX_Size() int {
+	return xxx_messageInfo_RemoveUserStateRequest.Size(m)
+}
+func (m *RemoveUserStateRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveUserStateRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveUserStateRequest proto.InternalMessageInfo
+
+func (m *RemoveUserStateRequest) GetUserName() string {
+	if m != nil {
+		return m.UserName
+	}
+	return ""
+}
+
+func (m *RemoveUserStateRequest) GetStateName() string {
+	if m != nil {
+		return m.StateName
+	}
+	return ""
+}
+
+func (m *RemoveUserStateRequest) GetForce() bool {
+	if m != nil {
+		return m.Force
+	}
+	return false
+}
+
+type RemoveStateResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*RemoveStateResponse_Log
+	//	*RemoveStateResponse_AdditionalRemovals
+	Reply                isRemoveStateResponse_Reply `protobuf_oneof:"reply"`
+	XXX_NoUnkeyedLiteral struct{}                    `json:"-"`
+	XXX_unrecognized     []byte                      `json:"-"`
+	XXX_sizecache        int32                       `json:"-"`
+}
+
+func (m *RemoveStateResponse) Reset()         { *m = RemoveStateResponse{} }
+func (m *RemoveStateResponse) String() string { return proto.CompactTextString(m) }
+func (*RemoveStateResponse) ProtoMessage()    {}
+func (*RemoveStateResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{12}
+}
+
+func (m *RemoveStateResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_RemoveStateResponse.Unmarshal(m, b)
+}
+func (m *RemoveStateResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_RemoveStateResponse.Marshal(b, m, deterministic)
+}
+func (m *RemoveStateResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_RemoveStateResponse.Merge(m, src)
+}
+func (m *RemoveStateResponse) XXX_Size() int {
+	return xxx_messageInfo_RemoveStateResponse.Size(m)
+}
+func (m *RemoveStateResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_RemoveStateResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_RemoveStateResponse proto.InternalMessageInfo
+
+type isRemoveStateResponse_Reply interface {
+	isRemoveStateResponse_Reply()
+}
+
+type RemoveStateResponse_Log struct {
+	Log string `protobuf:"bytes,1,opt,name=log,proto3,oneof"`
+}
+
+type RemoveStateResponse_AdditionalRemovals struct {
+	AdditionalRemovals string `protobuf:"bytes,2,opt,name=additionalRemovals,proto3,oneof"`
+}
+
+func (*RemoveStateResponse_Log) isRemoveStateResponse_Reply() {}
+
+func (*RemoveStateResponse_AdditionalRemovals) isRemoveStateResponse_Reply() {}
+
+func (m *RemoveStateResponse) GetReply() isRemoveStateResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *RemoveStateResponse) GetLog() string {
+	if x, ok := m.GetReply().(*RemoveStateResponse_Log); ok {
+		return x.Log
+	}
+	return ""
+}
+
+func (m *RemoveStateResponse) GetAdditionalRemovals() string {
+	if x, ok := m.GetReply().(*RemoveStateResponse_AdditionalRemovals); ok {
+		return x.AdditionalRemovals
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*RemoveStateResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*RemoveStateResponse_Log)(nil),
+		(*RemoveStateResponse_AdditionalRemovals)(nil),
+	}
+}
+
+type DumpStatesResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*DumpStatesResponse_Log
+	//	*DumpStatesResponse_States
+	Reply                isDumpStatesResponse_Reply `protobuf_oneof:"reply"`
+	XXX_NoUnkeyedLiteral struct{}                   `json:"-"`
+	XXX_unrecognized     []byte                     `json:"-"`
+	XXX_sizecache        int32                      `json:"-"`
+}
+
+func (m *DumpStatesResponse) Reset()         { *m = DumpStatesResponse{} }
+func (m *DumpStatesResponse) String() string { return proto.CompactTextString(m) }
+func (*DumpStatesResponse) ProtoMessage()    {}
+func (*DumpStatesResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{13}
+}
+
+func (m *DumpStatesResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DumpStatesResponse.Unmarshal(m, b)
+}
+func (m *DumpStatesResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DumpStatesResponse.Marshal(b, m, deterministic)
+}
+func (m *DumpStatesResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DumpStatesResponse.Merge(m, src)
+}
+func (m *DumpStatesResponse) XXX_Size() int {
+	return xxx_messageInfo_DumpStatesResponse.Size(m)
+}
+func (m *DumpStatesResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_DumpStatesResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DumpStatesResponse proto.InternalMessageInfo
+
+type isDumpStatesResponse_Reply interface {
+	isDumpStatesResponse_Reply()
+}
+
+type DumpStatesResponse_Log struct {
+	Log string `protobuf:"bytes,1,opt,name=log,proto3,oneof"`
+}
+
+type DumpStatesResponse_States struct {
+	States string `protobuf:"bytes,2,opt,name=states,proto3,oneof"`
+}
+
+func (*DumpStatesResponse_Log) isDumpStatesResponse_Reply() {}
+
+func (*DumpStatesResponse_States) isDumpStatesResponse_Reply() {}
+
+func (m *DumpStatesResponse) GetReply() isDumpStatesResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *DumpStatesResponse) GetLog() string {
+	if x, ok := m.GetReply().(*DumpStatesResponse_Log); ok {
+		return x.Log
+	}
+	return ""
+}
+
+func (m *DumpStatesResponse) GetStates() string {
+	if x, ok := m.GetReply().(*DumpStatesResponse_States); ok {
+		return x.States
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*DumpStatesResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*DumpStatesResponse_Log)(nil),
+		(*DumpStatesResponse_States)(nil),
+	}
+}
+
+type LoggingLevelRequest struct {
+	Logginglevel         int32    `protobuf:"varint,1,opt,name=logginglevel,proto3" json:"logginglevel,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *LoggingLevelRequest) Reset()         { *m = LoggingLevelRequest{} }
+func (m *LoggingLevelRequest) String() string { return proto.CompactTextString(m) }
+func (*LoggingLevelRequest) ProtoMessage()    {}
+func (*LoggingLevelRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{14}
+}
+
+func (m *LoggingLevelRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LoggingLevelRequest.Unmarshal(m, b)
+}
+func (m *LoggingLevelRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LoggingLevelRequest.Marshal(b, m, deterministic)
+}
+func (m *LoggingLevelRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LoggingLevelRequest.Merge(m, src)
+}
+func (m *LoggingLevelRequest) XXX_Size() int {
+	return xxx_messageInfo_LoggingLevelRequest.Size(m)
+}
+func (m *LoggingLevelRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_LoggingLevelRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LoggingLevelRequest proto.InternalMessageInfo
+
+func (m *LoggingLevelRequest) GetLogginglevel() int32 {
+	if m != nil {
+		return m.Logginglevel
+	}
+	return 0
+}
+
+type TraceRequest struct {
+	Type                 string   `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Duration             int32    `protobuf:"varint,2,opt,name=duration,proto3" json:"duration,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *TraceRequest) Reset()         { *m = TraceRequest{} }
+func (m *TraceRequest) String() string { return proto.CompactTextString(m) }
+func (*TraceRequest) ProtoMessage()    {}
+func (*TraceRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{15}
+}
+
+func (m *TraceRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TraceRequest.Unmarshal(m, b)
+}
+func (m *TraceRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TraceRequest.Marshal(b, m, deterministic)
+}
+func (m *TraceRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TraceRequest.Merge(m, src)
+}
+func (m *TraceRequest) XXX_Size() int {
+	return xxx_messageInfo_TraceRequest.Size(m)
+}
+func (m *TraceRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_TraceRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TraceRequest proto.InternalMessageInfo
+
+func (m *TraceRequest) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *TraceRequest) GetDuration() int32 {
+	if m != nil {
+		return m.Duration
+	}
+	return 0
+}
+
+type TraceResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*TraceResponse_Log
+	//	*TraceResponse_Trace
+	Reply                isTraceResponse_Reply `protobuf_oneof:"reply"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
+}
+
+func (m *TraceResponse) Reset()         { *m = TraceResponse{} }
+func (m *TraceResponse) String() string { return proto.CompactTextString(m) }
+func (*TraceResponse) ProtoMessage()    {}
+func (*TraceResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{16}
+}
+
+func (m *TraceResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_TraceResponse.Unmarshal(m, b)
+}
+func (m *TraceResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_TraceResponse.Marshal(b, m, deterministic)
+}
+func (m *TraceResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_TraceResponse.Merge(m, src)
+}
+func (m *TraceResponse) XXX_Size() int {
+	return xxx_messageInfo_TraceResponse.Size(m)
+}
+func (m *TraceResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_TraceResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_TraceResponse proto.InternalMessageInfo
+
+type isTraceResponse_Reply interface {
+	isTraceResponse_Reply()
+}
+
+type TraceResponse_Log struct {
+	Log string `protobuf:"bytes,1,opt,name=log,proto3,oneof"`
+}
+
+type TraceResponse_Trace struct {
+	Trace []byte `protobuf:"bytes,2,opt,name=trace,proto3,oneof"`
+}
+
+func (*TraceResponse_Log) isTraceResponse_Reply() {}
+
+func (*TraceResponse_Trace) isTraceResponse_Reply() {}
+
+func (m *TraceResponse) GetReply() isTraceResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *TraceResponse) GetLog() string {
+	if x, ok := m.GetReply().(*TraceResponse_Log); ok {
+		return x.Log
+	}
+	return ""
+}
+
+func (m *TraceResponse) GetTrace() []byte {
+	if x, ok := m.GetReply().(*TraceResponse_Trace); ok {
+		return x.Trace
+	}
+	return nil
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*TraceResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*TraceResponse_Log)(nil),
+		(*TraceResponse_Trace)(nil),
+	}
+}
+
+type GCRequest struct {
+	All                  bool     `protobuf:"varint,1,opt,name=all,proto3" json:"all,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *GCRequest) Reset()         { *m = GCRequest{} }
+func (m *GCRequest) String() string { return proto.CompactTextString(m) }
+func (*GCRequest) ProtoMessage()    {}
+func (*GCRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{17}
+}
+
+func (m *GCRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GCRequest.Unmarshal(m, b)
+}
+func (m *GCRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GCRequest.Marshal(b, m, deterministic)
+}
+func (m *GCRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GCRequest.Merge(m, src)
+}
+func (m *GCRequest) XXX_Size() int {
+	return xxx_messageInfo_GCRequest.Size(m)
+}
+func (m *GCRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GCRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GCRequest proto.InternalMessageInfo
+
+func (m *GCRequest) GetAll() bool {
+	if m != nil {
+		return m.All
+	}
+	return false
+}
+
+type MachineShowRequest struct {
+	MachineId            string   `protobuf:"bytes,1,opt,name=machineId,proto3" json:"machineId,omitempty"`
+	Full                 bool     `protobuf:"varint,2,opt,name=full,proto3" json:"full,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *MachineShowRequest) Reset()         { *m = MachineShowRequest{} }
+func (m *MachineShowRequest) String() string { return proto.CompactTextString(m) }
+func (*MachineShowRequest) ProtoMessage()    {}
+func (*MachineShowRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{18}
+}
+
+func (m *MachineShowRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MachineShowRequest.Unmarshal(m, b)
+}
+func (m *MachineShowRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MachineShowRequest.Marshal(b, m, deterministic)
+}
+func (m *MachineShowRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MachineShowRequest.Merge(m, src)
+}
+func (m *MachineShowRequest) XXX_Size() int {
+	return xxx_messageInfo_MachineShowRequest.Size(m)
+}
+func (m *MachineShowRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_MachineShowRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MachineShowRequest proto.InternalMessageInfo
+
+func (m *MachineShowRequest) GetMachineId() string {
+	if m != nil {
+		return m.MachineId
+	}
+	return ""
+}
+
+func (m *MachineShowRequest) GetFull() bool {
+	if m != nil {
+		return m.Full
+	}
+	return false
+}
+
+type MachineShowResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*MachineShowResponse_Log
+	//	*MachineShowResponse_MachineInfo
+	Reply                isMachineShowResponse_Reply `protobuf_oneof:"reply"`
+	XXX_NoUnkeyedLiteral struct{}                    `json:"-"`
+	XXX_unrecognized     []byte                      `json:"-"`
+	XXX_sizecache        int32                       `json:"-"`
+}
+
+func (m *MachineShowResponse) Reset()         { *m = MachineShowResponse{} }
+func (m *MachineShowResponse) String() string { return proto.CompactTextString(m) }
+func (*MachineShowResponse) ProtoMessage()    {}
+func (*MachineShowResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{19}
+}
+
+func (m *MachineShowResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MachineShowResponse.Unmarshal(m, b)
+}
+func (m *MachineShowResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MachineShowResponse.Marshal(b, m, deterministic)
+}
+func (m *MachineShowResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MachineShowResponse.Merge(m, src)
+}
+func (m *MachineShowResponse) XXX_Size() int {
+	return xxx_messageInfo_MachineShowResponse.Size(m)
+}
+func (m *MachineShowResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MachineShowResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MachineShowResponse proto.InternalMessageInfo
+
+type isMachineShowResponse_Reply interface {
+	isMachineShowResponse_Reply()
+}
+
+type MachineShowResponse_Log struct {
+	Log string `protobuf:"bytes,1,opt,name=log,proto3,oneof"`
+}
+
+type MachineShowResponse_MachineInfo struct {
+	MachineInfo string `protobuf:"bytes,2,opt,name=machineInfo,proto3,oneof"`
+}
+
+func (*MachineShowResponse_Log) isMachineShowResponse_Reply() {}
+
+func (*MachineShowResponse_MachineInfo) isMachineShowResponse_Reply() {}
+
+func (m *MachineShowResponse) GetReply() isMachineShowResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *MachineShowResponse) GetLog() string {
+	if x, ok := m.GetReply().(*MachineShowResponse_Log); ok {
+		return x.Log
+	}
+	return ""
+}
+
+func (m *MachineShowResponse) GetMachineInfo() string {
+	if x, ok := m.GetReply().(*MachineShowResponse_MachineInfo); ok {
+		return x.MachineInfo
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*MachineShowResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*MachineShowResponse_Log)(nil),
+		(*MachineShowResponse_MachineInfo)(nil),
+	}
+}
+
+type MachineListResponse struct {
+	// Types that are valid to be assigned to Reply:
+	//	*MachineListResponse_Log
+	//	*MachineListResponse_MachineList
+	Reply                isMachineListResponse_Reply `protobuf_oneof:"reply"`
+	XXX_NoUnkeyedLiteral struct{}                    `json:"-"`
+	XXX_unrecognized     []byte                      `json:"-"`
+	XXX_sizecache        int32                       `json:"-"`
+}
+
+func (m *MachineListResponse) Reset()         { *m = MachineListResponse{} }
+func (m *MachineListResponse) String() string { return proto.CompactTextString(m) }
+func (*MachineListResponse) ProtoMessage()    {}
+func (*MachineListResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_05865bfaed6eea5d, []int{20}
+}
+
+func (m *MachineListResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_MachineListResponse.Unmarshal(m, b)
+}
+func (m *MachineListResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_MachineListResponse.Marshal(b, m, deterministic)
+}
+func (m *MachineListResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MachineListResponse.Merge(m, src)
+}
+func (m *MachineListResponse) XXX_Size() int {
+	return xxx_messageInfo_MachineListResponse.Size(m)
+}
+func (m *MachineListResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_MachineListResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MachineListResponse proto.InternalMessageInfo
+
+type isMachineListResponse_Reply interface {
+	isMachineListResponse_Reply()
+}
+
+type MachineListResponse_Log struct {
+	Log string `protobuf:"bytes,1,opt,name=log,proto3,oneof"`
+}
+
+type MachineListResponse_MachineList struct {
+	MachineList string `protobuf:"bytes,2,opt,name=machineList,proto3,oneof"`
+}
+
+func (*MachineListResponse_Log) isMachineListResponse_Reply() {}
+
+func (*MachineListResponse_MachineList) isMachineListResponse_Reply() {}
+
+func (m *MachineListResponse) GetReply() isMachineListResponse_Reply {
+	if m != nil {
+		return m.Reply
+	}
+	return nil
+}
+
+func (m *MachineListResponse) GetLog() string {
+	if x, ok := m.GetReply().(*MachineListResponse_Log); ok {
+		return x.Log
+	}
+	return ""
+}
+
+func (m *MachineListResponse) GetMachineList() string {
+	if x, ok := m.GetReply().(*MachineListResponse_MachineList); ok {
+		return x.MachineList
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*MachineListResponse) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*MachineListResponse_Log)(nil),
+		(*MachineListResponse_MachineList)(nil),
+	}
+}
+
 func init() {
 	proto.RegisterType((*Empty)(nil), "zsys.Empty")
 	proto.RegisterType((*LogResponse)(nil), "zsys.LogResponse")
@@ -605,40 +1279,76 @@ func init() {
 	proto.RegisterType((*SaveSystemStateRequest)(nil), "zsys.SaveSystemStateRequest")
 	proto.RegisterType((*SaveUserStateRequest)(nil), "zsys.SaveUserStateRequest")
 	proto.RegisterType((*CreateSaveStateResponse)(nil), "zsys.CreateSaveStateResponse")
+	proto.RegisterType((*RemoveSystemStateRequest)(nil), "zsys.RemoveSystemStateRequest")
+	proto.RegisterType((*RemoveUserStateRequest)(nil), "zsys.RemoveUserStateRequest")
+	proto.RegisterType((*RemoveStateResponse)(nil), "zsys.RemoveStateResponse")
+	proto.RegisterType((*DumpStatesResponse)(nil), "zsys.DumpStatesResponse")
+	proto.RegisterType((*LoggingLevelRequest)(nil), "zsys.LoggingLevelRequest")
+	proto.RegisterType((*TraceRequest)(nil), "zsys.TraceRequest")
+	proto.RegisterType((*TraceResponse)(nil), "zsys.TraceResponse")
+	proto.RegisterType((*GCRequest)(nil), "zsys.GCRequest")
+	proto.RegisterType((*MachineShowRequest)(nil), "zsys.MachineShowRequest")
+	proto.RegisterType((*MachineShowResponse)(nil), "zsys.MachineShowResponse")
+	proto.RegisterType((*MachineListResponse)(nil), "zsys.MachineListResponse")
 }
 
 func init() { proto.RegisterFile("zsys.proto", fileDescriptor_05865bfaed6eea5d) }
 
 var fileDescriptor_05865bfaed6eea5d = []byte{
-	// 447 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x94, 0x4f, 0x6f, 0xd3, 0x40,
-	0x10, 0xc5, 0xeb, 0x36, 0xc5, 0xe9, 0x44, 0x50, 0x18, 0x5a, 0x30, 0x6e, 0xf9, 0xe7, 0x13, 0xa7,
-	0x62, 0x81, 0x80, 0x7b, 0x02, 0x22, 0x82, 0x12, 0x22, 0x47, 0xf4, 0xc0, 0x6d, 0x81, 0x51, 0x12,
-	0x29, 0xf6, 0x9a, 0xdd, 0x4d, 0x90, 0xf9, 0xaa, 0x7c, 0x19, 0xb4, 0xbb, 0xfe, 0x1f, 0x43, 0x2e,
-	0xbd, 0xcd, 0x4c, 0xde, 0x3c, 0xef, 0xdb, 0xfd, 0x29, 0x00, 0xbf, 0x65, 0x26, 0x2f, 0x52, 0xc1,
-	0x15, 0xc7, 0x9e, 0xae, 0x03, 0x17, 0x0e, 0xdf, 0xc5, 0xa9, 0xca, 0x82, 0xc7, 0x30, 0xb8, 0xe4,
-	0xf3, 0x88, 0x64, 0xca, 0x13, 0x49, 0x78, 0x1b, 0x0e, 0x56, 0x7c, 0xee, 0x39, 0x4f, 0x9c, 0x67,
-	0x47, 0x91, 0x2e, 0x83, 0x0f, 0x70, 0x7c, 0x45, 0x42, 0x2e, 0x79, 0x52, 0x8a, 0xb0, 0x26, 0x1a,
-	0xef, 0x19, 0x19, 0xfa, 0xe0, 0x6e, 0xac, 0xcc, 0xdb, 0xcf, 0xe7, 0xc5, 0x60, 0xe8, 0xc2, 0xa1,
-	0xa0, 0x74, 0x95, 0x05, 0xef, 0xe1, 0x74, 0x24, 0x88, 0x29, 0xfa, 0x22, 0x49, 0xbc, 0x65, 0x8a,
-	0x45, 0xf4, 0x73, 0x4d, 0x52, 0x21, 0x42, 0x6f, 0x2d, 0x49, 0xe4, 0xdf, 0x35, 0x35, 0xfa, 0xd0,
-	0x5f, 0xf0, 0x98, 0x52, 0xa6, 0x16, 0xd6, 0x32, 0x2a, 0xfb, 0xe0, 0x23, 0x9c, 0x8d, 0x16, 0x2c,
-	0x99, 0xd3, 0x98, 0xc7, 0xf4, 0x39, 0xe9, 0xb0, 0xd3, 0xd2, 0xc2, 0x4e, 0xd7, 0xe8, 0x81, 0x9b,
-	0xd0, 0x2f, 0xad, 0xcf, 0xdd, 0x8a, 0x36, 0x98, 0xc0, 0xdd, 0xa9, 0xa0, 0x94, 0x09, 0x1a, 0x72,
-	0xae, 0x76, 0xa5, 0xfc, 0x6e, 0xbe, 0xfb, 0xc3, 0x98, 0xf4, 0x75, 0xca, 0x7c, 0x50, 0xa5, 0xfc,
-	0x04, 0x38, 0xe2, 0x71, 0xbc, 0x54, 0xd7, 0x63, 0xf7, 0x1a, 0xee, 0xcd, 0xd8, 0x86, 0x66, 0x99,
-	0x54, 0x14, 0xcf, 0x14, 0x53, 0x54, 0xc4, 0x3c, 0x87, 0x23, 0xa9, 0xfb, 0x09, 0x2b, 0xb3, 0x56,
-	0x83, 0x60, 0x0a, 0x27, 0x7a, 0x4f, 0xdf, 0x4d, 0x63, 0xcb, 0x87, 0xbe, 0xbe, 0xdf, 0xda, 0x52,
-	0xd9, 0x37, 0x1d, 0xf7, 0xdb, 0x8e, 0x57, 0x70, 0xdf, 0x3e, 0x9f, 0x39, 0x8f, 0xf5, 0xfc, 0x4f,
-	0xba, 0x47, 0x5b, 0x66, 0xe3, 0xbd, 0x9a, 0x5d, 0x99, 0xf0, 0xc5, 0x9f, 0x03, 0xe8, 0x7d, 0x95,
-	0x99, 0xc4, 0xe7, 0xe0, 0xe6, 0xac, 0xe1, 0xe0, 0xc2, 0x30, 0x6b, 0x20, 0xf5, 0x4f, 0x6d, 0xd3,
-	0xe2, 0x30, 0x74, 0x70, 0x08, 0xb7, 0x9a, 0x40, 0xe1, 0x99, 0x95, 0x76, 0x62, 0xe6, 0xdf, 0xb1,
-	0x3f, 0xd6, 0x80, 0x0f, 0x1d, 0x9c, 0xc0, 0x49, 0x17, 0x4b, 0xf8, 0x34, 0x77, 0xfa, 0x37, 0x67,
-	0xdd, 0x7e, 0x6f, 0x60, 0x50, 0xc3, 0xa9, 0x19, 0xe4, 0x81, 0x6d, 0x3a, 0x70, 0x0b, 0x1d, 0x7c,
-	0x05, 0x50, 0x71, 0xd3, 0xdc, 0xf3, 0xf2, 0xb3, 0x6c, 0x61, 0x15, 0x3a, 0x38, 0x85, 0xe3, 0x16,
-	0x1f, 0x78, 0x6e, 0xe5, 0xdd, 0xd8, 0xf8, 0x0f, 0xeb, 0x57, 0xb4, 0xf5, 0x94, 0xa1, 0x83, 0x97,
-	0x70, 0xb3, 0x41, 0x0e, 0xfa, 0x95, 0x5f, 0x1b, 0xa7, 0x9d, 0x6e, 0xdf, 0x6e, 0x98, 0xff, 0x9d,
-	0x97, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff, 0xb0, 0xbc, 0xbe, 0xbf, 0x85, 0x04, 0x00, 0x00,
+	// 834 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x96, 0x5b, 0x4f, 0x2b, 0x37,
+	0x10, 0xc7, 0x59, 0x20, 0xb7, 0x49, 0x68, 0xc0, 0x01, 0x1a, 0x96, 0x4b, 0xdb, 0x7d, 0xaa, 0xa8,
+	0x44, 0x57, 0x54, 0xb4, 0xea, 0x0b, 0x0f, 0x24, 0x2d, 0x69, 0x09, 0x69, 0xb4, 0x69, 0x79, 0xe8,
+	0x9b, 0x4f, 0xe2, 0x5c, 0xa4, 0xdd, 0xf5, 0x9e, 0xb5, 0x03, 0xca, 0xf9, 0x00, 0xe7, 0x73, 0x1f,
+	0xd9, 0xde, 0x6b, 0x62, 0x42, 0x8e, 0xc4, 0x9b, 0x67, 0x3c, 0xf3, 0xf7, 0xcc, 0xac, 0xfd, 0x4b,
+	0x00, 0x3e, 0xb1, 0x05, 0xbb, 0x0a, 0x42, 0xca, 0x29, 0xda, 0x15, 0x6b, 0xab, 0x04, 0x85, 0x3f,
+	0xbc, 0x80, 0x2f, 0xac, 0xef, 0xa0, 0xda, 0xa5, 0x13, 0x87, 0xb0, 0x80, 0xfa, 0x8c, 0xa0, 0x7d,
+	0xd8, 0x71, 0xe9, 0xa4, 0x69, 0x7c, 0x6f, 0xfc, 0x58, 0x71, 0xc4, 0xd2, 0xfa, 0x1b, 0xea, 0x4f,
+	0x24, 0x64, 0x33, 0xea, 0x27, 0x41, 0x28, 0x13, 0xd4, 0xd9, 0x92, 0x61, 0xc8, 0x84, 0xd2, 0xb3,
+	0x0a, 0x6b, 0x6e, 0x47, 0xfe, 0xd8, 0x71, 0x57, 0x82, 0x42, 0x48, 0x02, 0x77, 0x61, 0xdd, 0xc3,
+	0x51, 0x2b, 0x24, 0x98, 0x93, 0xff, 0x18, 0x09, 0xdb, 0x98, 0x63, 0x87, 0x7c, 0x9c, 0x13, 0xc6,
+	0x11, 0x82, 0xdd, 0x39, 0x23, 0x61, 0x74, 0xae, 0x5c, 0x23, 0x13, 0xca, 0x53, 0xea, 0x91, 0x00,
+	0xf3, 0xa9, 0x92, 0x74, 0x12, 0xdb, 0x7a, 0x80, 0xd3, 0xd6, 0x14, 0xfb, 0x13, 0xd2, 0xa1, 0x1e,
+	0xf9, 0xc7, 0xd7, 0xc8, 0x89, 0xd0, 0x58, 0x4e, 0xac, 0x51, 0x13, 0x4a, 0x3e, 0x79, 0x11, 0xf1,
+	0x91, 0x5a, 0x6c, 0x5a, 0x3d, 0x68, 0xf4, 0x43, 0x12, 0xe0, 0x90, 0xdc, 0x51, 0xca, 0xdf, 0xea,
+	0x72, 0x28, 0xcf, 0x1d, 0x49, 0x91, 0xb2, 0xe8, 0x32, 0x72, 0xa4, 0x5d, 0x3e, 0x02, 0x6a, 0x51,
+	0xcf, 0x9b, 0xf1, 0xf7, 0x91, 0xfb, 0x15, 0x8e, 0x07, 0xf8, 0x99, 0x0c, 0x16, 0x8c, 0x13, 0x6f,
+	0xc0, 0x31, 0x27, 0x71, 0x9b, 0x67, 0x50, 0x61, 0xc2, 0xee, 0xe1, 0xa4, 0xd7, 0xd4, 0x61, 0xf5,
+	0xe1, 0x50, 0xe4, 0x89, 0xd9, 0xe4, 0xb2, 0x4c, 0x28, 0x8b, 0xf9, 0x66, 0x92, 0x12, 0x3b, 0xaf,
+	0xb8, 0xbd, 0xac, 0xf8, 0x04, 0xdf, 0xaa, 0xcf, 0x27, 0xeb, 0x51, 0x9a, 0x6b, 0xba, 0xbb, 0x58,
+	0x11, 0xeb, 0x6c, 0x65, 0xe4, 0xd2, 0x0e, 0x7b, 0xd0, 0x74, 0x88, 0x47, 0xbf, 0xbe, 0x47, 0x74,
+	0x08, 0x85, 0x31, 0x0d, 0x87, 0x4a, 0xbe, 0xec, 0x28, 0xc3, 0x9a, 0xc2, 0xb1, 0xd2, 0x7b, 0xbf,
+	0xde, 0xd3, 0x93, 0x76, 0xb2, 0x27, 0x8d, 0xa0, 0x11, 0x55, 0xfe, 0xe6, 0x34, 0x6c, 0x40, 0x78,
+	0x34, 0x9a, 0xf1, 0x19, 0xf5, 0xb1, 0x2b, 0x93, 0xb0, 0xcb, 0x92, 0xb1, 0x68, 0xf6, 0xd2, 0xf9,
+	0x3c, 0x00, 0x6a, 0xcf, 0xbd, 0x40, 0x9e, 0xc1, 0xd6, 0x1e, 0xd2, 0x84, 0xa2, 0x2c, 0x39, 0x15,
+	0x8e, 0xec, 0x54, 0xec, 0x77, 0x68, 0x74, 0xe9, 0x64, 0x32, 0xf3, 0x27, 0x5d, 0xf2, 0x4c, 0xdc,
+	0x78, 0x32, 0x16, 0xd4, 0x5c, 0xe5, 0x76, 0x85, 0x5b, 0xca, 0x16, 0x9c, 0x9c, 0xcf, 0xba, 0x85,
+	0xda, 0xbf, 0x21, 0x1e, 0x92, 0xcc, 0x33, 0xe3, 0x8b, 0x20, 0x79, 0x66, 0x62, 0x2d, 0x26, 0x3c,
+	0x9a, 0x87, 0x98, 0xc7, 0x20, 0x28, 0x38, 0x89, 0x6d, 0xb5, 0x61, 0x2f, 0xca, 0x5f, 0xd3, 0xc2,
+	0x31, 0x14, 0xb8, 0x08, 0x92, 0xd9, 0xb5, 0xce, 0x96, 0xa3, 0xcc, 0xb4, 0x81, 0x73, 0xa8, 0xdc,
+	0xb7, 0xe2, 0x12, 0xf6, 0x61, 0x07, 0xbb, 0xaa, 0xda, 0xb2, 0x23, 0x96, 0xd6, 0x9f, 0x80, 0x1e,
+	0xf1, 0x70, 0x3a, 0xf3, 0xc9, 0x60, 0x4a, 0x5f, 0x32, 0xd7, 0xc8, 0x53, 0xde, 0xbf, 0x46, 0xf1,
+	0x35, 0x4a, 0x1c, 0xa2, 0x91, 0xf1, 0xdc, 0x75, 0xa3, 0x5b, 0x24, 0xd7, 0xd6, 0x13, 0x34, 0x72,
+	0x3a, 0x6b, 0x4a, 0xb6, 0xa0, 0x1a, 0x6b, 0xf9, 0x63, 0x9a, 0x8c, 0x3e, 0xeb, 0x4c, 0xcb, 0x4f,
+	0x75, 0xbb, 0x33, 0xc6, 0x37, 0xd4, 0x15, 0xa1, 0x2b, 0xba, 0xc2, 0x99, 0xe8, 0x5e, 0x7f, 0xae,
+	0xc0, 0xee, 0xff, 0x6c, 0xc1, 0xd0, 0xcf, 0x50, 0x8a, 0x80, 0x8d, 0xaa, 0x57, 0x12, 0xfc, 0x92,
+	0xf4, 0xe6, 0x91, 0x32, 0x96, 0x60, 0x6e, 0x1b, 0xe8, 0x0e, 0xbe, 0xc9, 0x53, 0x19, 0x9d, 0xaa,
+	0x50, 0x2d, 0xab, 0xcd, 0x03, 0xb5, 0x99, 0xf9, 0xd5, 0xb0, 0x0d, 0xd4, 0x83, 0x43, 0x1d, 0x90,
+	0xd1, 0x0f, 0x91, 0xd2, 0xeb, 0xb0, 0xd6, 0xeb, 0xfd, 0x06, 0xd5, 0x0c, 0x93, 0xf3, 0x8d, 0x9c,
+	0x28, 0x43, 0xc3, 0x6c, 0xdb, 0x40, 0x37, 0x00, 0x29, 0x7c, 0xf3, 0x79, 0xcd, 0xa8, 0x96, 0x15,
+	0x36, 0xdb, 0x06, 0xea, 0x43, 0x7d, 0x09, 0xb2, 0xe8, 0x4c, 0x85, 0xeb, 0xd9, 0x6b, 0x9e, 0x67,
+	0x47, 0xb4, 0xc2, 0x43, 0xdb, 0x40, 0x5d, 0xd8, 0xcb, 0xe1, 0x17, 0x99, 0xa9, 0xde, 0x32, 0x97,
+	0xde, 0x56, 0xeb, 0xc3, 0xc1, 0x0a, 0x22, 0xd1, 0x85, 0xca, 0x7a, 0x8d, 0x9d, 0xf1, 0xa0, 0x34,
+	0x84, 0x92, 0xf5, 0xd5, 0x97, 0x20, 0x19, 0x77, 0xac, 0x67, 0xe7, 0x7a, 0xb5, 0x1b, 0x80, 0x14,
+	0x51, 0xda, 0xb1, 0xaf, 0x12, 0xcc, 0x36, 0xd0, 0x15, 0x40, 0x1b, 0x13, 0x8f, 0xfa, 0x03, 0x4e,
+	0x83, 0x7c, 0x9a, 0xf6, 0x5a, 0xdc, 0x42, 0x2d, 0x0b, 0x2f, 0x74, 0x92, 0x04, 0x2d, 0x03, 0x4d,
+	0x9f, 0xff, 0x13, 0x94, 0x1c, 0x32, 0x0e, 0x09, 0x9b, 0x6e, 0x70, 0xd8, 0x35, 0x14, 0x24, 0xae,
+	0x10, 0x52, 0xbb, 0x59, 0xf6, 0x99, 0x8d, 0x9c, 0x2f, 0xc9, 0xb9, 0x84, 0xa2, 0x68, 0x72, 0xce,
+	0x36, 0xd0, 0xbf, 0x84, 0xa2, 0x43, 0x5c, 0x8a, 0x47, 0x1b, 0xc5, 0x6e, 0xdf, 0xb7, 0x50, 0x5d,
+	0x6d, 0x25, 0xf8, 0xd3, 0xc7, 0xb6, 0xa1, 0x9a, 0x21, 0x17, 0x8a, 0xe6, 0xbf, 0x0a, 0xc5, 0xf8,
+	0x8b, 0x6a, 0x30, 0xa7, 0x5e, 0x60, 0x86, 0x53, 0xda, 0x17, 0xa8, 0xe1, 0x98, 0x6d, 0x7c, 0x28,
+	0xca, 0xff, 0x99, 0xbf, 0x7c, 0x09, 0x00, 0x00, 0xff, 0xff, 0xf5, 0xe5, 0x61, 0x0c, 0x75, 0x0a,
+	0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -660,6 +1370,18 @@ type ZsysClient interface {
 	CommitBoot(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_CommitBootClient, error)
 	SaveSystemState(ctx context.Context, in *SaveSystemStateRequest, opts ...grpc.CallOption) (Zsys_SaveSystemStateClient, error)
 	SaveUserState(ctx context.Context, in *SaveUserStateRequest, opts ...grpc.CallOption) (Zsys_SaveUserStateClient, error)
+	RemoveSystemState(ctx context.Context, in *RemoveSystemStateRequest, opts ...grpc.CallOption) (Zsys_RemoveSystemStateClient, error)
+	RemoveUserState(ctx context.Context, in *RemoveUserStateRequest, opts ...grpc.CallOption) (Zsys_RemoveUserStateClient, error)
+	DumpStates(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_DumpStatesClient, error)
+	DaemonStop(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_DaemonStopClient, error)
+	LoggingLevel(ctx context.Context, in *LoggingLevelRequest, opts ...grpc.CallOption) (Zsys_LoggingLevelClient, error)
+	Refresh(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_RefreshClient, error)
+	Trace(ctx context.Context, in *TraceRequest, opts ...grpc.CallOption) (Zsys_TraceClient, error)
+	Status(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_StatusClient, error)
+	Reload(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_ReloadClient, error)
+	GC(ctx context.Context, in *GCRequest, opts ...grpc.CallOption) (Zsys_GCClient, error)
+	MachineShow(ctx context.Context, in *MachineShowRequest, opts ...grpc.CallOption) (Zsys_MachineShowClient, error)
+	MachineList(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_MachineListClient, error)
 }
 
 type zsysClient struct {
@@ -894,6 +1616,390 @@ func (x *zsysSaveUserStateClient) Recv() (*CreateSaveStateResponse, error) {
 	return m, nil
 }
 
+func (c *zsysClient) RemoveSystemState(ctx context.Context, in *RemoveSystemStateRequest, opts ...grpc.CallOption) (Zsys_RemoveSystemStateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[7], "/zsys.Zsys/RemoveSystemState", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysRemoveSystemStateClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_RemoveSystemStateClient interface {
+	Recv() (*RemoveStateResponse, error)
+	grpc.ClientStream
+}
+
+type zsysRemoveSystemStateClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysRemoveSystemStateClient) Recv() (*RemoveStateResponse, error) {
+	m := new(RemoveStateResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) RemoveUserState(ctx context.Context, in *RemoveUserStateRequest, opts ...grpc.CallOption) (Zsys_RemoveUserStateClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[8], "/zsys.Zsys/RemoveUserState", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysRemoveUserStateClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_RemoveUserStateClient interface {
+	Recv() (*RemoveStateResponse, error)
+	grpc.ClientStream
+}
+
+type zsysRemoveUserStateClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysRemoveUserStateClient) Recv() (*RemoveStateResponse, error) {
+	m := new(RemoveStateResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) DumpStates(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_DumpStatesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[9], "/zsys.Zsys/DumpStates", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysDumpStatesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_DumpStatesClient interface {
+	Recv() (*DumpStatesResponse, error)
+	grpc.ClientStream
+}
+
+type zsysDumpStatesClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysDumpStatesClient) Recv() (*DumpStatesResponse, error) {
+	m := new(DumpStatesResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) DaemonStop(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_DaemonStopClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[10], "/zsys.Zsys/DaemonStop", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysDaemonStopClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_DaemonStopClient interface {
+	Recv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type zsysDaemonStopClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysDaemonStopClient) Recv() (*LogResponse, error) {
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) LoggingLevel(ctx context.Context, in *LoggingLevelRequest, opts ...grpc.CallOption) (Zsys_LoggingLevelClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[11], "/zsys.Zsys/LoggingLevel", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysLoggingLevelClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_LoggingLevelClient interface {
+	Recv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type zsysLoggingLevelClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysLoggingLevelClient) Recv() (*LogResponse, error) {
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) Refresh(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_RefreshClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[12], "/zsys.Zsys/Refresh", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysRefreshClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_RefreshClient interface {
+	Recv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type zsysRefreshClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysRefreshClient) Recv() (*LogResponse, error) {
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) Trace(ctx context.Context, in *TraceRequest, opts ...grpc.CallOption) (Zsys_TraceClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[13], "/zsys.Zsys/Trace", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysTraceClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_TraceClient interface {
+	Recv() (*TraceResponse, error)
+	grpc.ClientStream
+}
+
+type zsysTraceClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysTraceClient) Recv() (*TraceResponse, error) {
+	m := new(TraceResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) Status(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_StatusClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[14], "/zsys.Zsys/Status", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysStatusClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_StatusClient interface {
+	Recv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type zsysStatusClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysStatusClient) Recv() (*LogResponse, error) {
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) Reload(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_ReloadClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[15], "/zsys.Zsys/Reload", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysReloadClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_ReloadClient interface {
+	Recv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type zsysReloadClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysReloadClient) Recv() (*LogResponse, error) {
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) GC(ctx context.Context, in *GCRequest, opts ...grpc.CallOption) (Zsys_GCClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[16], "/zsys.Zsys/GC", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysGCClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_GCClient interface {
+	Recv() (*LogResponse, error)
+	grpc.ClientStream
+}
+
+type zsysGCClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysGCClient) Recv() (*LogResponse, error) {
+	m := new(LogResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) MachineShow(ctx context.Context, in *MachineShowRequest, opts ...grpc.CallOption) (Zsys_MachineShowClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[17], "/zsys.Zsys/MachineShow", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysMachineShowClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_MachineShowClient interface {
+	Recv() (*MachineShowResponse, error)
+	grpc.ClientStream
+}
+
+type zsysMachineShowClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysMachineShowClient) Recv() (*MachineShowResponse, error) {
+	m := new(MachineShowResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *zsysClient) MachineList(ctx context.Context, in *Empty, opts ...grpc.CallOption) (Zsys_MachineListClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_Zsys_serviceDesc.Streams[18], "/zsys.Zsys/MachineList", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &zsysMachineListClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Zsys_MachineListClient interface {
+	Recv() (*MachineListResponse, error)
+	grpc.ClientStream
+}
+
+type zsysMachineListClient struct {
+	grpc.ClientStream
+}
+
+func (x *zsysMachineListClient) Recv() (*MachineListResponse, error) {
+	m := new(MachineListResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ZsysServer is the server API for Zsys service.
 type ZsysServer interface {
 	Version(*Empty, Zsys_VersionServer) error
@@ -903,6 +2009,18 @@ type ZsysServer interface {
 	CommitBoot(*Empty, Zsys_CommitBootServer) error
 	SaveSystemState(*SaveSystemStateRequest, Zsys_SaveSystemStateServer) error
 	SaveUserState(*SaveUserStateRequest, Zsys_SaveUserStateServer) error
+	RemoveSystemState(*RemoveSystemStateRequest, Zsys_RemoveSystemStateServer) error
+	RemoveUserState(*RemoveUserStateRequest, Zsys_RemoveUserStateServer) error
+	DumpStates(*Empty, Zsys_DumpStatesServer) error
+	DaemonStop(*Empty, Zsys_DaemonStopServer) error
+	LoggingLevel(*LoggingLevelRequest, Zsys_LoggingLevelServer) error
+	Refresh(*Empty, Zsys_RefreshServer) error
+	Trace(*TraceRequest, Zsys_TraceServer) error
+	Status(*Empty, Zsys_StatusServer) error
+	Reload(*Empty, Zsys_ReloadServer) error
+	GC(*GCRequest, Zsys_GCServer) error
+	MachineShow(*MachineShowRequest, Zsys_MachineShowServer) error
+	MachineList(*Empty, Zsys_MachineListServer) error
 }
 
 // UnimplementedZsysServer can be embedded to have forward compatible implementations.
@@ -929,6 +2047,42 @@ func (*UnimplementedZsysServer) SaveSystemState(req *SaveSystemStateRequest, srv
 }
 func (*UnimplementedZsysServer) SaveUserState(req *SaveUserStateRequest, srv Zsys_SaveUserStateServer) error {
 	return status.Errorf(codes.Unimplemented, "method SaveUserState not implemented")
+}
+func (*UnimplementedZsysServer) RemoveSystemState(req *RemoveSystemStateRequest, srv Zsys_RemoveSystemStateServer) error {
+	return status.Errorf(codes.Unimplemented, "method RemoveSystemState not implemented")
+}
+func (*UnimplementedZsysServer) RemoveUserState(req *RemoveUserStateRequest, srv Zsys_RemoveUserStateServer) error {
+	return status.Errorf(codes.Unimplemented, "method RemoveUserState not implemented")
+}
+func (*UnimplementedZsysServer) DumpStates(req *Empty, srv Zsys_DumpStatesServer) error {
+	return status.Errorf(codes.Unimplemented, "method DumpStates not implemented")
+}
+func (*UnimplementedZsysServer) DaemonStop(req *Empty, srv Zsys_DaemonStopServer) error {
+	return status.Errorf(codes.Unimplemented, "method DaemonStop not implemented")
+}
+func (*UnimplementedZsysServer) LoggingLevel(req *LoggingLevelRequest, srv Zsys_LoggingLevelServer) error {
+	return status.Errorf(codes.Unimplemented, "method LoggingLevel not implemented")
+}
+func (*UnimplementedZsysServer) Refresh(req *Empty, srv Zsys_RefreshServer) error {
+	return status.Errorf(codes.Unimplemented, "method Refresh not implemented")
+}
+func (*UnimplementedZsysServer) Trace(req *TraceRequest, srv Zsys_TraceServer) error {
+	return status.Errorf(codes.Unimplemented, "method Trace not implemented")
+}
+func (*UnimplementedZsysServer) Status(req *Empty, srv Zsys_StatusServer) error {
+	return status.Errorf(codes.Unimplemented, "method Status not implemented")
+}
+func (*UnimplementedZsysServer) Reload(req *Empty, srv Zsys_ReloadServer) error {
+	return status.Errorf(codes.Unimplemented, "method Reload not implemented")
+}
+func (*UnimplementedZsysServer) GC(req *GCRequest, srv Zsys_GCServer) error {
+	return status.Errorf(codes.Unimplemented, "method GC not implemented")
+}
+func (*UnimplementedZsysServer) MachineShow(req *MachineShowRequest, srv Zsys_MachineShowServer) error {
+	return status.Errorf(codes.Unimplemented, "method MachineShow not implemented")
+}
+func (*UnimplementedZsysServer) MachineList(req *Empty, srv Zsys_MachineListServer) error {
+	return status.Errorf(codes.Unimplemented, "method MachineList not implemented")
 }
 
 func RegisterZsysServer(s *grpc.Server, srv ZsysServer) {
@@ -1082,6 +2236,258 @@ func (x *zsysSaveUserStateServer) Send(m *CreateSaveStateResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Zsys_RemoveSystemState_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RemoveSystemStateRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).RemoveSystemState(m, &zsysRemoveSystemStateServer{stream})
+}
+
+type Zsys_RemoveSystemStateServer interface {
+	Send(*RemoveStateResponse) error
+	grpc.ServerStream
+}
+
+type zsysRemoveSystemStateServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysRemoveSystemStateServer) Send(m *RemoveStateResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_RemoveUserState_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(RemoveUserStateRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).RemoveUserState(m, &zsysRemoveUserStateServer{stream})
+}
+
+type Zsys_RemoveUserStateServer interface {
+	Send(*RemoveStateResponse) error
+	grpc.ServerStream
+}
+
+type zsysRemoveUserStateServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysRemoveUserStateServer) Send(m *RemoveStateResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_DumpStates_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).DumpStates(m, &zsysDumpStatesServer{stream})
+}
+
+type Zsys_DumpStatesServer interface {
+	Send(*DumpStatesResponse) error
+	grpc.ServerStream
+}
+
+type zsysDumpStatesServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysDumpStatesServer) Send(m *DumpStatesResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_DaemonStop_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).DaemonStop(m, &zsysDaemonStopServer{stream})
+}
+
+type Zsys_DaemonStopServer interface {
+	Send(*LogResponse) error
+	grpc.ServerStream
+}
+
+type zsysDaemonStopServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysDaemonStopServer) Send(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_LoggingLevel_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(LoggingLevelRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).LoggingLevel(m, &zsysLoggingLevelServer{stream})
+}
+
+type Zsys_LoggingLevelServer interface {
+	Send(*LogResponse) error
+	grpc.ServerStream
+}
+
+type zsysLoggingLevelServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysLoggingLevelServer) Send(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_Refresh_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).Refresh(m, &zsysRefreshServer{stream})
+}
+
+type Zsys_RefreshServer interface {
+	Send(*LogResponse) error
+	grpc.ServerStream
+}
+
+type zsysRefreshServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysRefreshServer) Send(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_Trace_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TraceRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).Trace(m, &zsysTraceServer{stream})
+}
+
+type Zsys_TraceServer interface {
+	Send(*TraceResponse) error
+	grpc.ServerStream
+}
+
+type zsysTraceServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysTraceServer) Send(m *TraceResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_Status_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).Status(m, &zsysStatusServer{stream})
+}
+
+type Zsys_StatusServer interface {
+	Send(*LogResponse) error
+	grpc.ServerStream
+}
+
+type zsysStatusServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysStatusServer) Send(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_Reload_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).Reload(m, &zsysReloadServer{stream})
+}
+
+type Zsys_ReloadServer interface {
+	Send(*LogResponse) error
+	grpc.ServerStream
+}
+
+type zsysReloadServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysReloadServer) Send(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_GC_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GCRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).GC(m, &zsysGCServer{stream})
+}
+
+type Zsys_GCServer interface {
+	Send(*LogResponse) error
+	grpc.ServerStream
+}
+
+type zsysGCServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysGCServer) Send(m *LogResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_MachineShow_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(MachineShowRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).MachineShow(m, &zsysMachineShowServer{stream})
+}
+
+type Zsys_MachineShowServer interface {
+	Send(*MachineShowResponse) error
+	grpc.ServerStream
+}
+
+type zsysMachineShowServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysMachineShowServer) Send(m *MachineShowResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Zsys_MachineList_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ZsysServer).MachineList(m, &zsysMachineListServer{stream})
+}
+
+type Zsys_MachineListServer interface {
+	Send(*MachineListResponse) error
+	grpc.ServerStream
+}
+
+type zsysMachineListServer struct {
+	grpc.ServerStream
+}
+
+func (x *zsysMachineListServer) Send(m *MachineListResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 var _Zsys_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "zsys.Zsys",
 	HandlerType: (*ZsysServer)(nil),
@@ -1120,6 +2526,66 @@ var _Zsys_serviceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "SaveUserState",
 			Handler:       _Zsys_SaveUserState_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "RemoveSystemState",
+			Handler:       _Zsys_RemoveSystemState_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "RemoveUserState",
+			Handler:       _Zsys_RemoveUserState_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "DumpStates",
+			Handler:       _Zsys_DumpStates_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "DaemonStop",
+			Handler:       _Zsys_DaemonStop_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "LoggingLevel",
+			Handler:       _Zsys_LoggingLevel_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Refresh",
+			Handler:       _Zsys_Refresh_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Trace",
+			Handler:       _Zsys_Trace_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Status",
+			Handler:       _Zsys_Status_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "Reload",
+			Handler:       _Zsys_Reload_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GC",
+			Handler:       _Zsys_GC_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "MachineShow",
+			Handler:       _Zsys_MachineShow_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "MachineList",
+			Handler:       _Zsys_MachineList_Handler,
 			ServerStreams: true,
 		},
 	},

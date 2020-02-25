@@ -35,7 +35,6 @@ pools:
             mountpoint: /home/user1:local
             canmount: on:local
             creation_time: 2019-12-31T07:36:17+00:00
-            bootfs_datasets: rpool/main:local
       - name: USERDATA/user1_efgh
         mountpoint: /home/user1
         bootfs_datasets: rpool/clone
@@ -46,7 +45,6 @@ pools:
             mountpoint: /home/user1:local
             canmount: on:local
             creation_time: 2019-08-24T17:11:06+00:00
-            bootfs_datasets: rpool/clone:local
       - name: USERDATA/root_bcde
         mountpoint: /root
         bootfs_datasets: rpool/main

@@ -18,13 +18,14 @@ func TestServerStartStop(t *testing.T) {
 	   It can be reenabled once the race is fixed
 	*/
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
 
-	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"))
+	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
-		t.Errorf("expected no error but got: %v", err)
+		t.Fatalf("expected no error but got: %v", err)
 	}
 
 	s.Stop()
@@ -32,14 +33,16 @@ func TestServerStartStop(t *testing.T) {
 
 func TestServerFailingOption(t *testing.T) {
 	t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
-	if _, err := daemon.New("foo", daemon.FailingOption()); err == nil {
-		t.Error("expected an error but got none")
+	if _, err := daemon.New("foo", daemon.FailingOption(), daemon.WithLibZFS(testutils.GetMockZFS(t))); err == nil {
+		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestServerStartListenStop(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -54,13 +57,14 @@ func TestServerStartListenStop(t *testing.T) {
 		t.Fatalf("server shouldn't have timed out but did")
 	case err := <-errs:
 		if err != nil {
-			t.Errorf("got an error from the server but expected none: %v", err)
+			t.Fatalf("got an error from the server but expected none: %v", err)
 		}
 	}
 }
 
 func TestServerStartListenTimeout(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -71,6 +75,7 @@ func TestServerStartListenTimeout(t *testing.T) {
 
 func TestServerDontTimeoutOnRequest(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -81,7 +86,7 @@ func TestServerDontTimeoutOnRequest(t *testing.T) {
 	select {
 	case <-time.After(1000 * time.Millisecond):
 	case <-errs:
-		t.Errorf("server exited prematurily: we had a request in flight. Exited with %v", errs)
+		t.Fatalf("server exited prematurily: we had a request in flight. Exited with %v", errs)
 	}
 	reqDone()
 
@@ -91,6 +96,7 @@ func TestServerDontTimeoutOnRequest(t *testing.T) {
 
 func TestServerDontTimeoutWithMultipleRequests(t *testing.T) {
 	//t.Parallel()
+	defer testutils.StartLocalSystemBus(t)()
 
 	dir, cleanup := testutils.TempDir(t)
 	defer cleanup()
@@ -114,13 +120,14 @@ func TestServerDontTimeoutWithMultipleRequests(t *testing.T) {
 func TestServerCannotCreateSocket(t *testing.T) {
 	t.Parallel()
 
-	_, err := daemon.New("/path/does/not/exist/daemon_test.sock")
+	_, err := daemon.New("/path/does/not/exist/daemon_test.sock", daemon.WithLibZFS(testutils.GetMockZFS(t)))
 	if err == nil {
-		t.Error("expected an error but got none")
+		t.Fatal("expected an error but got none")
 	}
 }
 
 func TestServerSocketActivation(t *testing.T) {
+	defer testutils.StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
 		sockets      []string
@@ -162,7 +169,7 @@ func TestServerSocketActivation(t *testing.T) {
 				}
 			}
 
-			s, err := daemon.New("foo", daemon.WithSystemdActivationListener(f))
+			s, err := daemon.New("foo", daemon.WithSystemdActivationListener(f), daemon.WithLibZFS(testutils.GetMockZFS(t)))
 			if tc.wantErr && err == nil {
 				t.Fatal("expected an error but none")
 			} else if !tc.wantErr && err != nil {
@@ -177,7 +184,7 @@ func TestServerSocketActivation(t *testing.T) {
 				s.Stop()
 			}()
 			if err := s.Listen(); err != nil {
-				t.Errorf("expected to start listening but couldn't: %v", err)
+				t.Fatalf("expected to start listening but couldn't: %v", err)
 			}
 
 		})
@@ -185,6 +192,7 @@ func TestServerSocketActivation(t *testing.T) {
 }
 
 func TestServerSdNotifier(t *testing.T) {
+	defer testutils.StartLocalSystemBus(t)()
 
 	tests := map[string]struct {
 		sent         bool
@@ -215,7 +223,8 @@ func TestServerSdNotifier(t *testing.T) {
 						return false, errors.New("systemd notifier error")
 					}
 					return tc.sent, nil
-				}))
+				}),
+				daemon.WithLibZFS(testutils.GetMockZFS(t)))
 			if !tc.wantErr && err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
@@ -227,9 +236,9 @@ func TestServerSdNotifier(t *testing.T) {
 
 			err = s.Listen()
 			if tc.wantErr && err == nil {
-				t.Error("expected an error but none")
+				t.Fatal("expected an error but none")
 			} else if !tc.wantErr && err != nil {
-				t.Errorf("expected no error but got: %v", err)
+				t.Fatalf("expected no error but got: %v", err)
 			}
 
 		})
@@ -242,10 +251,10 @@ func assertServerTimeout(t *testing.T, s *daemon.Server, errs chan error) {
 	select {
 	case <-time.After(time.Second):
 		s.Stop()
-		t.Errorf("server should have timed out, but it didn't")
+		t.Fatalf("server should have timed out, but it didn't")
 	case err := <-errs:
 		if err != nil {
-			t.Error(err)
+			t.Fatal(err)
 		}
 	}
 }
@@ -253,7 +262,7 @@ func assertServerTimeout(t *testing.T, s *daemon.Server, errs chan error) {
 func startDaemonAndListen(t *testing.T, dir string, timeout time.Duration) (*daemon.Server, chan error) {
 	t.Helper()
 
-	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.WithIdleTimeout(timeout))
+	s, err := daemon.New(filepath.Join(dir, "daemon_test.sock"), daemon.WithIdleTimeout(timeout), daemon.WithLibZFS(testutils.GetMockZFS(t)))
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}

@@ -10,6 +10,8 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
+const automatedSnapshotPrefix = "autozsys_"
+
 // CreateSystemSnapshot creates a snapshot of a system and all users datasets.
 // If snapshotname is not empty, it is used as the id of the snapshot otherwise an id
 // is generated with a random string.
@@ -40,7 +42,7 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 	}
 
 	if name == "" {
-		name = "autozsys_" + ms.z.GenerateID(6)
+		name = automatedSnapshotPrefix + ms.z.GenerateID(6)
 	}
 
 	t, cancel := ms.z.NewTransaction(ctx)
@@ -62,6 +64,10 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 		// Only filter datasets attached to current state, as some subdataset could be linked to another
 		// system state but not that particular one.
 		for _, userState := range userStates {
+			// Don't take snapshots of snapshots
+			if userState.isSnapshot() {
+				continue
+			}
 			for _, d := range userState.Datasets {
 				if nameInBootfsDatasets(m.ID, *d) {
 					toSnapshot = append(toSnapshot, d)
@@ -69,8 +75,12 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 			}
 		}
 	} else {
-		toSnapshot = append(toSnapshot, m.SystemDatasets...)
-		toSnapshot = append(toSnapshot, m.UserDatasets...)
+		for _, ds := range m.SystemDatasets {
+			toSnapshot = append(toSnapshot, ds...)
+		}
+		for _, ds := range m.UserDatasets {
+			toSnapshot = append(toSnapshot, ds...)
+		}
 	}
 	for _, d := range toSnapshot {
 		if err := t.Snapshot(name, d.Name, false); err != nil {

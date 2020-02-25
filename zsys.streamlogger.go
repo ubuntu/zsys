@@ -270,6 +270,366 @@ func (z *ZsysLogServer) SaveUserState(req *SaveUserStateRequest, stream Zsys_Sav
 }
 
 /*
+ * Zsys.RemoveSystemState()
+ */
+
+// zsysRemoveSystemStateLogStream is a Zsys_RemoveSystemStateServer augmented by its own Context containing the log streamer
+type zsysRemoveSystemStateLogStream struct {
+	Zsys_RemoveSystemStateServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysRemoveSystemStateLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// RemoveSystemState overrides ZsysServer RemoveSystemState, installing a logger first
+func (z *ZsysLogServer) RemoveSystemState(req *RemoveSystemStateRequest, stream Zsys_RemoveSystemStateServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "RemoveSystemState")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.RemoveSystemState(req, &zsysRemoveSystemStateLogStream{
+		Zsys_RemoveSystemStateServer: stream,
+		ctx:                          ctx,
+	})
+}
+
+/*
+ * Zsys.RemoveUserState()
+ */
+
+// zsysRemoveUserStateLogStream is a Zsys_RemoveUserStateServer augmented by its own Context containing the log streamer
+type zsysRemoveUserStateLogStream struct {
+	Zsys_RemoveUserStateServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysRemoveUserStateLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// RemoveUserState overrides ZsysServer RemoveUserState, installing a logger first
+func (z *ZsysLogServer) RemoveUserState(req *RemoveUserStateRequest, stream Zsys_RemoveUserStateServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "RemoveUserState")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.RemoveUserState(req, &zsysRemoveUserStateLogStream{
+		Zsys_RemoveUserStateServer: stream,
+		ctx:                        ctx,
+	})
+}
+
+/*
+ * Zsys.DumpStates()
+ */
+
+// zsysDumpStatesLogStream is a Zsys_DumpStatesServer augmented by its own Context containing the log streamer
+type zsysDumpStatesLogStream struct {
+	Zsys_DumpStatesServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysDumpStatesLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// DumpStates overrides ZsysServer DumpStates, installing a logger first
+func (z *ZsysLogServer) DumpStates(req *Empty, stream Zsys_DumpStatesServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "DumpStates")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.DumpStates(req, &zsysDumpStatesLogStream{
+		Zsys_DumpStatesServer: stream,
+		ctx:                   ctx,
+	})
+}
+
+/*
+ * Zsys.DaemonStop()
+ */
+
+// zsysDaemonStopLogStream is a Zsys_DaemonStopServer augmented by its own Context containing the log streamer
+type zsysDaemonStopLogStream struct {
+	Zsys_DaemonStopServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysDaemonStopLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// DaemonStop overrides ZsysServer DaemonStop, installing a logger first
+func (z *ZsysLogServer) DaemonStop(req *Empty, stream Zsys_DaemonStopServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "DaemonStop")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.DaemonStop(req, &zsysDaemonStopLogStream{
+		Zsys_DaemonStopServer: stream,
+		ctx:                   ctx,
+	})
+}
+
+/*
+ * Zsys.LoggingLevel()
+ */
+
+// zsysLoggingLevelLogStream is a Zsys_LoggingLevelServer augmented by its own Context containing the log streamer
+type zsysLoggingLevelLogStream struct {
+	Zsys_LoggingLevelServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysLoggingLevelLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// LoggingLevel overrides ZsysServer LoggingLevel, installing a logger first
+func (z *ZsysLogServer) LoggingLevel(req *LoggingLevelRequest, stream Zsys_LoggingLevelServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "LoggingLevel")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.LoggingLevel(req, &zsysLoggingLevelLogStream{
+		Zsys_LoggingLevelServer: stream,
+		ctx:                     ctx,
+	})
+}
+
+/*
+ * Zsys.Refresh()
+ */
+
+// zsysRefreshLogStream is a Zsys_RefreshServer augmented by its own Context containing the log streamer
+type zsysRefreshLogStream struct {
+	Zsys_RefreshServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysRefreshLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// Refresh overrides ZsysServer Refresh, installing a logger first
+func (z *ZsysLogServer) Refresh(req *Empty, stream Zsys_RefreshServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "Refresh")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.Refresh(req, &zsysRefreshLogStream{
+		Zsys_RefreshServer: stream,
+		ctx:                ctx,
+	})
+}
+
+/*
+ * Zsys.Trace()
+ */
+
+// zsysTraceLogStream is a Zsys_TraceServer augmented by its own Context containing the log streamer
+type zsysTraceLogStream struct {
+	Zsys_TraceServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysTraceLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// Trace overrides ZsysServer Trace, installing a logger first
+func (z *ZsysLogServer) Trace(req *TraceRequest, stream Zsys_TraceServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "Trace")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.Trace(req, &zsysTraceLogStream{
+		Zsys_TraceServer: stream,
+		ctx:              ctx,
+	})
+}
+
+/*
+ * Zsys.Status()
+ */
+
+// zsysStatusLogStream is a Zsys_StatusServer augmented by its own Context containing the log streamer
+type zsysStatusLogStream struct {
+	Zsys_StatusServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysStatusLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// Status overrides ZsysServer Status, installing a logger first
+func (z *ZsysLogServer) Status(req *Empty, stream Zsys_StatusServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "Status")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.Status(req, &zsysStatusLogStream{
+		Zsys_StatusServer: stream,
+		ctx:               ctx,
+	})
+}
+
+/*
+ * Zsys.Reload()
+ */
+
+// zsysReloadLogStream is a Zsys_ReloadServer augmented by its own Context containing the log streamer
+type zsysReloadLogStream struct {
+	Zsys_ReloadServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysReloadLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// Reload overrides ZsysServer Reload, installing a logger first
+func (z *ZsysLogServer) Reload(req *Empty, stream Zsys_ReloadServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "Reload")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.Reload(req, &zsysReloadLogStream{
+		Zsys_ReloadServer: stream,
+		ctx:               ctx,
+	})
+}
+
+/*
+ * Zsys.GC()
+ */
+
+// zsysGCLogStream is a Zsys_GCServer augmented by its own Context containing the log streamer
+type zsysGCLogStream struct {
+	Zsys_GCServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysGCLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// GC overrides ZsysServer GC, installing a logger first
+func (z *ZsysLogServer) GC(req *GCRequest, stream Zsys_GCServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "GC")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.GC(req, &zsysGCLogStream{
+		Zsys_GCServer: stream,
+		ctx:           ctx,
+	})
+}
+
+/*
+ * Zsys.MachineShow()
+ */
+
+// zsysMachineShowLogStream is a Zsys_MachineShowServer augmented by its own Context containing the log streamer
+type zsysMachineShowLogStream struct {
+	Zsys_MachineShowServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysMachineShowLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// MachineShow overrides ZsysServer MachineShow, installing a logger first
+func (z *ZsysLogServer) MachineShow(req *MachineShowRequest, stream Zsys_MachineShowServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "MachineShow")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.MachineShow(req, &zsysMachineShowLogStream{
+		Zsys_MachineShowServer: stream,
+		ctx:                    ctx,
+	})
+}
+
+/*
+ * Zsys.MachineList()
+ */
+
+// zsysMachineListLogStream is a Zsys_MachineListServer augmented by its own Context containing the log streamer
+type zsysMachineListLogStream struct {
+	Zsys_MachineListServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysMachineListLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// MachineList overrides ZsysServer MachineList, installing a logger first
+func (z *ZsysLogServer) MachineList(req *Empty, stream Zsys_MachineListServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "MachineList")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.MachineList(req, &zsysMachineListLogStream{
+		Zsys_MachineListServer: stream,
+		ctx:                    ctx,
+	})
+}
+
+/*
  * Extend streams to io.Writer
  */
 
@@ -356,6 +716,162 @@ func (s *zsysSaveUserStateServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&CreateSaveStateResponse{
 			Reply: &CreateSaveStateResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysRemoveSystemStateServer to an io.Writer
+func (s *zsysRemoveSystemStateServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&RemoveStateResponse{
+			Reply: &RemoveStateResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysRemoveUserStateServer to an io.Writer
+func (s *zsysRemoveUserStateServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&RemoveStateResponse{
+			Reply: &RemoveStateResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysDumpStatesServer to an io.Writer
+func (s *zsysDumpStatesServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&DumpStatesResponse{
+			Reply: &DumpStatesResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysDaemonStopServer to an io.Writer
+func (s *zsysDaemonStopServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysLoggingLevelServer to an io.Writer
+func (s *zsysLoggingLevelServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysRefreshServer to an io.Writer
+func (s *zsysRefreshServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysTraceServer to an io.Writer
+func (s *zsysTraceServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&TraceResponse{
+			Reply: &TraceResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysStatusServer to an io.Writer
+func (s *zsysStatusServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysReloadServer to an io.Writer
+func (s *zsysReloadServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysGCServer to an io.Writer
+func (s *zsysGCServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysMachineShowServer to an io.Writer
+func (s *zsysMachineShowServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&MachineShowResponse{
+			Reply: &MachineShowResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysMachineListServer to an io.Writer
+func (s *zsysMachineListServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&MachineListResponse{
+			Reply: &MachineListResponse_Log{Log: string(p)},
 		})
 	if err != nil {
 		return 0, err

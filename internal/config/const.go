@@ -16,6 +16,9 @@ const (
 
 	// DefaultServerIdleTimeout is the default time without a request before the server exits
 	DefaultServerIdleTimeout = time.Minute
+
+	// DefaultPath is the default configuration path
+	DefaultPath = "/etc/zsys.conf"
 )
 
 var (

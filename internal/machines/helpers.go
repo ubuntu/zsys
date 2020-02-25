@@ -3,6 +3,7 @@ package machines
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -178,10 +179,25 @@ func splitSnapshotName(name string) (string, string) {
 
 // nameInBootfsDatasets returns if name is part of the bootfsdatsets list for d
 func nameInBootfsDatasets(name string, d zfs.Dataset) bool {
-	for _, bootfsDataset := range strings.Split(d.BootfsDatasets, ":") {
+	for _, bootfsDataset := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
 		if bootfsDataset == name || strings.HasPrefix(d.BootfsDatasets, name+"/") {
 			return true
 		}
 	}
 	return false
+}
+
+func userFromDatasetName(n string) string {
+	base, _ := splitSnapshotName(n)
+	t := strings.Split(filepath.Base(base), "_")
+	user := t[0]
+	if len(t) > 1 {
+		user = strings.Join(t[:len(t)-1], "_")
+	}
+	return user
+
+}
+
+func isUserDataset(path string) bool {
+	return strings.Contains(strings.ToLower(path), userdatasetsContainerName)
 }

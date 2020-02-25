@@ -11,8 +11,8 @@ import (
 	"sync"
 	"time"
 
-	libzfs "github.com/bicomsystems/go-libzfs"
-	"github.com/ubuntu/zsys/internal/zfs"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs"
+	"github.com/ubuntu/zsys/internal/zfs/libzfs/mock"
 	"gopkg.in/yaml.v2"
 )
 
@@ -75,7 +75,7 @@ type LibZFSInterface interface {
 	PoolOpen(name string) (pool libzfs.Pool, err error)
 	PoolCreate(name string, vdev libzfs.VDevTree, features map[string]string,
 		props libzfs.PoolProperties, fsprops libzfs.DatasetProperties) (pool libzfs.Pool, err error)
-	zfs.LibZFSInterface
+	libzfs.Interface
 }
 
 // WithLibZFS allows overriding default libzfs implementations with a mock
@@ -89,7 +89,7 @@ func WithLibZFS(libzfs LibZFSInterface) func(*FakePools) {
 func NewFakePools(t tester, path string, opts ...func(*FakePools)) FakePools {
 	pools := FakePools{
 		t:      t,
-		libzfs: &zfs.LibZFSAdapter{},
+		libzfs: &libzfs.Adapter{},
 	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
@@ -132,7 +132,7 @@ func (fpools FakePools) cleanup() {
 			fpools.t.Logf("couldn't delete %q: %v", p, err)
 			continue
 		}
-		if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+		if _, ok := fpools.libzfs.(*mock.LibZFS); !ok {
 			pool.Export(true, fmt.Sprintf("Export temporary pool %q", p))
 		}
 
@@ -198,7 +198,7 @@ func (fpools FakePools) Create(path string) func() {
 
 			for _, dataset := range fpool.Datasets {
 				datasetName := fpool.Name + "/" + dataset.Name
-				var d zfs.DZFSInterface
+				var d libzfs.DZFSInterface
 				if dataset.Name == "." {
 					datasetName = fpool.Name
 					d, err = fpools.libzfs.DatasetOpen(datasetName)
@@ -223,19 +223,19 @@ func (fpools FakePools) Create(path string) func() {
 				}
 
 				if dataset.ZsysBootfs != "" {
-					d.SetUserProperty(zfs.BootfsProp, dataset.ZsysBootfs)
+					d.SetUserProperty(libzfs.BootfsProp, dataset.ZsysBootfs)
 				}
 				if !dataset.LastUsed.IsZero() {
-					d.SetUserProperty(zfs.LastUsedProp, strconv.FormatInt(dataset.LastUsed.Unix(), 10))
+					d.SetUserProperty(libzfs.LastUsedProp, strconv.FormatInt(dataset.LastUsed.Unix(), 10))
 				}
 				if dataset.LastBootedKernel != "" {
-					d.SetUserProperty(zfs.LastBootedKernelProp, dataset.LastBootedKernel)
+					d.SetUserProperty(libzfs.LastBootedKernelProp, dataset.LastBootedKernel)
 				}
 				if dataset.BootfsDatasets != "" {
-					d.SetUserProperty(zfs.BootfsDatasetsProp, dataset.BootfsDatasets)
+					d.SetUserProperty(libzfs.BootfsDatasetsProp, dataset.BootfsDatasets)
 				}
 				if dataset.Origin != "" {
-					if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+					if _, ok := fpools.libzfs.(*mock.LibZFS); !ok {
 						fpools.Fatalf("trying to set origin on clone for %q on real ZFS run. This is not possible", datasetName)
 					}
 					d.SetProperty(libzfs.DatasetPropOrigin, dataset.Origin)
@@ -254,7 +254,7 @@ func (fpools FakePools) Create(path string) func() {
 						}
 						props := make(map[libzfs.Prop]libzfs.Property)
 						if s.CreationTime != nil {
-							if _, ok := fpools.libzfs.(*zfs.LibZFSMock); !ok {
+							if _, ok := fpools.libzfs.(*mock.LibZFS); !ok {
 								fpools.Fatalf("trying to set snapshot time for %q on real ZFS run. This is not possible", datasetName)
 							}
 							props[libzfs.DatasetPropCreation] = libzfs.Property{Value: strconv.FormatInt(s.CreationTime.Unix(), 10)}
@@ -265,19 +265,19 @@ func (fpools FakePools) Create(path string) func() {
 							os.Exit(1)
 						}
 						if s.Mountpoint != "" {
-							d.SetUserProperty(zfs.SnapshotMountpointProp, s.Mountpoint)
+							d.SetUserProperty(libzfs.SnapshotMountpointProp, s.Mountpoint)
 						}
 						if s.CanMount != "" {
-							d.SetUserProperty(zfs.SnapshotCanmountProp, s.CanMount)
+							d.SetUserProperty(libzfs.SnapshotCanmountProp, s.CanMount)
 						}
 						if s.ZsysBootfs != "" {
-							d.SetUserProperty(zfs.BootfsProp, s.ZsysBootfs)
+							d.SetUserProperty(libzfs.BootfsProp, s.ZsysBootfs)
 						}
 						if s.LastBootedKernel != "" {
-							d.SetUserProperty(zfs.LastBootedKernelProp, s.LastBootedKernel)
+							d.SetUserProperty(libzfs.LastBootedKernelProp, s.LastBootedKernel)
 						}
 						if s.BootfsDatasets != "" {
-							d.SetUserProperty(zfs.BootfsDatasetsProp, s.BootfsDatasets)
+							d.SetUserProperty(libzfs.BootfsDatasetsProp, s.BootfsDatasets)
 						}
 						d.Close()
 					}

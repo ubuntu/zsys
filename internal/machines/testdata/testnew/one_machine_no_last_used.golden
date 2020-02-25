@@ -3,14 +3,16 @@
       "rpool": {
          "ID": "rpool",
          "IsZsys": true,
-         "SystemDatasets": [
-            {
-               "Name": "rpool",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true
-            }
-         ]
+         "SystemDatasets": {
+            "rpool": [
+               {
+                  "Name": "rpool",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true
+               }
+            ]
+         }
       }
    },
    "AllSystemDatasets": [

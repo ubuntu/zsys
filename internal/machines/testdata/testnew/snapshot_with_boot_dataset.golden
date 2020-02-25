@@ -4,47 +4,67 @@
          "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool/ROOT/ubuntu_1234",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1555555555
-            },
-            {
-               "Name": "bpool/BOOT/ubuntu_1234",
-               "Mountpoint": "/boot",
-               "CanMount": "on"
-            }
-         ],
+         "SystemDatasets": {
+            "bpool/BOOT/ubuntu_1234": [
+               {
+                  "Name": "bpool/BOOT/ubuntu_1234",
+                  "Mountpoint": "/boot",
+                  "CanMount": "on"
+               }
+            ],
+            "rpool/ROOT/ubuntu_1234": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1555555555
+               }
+            ]
+         },
          "History": {
             "rpool/ROOT/ubuntu_1234@snap1": {
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
                "IsZsys": true,
                "LastUsed": "2018-12-10T13:20:44+01:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1544444444
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_1234@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/boot",
-                     "CanMount": "on",
-                     "LastUsed": 1544444444
-                  }
-               ]
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_1234@snap1": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_1234@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/boot",
+                        "CanMount": "on",
+                        "LastUsed": 1544444444
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_1234@snap1": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1544444444
+                     }
+                  ]
+               }
             }
          }
       }
    },
    "AllSystemDatasets": [
+      {
+         "Name": "bpool/BOOT/ubuntu_1234",
+         "Mountpoint": "/boot",
+         "CanMount": "on"
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_1234@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
+         "CanMount": "on",
+         "LastUsed": 1544444444
+      },
       {
          "Name": "rpool/ROOT/ubuntu_1234",
          "Mountpoint": "/",
@@ -53,24 +73,34 @@
          "LastUsed": 1555555555
       },
       {
-         "Name": "bpool/BOOT/ubuntu_1234",
-         "Mountpoint": "/boot",
-         "CanMount": "on"
-      },
-      {
          "Name": "rpool/ROOT/ubuntu_1234@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1544444444
+      }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "bpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
       },
       {
-         "Name": "bpool/BOOT/ubuntu_1234@snap1",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "on",
-         "LastUsed": 1544444444
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "bpool/BOOT",
+         "Mountpoint": "/BOOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
       }
    ]
 }

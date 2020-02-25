@@ -57,12 +57,10 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-      "BootfsDatasets": "something else",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "inherited",
-         "LastBootedKernel": "inherited",
-         "BootfsDatasets": "inherited"
+         "LastBootedKernel": "inherited"
       }
    },
    {
@@ -90,12 +88,10 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-4.0.0-0-generic",
-      "BootfsDatasets": "something else on dataset",
       "Sources": {
          "Mountpoint": "inherited",
          "BootFS": "local",
-         "LastBootedKernel": "local",
-         "BootfsDatasets": "local"
+         "LastBootedKernel": "local"
       }
    },
    {
@@ -106,13 +102,11 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-      "BootfsDatasets": "something else",
       "Sources": {
          "Mountpoint": "local",
          "CanMount": "local",
          "BootFS": "local",
-         "LastBootedKernel": "local",
-         "BootfsDatasets": "local"
+         "LastBootedKernel": "local"
       }
    }
 ]

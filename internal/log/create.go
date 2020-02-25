@@ -65,3 +65,13 @@ func IDFromContext(ctx context.Context) (string, error) {
 
 	return info.id, nil
 }
+
+// LevelFromContext returns current request log level from context
+func LevelFromContext(ctx context.Context) (logrus.Level, error) {
+	info, ok := ctx.Value(requestInfoKey).(*requestInfo)
+	if !ok {
+		return DefaultLevel, errors.New(i18n.G("no logger attached to this context"))
+	}
+
+	return info.logger.GetLevel(), nil
+}

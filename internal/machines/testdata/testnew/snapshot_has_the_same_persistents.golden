@@ -4,15 +4,17 @@
          "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool/ROOT/ubuntu_1234",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 1555555555
-            }
-         ],
+         "SystemDatasets": {
+            "rpool/ROOT/ubuntu_1234": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1555555555
+               }
+            ]
+         },
          "PersistentDatasets": [
             {
                "Name": "rpool/opt",
@@ -25,16 +27,18 @@
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
                "IsZsys": true,
                "LastUsed": "2018-12-10T13:20:44+01:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1544444444
-                  }
-               ],
+               "SystemDatasets": {
+                  "rpool/ROOT/ubuntu_1234@snap1": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1544444444
+                     }
+                  ]
+               },
                "PersistentDatasets": [
                   {
                      "Name": "rpool/opt",
@@ -61,6 +65,25 @@
          "CanMount": "on",
          "BootFS": true,
          "LastUsed": 1544444444
+      }
+   ],
+   "AllPersistentDatasets": [
+      {
+         "Name": "rpool/opt",
+         "Mountpoint": "/opt",
+         "CanMount": "on"
+      }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
       }
    ]
 }

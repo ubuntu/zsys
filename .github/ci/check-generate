@@ -2,20 +2,29 @@
 
 set -eu
 
+generatedAssets="internal/config/internalassets*go"
+
 # Ignore mod file changes; README.md and po files
 # Modules are handled in another check and aren't related to generator
 # po and README.md files will be automatically updated once master in master.
-git update-index --assume-unchanged go.* po/* README.md
+git update-index --assume-unchanged go.* po/* README.md ${generatedAssets}
 on_exit() {
     # Restore files
-    git update-index --no-assume-unchanged go.* po/* README.md
+    git update-index --no-assume-unchanged go.* po/* README.md  ${generatedAssets}
 }
 trap on_exit EXIT INT QUIT ABRT PIPE TERM
 
 go generate ./...
 
-# Handle everything but po files
+# Handle everything but po and assets files
 MODIFIED=`git status --porcelain --untracked-files=no`
+
+# Check assets files
+git update-index --no-assume-unchanged ${generatedAssets}
+if [ -z "$MODIFIED" ]; then
+    MODIFIED=`git difftool -y -x "diff -I 'modTime'" ${generatedAssets}`
+fi
+
 if [ -n "$MODIFIED" ]; then
     echo "ERROR: 'go generate' modified files:"
     git --no-pager diff

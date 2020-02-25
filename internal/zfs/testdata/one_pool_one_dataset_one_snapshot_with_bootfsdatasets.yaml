@@ -8,3 +8,4 @@ pools:
         bootfs_datasets: rpool/ROOT/ubuntu_42
         snapshots:
           - name: snap1
+            bootfs_datasets: something set:local

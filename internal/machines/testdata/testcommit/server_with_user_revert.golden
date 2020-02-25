@@ -4,73 +4,79 @@
          "ID": "rpool/ROOT/ubuntu_9876",
          "IsZsys": true,
          "LastUsed": "2033-05-18T05:33:20+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool/ROOT/ubuntu_9876",
-               "Mountpoint": "/",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9876/var",
-               "Mountpoint": "/var",
-               "CanMount": "on",
-               "BootFS": true,
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9876/var/lib",
-               "Mountpoint": "/var/lib",
-               "CanMount": "off",
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
-               "Mountpoint": "/var/lib/AccountsService",
-               "CanMount": "on",
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
-               "Mountpoint": "/var/lib/NetworkManager",
-               "CanMount": "on",
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt",
-               "Mountpoint": "/var/lib/apt",
-               "CanMount": "on",
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude",
-               "Mountpoint": "/var/lib/aptitude",
-               "CanMount": "on",
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg",
-               "Mountpoint": "/var/lib/dpkg",
-               "CanMount": "on",
-               "LastUsed": 2000000000
-            },
-            {
-               "Name": "bpool/BOOT/ubuntu_9876",
-               "Mountpoint": "/boot",
-               "CanMount": "on",
-               "LastUsed": 2000000000
-            }
-         ],
-         "UserDatasets": [
-            {
-               "Name": "rpool/USERDATA/user1_efgh",
-               "Mountpoint": "/home/user1",
-               "CanMount": "on",
-               "LastUsed": 2000000000,
-               "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-            }
-         ],
+         "SystemDatasets": {
+            "bpool/BOOT/ubuntu_9876": [
+               {
+                  "Name": "bpool/BOOT/ubuntu_9876",
+                  "Mountpoint": "/boot",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               }
+            ],
+            "rpool/ROOT/ubuntu_9876": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876/var",
+                  "Mountpoint": "/var",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876/var/lib",
+                  "Mountpoint": "/var/lib",
+                  "CanMount": "off",
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+                  "Mountpoint": "/var/lib/AccountsService",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
+                  "Mountpoint": "/var/lib/NetworkManager",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt",
+                  "Mountpoint": "/var/lib/apt",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude",
+                  "Mountpoint": "/var/lib/aptitude",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg",
+                  "Mountpoint": "/var/lib/dpkg",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000
+               }
+            ]
+         },
+         "UserDatasets": {
+            "rpool/USERDATA/user1_efgh": [
+               {
+                  "Name": "rpool/USERDATA/user1_efgh",
+                  "Mountpoint": "/home/user1",
+                  "CanMount": "on",
+                  "LastUsed": 2000000000,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678"
+               }
+            ]
+         },
          "PersistentDatasets": [
             {
                "Name": "rpool/srv",
@@ -137,8 +143,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/root",
                         "CanMount": "on",
-                        "LastUsed": 1588888888,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                        "LastUsed": 1588888888
                      }
                   ]
                }
@@ -167,7 +172,7 @@
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
                         "LastUsed": 2000000000,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678"
                      }
                   ]
                },
@@ -180,8 +185,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 1588888888,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                        "LastUsed": 1588888888
                      }
                   ]
                },
@@ -194,8 +198,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 1577777777,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+                        "LastUsed": 1577777777
                      }
                   ]
                },
@@ -208,8 +211,7 @@
                         "IsSnapshot": true,
                         "Mountpoint": "/home/user1",
                         "CanMount": "on",
-                        "LastUsed": 1522222222,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+                        "LastUsed": 1522222222
                      }
                   ]
                }
@@ -220,97 +222,105 @@
                "ID": "rpool/ROOT/ubuntu_1234",
                "IsZsys": true,
                "LastUsed": "2020-09-13T14:26:39+02:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234",
-                     "Mountpoint": "/",
-                     "CanMount": "noauto",
-                     "BootFS": true,
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876@snap2"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var",
-                     "Mountpoint": "/var",
-                     "CanMount": "noauto",
-                     "BootFS": true,
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var@snap2"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib",
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "off",
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap2"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
-                     "Mountpoint": "/var/lib/AccountsService",
-                     "CanMount": "noauto",
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
-                     "Mountpoint": "/var/lib/NetworkManager",
-                     "CanMount": "noauto",
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
-                     "Mountpoint": "/var/lib/apt",
-                     "CanMount": "noauto",
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
-                     "Mountpoint": "/var/lib/aptitude",
-                     "CanMount": "noauto",
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
-                     "Mountpoint": "/var/lib/dpkg",
-                     "CanMount": "noauto",
-                     "LastUsed": 1599999999,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2"
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_1234",
-                     "Mountpoint": "/boot",
-                     "CanMount": "noauto",
-                     "Origin": "bpool/BOOT/ubuntu_9876@snap2"
-                  }
-               ],
-               "UserDatasets": [
-                  {
-                     "Name": "rpool/USERDATA/user1_abcd",
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "noauto",
-                     "LastUsed": 1544444444,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
-                     "Origin": "rpool/USERDATA/user1_efgh@snap1"
-                  },
-                  {
-                     "Name": "rpool/USERDATA/root_bcde",
-                     "Mountpoint": "/root",
-                     "CanMount": "noauto",
-                     "LastUsed": 1533333333,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-                  }
-               ],
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_1234": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_1234",
+                        "Mountpoint": "/boot",
+                        "CanMount": "noauto",
+                        "Origin": "bpool/BOOT/ubuntu_9876@snap2"
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_1234": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234",
+                        "Mountpoint": "/",
+                        "CanMount": "noauto",
+                        "BootFS": true,
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876@snap2"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var",
+                        "Mountpoint": "/var",
+                        "CanMount": "noauto",
+                        "BootFS": true,
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var@snap2"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib",
+                        "Mountpoint": "/var/lib",
+                        "CanMount": "off",
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap2"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+                        "Mountpoint": "/var/lib/AccountsService",
+                        "CanMount": "noauto",
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+                        "Mountpoint": "/var/lib/NetworkManager",
+                        "CanMount": "noauto",
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+                        "Mountpoint": "/var/lib/apt",
+                        "CanMount": "noauto",
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+                        "Mountpoint": "/var/lib/aptitude",
+                        "CanMount": "noauto",
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+                        "Mountpoint": "/var/lib/dpkg",
+                        "CanMount": "noauto",
+                        "LastUsed": 1599999999,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2"
+                     }
+                  ]
+               },
+               "UserDatasets": {
+                  "rpool/USERDATA/root_bcde": [
+                     {
+                        "Name": "rpool/USERDATA/root_bcde",
+                        "Mountpoint": "/root",
+                        "CanMount": "noauto",
+                        "LastUsed": 1533333333,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                     }
+                  ],
+                  "rpool/USERDATA/user1_abcd": [
+                     {
+                        "Name": "rpool/USERDATA/user1_abcd",
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "noauto",
+                        "LastUsed": 1544444444,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+                        "Origin": "rpool/USERDATA/user1_efgh@snap1"
+                     }
+                  ]
+               },
                "PersistentDatasets": [
                   {
                      "Name": "rpool/srv",
@@ -358,99 +368,105 @@
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
                "IsZsys": true,
                "LastUsed": "2020-05-08T00:01:28+02:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountsService",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/NetworkManager",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/apt",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/aptitude",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/dpkg",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_1234@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/boot",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888
-                  }
-               ],
-               "UserDatasets": [
-                  {
-                     "Name": "rpool/USERDATA/root_bcde@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/root",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-                  },
-                  {
-                     "Name": "rpool/USERDATA/user1_efgh@snap1",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-                  }
-               ],
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_1234@snap1": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_1234@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/boot",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_1234@snap1": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/AccountsService",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/NetworkManager",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/apt",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/aptitude",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/dpkg",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888,
+                        "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                     }
+                  ]
+               },
+               "UserDatasets": {
+                  "rpool/USERDATA/root_bcde@snap1": [
+                     {
+                        "Name": "rpool/USERDATA/root_bcde@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/root",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888
+                     }
+                  ],
+                  "rpool/USERDATA/user1_efgh@snap1": [
+                     {
+                        "Name": "rpool/USERDATA/user1_efgh@snap1",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 1588888888
+                     }
+                  ]
+               },
                "PersistentDatasets": [
                   {
                      "Name": "rpool/srv",
@@ -498,89 +514,95 @@
                "ID": "rpool/ROOT/ubuntu_5678",
                "IsZsys": true,
                "LastUsed": "2018-08-03T23:55:33+02:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678",
-                     "Mountpoint": "/",
-                     "CanMount": "noauto",
-                     "BootFS": true,
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876@snap3"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678/var",
-                     "Mountpoint": "/var",
-                     "CanMount": "noauto",
-                     "BootFS": true,
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var@snap3"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib",
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "off",
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap3"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
-                     "Mountpoint": "/var/lib/AccountsService",
-                     "CanMount": "noauto",
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
-                     "Mountpoint": "/var/lib/NetworkManager",
-                     "CanMount": "noauto",
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
-                     "Mountpoint": "/var/lib/apt",
-                     "CanMount": "noauto",
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/aptitude",
-                     "Mountpoint": "/var/lib/aptitude",
-                     "CanMount": "noauto",
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/dpkg",
-                     "Mountpoint": "/var/lib/dpkg",
-                     "CanMount": "noauto",
-                     "LastUsed": 1533333333,
-                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3"
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_5678",
-                     "Mountpoint": "/boot",
-                     "CanMount": "noauto",
-                     "Origin": "bpool/BOOT/ubuntu_9876@snap3"
-                  }
-               ],
-               "UserDatasets": [
-                  {
-                     "Name": "rpool/USERDATA/user1_efgh",
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "on",
-                     "LastUsed": 2000000000,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-                  }
-               ],
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_5678": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_5678",
+                        "Mountpoint": "/boot",
+                        "CanMount": "noauto",
+                        "Origin": "bpool/BOOT/ubuntu_9876@snap3"
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_5678": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678",
+                        "Mountpoint": "/",
+                        "CanMount": "noauto",
+                        "BootFS": true,
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876@snap3"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678/var",
+                        "Mountpoint": "/var",
+                        "CanMount": "noauto",
+                        "BootFS": true,
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var@snap3"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678/var/lib",
+                        "Mountpoint": "/var/lib",
+                        "CanMount": "off",
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap3"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
+                        "Mountpoint": "/var/lib/AccountsService",
+                        "CanMount": "noauto",
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
+                        "Mountpoint": "/var/lib/NetworkManager",
+                        "CanMount": "noauto",
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
+                        "Mountpoint": "/var/lib/apt",
+                        "CanMount": "noauto",
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678/var/lib/aptitude",
+                        "Mountpoint": "/var/lib/aptitude",
+                        "CanMount": "noauto",
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_5678/var/lib/dpkg",
+                        "Mountpoint": "/var/lib/dpkg",
+                        "CanMount": "noauto",
+                        "LastUsed": 1533333333,
+                        "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                        "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3"
+                     }
+                  ]
+               },
+               "UserDatasets": {
+                  "rpool/USERDATA/user1_efgh": [
+                     {
+                        "Name": "rpool/USERDATA/user1_efgh",
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 2000000000,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678"
+                     }
+                  ]
+               },
                "PersistentDatasets": [
                   {
                      "Name": "rpool/srv",
@@ -628,91 +650,96 @@
                "ID": "rpool/ROOT/ubuntu_9876@snap2",
                "IsZsys": true,
                "LastUsed": "2019-12-31T08:36:17+01:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.1.0-2-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountsService",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/NetworkManager",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/apt",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/aptitude",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/dpkg",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_9876@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/boot",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777
-                  }
-               ],
-               "UserDatasets": [
-                  {
-                     "Name": "rpool/USERDATA/user1_efgh@snap2",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-                  }
-               ],
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_9876@snap2": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_9876@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/boot",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_9876@snap2": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.1.0-2-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/AccountsService",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/NetworkManager",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/apt",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/aptitude",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/dpkg",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777,
+                        "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                     }
+                  ]
+               },
+               "UserDatasets": {
+                  "rpool/USERDATA/user1_efgh@snap2": [
+                     {
+                        "Name": "rpool/USERDATA/user1_efgh@snap2",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 1577777777
+                     }
+                  ]
+               },
                "PersistentDatasets": [
                   {
                      "Name": "rpool/srv",
@@ -760,91 +787,96 @@
                "ID": "rpool/ROOT/ubuntu_9876@snap3",
                "IsZsys": true,
                "LastUsed": "2018-03-28T09:30:22+02:00",
-               "SystemDatasets": [
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var",
-                     "CanMount": "on",
-                     "BootFS": true,
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/AccountsService",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/NetworkManager",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/apt",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/aptitude",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/var/lib/dpkg",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-                  },
-                  {
-                     "Name": "bpool/BOOT/ubuntu_9876@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/boot",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222
-                  }
-               ],
-               "UserDatasets": [
-                  {
-                     "Name": "rpool/USERDATA/user1_efgh@snap3",
-                     "IsSnapshot": true,
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-                  }
-               ],
+               "SystemDatasets": {
+                  "bpool/BOOT/ubuntu_9876@snap3": [
+                     {
+                        "Name": "bpool/BOOT/ubuntu_9876@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/boot",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222
+                     }
+                  ],
+                  "rpool/ROOT/ubuntu_9876@snap3": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/AccountsService",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/NetworkManager",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/apt",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/aptitude",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     },
+                     {
+                        "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/var/lib/dpkg",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222,
+                        "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                     }
+                  ]
+               },
+               "UserDatasets": {
+                  "rpool/USERDATA/user1_efgh@snap3": [
+                     {
+                        "Name": "rpool/USERDATA/user1_efgh@snap3",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 1522222222
+                     }
+                  ]
+               },
                "PersistentDatasets": [
                   {
                      "Name": "rpool/srv",
@@ -894,80 +926,86 @@
          "ID": "rpool/ROOT/ubuntu_9999",
          "IsZsys": true,
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": [
-            {
-               "Name": "rpool/ROOT/ubuntu_9999",
-               "Mountpoint": "/",
-               "CanMount": "noauto",
-               "BootFS": true,
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9999/var",
-               "Mountpoint": "/var",
-               "CanMount": "noauto",
-               "BootFS": true,
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib",
-               "Mountpoint": "/var/lib",
-               "CanMount": "off",
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountsService",
-               "Mountpoint": "/var/lib/AccountsService",
-               "CanMount": "noauto",
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib/NetworkManager",
-               "Mountpoint": "/var/lib/NetworkManager",
-               "CanMount": "noauto",
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib/apt",
-               "Mountpoint": "/var/lib/apt",
-               "CanMount": "noauto",
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib/aptitude",
-               "Mountpoint": "/var/lib/aptitude",
-               "CanMount": "noauto",
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "rpool/ROOT/ubuntu_9999/var/lib/dpkg",
-               "Mountpoint": "/var/lib/dpkg",
-               "CanMount": "noauto",
-               "LastUsed": 1555555555,
-               "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-            },
-            {
-               "Name": "bpool/BOOT/ubuntu_9999",
-               "Mountpoint": "/boot",
-               "CanMount": "noauto"
-            }
-         ],
-         "UserDatasets": [
-            {
-               "Name": "rpool/USERDATA/user2_aaaa",
-               "Mountpoint": "/home/user2",
-               "CanMount": "noauto",
-               "LastUsed": 1544444444,
-               "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
-            }
-         ],
+         "SystemDatasets": {
+            "bpool/BOOT/ubuntu_9999": [
+               {
+                  "Name": "bpool/BOOT/ubuntu_9999",
+                  "Mountpoint": "/boot",
+                  "CanMount": "noauto"
+               }
+            ],
+            "rpool/ROOT/ubuntu_9999": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999",
+                  "Mountpoint": "/",
+                  "CanMount": "noauto",
+                  "BootFS": true,
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999/var",
+                  "Mountpoint": "/var",
+                  "CanMount": "noauto",
+                  "BootFS": true,
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999/var/lib",
+                  "Mountpoint": "/var/lib",
+                  "CanMount": "off",
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999/var/lib/AccountsService",
+                  "Mountpoint": "/var/lib/AccountsService",
+                  "CanMount": "noauto",
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999/var/lib/NetworkManager",
+                  "Mountpoint": "/var/lib/NetworkManager",
+                  "CanMount": "noauto",
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999/var/lib/apt",
+                  "Mountpoint": "/var/lib/apt",
+                  "CanMount": "noauto",
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999/var/lib/aptitude",
+                  "Mountpoint": "/var/lib/aptitude",
+                  "CanMount": "noauto",
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               },
+               {
+                  "Name": "rpool/ROOT/ubuntu_9999/var/lib/dpkg",
+                  "Mountpoint": "/var/lib/dpkg",
+                  "CanMount": "noauto",
+                  "LastUsed": 1555555555,
+                  "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
+               }
+            ]
+         },
+         "UserDatasets": {
+            "rpool/USERDATA/user2_aaaa": [
+               {
+                  "Name": "rpool/USERDATA/user2_aaaa",
+                  "Mountpoint": "/home/user2",
+                  "CanMount": "noauto",
+                  "LastUsed": 1544444444,
+                  "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
+               }
+            ]
+         },
          "PersistentDatasets": [
             {
                "Name": "rpool/srv",
@@ -1034,73 +1072,79 @@
       "ID": "rpool/ROOT/ubuntu_9876",
       "IsZsys": true,
       "LastUsed": "2033-05-18T05:33:20+02:00",
-      "SystemDatasets": [
-         {
-            "Name": "rpool/ROOT/ubuntu_9876",
-            "Mountpoint": "/",
-            "CanMount": "on",
-            "BootFS": true,
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_9876/var",
-            "Mountpoint": "/var",
-            "CanMount": "on",
-            "BootFS": true,
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_9876/var/lib",
-            "Mountpoint": "/var/lib",
-            "CanMount": "off",
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
-            "Mountpoint": "/var/lib/AccountsService",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
-            "Mountpoint": "/var/lib/NetworkManager",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt",
-            "Mountpoint": "/var/lib/apt",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude",
-            "Mountpoint": "/var/lib/aptitude",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg",
-            "Mountpoint": "/var/lib/dpkg",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         },
-         {
-            "Name": "bpool/BOOT/ubuntu_9876",
-            "Mountpoint": "/boot",
-            "CanMount": "on",
-            "LastUsed": 2000000000
-         }
-      ],
-      "UserDatasets": [
-         {
-            "Name": "rpool/USERDATA/user1_efgh",
-            "Mountpoint": "/home/user1",
-            "CanMount": "on",
-            "LastUsed": 2000000000,
-            "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-         }
-      ],
+      "SystemDatasets": {
+         "bpool/BOOT/ubuntu_9876": [
+            {
+               "Name": "bpool/BOOT/ubuntu_9876",
+               "Mountpoint": "/boot",
+               "CanMount": "on",
+               "LastUsed": 2000000000
+            }
+         ],
+         "rpool/ROOT/ubuntu_9876": [
+            {
+               "Name": "rpool/ROOT/ubuntu_9876",
+               "Mountpoint": "/",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 2000000000
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_9876/var",
+               "Mountpoint": "/var",
+               "CanMount": "on",
+               "BootFS": true,
+               "LastUsed": 2000000000
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_9876/var/lib",
+               "Mountpoint": "/var/lib",
+               "CanMount": "off",
+               "LastUsed": 2000000000
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+               "Mountpoint": "/var/lib/AccountsService",
+               "CanMount": "on",
+               "LastUsed": 2000000000
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
+               "Mountpoint": "/var/lib/NetworkManager",
+               "CanMount": "on",
+               "LastUsed": 2000000000
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt",
+               "Mountpoint": "/var/lib/apt",
+               "CanMount": "on",
+               "LastUsed": 2000000000
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude",
+               "Mountpoint": "/var/lib/aptitude",
+               "CanMount": "on",
+               "LastUsed": 2000000000
+            },
+            {
+               "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg",
+               "Mountpoint": "/var/lib/dpkg",
+               "CanMount": "on",
+               "LastUsed": 2000000000
+            }
+         ]
+      },
+      "UserDatasets": {
+         "rpool/USERDATA/user1_efgh": [
+            {
+               "Name": "rpool/USERDATA/user1_efgh",
+               "Mountpoint": "/home/user1",
+               "CanMount": "on",
+               "LastUsed": 2000000000,
+               "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678"
+            }
+         ]
+      },
       "PersistentDatasets": [
          {
             "Name": "rpool/srv",
@@ -1167,8 +1211,7 @@
                      "IsSnapshot": true,
                      "Mountpoint": "/root",
                      "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                     "LastUsed": 1588888888
                   }
                ]
             }
@@ -1197,7 +1240,7 @@
                      "Mountpoint": "/home/user1",
                      "CanMount": "on",
                      "LastUsed": 2000000000,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678"
                   }
                ]
             },
@@ -1210,8 +1253,7 @@
                      "IsSnapshot": true,
                      "Mountpoint": "/home/user1",
                      "CanMount": "on",
-                     "LastUsed": 1588888888,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                     "LastUsed": 1588888888
                   }
                ]
             },
@@ -1224,8 +1266,7 @@
                      "IsSnapshot": true,
                      "Mountpoint": "/home/user1",
                      "CanMount": "on",
-                     "LastUsed": 1577777777,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+                     "LastUsed": 1577777777
                   }
                ]
             },
@@ -1238,8 +1279,7 @@
                      "IsSnapshot": true,
                      "Mountpoint": "/home/user1",
                      "CanMount": "on",
-                     "LastUsed": 1522222222,
-                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+                     "LastUsed": 1522222222
                   }
                ]
             }
@@ -1250,97 +1290,105 @@
             "ID": "rpool/ROOT/ubuntu_1234",
             "IsZsys": true,
             "LastUsed": "2020-09-13T14:26:39+02:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234",
-                  "Mountpoint": "/",
-                  "CanMount": "noauto",
-                  "BootFS": true,
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876@snap2"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var",
-                  "Mountpoint": "/var",
-                  "CanMount": "noauto",
-                  "BootFS": true,
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var@snap2"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib",
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "off",
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap2"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
-                  "Mountpoint": "/var/lib/AccountsService",
-                  "CanMount": "noauto",
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
-                  "Mountpoint": "/var/lib/NetworkManager",
-                  "CanMount": "noauto",
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
-                  "Mountpoint": "/var/lib/apt",
-                  "CanMount": "noauto",
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
-                  "Mountpoint": "/var/lib/aptitude",
-                  "CanMount": "noauto",
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
-                  "Mountpoint": "/var/lib/dpkg",
-                  "CanMount": "noauto",
-                  "LastUsed": 1599999999,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2"
-               },
-               {
-                  "Name": "bpool/BOOT/ubuntu_1234",
-                  "Mountpoint": "/boot",
-                  "CanMount": "noauto",
-                  "Origin": "bpool/BOOT/ubuntu_9876@snap2"
-               }
-            ],
-            "UserDatasets": [
-               {
-                  "Name": "rpool/USERDATA/user1_abcd",
-                  "Mountpoint": "/home/user1",
-                  "CanMount": "noauto",
-                  "LastUsed": 1544444444,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
-                  "Origin": "rpool/USERDATA/user1_efgh@snap1"
-               },
-               {
-                  "Name": "rpool/USERDATA/root_bcde",
-                  "Mountpoint": "/root",
-                  "CanMount": "noauto",
-                  "LastUsed": 1533333333,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-               }
-            ],
+            "SystemDatasets": {
+               "bpool/BOOT/ubuntu_1234": [
+                  {
+                     "Name": "bpool/BOOT/ubuntu_1234",
+                     "Mountpoint": "/boot",
+                     "CanMount": "noauto",
+                     "Origin": "bpool/BOOT/ubuntu_9876@snap2"
+                  }
+               ],
+               "rpool/ROOT/ubuntu_1234": [
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234",
+                     "Mountpoint": "/",
+                     "CanMount": "noauto",
+                     "BootFS": true,
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876@snap2"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var",
+                     "Mountpoint": "/var",
+                     "CanMount": "noauto",
+                     "BootFS": true,
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var@snap2"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib",
+                     "Mountpoint": "/var/lib",
+                     "CanMount": "off",
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap2"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+                     "Mountpoint": "/var/lib/AccountsService",
+                     "CanMount": "noauto",
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+                     "Mountpoint": "/var/lib/NetworkManager",
+                     "CanMount": "noauto",
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+                     "Mountpoint": "/var/lib/apt",
+                     "CanMount": "noauto",
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+                     "Mountpoint": "/var/lib/aptitude",
+                     "CanMount": "noauto",
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+                     "Mountpoint": "/var/lib/dpkg",
+                     "CanMount": "noauto",
+                     "LastUsed": 1599999999,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2"
+                  }
+               ]
+            },
+            "UserDatasets": {
+               "rpool/USERDATA/root_bcde": [
+                  {
+                     "Name": "rpool/USERDATA/root_bcde",
+                     "Mountpoint": "/root",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ],
+               "rpool/USERDATA/user1_abcd": [
+                  {
+                     "Name": "rpool/USERDATA/user1_abcd",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "noauto",
+                     "LastUsed": 1544444444,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+                     "Origin": "rpool/USERDATA/user1_efgh@snap1"
+                  }
+               ]
+            },
             "PersistentDatasets": [
                {
                   "Name": "rpool/srv",
@@ -1388,99 +1436,105 @@
             "ID": "rpool/ROOT/ubuntu_1234@snap1",
             "IsZsys": true,
             "LastUsed": "2020-05-08T00:01:28+02:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/AccountsService",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/NetworkManager",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/apt",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/aptitude",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/dpkg",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-               },
-               {
-                  "Name": "bpool/BOOT/ubuntu_1234@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/boot",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888
-               }
-            ],
-            "UserDatasets": [
-               {
-                  "Name": "rpool/USERDATA/root_bcde@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/root",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-               },
-               {
-                  "Name": "rpool/USERDATA/user1_efgh@snap1",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/home/user1",
-                  "CanMount": "on",
-                  "LastUsed": 1588888888,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-               }
-            ],
+            "SystemDatasets": {
+               "bpool/BOOT/ubuntu_1234@snap1": [
+                  {
+                     "Name": "bpool/BOOT/ubuntu_1234@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/boot",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888
+                  }
+               ],
+               "rpool/ROOT/ubuntu_1234@snap1": [
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/AccountsService",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/NetworkManager",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/apt",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/aptitude",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/dpkg",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888,
+                     "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+                  }
+               ]
+            },
+            "UserDatasets": {
+               "rpool/USERDATA/root_bcde@snap1": [
+                  {
+                     "Name": "rpool/USERDATA/root_bcde@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/root",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888
+                  }
+               ],
+               "rpool/USERDATA/user1_efgh@snap1": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh@snap1",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1588888888
+                  }
+               ]
+            },
             "PersistentDatasets": [
                {
                   "Name": "rpool/srv",
@@ -1528,89 +1582,95 @@
             "ID": "rpool/ROOT/ubuntu_5678",
             "IsZsys": true,
             "LastUsed": "2018-08-03T23:55:33+02:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678",
-                  "Mountpoint": "/",
-                  "CanMount": "noauto",
-                  "BootFS": true,
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876@snap3"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678/var",
-                  "Mountpoint": "/var",
-                  "CanMount": "noauto",
-                  "BootFS": true,
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var@snap3"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib",
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "off",
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap3"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
-                  "Mountpoint": "/var/lib/AccountsService",
-                  "CanMount": "noauto",
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
-                  "Mountpoint": "/var/lib/NetworkManager",
-                  "CanMount": "noauto",
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
-                  "Mountpoint": "/var/lib/apt",
-                  "CanMount": "noauto",
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/aptitude",
-                  "Mountpoint": "/var/lib/aptitude",
-                  "CanMount": "noauto",
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_5678/var/lib/dpkg",
-                  "Mountpoint": "/var/lib/dpkg",
-                  "CanMount": "noauto",
-                  "LastUsed": 1533333333,
-                  "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
-                  "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3"
-               },
-               {
-                  "Name": "bpool/BOOT/ubuntu_5678",
-                  "Mountpoint": "/boot",
-                  "CanMount": "noauto",
-                  "Origin": "bpool/BOOT/ubuntu_9876@snap3"
-               }
-            ],
-            "UserDatasets": [
-               {
-                  "Name": "rpool/USERDATA/user1_efgh",
-                  "Mountpoint": "/home/user1",
-                  "CanMount": "on",
-                  "LastUsed": 2000000000,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-               }
-            ],
+            "SystemDatasets": {
+               "bpool/BOOT/ubuntu_5678": [
+                  {
+                     "Name": "bpool/BOOT/ubuntu_5678",
+                     "Mountpoint": "/boot",
+                     "CanMount": "noauto",
+                     "Origin": "bpool/BOOT/ubuntu_9876@snap3"
+                  }
+               ],
+               "rpool/ROOT/ubuntu_5678": [
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678",
+                     "Mountpoint": "/",
+                     "CanMount": "noauto",
+                     "BootFS": true,
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876@snap3"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678/var",
+                     "Mountpoint": "/var",
+                     "CanMount": "noauto",
+                     "BootFS": true,
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var@snap3"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib",
+                     "Mountpoint": "/var/lib",
+                     "CanMount": "off",
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap3"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/AccountsService",
+                     "Mountpoint": "/var/lib/AccountsService",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/NetworkManager",
+                     "Mountpoint": "/var/lib/NetworkManager",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
+                     "Mountpoint": "/var/lib/apt",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/aptitude",
+                     "Mountpoint": "/var/lib/aptitude",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_5678/var/lib/dpkg",
+                     "Mountpoint": "/var/lib/dpkg",
+                     "CanMount": "noauto",
+                     "LastUsed": 1533333333,
+                     "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+                     "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3"
+                  }
+               ]
+            },
+            "UserDatasets": {
+               "rpool/USERDATA/user1_efgh": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh",
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678"
+                  }
+               ]
+            },
             "PersistentDatasets": [
                {
                   "Name": "rpool/srv",
@@ -1658,91 +1718,96 @@
             "ID": "rpool/ROOT/ubuntu_9876@snap2",
             "IsZsys": true,
             "LastUsed": "2019-12-31T08:36:17+01:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.1.0-2-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/AccountsService",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/NetworkManager",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/apt",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/aptitude",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/dpkg",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777,
-                  "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-               },
-               {
-                  "Name": "bpool/BOOT/ubuntu_9876@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/boot",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777
-               }
-            ],
-            "UserDatasets": [
-               {
-                  "Name": "rpool/USERDATA/user1_efgh@snap2",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/home/user1",
-                  "CanMount": "on",
-                  "LastUsed": 1577777777,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-               }
-            ],
+            "SystemDatasets": {
+               "bpool/BOOT/ubuntu_9876@snap2": [
+                  {
+                     "Name": "bpool/BOOT/ubuntu_9876@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/boot",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777
+                  }
+               ],
+               "rpool/ROOT/ubuntu_9876@snap2": [
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.1.0-2-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/AccountsService",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/NetworkManager",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/apt",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/aptitude",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/dpkg",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777,
+                     "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+                  }
+               ]
+            },
+            "UserDatasets": {
+               "rpool/USERDATA/user1_efgh@snap2": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh@snap2",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1577777777
+                  }
+               ]
+            },
             "PersistentDatasets": [
                {
                   "Name": "rpool/srv",
@@ -1790,91 +1855,96 @@
             "ID": "rpool/ROOT/ubuntu_9876@snap3",
             "IsZsys": true,
             "LastUsed": "2018-03-28T09:30:22+02:00",
-            "SystemDatasets": [
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var",
-                  "CanMount": "on",
-                  "BootFS": true,
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/AccountsService",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/NetworkManager",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/apt",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/aptitude",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/var/lib/dpkg",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222,
-                  "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-               },
-               {
-                  "Name": "bpool/BOOT/ubuntu_9876@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/boot",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222
-               }
-            ],
-            "UserDatasets": [
-               {
-                  "Name": "rpool/USERDATA/user1_efgh@snap3",
-                  "IsSnapshot": true,
-                  "Mountpoint": "/home/user1",
-                  "CanMount": "on",
-                  "LastUsed": 1522222222,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
-               }
-            ],
+            "SystemDatasets": {
+               "bpool/BOOT/ubuntu_9876@snap3": [
+                  {
+                     "Name": "bpool/BOOT/ubuntu_9876@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/boot",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222
+                  }
+               ],
+               "rpool/ROOT/ubuntu_9876@snap3": [
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var",
+                     "CanMount": "on",
+                     "BootFS": true,
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/AccountsService",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/NetworkManager",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/apt",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/aptitude",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  },
+                  {
+                     "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/var/lib/dpkg",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222,
+                     "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+                  }
+               ]
+            },
+            "UserDatasets": {
+               "rpool/USERDATA/user1_efgh@snap3": [
+                  {
+                     "Name": "rpool/USERDATA/user1_efgh@snap3",
+                     "IsSnapshot": true,
+                     "Mountpoint": "/home/user1",
+                     "CanMount": "on",
+                     "LastUsed": 1522222222
+                  }
+               ]
+            },
             "PersistentDatasets": [
                {
                   "Name": "rpool/srv",
@@ -1922,60 +1992,48 @@
    },
    "AllSystemDatasets": [
       {
-         "Name": "rpool/ROOT/ubuntu_9876",
-         "Mountpoint": "/",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 2000000000
+         "Name": "bpool/BOOT/ubuntu_1234",
+         "Mountpoint": "/boot",
+         "CanMount": "noauto",
+         "Origin": "bpool/BOOT/ubuntu_9876@snap2"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_9876/var",
-         "Mountpoint": "/var",
+         "Name": "bpool/BOOT/ubuntu_1234@snap1",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
          "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 2000000000
+         "LastUsed": 1588888888
       },
       {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib",
-         "Mountpoint": "/var/lib",
-         "CanMount": "off",
-         "LastUsed": 2000000000
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
-         "Mountpoint": "/var/lib/AccountsService",
-         "CanMount": "on",
-         "LastUsed": 2000000000
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
-         "Mountpoint": "/var/lib/NetworkManager",
-         "CanMount": "on",
-         "LastUsed": 2000000000
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt",
-         "Mountpoint": "/var/lib/apt",
-         "CanMount": "on",
-         "LastUsed": 2000000000
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude",
-         "Mountpoint": "/var/lib/aptitude",
-         "CanMount": "on",
-         "LastUsed": 2000000000
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg",
-         "Mountpoint": "/var/lib/dpkg",
-         "CanMount": "on",
-         "LastUsed": 2000000000
+         "Name": "bpool/BOOT/ubuntu_5678",
+         "Mountpoint": "/boot",
+         "CanMount": "noauto",
+         "Origin": "bpool/BOOT/ubuntu_9876@snap3"
       },
       {
          "Name": "bpool/BOOT/ubuntu_9876",
          "Mountpoint": "/boot",
          "CanMount": "on",
          "LastUsed": 2000000000
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_9876@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
+         "CanMount": "on",
+         "LastUsed": 1577777777
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_9876@snap3",
+         "IsSnapshot": true,
+         "Mountpoint": "/boot",
+         "CanMount": "on",
+         "LastUsed": 1522222222
+      },
+      {
+         "Name": "bpool/BOOT/ubuntu_9999",
+         "Mountpoint": "/boot",
+         "CanMount": "noauto"
       },
       {
          "Name": "rpool/ROOT/ubuntu_1234",
@@ -1987,69 +2045,6 @@
          "Origin": "rpool/ROOT/ubuntu_9876@snap2"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_1234/var",
-         "Mountpoint": "/var",
-         "CanMount": "noauto",
-         "BootFS": true,
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_9876/var@snap2"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib",
-         "Mountpoint": "/var/lib",
-         "CanMount": "off",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap2"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
-         "Mountpoint": "/var/lib/AccountsService",
-         "CanMount": "noauto",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
-         "Mountpoint": "/var/lib/NetworkManager",
-         "CanMount": "noauto",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
-         "Mountpoint": "/var/lib/apt",
-         "CanMount": "noauto",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
-         "Mountpoint": "/var/lib/aptitude",
-         "CanMount": "noauto",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
-         "Mountpoint": "/var/lib/dpkg",
-         "CanMount": "noauto",
-         "LastUsed": 1599999999,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
-         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234",
-         "Mountpoint": "/boot",
-         "CanMount": "noauto",
-         "Origin": "bpool/BOOT/ubuntu_9876@snap2"
-      },
-      {
          "Name": "rpool/ROOT/ubuntu_1234@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/",
@@ -2057,6 +2052,15 @@
          "BootFS": true,
          "LastUsed": 1588888888,
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var",
+         "Mountpoint": "/var",
+         "CanMount": "noauto",
+         "BootFS": true,
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+         "Origin": "rpool/ROOT/ubuntu_9876/var@snap2"
       },
       {
          "Name": "rpool/ROOT/ubuntu_1234/var@snap1",
@@ -2068,12 +2072,28 @@
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib",
+         "Mountpoint": "/var/lib",
+         "CanMount": "off",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+         "Origin": "rpool/ROOT/ubuntu_9876/var/lib@snap2"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234/var/lib@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib",
          "CanMount": "on",
          "LastUsed": 1588888888,
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
+         "CanMount": "noauto",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2"
       },
       {
          "Name": "rpool/ROOT/ubuntu_1234/var/lib/AccountsService@snap1",
@@ -2084,12 +2104,28 @@
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager",
+         "Mountpoint": "/var/lib/NetworkManager",
+         "CanMount": "noauto",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234/var/lib/NetworkManager@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/NetworkManager",
          "CanMount": "on",
          "LastUsed": 1588888888,
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt",
+         "Mountpoint": "/var/lib/apt",
+         "CanMount": "noauto",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2"
       },
       {
          "Name": "rpool/ROOT/ubuntu_1234/var/lib/apt@snap1",
@@ -2100,6 +2136,14 @@
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude",
+         "Mountpoint": "/var/lib/aptitude",
+         "CanMount": "noauto",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234/var/lib/aptitude@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/aptitude",
@@ -2108,19 +2152,20 @@
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg",
+         "Mountpoint": "/var/lib/dpkg",
+         "CanMount": "noauto",
+         "LastUsed": 1599999999,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic",
+         "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_1234/var/lib/dpkg@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/dpkg",
          "CanMount": "on",
          "LastUsed": 1588888888,
          "LastBootedKernel": "vmlinuz-5.1.0-1-generic"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_1234@snap1",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "on",
-         "LastUsed": 1588888888
       },
       {
          "Name": "rpool/ROOT/ubuntu_5678",
@@ -2189,10 +2234,11 @@
          "Origin": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3"
       },
       {
-         "Name": "bpool/BOOT/ubuntu_5678",
-         "Mountpoint": "/boot",
-         "CanMount": "noauto",
-         "Origin": "bpool/BOOT/ubuntu_9876@snap3"
+         "Name": "rpool/ROOT/ubuntu_9876",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000
       },
       {
          "Name": "rpool/ROOT/ubuntu_9876@snap2",
@@ -2204,70 +2250,6 @@
          "LastBootedKernel": "vmlinuz-5.1.0-2-generic"
       },
       {
-         "Name": "rpool/ROOT/ubuntu_9876/var@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/var",
-         "CanMount": "on",
-         "BootFS": true,
-         "LastUsed": 1577777777,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/var/lib",
-         "CanMount": "on",
-         "LastUsed": 1577777777,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/var/lib/AccountsService",
-         "CanMount": "on",
-         "LastUsed": 1577777777,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/var/lib/NetworkManager",
-         "CanMount": "on",
-         "LastUsed": 1577777777,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/var/lib/apt",
-         "CanMount": "on",
-         "LastUsed": 1577777777,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/var/lib/aptitude",
-         "CanMount": "on",
-         "LastUsed": 1577777777,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/var/lib/dpkg",
-         "CanMount": "on",
-         "LastUsed": 1577777777,
-         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_9876@snap2",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "on",
-         "LastUsed": 1577777777
-      },
-      {
          "Name": "rpool/ROOT/ubuntu_9876@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/",
@@ -2275,6 +2257,22 @@
          "BootFS": true,
          "LastUsed": 1522222222,
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var",
+         "Mountpoint": "/var",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/var",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
       },
       {
          "Name": "rpool/ROOT/ubuntu_9876/var@snap3",
@@ -2286,12 +2284,40 @@
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib",
+         "Mountpoint": "/var/lib",
+         "CanMount": "off",
+         "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/var/lib",
+         "CanMount": "on",
+         "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib",
          "CanMount": "on",
          "LastUsed": 1522222222,
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService",
+         "Mountpoint": "/var/lib/AccountsService",
+         "CanMount": "on",
+         "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/var/lib/AccountsService",
+         "CanMount": "on",
+         "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
       },
       {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib/AccountsService@snap3",
@@ -2302,12 +2328,40 @@
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager",
+         "Mountpoint": "/var/lib/NetworkManager",
+         "CanMount": "on",
+         "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/var/lib/NetworkManager",
+         "CanMount": "on",
+         "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib/NetworkManager@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/NetworkManager",
          "CanMount": "on",
          "LastUsed": 1522222222,
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt",
+         "Mountpoint": "/var/lib/apt",
+         "CanMount": "on",
+         "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/var/lib/apt",
+         "CanMount": "on",
+         "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
       },
       {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib/apt@snap3",
@@ -2318,6 +2372,20 @@
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude",
+         "Mountpoint": "/var/lib/aptitude",
+         "CanMount": "on",
+         "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/var/lib/aptitude",
+         "CanMount": "on",
+         "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib/aptitude@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/aptitude",
@@ -2326,19 +2394,26 @@
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
       },
       {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg",
+         "Mountpoint": "/var/lib/dpkg",
+         "CanMount": "on",
+         "LastUsed": 2000000000
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap2",
+         "IsSnapshot": true,
+         "Mountpoint": "/var/lib/dpkg",
+         "CanMount": "on",
+         "LastUsed": 1577777777,
+         "LastBootedKernel": "vmlinuz-5.2.0-0-generic"
+      },
+      {
          "Name": "rpool/ROOT/ubuntu_9876/var/lib/dpkg@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/var/lib/dpkg",
          "CanMount": "on",
          "LastUsed": 1522222222,
          "LastBootedKernel": "vmlinuz-5.0.0-3-generic"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_9876@snap3",
-         "IsSnapshot": true,
-         "Mountpoint": "/boot",
-         "CanMount": "on",
-         "LastUsed": 1522222222
       },
       {
          "Name": "rpool/ROOT/ubuntu_9999",
@@ -2397,11 +2472,6 @@
          "CanMount": "noauto",
          "LastUsed": 1555555555,
          "LastBootedKernel": "vmlinuz-5.0.9-0-generic"
-      },
-      {
-         "Name": "bpool/BOOT/ubuntu_9999",
-         "Mountpoint": "/boot",
-         "CanMount": "noauto"
       }
    ],
    "AllUsersDatasets": [
@@ -2417,8 +2487,7 @@
          "IsSnapshot": true,
          "Mountpoint": "/root",
          "CanMount": "on",
-         "LastUsed": 1588888888,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "LastUsed": 1588888888
       },
       {
          "Name": "rpool/USERDATA/user1_abcd",
@@ -2433,31 +2502,28 @@
          "Mountpoint": "/home/user1",
          "CanMount": "on",
          "LastUsed": 2000000000,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+         "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678"
       },
       {
          "Name": "rpool/USERDATA/user1_efgh@snap1",
          "IsSnapshot": true,
          "Mountpoint": "/home/user1",
          "CanMount": "on",
-         "LastUsed": 1588888888,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+         "LastUsed": 1588888888
       },
       {
          "Name": "rpool/USERDATA/user1_efgh@snap2",
          "IsSnapshot": true,
          "Mountpoint": "/home/user1",
          "CanMount": "on",
-         "LastUsed": 1577777777,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+         "LastUsed": 1577777777
       },
       {
          "Name": "rpool/USERDATA/user1_efgh@snap3",
          "IsSnapshot": true,
          "Mountpoint": "/home/user1",
          "CanMount": "on",
-         "LastUsed": 1522222222,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_9876:rpool/ROOT/ubuntu_5678"
+         "LastUsed": 1522222222
       },
       {
          "Name": "rpool/USERDATA/user2_aaaa",
@@ -2465,6 +2531,70 @@
          "CanMount": "noauto",
          "LastUsed": 1544444444,
          "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
+      }
+   ],
+   "AllPersistentDatasets": [
+      {
+         "Name": "rpool/srv",
+         "Mountpoint": "/srv",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/games",
+         "Mountpoint": "/var/games",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/lib",
+         "Mountpoint": "/var/lib",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/log",
+         "Mountpoint": "/var/log",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/mail",
+         "Mountpoint": "/var/mail",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/snap",
+         "Mountpoint": "/var/snap",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/spool",
+         "Mountpoint": "/var/spool",
+         "CanMount": "on"
+      },
+      {
+         "Name": "rpool/var/www",
+         "Mountpoint": "/var/www",
+         "CanMount": "on"
+      }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA",
+         "Mountpoint": "/USERDATA",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/var",
+         "Mountpoint": "/var",
+         "CanMount": "off"
       }
    ]
 }

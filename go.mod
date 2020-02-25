@@ -3,7 +3,7 @@ module github.com/ubuntu/zsys
 go 1.13
 
 require (
-	github.com/bicomsystems/go-libzfs v0.3.1
+	github.com/bicomsystems/go-libzfs v0.3.3
 	github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f
 	github.com/godbus/dbus/v5 v5.0.3
 	github.com/golang/protobuf v1.3.2
@@ -11,6 +11,8 @@ require (
 	github.com/k0kubun/colorstring v0.0.0-20150214042306-9440f1994b88 // indirect
 	github.com/k0kubun/pp v3.0.1+incompatible
 	github.com/mattn/go-colorable v0.1.2 // indirect
+	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749
+	github.com/shurcooL/vfsgen v0.0.0-20181202132449-6a9ea43bcacd
 	github.com/sirupsen/logrus v1.4.2
 	github.com/snapcore/go-gettext v0.0.0-20190812090936-a77afd68d2bd
 	github.com/spf13/cobra v0.0.5

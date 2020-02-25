@@ -1,0 +1,30 @@
+{
+   "Cmdline": "aaaaa bbbbb root=ZFS= ccccc",
+   "UnmanagedDatasets": [
+      {
+         "Name": "bpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "bpool/BOOT",
+         "Mountpoint": "/BOOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA",
+         "Mountpoint": "/USERDATA",
+         "CanMount": "off"
+      }
+   ]
+}

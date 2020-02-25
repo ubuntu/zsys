@@ -11,6 +11,21 @@ service Zsys {
 
   rpc SaveSystemState(SaveSystemStateRequest) returns (stream CreateSaveStateResponse);
   rpc SaveUserState(SaveUserStateRequest) returns (stream CreateSaveStateResponse);
+  rpc RemoveSystemState(RemoveSystemStateRequest) returns (stream RemoveStateResponse);
+  rpc RemoveUserState(RemoveUserStateRequest) returns (stream RemoveStateResponse);
+
+  rpc DumpStates(Empty) returns (stream DumpStatesResponse);
+  rpc DaemonStop(Empty) returns (stream LogResponse);
+  rpc LoggingLevel(LoggingLevelRequest) returns (stream LogResponse);
+  rpc Refresh(Empty) returns  (stream LogResponse);
+  rpc Trace(TraceRequest) returns  (stream TraceResponse);
+  rpc Status(Empty) returns (stream LogResponse);
+  rpc Reload(Empty) returns (stream LogResponse);
+  rpc GC(GCRequest) returns (stream LogResponse);
+
+  rpc MachineShow(MachineShowRequest) returns (stream MachineShowResponse);
+  rpc MachineList(Empty) returns (stream MachineListResponse);
+
 }
 
 message Empty {}
@@ -25,6 +40,7 @@ message VersionResponse {
     string version = 2;
   }
 }
+
 message CreateUserDataRequest {
   string user = 1;
   string homepath = 2;
@@ -62,5 +78,69 @@ message CreateSaveStateResponse {
   oneof reply {
     string log = 1;
     string stateName = 2;
+  }
+}
+
+message RemoveSystemStateRequest {
+  string stateName = 1;
+  bool force = 2;
+}
+
+message RemoveUserStateRequest {
+  string userName = 1;
+  string stateName = 2;
+  bool force = 3;
+}
+
+message RemoveStateResponse {
+  oneof reply {
+    string log = 1;
+    string additionalRemovals = 2;
+  }
+}
+
+message DumpStatesResponse {
+  oneof reply {
+    string log = 1;
+    string states = 2;
+  }
+}
+
+message LoggingLevelRequest {
+  int32 logginglevel = 1;
+}
+
+message TraceRequest {
+  string type = 1;
+  int32 duration = 2;
+}
+
+message TraceResponse {
+  oneof reply {
+    string log = 1;
+    bytes trace = 2;
+  }
+}
+
+message GCRequest {
+  bool all = 1;
+}
+
+message MachineShowRequest {
+  string machineId = 1;
+  bool full = 2;
+}
+
+message MachineShowResponse {
+  oneof reply {
+    string log = 1;
+    string machineInfo = 2;
+  }
+}
+
+message MachineListResponse {
+  oneof reply {
+    string log = 1;
+    string machineList = 2;
   }
 }
