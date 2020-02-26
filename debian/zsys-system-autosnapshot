@@ -11,6 +11,6 @@ RUNAFTER=$(date -d "${DELAY} seconds ago" "+%s")
 
 [ ${RUNAFTER} -lt ${LASTRUN} ] && exit 0
 
-echo "Snapshotting system"
+echo "Saving system state"
 touch "${STAMPFILE}"
 zsysctl state save --system
