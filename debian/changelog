@@ -1,3 +1,16 @@
+zsys (0.4.0) focal; urgency=medium
+
+  * Many new commands: machine list/show, state management, service remote debug
+    and management, logging support, garbage collection, first path on removal.
+  * Aliases for commonly used actions.
+  * More fine-grained policies for authorization support.
+  * Many refactoring and improvement of internal representations with tests
+    enhancements.
+  * Automated snapshots done on package installation, upgrade and removal.
+  * Update some vendored dependencies.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 26 Feb 2020 16:01:23 +0100
+
 zsys (0.3.3) focal; urgency=medium
 
   * Track number of requests in flights during dbus tests
