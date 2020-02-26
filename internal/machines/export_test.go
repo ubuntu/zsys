@@ -10,7 +10,8 @@ import (
 )
 
 const (
-	RevertUserDataTag = zfsRevertUserDataTag
+	RevertUserDataTag       = zfsRevertUserDataTag
+	AutomatedSnapshotPrefix = automatedSnapshotPrefix
 )
 
 type SortedDatasets []*zfs.Dataset

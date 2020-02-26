@@ -757,7 +757,7 @@ func TestCreateSystemSnapshot(t *testing.T) {
 			lzfs.ForceLastUsedTime(true)
 			ms := initMachines
 
-			err = ms.CreateSystemSnapshot(context.Background(), tc.snapshotName)
+			snapshotName, err := ms.CreateSystemSnapshot(context.Background(), tc.snapshotName)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -766,6 +766,16 @@ func TestCreateSystemSnapshot(t *testing.T) {
 			}
 			if err == nil && tc.wantErr {
 				t.Fatal("expected an error but got none")
+			}
+
+			if tc.snapshotName != "" {
+				if snapshotName != tc.snapshotName {
+					t.Errorf("provided snapshotname isn't the one used. Want: %s, got: %s", tc.snapshotName, snapshotName)
+				}
+			} else {
+				if !strings.HasPrefix(snapshotName, machines.AutomatedSnapshotPrefix) {
+					t.Errorf("generated snapshotname should start with %s, but got: %s", machines.AutomatedSnapshotPrefix, snapshotName)
+				}
 			}
 
 			if tc.isNoOp {
@@ -844,7 +854,7 @@ func TestCreateUserSnapshot(t *testing.T) {
 			lzfs.ForceLastUsedTime(true)
 			ms := initMachines
 
-			err = ms.CreateUserSnapshot(context.Background(), tc.userName, tc.snapshotName)
+			snapshotName, err := ms.CreateUserSnapshot(context.Background(), tc.userName, tc.snapshotName)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -853,6 +863,16 @@ func TestCreateUserSnapshot(t *testing.T) {
 			}
 			if err == nil && tc.wantErr {
 				t.Fatal("expected an error but got none")
+			}
+
+			if tc.snapshotName != "" {
+				if snapshotName != tc.snapshotName {
+					t.Errorf("provided snapshotname isn't the one used. Want: %s, got: %s", tc.snapshotName, snapshotName)
+				}
+			} else {
+				if !strings.HasPrefix(snapshotName, machines.AutomatedSnapshotPrefix) {
+					t.Errorf("generated snapshotname should start with %s, but got: %s", machines.AutomatedSnapshotPrefix, snapshotName)
+				}
 			}
 
 			if tc.isNoOp {

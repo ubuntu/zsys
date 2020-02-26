@@ -31,7 +31,7 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 		log.Info(stream.Context(), i18n.G("Requesting saving current system state"))
 	}
 
-	if err := s.Machines.CreateSystemSnapshot(stream.Context(), stateName); err != nil {
+	if stateName, err = s.Machines.CreateSystemSnapshot(stream.Context(), stateName); err != nil {
 		return fmt.Errorf(i18n.G("couldn't save system state: ")+config.ErrorFormat, err)
 	}
 
@@ -42,6 +42,11 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
 	}
+
+	stream.Send(&zsys.CreateSaveStateResponse{
+		Reply: &zsys.CreateSaveStateResponse_StateName{StateName: stateName},
+	})
+
 	return nil
 }
 
@@ -69,9 +74,13 @@ func (s *Server) SaveUserState(req *zsys.SaveUserStateRequest, stream zsys.Zsys_
 		log.Infof(stream.Context(), i18n.G("Requesting saving state for user %q"), userName)
 	}
 
-	if err := s.Machines.CreateUserSnapshot(stream.Context(), userName, stateName); err != nil {
+	if stateName, err = s.Machines.CreateUserSnapshot(stream.Context(), userName, stateName); err != nil {
 		return fmt.Errorf(i18n.G("couldn't save state for user %q:")+config.ErrorFormat, userName, err)
 	}
+
+	stream.Send(&zsys.CreateSaveStateResponse{
+		Reply: &zsys.CreateSaveStateResponse_StateName{StateName: stateName},
+	})
 
 	return nil
 }
