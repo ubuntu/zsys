@@ -13,4 +13,4 @@ RUNAFTER=$(date -d "${DELAY} seconds ago" "+%s")
 
 echo "Snapshotting system"
 touch "${STAMPFILE}"
-zsysctl snapshot --system
+zsysctl state save --system
