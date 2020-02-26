@@ -32,12 +32,12 @@ type ZConfig struct {
 
 // HistoryRules store the rules for each GC element
 type HistoryRules struct {
-	GCStartAfter int
+	GCStartAfter int64
 	KeepLast     int
 	GCRules      []struct {
 		Name             string
 		Buckets          int
-		BucketLength     int
+		BucketLength     int64
 		SamplesPerBucket int
 	}
 }
