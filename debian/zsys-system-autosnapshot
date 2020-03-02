@@ -13,4 +13,4 @@ RUNAFTER=$(date -d "${DELAY} seconds ago" "+%s")
 
 echo "Saving system state"
 touch "${STAMPFILE}"
-zsysctl state save --system
+zsysctl state save --system --no-update-bootmenu
