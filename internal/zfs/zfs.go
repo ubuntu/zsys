@@ -377,25 +377,6 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 
 	props := make(map[libzfs.Prop]libzfs.Property)
 
-	dZFS, err := t.Zfs.libzfs.DatasetSnapshot(parent.Name+"@"+snapName, false, props)
-	if err != nil {
-		return fmt.Errorf(i18n.G("couldn't create snapshot %q: %v"), parent.Name+"@"+snapName, err)
-	}
-
-	d := Dataset{
-		Name:       parent.Name + "@" + snapName,
-		IsSnapshot: true,
-		dZFS:       dZFS,
-	}
-	t.registerRevert(func() error {
-		nt := t.Zfs.NewNoTransaction(t.ctx)
-		if err := nt.destroyOne(&d); err != nil {
-			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), d.Name, err)
-		}
-		return nil
-	})
-
-	// Set user properties that we couldn't set before creating the snapshot dataset.
 	// We don't set LastUsed here as Creation time will be used.
 	userPropertiesToSet := map[string]string{
 		libzfs.SnapshotMountpointProp: srcProps.Mountpoint + ":" + srcProps.sources.Mountpoint,
@@ -413,15 +394,23 @@ func (t *nestedTransaction) snapshotRecursive(parent *Dataset, snapName string, 
 		userPropertiesToSet[libzfs.LastBootedKernelProp] = srcProps.LastBootedKernel + ":" + srcProps.sources.LastBootedKernel
 	}
 
-	for prop, value := range userPropertiesToSet {
-		// Only set values that are not empty on parent
-		if strings.HasPrefix(value, ":") {
-			continue
-		}
-		if err := dZFS.SetUserProperty(prop, value); err != nil {
-			return fmt.Errorf(i18n.G("couldn't set user property %q to %q for %v: ")+config.ErrorFormat, prop, value, d.Name, err)
-		}
+	dZFS, err := t.Zfs.libzfs.DatasetSnapshot(parent.Name+"@"+snapName, false, props, userPropertiesToSet)
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't create snapshot %q: %v"), parent.Name+"@"+snapName, err)
 	}
+
+	d := Dataset{
+		Name:       parent.Name + "@" + snapName,
+		IsSnapshot: true,
+		dZFS:       dZFS,
+	}
+	t.registerRevert(func() error {
+		nt := t.Zfs.NewNoTransaction(t.ctx)
+		if err := nt.destroyOne(&d); err != nil {
+			return fmt.Errorf(i18n.G("couldn't destroy %q for cleanup: %v"), d.Name, err)
+		}
+		return nil
+	})
 
 	if err := d.refreshProperties(t.ctx); err != nil {
 		log.Warningf(t.ctx, i18n.G("couldn't fetch property of newly created snapshot: %v"), err)

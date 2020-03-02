@@ -54,8 +54,8 @@ func (*Adapter) DatasetCreate(path string, dtype DatasetType, props map[Prop]Pro
 }
 
 // DatasetSnapshot creates a snapshot
-func (*Adapter) DatasetSnapshot(path string, recur bool, props map[Prop]Property) (DZFSInterface, error) {
-	d, err := golibzfs.DatasetSnapshot(path, recur, props)
+func (*Adapter) DatasetSnapshot(path string, recur bool, props map[Prop]Property, userProps map[string]string) (DZFSInterface, error) {
+	d, err := golibzfs.DatasetSnapshot(path, recur, props, userProps)
 	if err != nil {
 		return dZFSAdapter{}, err
 	}

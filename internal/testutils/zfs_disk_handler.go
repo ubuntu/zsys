@@ -259,25 +259,26 @@ func (fpools FakePools) Create(path string) func() {
 							}
 							props[libzfs.DatasetPropCreation] = libzfs.Property{Value: strconv.FormatInt(s.CreationTime.Unix(), 10)}
 						}
-						d, err := fpools.libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props)
+						userProps := make(map[string]string)
+						if s.Mountpoint != "" {
+							userProps[libzfs.SnapshotMountpointProp] = s.Mountpoint
+						}
+						if s.CanMount != "" {
+							userProps[libzfs.SnapshotCanmountProp] = s.CanMount
+						}
+						if s.ZsysBootfs != "" {
+							userProps[libzfs.BootfsProp] = s.ZsysBootfs
+						}
+						if s.LastBootedKernel != "" {
+							userProps[libzfs.LastBootedKernelProp] = s.LastBootedKernel
+						}
+						if s.BootfsDatasets != "" {
+							userProps[libzfs.BootfsDatasetsProp] = s.BootfsDatasets
+						}
+						d, err := fpools.libzfs.DatasetSnapshot(datasetName+"@"+s.Name, false, props, userProps)
 						if err != nil {
 							fmt.Fprintf(os.Stderr, "Couldn't create snapshot %q: %v\n", datasetName+"@"+s.Name, err)
 							os.Exit(1)
-						}
-						if s.Mountpoint != "" {
-							d.SetUserProperty(libzfs.SnapshotMountpointProp, s.Mountpoint)
-						}
-						if s.CanMount != "" {
-							d.SetUserProperty(libzfs.SnapshotCanmountProp, s.CanMount)
-						}
-						if s.ZsysBootfs != "" {
-							d.SetUserProperty(libzfs.BootfsProp, s.ZsysBootfs)
-						}
-						if s.LastBootedKernel != "" {
-							d.SetUserProperty(libzfs.LastBootedKernelProp, s.LastBootedKernel)
-						}
-						if s.BootfsDatasets != "" {
-							d.SetUserProperty(libzfs.BootfsDatasetsProp, s.BootfsDatasets)
 						}
 						d.Close()
 					}
