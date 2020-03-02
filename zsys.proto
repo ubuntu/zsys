@@ -67,6 +67,7 @@ message CommitBootResponse {
 
 message SaveSystemStateRequest {
   string stateName = 1;
+  bool updateBootMenu = 2;
 }
 
 message SaveUserStateRequest {

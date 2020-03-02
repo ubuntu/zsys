@@ -29,7 +29,7 @@ var (
 		Use:   "save [state id]",
 		Short: i18n.G("Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided."),
 		Args:  cobra.MaximumNArgs(1),
-		Run:   func(cmd *cobra.Command, args []string) { cmdErr = saveState(args) },
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = saveState(args, system, userName, noUpdateBootMenu) },
 	}
 	stateremoveCmd = &cobra.Command{
 		Use:   "remove [state id]",
@@ -40,9 +40,10 @@ var (
 )
 
 var (
-	system   bool
-	userName string
-	force    bool
+	system           bool
+	noUpdateBootMenu bool
+	userName         string
+	force            bool
 )
 
 func init() {
@@ -52,6 +53,7 @@ func init() {
 
 	statesaveCmd.Flags().BoolVarP(&system, "system", "s", false, i18n.G("Save complete system state (users and system)"))
 	statesaveCmd.Flags().StringVarP(&userName, "user", "u", "", i18n.G("Save the state for a given user or current user if empty"))
+	statesaveCmd.Flags().BoolVarP(&noUpdateBootMenu, "no-update-bootmenu", "", false, i18n.G("Do not update bootmenu on system state save"))
 
 	// user name and system or exclusive: TODO
 	stateremoveCmd.Flags().BoolVarP(&system, "system", "s", false, i18n.G("Remove system state (system and users linked to it)"))
@@ -61,10 +63,13 @@ func init() {
 	cmdhandler.RegisterAlias(statesaveCmd, rootCmd)
 }
 
-func saveState(args []string) (err error) {
+func saveState(args []string, system bool, userName string, noUpdateBootMenu bool) (err error) {
 
 	if system && userName != "" {
 		return errors.New(i18n.G("you can't provide system and user flags at the same time"))
+	}
+	if !system && noUpdateBootMenu {
+		return errors.New(i18n.G("you can't provide no-update-bootmenu option on user state save"))
 	}
 
 	var stateName string
@@ -82,7 +87,10 @@ func saveState(args []string) (err error) {
 	defer cancel()
 
 	if system {
-		stream, err := client.SaveSystemState(ctx, &zsys.SaveSystemStateRequest{StateName: stateName})
+		stream, err := client.SaveSystemState(ctx, &zsys.SaveSystemStateRequest{
+			StateName:      stateName,
+			UpdateBootMenu: !noUpdateBootMenu,
+		})
 
 		if err = checkConn(err); err != nil {
 			return err

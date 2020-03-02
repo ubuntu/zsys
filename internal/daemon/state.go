@@ -35,12 +35,14 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 		return fmt.Errorf(i18n.G("couldn't save system state: ")+config.ErrorFormat, err)
 	}
 
-	cmd := exec.Command(updateGrubCmd)
-	logger := &logWriter{ctx: stream.Context()}
-	cmd.Stdout = logger
-	cmd.Stderr = logger
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
+	if req.GetUpdateBootMenu() {
+		cmd := exec.Command(updateGrubCmd)
+		logger := &logWriter{ctx: stream.Context()}
+		cmd.Stdout = logger
+		cmd.Stderr = logger
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
+		}
 	}
 
 	stream.Send(&zsys.CreateSaveStateResponse{
