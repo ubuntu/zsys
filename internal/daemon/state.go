@@ -3,7 +3,6 @@ package daemon
 import (
 	"context"
 	"fmt"
-	"os/exec"
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/authorizer"
@@ -36,12 +35,8 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 	}
 
 	if req.GetUpdateBootMenu() {
-		cmd := exec.Command(updateGrubCmd)
-		logger := &logWriter{ctx: stream.Context()}
-		cmd.Stdout = logger
-		cmd.Stderr = logger
-		if err := cmd.Run(); err != nil {
-			return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
+		if err := updateBootMenu(stream.Context()); err != nil {
+			return err
 		}
 	}
 
@@ -134,14 +129,7 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 		return fmt.Errorf(i18n.G("couldn't remove system state %s: ")+config.ErrorFormat, stateName, err)
 	}
 
-	cmd := exec.Command(updateGrubCmd)
-	logger := &logWriter{ctx: stream.Context()}
-	cmd.Stdout = logger
-	cmd.Stderr = logger
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
-	}
-	return nil
+	return updateBootMenu(stream.Context())
 }
 
 // RemoveUserState removes a user state
