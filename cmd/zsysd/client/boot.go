@@ -35,6 +35,12 @@ var (
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = bootCommit(printModifiedBoot) },
 	}
+	updateMenuCmd = &cobra.Command{
+		Use:   "update-menu",
+		Short: i18n.G("Update system boot menu"),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = updateBootMenu() },
+	}
 )
 
 func init() {
@@ -119,6 +125,37 @@ func bootCommit(printModifiedBoot bool) (err error) {
 		fmt.Println(config.ModifiedBoot)
 	} else if printModifiedBoot && !changed {
 		fmt.Println(config.NoModifiedBoot)
+	}
+
+	return nil
+}
+
+func updateBootMenu() error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.UpdateBootMenu(ctx, &zsys.Empty{})
+	if err = checkConn(err); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			continue
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

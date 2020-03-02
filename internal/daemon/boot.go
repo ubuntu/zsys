@@ -76,6 +76,28 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 	return nil
 }
 
+// UpdateBootMenu updates machine bootmenu.
+func (s *Server) UpdateBootMenu(req *zsys.Empty, stream zsys.Zsys_UpdateBootMenuServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
+		return err
+	}
+
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
+	log.Infof(stream.Context(), i18n.G("Updating system boot menu"))
+
+	cmd := exec.Command(updateGrubCmd)
+	logger := &logWriter{ctx: stream.Context()}
+	cmd.Stdout = logger
+	cmd.Stderr = logger
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
+	}
+
+	return nil
+}
+
 type logWriter struct {
 	ctx context.Context
 }
