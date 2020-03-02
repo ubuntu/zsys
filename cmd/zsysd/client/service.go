@@ -237,6 +237,7 @@ func trace() error {
 		traceType = "cpu"
 	case "cpu":
 	case "mem":
+	case "trace":
 	default:
 		return fmt.Errorf(i18n.G("Unsupported trace type: %s"), traceType)
 	}

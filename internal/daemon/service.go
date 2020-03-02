@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"runtime"
 	"runtime/pprof"
+	"runtime/trace"
 	"time"
 
 	"github.com/ubuntu/zsys"
@@ -122,6 +123,9 @@ func (s *Server) Trace(req *zsys.TraceRequest, stream zsys.Zsys_TraceServer) err
 			pprof.Lookup("heap").WriteTo(w, 0)
 			runtime.MemProfileRate = old
 		}()
+	case "trace":
+		trace.Start(w)
+		defer trace.Stop()
 	default:
 		return errors.New(i18n.G("unknown type of profiling"))
 	}
