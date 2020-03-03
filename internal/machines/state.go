@@ -64,7 +64,7 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, []UserState, erro
 		}
 
 		var dNames []string
-		for _, ds := range state.SystemDatasets {
+		for _, ds := range state.Datasets {
 			for _, d := range ds {
 				dNames = append(dNames, d.Name)
 			}
@@ -220,7 +220,7 @@ nextUserState:
 
 func (m Machine) getStateDependencies(s State) (deps []State) {
 	for k := range m.History {
-		if (s.isSnapshot() && m.History[k].SystemDatasets[m.History[k].ID][0].Origin != s.ID) || // clones pointing to this snapshot
+		if (s.isSnapshot() && m.History[k].Datasets[m.History[k].ID][0].Origin != s.ID) || // clones pointing to this snapshot
 			(!s.isSnapshot() && !strings.HasPrefix(k, s.ID+"@")) { // k is a snapshot of this clone
 			continue
 		}
@@ -293,7 +293,7 @@ nextState:
 			}
 		}
 
-		for route := range s.SystemDatasets {
+		for route := range s.Datasets {
 			if err := nt.Destroy(route); err != nil {
 				return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
 			}
@@ -377,7 +377,7 @@ nextState:
 func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 	nt := z.NewNoTransaction(ctx)
 
-	for route := range s.SystemDatasets {
+	for route := range s.Datasets {
 		if err := nt.Destroy(route); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
 		}

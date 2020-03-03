@@ -68,7 +68,7 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 
 	// Start switching every non desired system and user datasets to noauto
 	var systemDatasets []*zfs.Dataset
-	for _, ds := range bootedState.SystemDatasets {
+	for _, ds := range bootedState.Datasets {
 		systemDatasets = append(systemDatasets, ds...)
 	}
 	noAutoDatasets := diffDatasets(ms.allSystemDatasets, systemDatasets)
@@ -140,7 +140,7 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	}
 
 	var systemDatasets []*zfs.Dataset
-	for _, ds := range bootedState.SystemDatasets {
+	for _, ds := range bootedState.Datasets {
 		systemDatasets = append(systemDatasets, ds...)
 	}
 	// System and users datasets: set lastUsed
@@ -219,7 +219,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
 	// in case of a real issue.
 	// Clone fails on system dataset already exists and skipping requested -> ok, other clone fails -> return error
-	for route := range snapshot.SystemDatasets {
+	for route := range snapshot.Datasets {
 		log.Infof(t.Context(), i18n.G("cloning %q and children"), route)
 		if err := t.Clone(route, suffix, true, true); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), route, err)

@@ -4,7 +4,7 @@
          "ID": "rpool",
          "IsZsys": true,
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool": [
                {
                   "Name": "rpool",
@@ -19,7 +19,7 @@
       "rpool2": {
          "ID": "rpool2",
          "LastUsed": "2020-05-08T00:01:28+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool2": [
                {
                   "Name": "rpool2",

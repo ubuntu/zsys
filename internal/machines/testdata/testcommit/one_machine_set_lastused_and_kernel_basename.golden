@@ -4,7 +4,7 @@
          "ID": "rpool/clone",
          "IsZsys": true,
          "LastUsed": "2033-05-18T05:33:20+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/clone": [
                {
                   "Name": "rpool/clone",
@@ -20,7 +20,7 @@
             "rpool/clone@snap1": {
                "ID": "rpool/clone@snap1",
                "LastUsed": "2019-12-31T08:36:17+01:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/clone@snap1": [
                      {
                         "Name": "rpool/clone@snap1",
@@ -36,7 +36,7 @@
                "ID": "rpool/main",
                "IsZsys": true,
                "LastUsed": "2020-09-13T14:26:39+02:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/main": [
                      {
                         "Name": "rpool/main",
@@ -58,7 +58,7 @@
       "ID": "rpool/clone",
       "IsZsys": true,
       "LastUsed": "2033-05-18T05:33:20+02:00",
-      "SystemDatasets": {
+      "Datasets": {
          "rpool/clone": [
             {
                "Name": "rpool/clone",
@@ -74,7 +74,7 @@
          "rpool/clone@snap1": {
             "ID": "rpool/clone@snap1",
             "LastUsed": "2019-12-31T08:36:17+01:00",
-            "SystemDatasets": {
+            "Datasets": {
                "rpool/clone@snap1": [
                   {
                      "Name": "rpool/clone@snap1",
@@ -90,7 +90,7 @@
             "ID": "rpool/main",
             "IsZsys": true,
             "LastUsed": "2020-09-13T14:26:39+02:00",
-            "SystemDatasets": {
+            "Datasets": {
                "rpool/main": [
                   {
                      "Name": "rpool/main",

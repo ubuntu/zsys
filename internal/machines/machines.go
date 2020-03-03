@@ -56,9 +56,9 @@ type State struct {
 	IsZsys bool `json:",omitempty"`
 	// LastUsed is the last time this state was used
 	LastUsed *time.Time `json:",omitempty"`
-	// SystemDatasets are all datasets that constitutes this State (in <pool>/ROOT/ + <pool>/BOOT/).
+	// Datasets are all datasets that constitutes this State (in <pool>/ROOT/ + <pool>/BOOT/).
 	// The map index is each route for datasets.
-	SystemDatasets map[string][]*zfs.Dataset `json:",omitempty"`
+	Datasets map[string][]*zfs.Dataset `json:",omitempty"`
 	// UserDatasets are all datasets that are attached to the given State (in <pool>/USERDATA/)
 	UserDatasets map[string][]*zfs.Dataset `json:",omitempty"`
 	// PersistentDatasets are all datasets that are canmount=on and and not in ROOT, USERDATA or BOOT dataset containers.
@@ -323,13 +323,13 @@ func (ms *Machines) refresh(ctx context.Context) {
 		m.attachRemainingDatasets(ctx, boots, persistents)
 
 		// attach to global list all system datasets of this machine
-		for id := range m.SystemDatasets {
-			machines.allSystemDatasets = append(machines.allSystemDatasets, m.SystemDatasets[id]...)
+		for id := range m.Datasets {
+			machines.allSystemDatasets = append(machines.allSystemDatasets, m.Datasets[id]...)
 		}
 		for _, k := range sortedStateKeys(m.History) {
 			h := m.History[k]
-			for id := range h.SystemDatasets {
-				machines.allSystemDatasets = append(machines.allSystemDatasets, h.SystemDatasets[id]...)
+			for id := range h.Datasets {
+				machines.allSystemDatasets = append(machines.allSystemDatasets, h.Datasets[id]...)
 			}
 		}
 	}
@@ -417,15 +417,15 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 	if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == "" {
 		m := Machine{
 			State: State{
-				ID:             d.Name,
-				IsZsys:         d.BootFS,
-				SystemDatasets: make(map[string][]*zfs.Dataset),
-				UserDatasets:   make(map[string][]*zfs.Dataset),
+				ID:           d.Name,
+				IsZsys:       d.BootFS,
+				Datasets:     make(map[string][]*zfs.Dataset),
+				UserDatasets: make(map[string][]*zfs.Dataset),
 			},
 			Users:   make(map[string]map[string]UserState),
 			History: make(map[string]*State),
 		}
-		m.SystemDatasets[d.Name] = []*zfs.Dataset{&d}
+		m.Datasets[d.Name] = []*zfs.Dataset{&d}
 		// We don't want lastused to be 1970 in our golden files
 		if d.LastUsed != 0 {
 			lu := time.Unix(int64(d.LastUsed), 0)
@@ -446,19 +446,19 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset,
 		if ok, err := isChild(m.ID, d); err != nil {
 			log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 		} else if ok {
-			m.SystemDatasets[m.ID] = append(m.SystemDatasets[m.ID], &d)
+			m.Datasets[m.ID] = append(m.Datasets[m.ID], &d)
 			return true
 		}
 
 		// Clones or snapshot root dataset (origins points to origin dataset)
 		if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == m.ID {
 			s := &State{
-				ID:             d.Name,
-				IsZsys:         d.BootFS,
-				SystemDatasets: make(map[string][]*zfs.Dataset),
-				UserDatasets:   make(map[string][]*zfs.Dataset),
+				ID:           d.Name,
+				IsZsys:       d.BootFS,
+				Datasets:     make(map[string][]*zfs.Dataset),
+				UserDatasets: make(map[string][]*zfs.Dataset),
 			}
-			s.SystemDatasets[d.Name] = []*zfs.Dataset{&d}
+			s.Datasets[d.Name] = []*zfs.Dataset{&d}
 			m.History[d.Name] = s
 			// We don't want lastused to be 1970 in our golden files
 			if d.LastUsed != 0 {
@@ -477,7 +477,7 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset,
 			if ok, err := isChild(h.ID, d); err != nil {
 				log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 			} else if ok {
-				h.SystemDatasets[h.ID] = append(h.SystemDatasets[h.ID], &d)
+				h.Datasets[h.ID] = append(h.Datasets[h.ID], &d)
 				return true
 			}
 		}
@@ -528,9 +528,9 @@ func (m *Machine) attachRemainingDatasets(ctx context.Context, boots, persistent
 		// Main boot base dataset (matching machine ID)
 		if strings.HasSuffix(d.Name, "/"+machineID) {
 			bootDatasetsID = d.Name
-			m.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+			m.Datasets[bootDatasetsID] = []*zfs.Dataset{d}
 		} else if bootDatasetsID != "" && strings.HasPrefix(d.Name, bootDatasetsID+"/") { // child
-			m.SystemDatasets[bootDatasetsID] = append(m.SystemDatasets[bootDatasetsID], d)
+			m.Datasets[bootDatasetsID] = append(m.Datasets[bootDatasetsID], d)
 		}
 	}
 
@@ -564,12 +564,12 @@ func (s *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Data
 			// its name and take the first route we find.
 			if bootDatasetsID == "" && strings.HasSuffix(d.Name, "@"+snapshot) {
 				bootDatasetsID = d.Name
-				s.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+				s.Datasets[bootDatasetsID] = []*zfs.Dataset{d}
 				continue
 			} else if bootDatasetsID != "" {
 				baseBootDatasetsID, _ := splitSnapshotName(bootDatasetsID)
 				if strings.HasPrefix(d.Name, baseBootDatasetsID+"/") && strings.HasSuffix(d.Name, "@"+snapshot) { // child
-					s.SystemDatasets[bootDatasetsID] = append(s.SystemDatasets[bootDatasetsID], d)
+					s.Datasets[bootDatasetsID] = append(s.Datasets[bootDatasetsID], d)
 				}
 			}
 		}
@@ -578,9 +578,9 @@ func (s *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Data
 		// Main boot base dataset (matching machine ID)
 		if strings.HasSuffix(d.Name, "/"+stateID) {
 			bootDatasetsID = d.Name
-			s.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+			s.Datasets[bootDatasetsID] = []*zfs.Dataset{d}
 		} else if bootDatasetsID != "" && strings.HasPrefix(d.Name, bootDatasetsID+"/") { // child
-			s.SystemDatasets[bootDatasetsID] = append(s.SystemDatasets[bootDatasetsID], d)
+			s.Datasets[bootDatasetsID] = append(s.Datasets[bootDatasetsID], d)
 		}
 	}
 
@@ -752,20 +752,20 @@ func (s State) toWriter(w io.Writer, isHistory, full bool) {
 		prefix = "    "
 	}
 	if !isHistory {
-		if s.SystemDatasets[s.ID][0].Mounted {
+		if s.Datasets[s.ID][0].Mounted {
 			lu = i18n.G("current")
 		}
 		fmt.Fprintf(w, i18n.G("%sLast Used:\t%s\n"), prefix, lu)
-		fmt.Fprintf(w, i18n.G("%sZSys:\t%t\n"), prefix, s.SystemDatasets[s.ID][0].BootFS)
+		fmt.Fprintf(w, i18n.G("%sZSys:\t%t\n"), prefix, s.Datasets[s.ID][0].BootFS)
 	} else {
 		fmt.Fprintf(w, i18n.G("%sCreated on:\t%s\n"), prefix, lu)
 	}
 
 	if full {
-		fmt.Fprintf(w, i18n.G("%sLast Booted Kernel:\t%s\n"), prefix, s.SystemDatasets[s.ID][0].LastBootedKernel)
+		fmt.Fprintf(w, i18n.G("%sLast Booted Kernel:\t%s\n"), prefix, s.Datasets[s.ID][0].LastBootedKernel)
 		fmt.Fprintf(w, i18n.G("%sSystem Datasets:\n"), prefix)
 
-		for _, n := range sortedDatasetNames(s.SystemDatasets) {
+		for _, n := range sortedDatasetNames(s.Datasets) {
 			fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
 		}
 

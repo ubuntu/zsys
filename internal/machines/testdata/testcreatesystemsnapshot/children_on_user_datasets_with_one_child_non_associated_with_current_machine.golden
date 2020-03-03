@@ -4,7 +4,7 @@
          "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/ROOT/ubuntu_1234": [
                {
                   "Name": "rpool/ROOT/ubuntu_1234",
@@ -62,7 +62,7 @@
          "ID": "rpool/ROOT/ubuntu_9999",
          "IsZsys": true,
          "LastUsed": "2018-12-10T13:20:44+01:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/ROOT/ubuntu_9999": [
                {
                   "Name": "rpool/ROOT/ubuntu_9999",
@@ -119,7 +119,7 @@
                "ID": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
                "IsZsys": true,
                "LastUsed": "2033-05-18T05:33:20+02:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx": [
                      {
                         "Name": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
@@ -151,7 +151,7 @@
       "ID": "rpool/ROOT/ubuntu_9999",
       "IsZsys": true,
       "LastUsed": "2018-12-10T13:20:44+01:00",
-      "SystemDatasets": {
+      "Datasets": {
          "rpool/ROOT/ubuntu_9999": [
             {
                "Name": "rpool/ROOT/ubuntu_9999",
@@ -208,7 +208,7 @@
             "ID": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",
             "IsZsys": true,
             "LastUsed": "2033-05-18T05:33:20+02:00",
-            "SystemDatasets": {
+            "Datasets": {
                "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx": [
                   {
                      "Name": "rpool/ROOT/ubuntu_9999@autozsys_xxxxxx",

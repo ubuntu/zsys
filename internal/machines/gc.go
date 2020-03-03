@@ -149,7 +149,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					} else {
 						// We only collect systems because users will be untagged if they have any dependency
 					analyzeSystemDataset:
-						for _, ds := range s.SystemDatasets {
+						for _, ds := range s.Datasets {
 							for _, d := range ds {
 								// keep the whole state if any dataset is the origin of a clone of if it’s a clone with snapshots on it
 								if byOrigin[d.Name] != nil || snapshotsByDS[d.Name] != nil {
@@ -187,7 +187,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 					// We are removing that state: purge all datasets from our maps.
 					// We don’t deal with user datasets right now as we only untag them.
-					for _, ds := range s.SystemDatasets {
+					for _, ds := range s.Datasets {
 						for _, d := range ds {
 							if d.IsSnapshot {
 								n, _ := splitSnapshotName(d.Name)

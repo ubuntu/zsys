@@ -4,7 +4,7 @@
          "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/ROOT/ubuntu_1234": [
                {
                   "Name": "rpool/ROOT/ubuntu_1234",
@@ -98,7 +98,7 @@
       "ID": "rpool/ROOT/ubuntu_1234",
       "IsZsys": true,
       "LastUsed": "2019-04-18T04:45:55+02:00",
-      "SystemDatasets": {
+      "Datasets": {
          "rpool/ROOT/ubuntu_1234": [
             {
                "Name": "rpool/ROOT/ubuntu_1234",

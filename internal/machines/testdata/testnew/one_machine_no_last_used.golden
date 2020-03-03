@@ -3,7 +3,7 @@
       "rpool": {
          "ID": "rpool",
          "IsZsys": true,
-         "SystemDatasets": {
+         "Datasets": {
             "rpool": [
                {
                   "Name": "rpool",

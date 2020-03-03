@@ -4,7 +4,7 @@
          "ID": "rpool",
          "IsZsys": true,
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool": [
                {
                   "Name": "rpool",
@@ -29,7 +29,7 @@
                "ID": "rpool@autozsys_xxxxxx",
                "IsZsys": true,
                "LastUsed": "2033-05-18T05:33:20+02:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool@autozsys_xxxxxx": [
                      {
                         "Name": "rpool@autozsys_xxxxxx",
@@ -60,7 +60,7 @@
       "ID": "rpool",
       "IsZsys": true,
       "LastUsed": "2020-09-13T14:26:39+02:00",
-      "SystemDatasets": {
+      "Datasets": {
          "rpool": [
             {
                "Name": "rpool",
@@ -85,7 +85,7 @@
             "ID": "rpool@autozsys_xxxxxx",
             "IsZsys": true,
             "LastUsed": "2033-05-18T05:33:20+02:00",
-            "SystemDatasets": {
+            "Datasets": {
                "rpool@autozsys_xxxxxx": [
                   {
                      "Name": "rpool@autozsys_xxxxxx",
