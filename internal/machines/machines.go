@@ -76,7 +76,7 @@ type machineAndState struct {
 type UserState struct {
 	ID       string
 	LastUsed *time.Time `json:",omitempty"`
-	Datasets []*zfs.Dataset
+	Datasets map[string][]*zfs.Dataset
 }
 
 const (
@@ -502,7 +502,7 @@ func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children 
 	// If the dataset has already been added  it is overwritten
 	s := UserState{
 		ID:       r.Name,
-		Datasets: append([]*zfs.Dataset{r}, children...),
+		Datasets: map[string][]*zfs.Dataset{r.Name: append([]*zfs.Dataset{r}, children...)},
 	}
 	// We don't want lastused to be 1970 in our golden files
 	if r.LastUsed != 0 {
@@ -717,8 +717,10 @@ func (m Machine) Info(full bool) (string, error) {
 
 			if full {
 				var ud []string
-				for _, d := range s.Datasets {
-					ud = append(ud, d.Name)
+				for _, ds := range s.Datasets {
+					for _, d := range ds {
+						ud = append(ud, d.Name)
+					}
 				}
 				fmt.Fprintf(w, i18n.G("     - %s: %s\n"), s.LastUsed.Format("2006-01-02 15:04:05"), strings.Join(ud, ", "))
 				continue

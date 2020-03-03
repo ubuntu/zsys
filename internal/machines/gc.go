@@ -318,15 +318,17 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						} else if keep == keepUnknown {
 							// check if any dataset has a automated or manual clone
 						analyzeUserDataset:
-							for _, d := range s.Datasets {
-								// We only treat snapshots as clones are necessarily associated with one system state or
-								// has already been destroyed and not associated.
-								// do we have clones of us?
-								if byOrigin[d.Name] != nil {
-									log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
-									keep = keepYes
-									break analyzeUserDataset
+							for _, ds := range s.Datasets {
+								for _, d := range ds {
+									// We only treat snapshots as clones are necessarily associated with one system state or
+									// has already been destroyed and not associated.
+									// do we have clones of us?
+									if byOrigin[d.Name] != nil {
+										log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
+										keep = keepYes
+										break analyzeUserDataset
 
+									}
 								}
 							}
 						}
@@ -356,13 +358,15 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						}
 
 						// We are removing that state: purge all datasets from our maps.
-						for _, d := range s.Datasets {
-							if d.IsSnapshot {
-								n, _ := splitSnapshotName(d.Name)
-								snapshotsByDS[n] = removeFromSlice(snapshotsByDS[n], d.Name)
-							} else {
-								for orig := range byOrigin {
-									byOrigin[orig] = removeFromSlice(byOrigin[orig], d.Name)
+						for _, ds := range s.Datasets {
+							for _, d := range ds {
+								if d.IsSnapshot {
+									n, _ := splitSnapshotName(d.Name)
+									snapshotsByDS[n] = removeFromSlice(snapshotsByDS[n], d.Name)
+								} else {
+									for orig := range byOrigin {
+										byOrigin[orig] = removeFromSlice(byOrigin[orig], d.Name)
+									}
 								}
 							}
 						}
@@ -384,7 +388,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		nt := ms.z.NewNoTransaction(ctx)
 		for _, s := range UserStatesToRemove {
 			log.Infof(ctx, i18n.G("Removing state: %s"), s.ID)
-			if err := nt.Destroy(s.Datasets[0].Name); err != nil {
+			if err := nt.Destroy(s.Datasets[s.ID][0].Name); err != nil {
 				log.Errorf(ctx, i18n.G("Couldn't destroy user state %s: %v"), s, err)
 			}
 		}

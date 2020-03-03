@@ -203,10 +203,12 @@ nextUserState:
 			continue
 		}
 
-		for _, d := range state.Datasets {
-			if names, ok := originsToDatasets[d.Name]; ok {
-				for _, m := range names {
-					errmsg += fmt.Sprintf(i18n.G("  - %s is a clone of %s\n"), m, d.Name)
+		for _, ds := range state.Datasets {
+			for _, d := range ds {
+				if names, ok := originsToDatasets[d.Name]; ok {
+					for _, m := range names {
+						errmsg += fmt.Sprintf(i18n.G("  - %s is a clone of %s\n"), m, d.Name)
+					}
 				}
 			}
 		}
@@ -233,7 +235,7 @@ func (m Machine) getStateDependencies(s State) (deps []State) {
 
 func (m Machine) getUserStateDependencies(user string, s *UserState) (deps []*UserState) {
 	for k := range m.Users[user] {
-		if (s.isSnapshot() && m.Users[user][k].Datasets[0].Origin != s.ID) || // clones pointing to this snapshot
+		if (s.isSnapshot() && m.Users[user][k].Datasets[m.Users[user][k].ID][0].Origin != s.ID) || // clones pointing to this snapshot
 			(!s.isSnapshot() && !strings.HasPrefix(k, s.ID+"@")) { // k is a snapshot of this clone
 			continue
 		}
@@ -282,7 +284,7 @@ nextState:
 				log.Warningf(ctx, i18n.G("Cannot get list of dependencies for user %s and state %s: %v"), user, route, err)
 				continue
 			}
-			userStatesToRemove := []*UserState{&UserState{ID: route, Datasets: ds}}
+			userStatesToRemove := []*UserState{&UserState{ID: route, Datasets: map[string][]*zfs.Dataset{route: ds}}}
 
 			for i := len(us) - 1; i >= 0; i-- {
 				userStatesToRemove = append(userStatesToRemove, us[i])
@@ -332,30 +334,33 @@ nextState:
 
 	var datasetsToDelete []*zfs.Dataset
 	for route, s := range candidates {
-		for _, d := range s.Datasets {
-			var newTags []string
-			if systemStateID != "" {
-				for _, n := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
-					if n != systemStateID {
+		for _, ds := range s.Datasets {
+			for _, d := range ds {
+				var newTags []string
+				// we will keep an empty newTags if no systemStateID is provided
+				if systemStateID != "" {
+					for _, n := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
+						if n == systemStateID {
+							continue
+						}
 						newTags = append(newTags, n)
-						break
 					}
 				}
-			}
 
-			newTag := strings.Join(newTags, bootfsdatasetsSeparator)
+				newTag := strings.Join(newTags, bootfsdatasetsSeparator)
 
-			if newTag != "" {
-				// Associated with more than one: untag this one and all children
-				t, cancel := ms.z.NewTransaction(ctx)
-				defer t.Done()
-				if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
-					cancel()
-					return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, route, d.Name, err)
+				if newTag != "" {
+					// Associated with more than one: untag this one and all children
+					t, cancel := ms.z.NewTransaction(ctx)
+					defer t.Done()
+					if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+						cancel()
+						return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, route, d.Name, err)
+					}
+				} else {
+					// Associated with only this one: destroy (in reverse order)
+					datasetsToDelete = prependDataset(datasetsToDelete, d)
 				}
-			} else {
-				// Associated with only this one: destroy (in reverse order)
-				datasetsToDelete = prependDataset(datasetsToDelete, d)
 			}
 		}
 	}

@@ -68,9 +68,11 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 			if userState.isSnapshot() {
 				continue
 			}
-			for _, d := range userState.Datasets {
-				if nameInBootfsDatasets(m.ID, *d) {
-					toSnapshot = append(toSnapshot, d)
+			for _, ds := range userState.Datasets {
+				for _, d := range ds {
+					if nameInBootfsDatasets(m.ID, *d) {
+						toSnapshot = append(toSnapshot, d)
+					}
 				}
 			}
 		}
