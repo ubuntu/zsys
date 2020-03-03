@@ -16,27 +16,39 @@
                }
             ]
          },
-         "UserDatasets": {
-            "rpool2/USERDATA/root_bcde": [
-               {
-                  "Name": "rpool2/USERDATA/root_bcde",
-                  "Mountpoint": "/root",
-                  "CanMount": "on",
-                  "LastUsed": 1533333333,
-                  "BootfsDatasets": "rpool/main"
-               }
-            ],
-            "rpool2/USERDATA/user1_abcd": [
-               {
-                  "Name": "rpool2/USERDATA/user1_abcd",
-                  "Mountpoint": "/home/user1",
-                  "CanMount": "on",
-                  "LastUsed": 1544444444,
-                  "BootfsDatasets": "rpool/main"
-               }
-            ]
-         },
          "Users": {
+            "root": {
+               "ID": "rpool2/USERDATA/root_bcde",
+               "LastUsed": "2018-08-03T23:55:33+02:00",
+               "Datasets": {
+                  "rpool2/USERDATA/root_bcde": [
+                     {
+                        "Name": "rpool2/USERDATA/root_bcde",
+                        "Mountpoint": "/root",
+                        "CanMount": "on",
+                        "LastUsed": 1533333333,
+                        "BootfsDatasets": "rpool/main"
+                     }
+                  ]
+               }
+            },
+            "user1": {
+               "ID": "rpool2/USERDATA/user1_abcd",
+               "LastUsed": "2018-12-10T13:20:44+01:00",
+               "Datasets": {
+                  "rpool2/USERDATA/user1_abcd": [
+                     {
+                        "Name": "rpool2/USERDATA/user1_abcd",
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "on",
+                        "LastUsed": 1544444444,
+                        "BootfsDatasets": "rpool/main"
+                     }
+                  ]
+               }
+            }
+         },
+         "AllUsersStates": {
             "root": {
                "rpool2/USERDATA/root_bcde": {
                   "ID": "rpool2/USERDATA/root_bcde",
@@ -134,17 +146,23 @@
                      }
                   ]
                },
-               "UserDatasets": {
-                  "rpool2/USERDATA/user1_efgh": [
-                     {
-                        "Name": "rpool2/USERDATA/user1_efgh",
-                        "Mountpoint": "/home/user1",
-                        "CanMount": "on",
-                        "LastUsed": 1522222222,
-                        "BootfsDatasets": "rpool/clone",
-                        "Origin": "rpool2/USERDATA/user1_abcd@snap1"
+               "Users": {
+                  "user1": {
+                     "ID": "rpool2/USERDATA/user1_efgh",
+                     "LastUsed": "2018-03-28T09:30:22+02:00",
+                     "Datasets": {
+                        "rpool2/USERDATA/user1_efgh": [
+                           {
+                              "Name": "rpool2/USERDATA/user1_efgh",
+                              "Mountpoint": "/home/user1",
+                              "CanMount": "on",
+                              "LastUsed": 1522222222,
+                              "BootfsDatasets": "rpool/clone",
+                              "Origin": "rpool2/USERDATA/user1_abcd@snap1"
+                           }
+                        ]
                      }
-                  ]
+                  }
                }
             },
             "rpool/clone@snap2": {
@@ -161,16 +179,22 @@
                      }
                   ]
                },
-               "UserDatasets": {
-                  "rpool2/USERDATA/user1_efgh@snap2": [
-                     {
-                        "Name": "rpool2/USERDATA/user1_efgh@snap2",
-                        "IsSnapshot": true,
-                        "Mountpoint": "/home/user1",
-                        "CanMount": "on",
-                        "LastUsed": 1566666666
+               "Users": {
+                  "user1": {
+                     "ID": "rpool2/USERDATA/user1_efgh@snap2",
+                     "LastUsed": "2019-08-24T19:11:06+02:00",
+                     "Datasets": {
+                        "rpool2/USERDATA/user1_efgh@snap2": [
+                           {
+                              "Name": "rpool2/USERDATA/user1_efgh@snap2",
+                              "IsSnapshot": true,
+                              "Mountpoint": "/home/user1",
+                              "CanMount": "on",
+                              "LastUsed": 1566666666
+                           }
+                        ]
                      }
-                  ]
+                  }
                }
             },
             "rpool/main@snap1": {
@@ -187,16 +211,22 @@
                      }
                   ]
                },
-               "UserDatasets": {
-                  "rpool2/USERDATA/user1_abcd@snap1": [
-                     {
-                        "Name": "rpool2/USERDATA/user1_abcd@snap1",
-                        "IsSnapshot": true,
-                        "Mountpoint": "/home/user1",
-                        "CanMount": "on",
-                        "LastUsed": 1577777777
+               "Users": {
+                  "user1": {
+                     "ID": "rpool2/USERDATA/user1_abcd@snap1",
+                     "LastUsed": "2019-12-31T08:36:17+01:00",
+                     "Datasets": {
+                        "rpool2/USERDATA/user1_abcd@snap1": [
+                           {
+                              "Name": "rpool2/USERDATA/user1_abcd@snap1",
+                              "IsSnapshot": true,
+                              "Mountpoint": "/home/user1",
+                              "CanMount": "on",
+                              "LastUsed": 1577777777
+                           }
+                        ]
                      }
-                  ]
+                  }
                }
             }
          }

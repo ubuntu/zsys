@@ -15,18 +15,24 @@
                }
             ]
          },
-         "UserDatasets": {
-            "rpool/USERDATA/userfoo_xxxxxx": [
-               {
-                  "Name": "rpool/USERDATA/userfoo_xxxxxx",
-                  "Mountpoint": "/home/foo",
-                  "CanMount": "on",
-                  "LastUsed": 2000000000,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-               }
-            ]
-         },
          "Users": {
+            "userfoo": {
+               "ID": "rpool/USERDATA/userfoo_xxxxxx",
+               "LastUsed": "2033-05-18T05:33:20+02:00",
+               "Datasets": {
+                  "rpool/USERDATA/userfoo_xxxxxx": [
+                     {
+                        "Name": "rpool/USERDATA/userfoo_xxxxxx",
+                        "Mountpoint": "/home/foo",
+                        "CanMount": "on",
+                        "LastUsed": 2000000000,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                     }
+                  ]
+               }
+            }
+         },
+         "AllUsersStates": {
             "userfoo": {
                "rpool/USERDATA/userfoo_xxxxxx": {
                   "ID": "rpool/USERDATA/userfoo_xxxxxx",
@@ -79,18 +85,24 @@
             }
          ]
       },
-      "UserDatasets": {
-         "rpool/USERDATA/userfoo_xxxxxx": [
-            {
-               "Name": "rpool/USERDATA/userfoo_xxxxxx",
-               "Mountpoint": "/home/foo",
-               "CanMount": "on",
-               "LastUsed": 2000000000,
-               "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-            }
-         ]
-      },
       "Users": {
+         "userfoo": {
+            "ID": "rpool/USERDATA/userfoo_xxxxxx",
+            "LastUsed": "2033-05-18T05:33:20+02:00",
+            "Datasets": {
+               "rpool/USERDATA/userfoo_xxxxxx": [
+                  {
+                     "Name": "rpool/USERDATA/userfoo_xxxxxx",
+                     "Mountpoint": "/home/foo",
+                     "CanMount": "on",
+                     "LastUsed": 2000000000,
+                     "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                  }
+               ]
+            }
+         }
+      },
+      "AllUsersStates": {
          "userfoo": {
             "rpool/USERDATA/userfoo_xxxxxx": {
                "ID": "rpool/USERDATA/userfoo_xxxxxx",
