@@ -48,6 +48,9 @@ type Machine struct {
 	Users map[string]map[string]UserState `json:",omitempty"`
 	// History is a map or root system datasets to all its possible State
 	History map[string]*State `json:",omitempty"`
+	// PersistentDatasets are all datasets that are canmount=on and and not in ROOT, USERDATA or BOOT dataset containers.
+	// Those are common between all machines, as persistent (and detected without snapshot information)
+	PersistentDatasets []*zfs.Dataset `json:",omitempty"`
 }
 
 // State is a finite regroupement of multiple ID and elements corresponding to a bootable machine instance.
@@ -61,9 +64,6 @@ type State struct {
 	Datasets map[string][]*zfs.Dataset `json:",omitempty"`
 	// UserDatasets are all datasets that are attached to the given State (in <pool>/USERDATA/)
 	UserDatasets map[string][]*zfs.Dataset `json:",omitempty"`
-	// PersistentDatasets are all datasets that are canmount=on and and not in ROOT, USERDATA or BOOT dataset containers.
-	// Those are common between all machines, as persistent (and detected without snapshot information)
-	PersistentDatasets []*zfs.Dataset `json:",omitempty"`
 }
 
 // machineAndState is an internal helper to associate a dataset path to a machine and state
@@ -540,13 +540,13 @@ func (m *Machine) attachRemainingDatasets(ctx context.Context, boots, persistent
 	// We want reproducibility, so iterate to attach datasets in a given order.
 	for _, k := range sortedStateKeys(m.History) {
 		h := m.History[k]
-		h.attachRemainingDatasetsForHistory(boots, persistents)
+		h.attachRemainingDatasetsForHistory(boots)
 	}
 }
 
-// attachRemainingDatasetsForHistory attaches to a given history state boot and persistent datasets if they fit.
+// attachRemainingDatasetsForHistory attaches to a given history state boot datasets if they fit.
 // It's similar to attachRemainingDatasets with some particular rules on snapshots.
-func (s *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Dataset) {
+func (s *State) attachRemainingDatasetsForHistory(boots []*zfs.Dataset) {
 	// stateID is the basename of the State.
 	stateID := filepath.Base(s.ID)
 
@@ -582,9 +582,6 @@ func (s *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Data
 			s.Datasets[bootDatasetsID] = append(s.Datasets[bootDatasetsID], d)
 		}
 	}
-
-	// Persistent datasets
-	s.PersistentDatasets = persistents
 }
 
 // isZsys returns if there is a current machine, and if it's the case, if it's zsys.
@@ -651,6 +648,17 @@ func (m Machine) Info(full bool) (string, error) {
 
 	// Main machine state
 	m.toWriter(w, false, full)
+
+	if full {
+		if len(m.PersistentDatasets) == 0 {
+			fmt.Fprintf(w, i18n.G("Persistent Datasets: None\n"))
+		} else {
+			fmt.Fprintf(w, i18n.G("Persistent Datasets:\n"))
+			for _, n := range m.PersistentDatasets {
+				fmt.Fprintf(w, i18n.G("\t- %s\n"), n)
+			}
+		}
+	}
 
 	// History
 	fmt.Fprintf(w, i18n.G("History:\n"))
@@ -774,16 +782,6 @@ func (s State) toWriter(w io.Writer, isHistory, full bool) {
 				fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
 			}
 		}
-
-		if len(s.PersistentDatasets) == 0 {
-			fmt.Fprintf(w, i18n.G("%sPersistent Datasets: None\n"), prefix)
-		} else {
-			fmt.Fprintf(w, i18n.G("%sPersistent Datasets:\n"), prefix)
-			for _, n := range s.PersistentDatasets {
-				fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
-			}
-		}
-
 	}
 }
 

@@ -67,15 +67,6 @@
                }
             ]
          },
-         "PersistentDatasets": [
-            {
-               "Name": "rpool/user1_xyz",
-               "Mountpoint": "/home/user1",
-               "CanMount": "on",
-               "LastUsed": 1544444444,
-               "Origin": "rpool/USERDATA/user1_efgh@snapuser3"
-            }
-         ],
          "Users": {
             "root": {
                "rpool/USERDATA/root_bcde": {
@@ -363,16 +354,7 @@
                         "LastUsed": 1522222222
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/user1_xyz",
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "on",
-                     "LastUsed": 1544444444,
-                     "Origin": "rpool/USERDATA/user1_efgh@snapuser3"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_1234@snap2": {
                "ID": "rpool/ROOT/ubuntu_1234@snap2",
@@ -426,16 +408,7 @@
                         "LastUsed": 1555555555
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/user1_xyz",
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "on",
-                     "LastUsed": 1544444444,
-                     "Origin": "rpool/USERDATA/user1_efgh@snapuser3"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_1234@snap3": {
                "ID": "rpool/ROOT/ubuntu_1234@snap3",
@@ -489,18 +462,18 @@
                         "LastUsed": 1566666666
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/user1_xyz",
-                     "Mountpoint": "/home/user1",
-                     "CanMount": "on",
-                     "LastUsed": 1544444444,
-                     "Origin": "rpool/USERDATA/user1_efgh@snapuser3"
-                  }
-               ]
+               }
             }
-         }
+         },
+         "PersistentDatasets": [
+            {
+               "Name": "rpool/user1_xyz",
+               "Mountpoint": "/home/user1",
+               "CanMount": "on",
+               "LastUsed": 1544444444,
+               "Origin": "rpool/USERDATA/user1_efgh@snapuser3"
+            }
+         ]
       }
    },
    "Cmdline": "aaaaa bbbbb root=ZFS= ccccc",

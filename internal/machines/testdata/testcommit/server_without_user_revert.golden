@@ -86,48 +86,6 @@
                }
             ]
          },
-         "PersistentDatasets": [
-            {
-               "Name": "rpool/srv",
-               "Mountpoint": "/srv",
-               "CanMount": "on"
-            },
-            {
-               "Name": "rpool/var/games",
-               "Mountpoint": "/var/games",
-               "CanMount": "on"
-            },
-            {
-               "Name": "rpool/var/lib",
-               "Mountpoint": "/var/lib",
-               "CanMount": "on"
-            },
-            {
-               "Name": "rpool/var/log",
-               "Mountpoint": "/var/log",
-               "CanMount": "on"
-            },
-            {
-               "Name": "rpool/var/mail",
-               "Mountpoint": "/var/mail",
-               "CanMount": "on"
-            },
-            {
-               "Name": "rpool/var/snap",
-               "Mountpoint": "/var/snap",
-               "CanMount": "on"
-            },
-            {
-               "Name": "rpool/var/spool",
-               "Mountpoint": "/var/spool",
-               "CanMount": "on"
-            },
-            {
-               "Name": "rpool/var/www",
-               "Mountpoint": "/var/www",
-               "CanMount": "on"
-            }
-         ],
          "Users": {
             "root": {
                "rpool/USERDATA/root_bcde": {
@@ -327,49 +285,7 @@
                         "BootfsDatasets": "rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_9876"
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/srv",
-                     "Mountpoint": "/srv",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/games",
-                     "Mountpoint": "/var/games",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/lib",
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/log",
-                     "Mountpoint": "/var/log",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/mail",
-                     "Mountpoint": "/var/mail",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/snap",
-                     "Mountpoint": "/var/snap",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/spool",
-                     "Mountpoint": "/var/spool",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/www",
-                     "Mountpoint": "/var/www",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_1234@snap1": {
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
@@ -472,49 +388,7 @@
                         "LastUsed": 1588888888
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/srv",
-                     "Mountpoint": "/srv",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/games",
-                     "Mountpoint": "/var/games",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/lib",
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/log",
-                     "Mountpoint": "/var/log",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/mail",
-                     "Mountpoint": "/var/mail",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/snap",
-                     "Mountpoint": "/var/snap",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/spool",
-                     "Mountpoint": "/var/spool",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/www",
-                     "Mountpoint": "/var/www",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_5678": {
                "ID": "rpool/ROOT/ubuntu_5678",
@@ -608,49 +482,7 @@
                         "Origin": "rpool/USERDATA/user1_abcd@snap1"
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/srv",
-                     "Mountpoint": "/srv",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/games",
-                     "Mountpoint": "/var/games",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/lib",
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/log",
-                     "Mountpoint": "/var/log",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/mail",
-                     "Mountpoint": "/var/mail",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/snap",
-                     "Mountpoint": "/var/snap",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/spool",
-                     "Mountpoint": "/var/spool",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/www",
-                     "Mountpoint": "/var/www",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_9876@snap2": {
                "ID": "rpool/ROOT/ubuntu_9876@snap2",
@@ -744,49 +576,7 @@
                         "LastUsed": 1577777777
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/srv",
-                     "Mountpoint": "/srv",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/games",
-                     "Mountpoint": "/var/games",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/lib",
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/log",
-                     "Mountpoint": "/var/log",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/mail",
-                     "Mountpoint": "/var/mail",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/snap",
-                     "Mountpoint": "/var/snap",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/spool",
-                     "Mountpoint": "/var/spool",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/www",
-                     "Mountpoint": "/var/www",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_9876@snap3": {
                "ID": "rpool/ROOT/ubuntu_9876@snap3",
@@ -880,51 +670,51 @@
                         "LastUsed": 1522222222
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/srv",
-                     "Mountpoint": "/srv",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/games",
-                     "Mountpoint": "/var/games",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/lib",
-                     "Mountpoint": "/var/lib",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/log",
-                     "Mountpoint": "/var/log",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/mail",
-                     "Mountpoint": "/var/mail",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/snap",
-                     "Mountpoint": "/var/snap",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/spool",
-                     "Mountpoint": "/var/spool",
-                     "CanMount": "on"
-                  },
-                  {
-                     "Name": "rpool/var/www",
-                     "Mountpoint": "/var/www",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             }
-         }
+         },
+         "PersistentDatasets": [
+            {
+               "Name": "rpool/srv",
+               "Mountpoint": "/srv",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/var/games",
+               "Mountpoint": "/var/games",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/var/lib",
+               "Mountpoint": "/var/lib",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/var/log",
+               "Mountpoint": "/var/log",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/var/mail",
+               "Mountpoint": "/var/mail",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/var/snap",
+               "Mountpoint": "/var/snap",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/var/spool",
+               "Mountpoint": "/var/spool",
+               "CanMount": "on"
+            },
+            {
+               "Name": "rpool/var/www",
+               "Mountpoint": "/var/www",
+               "CanMount": "on"
+            }
+         ]
       },
       "rpool/ROOT/ubuntu_9999": {
          "IsZsys": true,
@@ -1010,6 +800,23 @@
                }
             ]
          },
+         "Users": {
+            "user2": {
+               "rpool/USERDATA/user2_aaaa": {
+                  "ID": "rpool/USERDATA/user2_aaaa",
+                  "LastUsed": "2018-12-10T13:20:44+01:00",
+                  "Datasets": [
+                     {
+                        "Name": "rpool/USERDATA/user2_aaaa",
+                        "Mountpoint": "/home/user2",
+                        "CanMount": "noauto",
+                        "LastUsed": 1544444444,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
+                     }
+                  ]
+               }
+            }
+         },
          "PersistentDatasets": [
             {
                "Name": "rpool/srv",
@@ -1051,24 +858,7 @@
                "Mountpoint": "/var/www",
                "CanMount": "on"
             }
-         ],
-         "Users": {
-            "user2": {
-               "rpool/USERDATA/user2_aaaa": {
-                  "ID": "rpool/USERDATA/user2_aaaa",
-                  "LastUsed": "2018-12-10T13:20:44+01:00",
-                  "Datasets": [
-                     {
-                        "Name": "rpool/USERDATA/user2_aaaa",
-                        "Mountpoint": "/home/user2",
-                        "CanMount": "noauto",
-                        "LastUsed": 1544444444,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
-                     }
-                  ]
-               }
-            }
-         }
+         ]
       }
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_9876 ccccc",
@@ -1158,48 +948,6 @@
             }
          ]
       },
-      "PersistentDatasets": [
-         {
-            "Name": "rpool/srv",
-            "Mountpoint": "/srv",
-            "CanMount": "on"
-         },
-         {
-            "Name": "rpool/var/games",
-            "Mountpoint": "/var/games",
-            "CanMount": "on"
-         },
-         {
-            "Name": "rpool/var/lib",
-            "Mountpoint": "/var/lib",
-            "CanMount": "on"
-         },
-         {
-            "Name": "rpool/var/log",
-            "Mountpoint": "/var/log",
-            "CanMount": "on"
-         },
-         {
-            "Name": "rpool/var/mail",
-            "Mountpoint": "/var/mail",
-            "CanMount": "on"
-         },
-         {
-            "Name": "rpool/var/snap",
-            "Mountpoint": "/var/snap",
-            "CanMount": "on"
-         },
-         {
-            "Name": "rpool/var/spool",
-            "Mountpoint": "/var/spool",
-            "CanMount": "on"
-         },
-         {
-            "Name": "rpool/var/www",
-            "Mountpoint": "/var/www",
-            "CanMount": "on"
-         }
-      ],
       "Users": {
          "root": {
             "rpool/USERDATA/root_bcde": {
@@ -1399,49 +1147,7 @@
                      "BootfsDatasets": "rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_9876"
                   }
                ]
-            },
-            "PersistentDatasets": [
-               {
-                  "Name": "rpool/srv",
-                  "Mountpoint": "/srv",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/games",
-                  "Mountpoint": "/var/games",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/lib",
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/log",
-                  "Mountpoint": "/var/log",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/mail",
-                  "Mountpoint": "/var/mail",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/snap",
-                  "Mountpoint": "/var/snap",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/spool",
-                  "Mountpoint": "/var/spool",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/www",
-                  "Mountpoint": "/var/www",
-                  "CanMount": "on"
-               }
-            ]
+            }
          },
          "rpool/ROOT/ubuntu_1234@snap1": {
             "ID": "rpool/ROOT/ubuntu_1234@snap1",
@@ -1544,49 +1250,7 @@
                      "LastUsed": 1588888888
                   }
                ]
-            },
-            "PersistentDatasets": [
-               {
-                  "Name": "rpool/srv",
-                  "Mountpoint": "/srv",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/games",
-                  "Mountpoint": "/var/games",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/lib",
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/log",
-                  "Mountpoint": "/var/log",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/mail",
-                  "Mountpoint": "/var/mail",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/snap",
-                  "Mountpoint": "/var/snap",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/spool",
-                  "Mountpoint": "/var/spool",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/www",
-                  "Mountpoint": "/var/www",
-                  "CanMount": "on"
-               }
-            ]
+            }
          },
          "rpool/ROOT/ubuntu_5678": {
             "ID": "rpool/ROOT/ubuntu_5678",
@@ -1680,49 +1344,7 @@
                      "Origin": "rpool/USERDATA/user1_abcd@snap1"
                   }
                ]
-            },
-            "PersistentDatasets": [
-               {
-                  "Name": "rpool/srv",
-                  "Mountpoint": "/srv",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/games",
-                  "Mountpoint": "/var/games",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/lib",
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/log",
-                  "Mountpoint": "/var/log",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/mail",
-                  "Mountpoint": "/var/mail",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/snap",
-                  "Mountpoint": "/var/snap",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/spool",
-                  "Mountpoint": "/var/spool",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/www",
-                  "Mountpoint": "/var/www",
-                  "CanMount": "on"
-               }
-            ]
+            }
          },
          "rpool/ROOT/ubuntu_9876@snap2": {
             "ID": "rpool/ROOT/ubuntu_9876@snap2",
@@ -1816,49 +1438,7 @@
                      "LastUsed": 1577777777
                   }
                ]
-            },
-            "PersistentDatasets": [
-               {
-                  "Name": "rpool/srv",
-                  "Mountpoint": "/srv",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/games",
-                  "Mountpoint": "/var/games",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/lib",
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/log",
-                  "Mountpoint": "/var/log",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/mail",
-                  "Mountpoint": "/var/mail",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/snap",
-                  "Mountpoint": "/var/snap",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/spool",
-                  "Mountpoint": "/var/spool",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/www",
-                  "Mountpoint": "/var/www",
-                  "CanMount": "on"
-               }
-            ]
+            }
          },
          "rpool/ROOT/ubuntu_9876@snap3": {
             "ID": "rpool/ROOT/ubuntu_9876@snap3",
@@ -1952,51 +1532,51 @@
                      "LastUsed": 1522222222
                   }
                ]
-            },
-            "PersistentDatasets": [
-               {
-                  "Name": "rpool/srv",
-                  "Mountpoint": "/srv",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/games",
-                  "Mountpoint": "/var/games",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/lib",
-                  "Mountpoint": "/var/lib",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/log",
-                  "Mountpoint": "/var/log",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/mail",
-                  "Mountpoint": "/var/mail",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/snap",
-                  "Mountpoint": "/var/snap",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/spool",
-                  "Mountpoint": "/var/spool",
-                  "CanMount": "on"
-               },
-               {
-                  "Name": "rpool/var/www",
-                  "Mountpoint": "/var/www",
-                  "CanMount": "on"
-               }
-            ]
+            }
          }
-      }
+      },
+      "PersistentDatasets": [
+         {
+            "Name": "rpool/srv",
+            "Mountpoint": "/srv",
+            "CanMount": "on"
+         },
+         {
+            "Name": "rpool/var/games",
+            "Mountpoint": "/var/games",
+            "CanMount": "on"
+         },
+         {
+            "Name": "rpool/var/lib",
+            "Mountpoint": "/var/lib",
+            "CanMount": "on"
+         },
+         {
+            "Name": "rpool/var/log",
+            "Mountpoint": "/var/log",
+            "CanMount": "on"
+         },
+         {
+            "Name": "rpool/var/mail",
+            "Mountpoint": "/var/mail",
+            "CanMount": "on"
+         },
+         {
+            "Name": "rpool/var/snap",
+            "Mountpoint": "/var/snap",
+            "CanMount": "on"
+         },
+         {
+            "Name": "rpool/var/spool",
+            "Mountpoint": "/var/spool",
+            "CanMount": "on"
+         },
+         {
+            "Name": "rpool/var/www",
+            "Mountpoint": "/var/www",
+            "CanMount": "on"
+         }
+      ]
    },
    "AllSystemDatasets": [
       {

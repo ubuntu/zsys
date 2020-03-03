@@ -16,13 +16,6 @@
                }
             ]
          },
-         "PersistentDatasets": [
-            {
-               "Name": "rpool/opt",
-               "Mountpoint": "/opt",
-               "CanMount": "on"
-            }
-         ],
          "History": {
             "rpool/ROOT/ubuntu_1234@snap1": {
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
@@ -38,14 +31,7 @@
                         "LastUsed": 1544444444
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/opt",
-                     "Mountpoint": "/opt",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_5678": {
                "ID": "rpool/ROOT/ubuntu_5678",
@@ -61,16 +47,16 @@
                         "Origin": "rpool/ROOT/ubuntu_1234@snap1"
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/opt",
-                     "Mountpoint": "/opt",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             }
-         }
+         },
+         "PersistentDatasets": [
+            {
+               "Name": "rpool/opt",
+               "Mountpoint": "/opt",
+               "CanMount": "on"
+            }
+         ]
       }
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu_1234@snap1 ccccc",
@@ -90,13 +76,6 @@
             }
          ]
       },
-      "PersistentDatasets": [
-         {
-            "Name": "rpool/opt",
-            "Mountpoint": "/opt",
-            "CanMount": "on"
-         }
-      ],
       "History": {
          "rpool/ROOT/ubuntu_1234@snap1": {
             "ID": "rpool/ROOT/ubuntu_1234@snap1",
@@ -112,14 +91,7 @@
                      "LastUsed": 1544444444
                   }
                ]
-            },
-            "PersistentDatasets": [
-               {
-                  "Name": "rpool/opt",
-                  "Mountpoint": "/opt",
-                  "CanMount": "on"
-               }
-            ]
+            }
          },
          "rpool/ROOT/ubuntu_5678": {
             "ID": "rpool/ROOT/ubuntu_5678",
@@ -135,16 +107,16 @@
                      "Origin": "rpool/ROOT/ubuntu_1234@snap1"
                   }
                ]
-            },
-            "PersistentDatasets": [
-               {
-                  "Name": "rpool/opt",
-                  "Mountpoint": "/opt",
-                  "CanMount": "on"
-               }
-            ]
+            }
          }
-      }
+      },
+      "PersistentDatasets": [
+         {
+            "Name": "rpool/opt",
+            "Mountpoint": "/opt",
+            "CanMount": "on"
+         }
+      ]
    },
    "AllSystemDatasets": [
       {
