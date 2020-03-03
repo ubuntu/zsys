@@ -45,7 +45,7 @@ type Machine struct {
 	// Main machine State
 	State
 	// Users is a per user reference to each of its state
-	Users map[string]map[string]UserState `json:",omitempty"`
+	Users map[string]map[string]*UserState `json:",omitempty"`
 	// History is a map or root system datasets to all its possible State
 	History map[string]*State `json:",omitempty"`
 	// PersistentDatasets are all datasets that are canmount=on and and not in ROOT, USERDATA or BOOT dataset containers.
@@ -422,7 +422,7 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 				Datasets:     make(map[string][]*zfs.Dataset),
 				UserDatasets: make(map[string][]*zfs.Dataset),
 			},
-			Users:   make(map[string]map[string]UserState),
+			Users:   make(map[string]map[string]*UserState),
 			History: make(map[string]*State),
 		}
 		m.Datasets[d.Name] = []*zfs.Dataset{&d}
@@ -495,7 +495,7 @@ func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children 
 
 	user := userFromDatasetName(r.Name)
 	if m.Users[user] == nil {
-		m.Users[user] = make(map[string]UserState)
+		m.Users[user] = make(map[string]*UserState)
 	}
 
 	// Attach to global user map new userData
@@ -509,7 +509,7 @@ func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children 
 		lu := time.Unix(int64(r.LastUsed), 0)
 		s.LastUsed = &lu
 	}
-	m.Users[user][r.Name] = s
+	m.Users[user][r.Name] = &s
 }
 
 // attachRemainingDatasets attaches to machine boot and persistent datasets if they fit current machine.
@@ -696,7 +696,7 @@ func (m Machine) Info(full bool) (string, error) {
 
 		fmt.Fprintf(w, i18n.G("    History:\t\n"))
 
-		timeToState := make(map[string]UserState)
+		timeToState := make(map[string]*UserState)
 		for id, s := range m.Users[user] {
 			// exclude "current" user state fom history
 			if _, exists := m.UserDatasets[s.ID]; exists {

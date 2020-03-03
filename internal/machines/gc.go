@@ -30,7 +30,7 @@ func (s sortedReverseByTimeStates) Less(i, j int) bool {
 }
 func (s sortedReverseByTimeStates) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-type sortedReverseByTimeUserStates []UserState
+type sortedReverseByTimeUserStates []*UserState
 
 func (s sortedReverseByTimeUserStates) Len() int { return len(s) }
 func (s sortedReverseByTimeUserStates) Less(i, j int) bool {
@@ -332,7 +332,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						}
 
 						states = append(states, userStateWithKeep{
-							UserState: &s,
+							UserState: s,
 							keep:      keep,
 						})
 					}
