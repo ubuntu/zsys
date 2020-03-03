@@ -31,15 +31,17 @@
                "rpool/USERDATA/user1_abcd": {
                   "ID": "rpool/USERDATA/user1_abcd",
                   "LastUsed": "2018-12-10T13:20:44+01:00",
-                  "Datasets": [
-                     {
-                        "Name": "rpool/USERDATA/user1_abcd",
-                        "Mountpoint": "/home/user1",
-                        "CanMount": "on",
-                        "LastUsed": 1544444444,
-                        "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-                     }
-                  ]
+                  "Datasets": {
+                     "rpool/USERDATA/user1_abcd": [
+                        {
+                           "Name": "rpool/USERDATA/user1_abcd",
+                           "Mountpoint": "/home/user1",
+                           "CanMount": "on",
+                           "LastUsed": 1544444444,
+                           "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                        }
+                     ]
+                  }
                }
             }
          }
