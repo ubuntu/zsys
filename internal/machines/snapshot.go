@@ -80,8 +80,10 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 		for _, ds := range m.Datasets {
 			toSnapshot = append(toSnapshot, ds...)
 		}
-		for _, ds := range m.UserDatasets {
-			toSnapshot = append(toSnapshot, ds...)
+		for _, us := range m.State.UserDatasets {
+			for _, ds := range us.Datasets {
+				toSnapshot = append(toSnapshot, ds...)
+			}
 		}
 	}
 	for _, d := range toSnapshot {

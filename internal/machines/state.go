@@ -69,8 +69,8 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, []*State, error) 
 				dNames = append(dNames, d.Name)
 			}
 		}
-		for _, ds := range state.UserDatasets {
-			for _, d := range ds {
+		for _, us := range state.UserDatasets {
+			for _, d := range us.getDatasets() {
 				dNames = append(dNames, d.Name)
 			}
 		}
@@ -89,9 +89,8 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, []*State, error) 
 	// Get clones and snapshots for our userdatasets state save which aren’t linked to a system state
 	var matchesOtherUsers []*State
 	errmsg = ""
-	for dName := range matches[0].UserDatasets {
-		user := userFromDatasetName(dName)
-		match, err := ms.GetUserStateAndDependencies(user, dName, true)
+	for user, us := range matches[0].UserDatasets {
+		match, err := ms.GetUserStateAndDependencies(user, us.ID, true)
 		if err != nil {
 			errmsg += fmt.Sprintf(i18n.G("one or multiple manually cloned datasets on user %q: %v\n"), user, err)
 		} else {
@@ -148,26 +147,22 @@ nextUserState:
 	for _, userState := range candidates {
 		userStateID := userState.ID
 		for _, m := range ms.all {
-			for _, ds := range m.UserDatasets {
-				for _, d := range ds {
+			for _, d := range m.getChildrenDatasets() {
+				if d.Name == userStateID {
+					if onlyUserStateSave {
+						continue nextUserState
+					}
+					matchingSystemStates[userStateID] = append(matchingSystemStates[userStateID], m.ID)
+				}
+			}
+
+			for _, state := range m.History {
+				for _, d := range state.getChildrenDatasets() {
 					if d.Name == userStateID {
 						if onlyUserStateSave {
 							continue nextUserState
 						}
 						matchingSystemStates[userStateID] = append(matchingSystemStates[userStateID], m.ID)
-					}
-				}
-			}
-
-			for _, state := range m.History {
-				for _, ds := range state.UserDatasets {
-					for _, d := range ds {
-						if d.Name == userStateID {
-							if onlyUserStateSave {
-								continue nextUserState
-							}
-							matchingSystemStates[userStateID] = append(matchingSystemStates[userStateID], m.ID)
-						}
 					}
 				}
 			}
@@ -277,14 +272,13 @@ nextState:
 			}
 		}
 
-		for route, ds := range s.UserDatasets {
-			user := userFromDatasetName(route)
-			us, err := ms.GetUserStateAndDependencies(user, route, true)
+		for user, ustate := range s.UserDatasets {
+			us, err := ms.GetUserStateAndDependencies(user, ustate.ID, true)
 			if err != nil {
-				log.Warningf(ctx, i18n.G("Cannot get list of dependencies for user %s and state %s: %v"), user, route, err)
+				log.Warningf(ctx, i18n.G("Cannot get list of dependencies for user %s and state %s: %v"), user, ustate.ID, err)
 				continue
 			}
-			userStatesToRemove := []*State{&State{ID: route, Datasets: map[string][]*zfs.Dataset{route: ds}}}
+			userStatesToRemove := []*State{&State{ID: ustate.ID, Datasets: map[string][]*zfs.Dataset{ustate.ID: ustate.getDatasets()}}}
 
 			for i := len(us) - 1; i >= 0; i-- {
 				userStatesToRemove = append(userStatesToRemove, us[i])
@@ -390,9 +384,9 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 
 	// If we have a snapshot system states, we can safely remove all user states (/!\ will fail if there is a clone)
 	if s.isSnapshot() {
-		for route := range s.UserDatasets {
-			if err := nt.Destroy(route); err != nil {
-				log.Errorf(ctx, i18n.G("Couldn't destroy %s: %v"), route, err)
+		for _, us := range s.UserDatasets {
+			if err := nt.Destroy(us.ID); err != nil {
+				log.Errorf(ctx, i18n.G("Couldn't destroy %s: %v"), us.ID, err)
 			}
 		}
 		return nil
@@ -407,8 +401,8 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 	//Untag all datasets associated with this state for non snapshots
 	t, cancel := z.NewTransaction(ctx)
 	defer t.Done()
-	for route, ds := range s.UserDatasets {
-		for _, d := range ds {
+	for _, us := range s.UserDatasets {
+		for _, d := range us.getDatasets() {
 			var newTags []string
 			for _, n := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
 				if n != s.ID {
@@ -421,12 +415,28 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 
 			if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 				cancel()
-				return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, route, d.Name, err)
+				return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, us.ID, d.Name, err)
 			}
 		}
 	}
 
 	return nil
+}
+
+func (s State) getDatasets() []*zfs.Dataset {
+	var r []*zfs.Dataset
+	for _, ds := range s.Datasets {
+		r = append(r, ds...)
+	}
+	return r
+}
+
+func (s State) getChildrenDatasets() []*zfs.Dataset {
+	var r []*zfs.Dataset
+	for _, cs := range s.UserDatasets {
+		r = append(r, cs.getDatasets()...)
+	}
+	return r
 }
 
 func (s State) isSnapshot() bool {

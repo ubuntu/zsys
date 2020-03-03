@@ -227,10 +227,13 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 				var newestStateIndex int
 				var sortedStates sortedReverseByTimeStates
 
+			nextUserState:
 				for _, s := range us {
-					// exclude "current" user state
-					if _, exists := m.UserDatasets[s.ID]; exists {
-						continue
+					// exclude "current" user state fom history
+					for _, us := range m.State.UserDatasets {
+						if us == s {
+							continue nextUserState
+						}
 					}
 
 					sortedStates = append(sortedStates, s)
