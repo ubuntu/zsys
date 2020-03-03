@@ -1,8 +1,8 @@
 {
    "All": {
       "rpool/main": {
-         "ID": "rpool/main",
          "IsZsys": true,
+         "ID": "rpool/main",
          "LastUsed": "2020-09-13T14:26:39+02:00",
          "Datasets": {
             "rpool/main": [
@@ -111,7 +111,6 @@
          "History": {
             "rpool/clone": {
                "ID": "rpool/clone",
-               "IsZsys": true,
                "LastUsed": "2020-05-08T00:01:28+02:00",
                "Datasets": {
                   "rpool/clone": [

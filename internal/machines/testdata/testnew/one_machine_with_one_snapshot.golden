@@ -1,8 +1,8 @@
 {
    "All": {
       "rpool": {
-         "ID": "rpool",
          "IsZsys": true,
+         "ID": "rpool",
          "LastUsed": "2020-09-13T14:26:39+02:00",
          "Datasets": {
             "rpool": [
@@ -18,7 +18,6 @@
          "History": {
             "rpool@snap1": {
                "ID": "rpool@snap1",
-               "IsZsys": true,
                "LastUsed": "2020-05-08T00:01:28+02:00",
                "Datasets": {
                   "rpool@snap1": [

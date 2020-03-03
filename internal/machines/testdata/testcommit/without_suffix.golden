@@ -1,8 +1,8 @@
 {
    "All": {
       "rpool/ROOT/ubuntu": {
-         "ID": "rpool/ROOT/ubuntu",
          "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu",
          "LastUsed": "2033-05-18T05:33:20+02:00",
          "Datasets": {
             "rpool/ROOT/ubuntu": [
@@ -25,7 +25,6 @@
          "History": {
             "rpool/ROOT/ubuntu@snap1": {
                "ID": "rpool/ROOT/ubuntu@snap1",
-               "IsZsys": true,
                "LastUsed": "2018-12-10T13:20:44+01:00",
                "Datasets": {
                   "rpool/ROOT/ubuntu@snap1": [
@@ -49,7 +48,6 @@
             },
             "rpool/ROOT/ubuntu_5678": {
                "ID": "rpool/ROOT/ubuntu_5678",
-               "IsZsys": true,
                "LastUsed": "2019-12-31T08:36:17+01:00",
                "Datasets": {
                   "rpool/ROOT/ubuntu_5678": [
@@ -77,8 +75,8 @@
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/ROOT/ubuntu ccccc",
    "Current": {
-      "ID": "rpool/ROOT/ubuntu",
       "IsZsys": true,
+      "ID": "rpool/ROOT/ubuntu",
       "LastUsed": "2033-05-18T05:33:20+02:00",
       "Datasets": {
          "rpool/ROOT/ubuntu": [
@@ -101,7 +99,6 @@
       "History": {
          "rpool/ROOT/ubuntu@snap1": {
             "ID": "rpool/ROOT/ubuntu@snap1",
-            "IsZsys": true,
             "LastUsed": "2018-12-10T13:20:44+01:00",
             "Datasets": {
                "rpool/ROOT/ubuntu@snap1": [
@@ -125,7 +122,6 @@
          },
          "rpool/ROOT/ubuntu_5678": {
             "ID": "rpool/ROOT/ubuntu_5678",
-            "IsZsys": true,
             "LastUsed": "2019-12-31T08:36:17+01:00",
             "Datasets": {
                "rpool/ROOT/ubuntu_5678": [

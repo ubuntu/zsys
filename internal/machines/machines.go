@@ -40,6 +40,8 @@ type Machines struct {
 // Machine is a group of Main and its History children states
 // TODO: History should be replaced with States as a map and main state points to it
 type Machine struct {
+	// IsZsys states if we have a zsys system. The other datasets type will be empty otherwise.
+	IsZsys bool `json:",omitempty"`
 	// Main machine State
 	State
 	// Users is a per user reference to each of its state
@@ -52,8 +54,6 @@ type Machine struct {
 type State struct {
 	// ID is the path to the root system dataset for this State.
 	ID string
-	// IsZsys states if we have a zsys system. The other datasets type will be empty otherwise.
-	IsZsys bool `json:",omitempty"`
 	// LastUsed is the last time this state was used
 	LastUsed *time.Time `json:",omitempty"`
 	// Datasets are all datasets that constitutes this State (in <pool>/ROOT/ + <pool>/BOOT/).
@@ -416,9 +416,9 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 	// Register all zsys non cloned mountable / to a new machine
 	if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == "" {
 		m := Machine{
+			IsZsys: d.BootFS,
 			State: State{
 				ID:           d.Name,
-				IsZsys:       d.BootFS,
 				Datasets:     make(map[string][]*zfs.Dataset),
 				UserDatasets: make(map[string][]*zfs.Dataset),
 			},
@@ -454,7 +454,6 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset,
 		if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == m.ID {
 			s := &State{
 				ID:           d.Name,
-				IsZsys:       d.BootFS,
 				Datasets:     make(map[string][]*zfs.Dataset),
 				UserDatasets: make(map[string][]*zfs.Dataset),
 			}
@@ -647,8 +646,10 @@ func (ms Machines) GetMachine(ID string) (*Machine, error) {
 func (m Machine) Info(full bool) (string, error) {
 	var out bytes.Buffer
 	w := tabwriter.NewWriter(&out, 0, 0, 1, ' ', 0)
+	fmt.Fprintf(w, i18n.G("Name:\t%s\n"), m.ID)
+	fmt.Fprintf(w, i18n.G("ZSys:\t%t\n"), m.isZsys)
 
-	// Main machine
+	// Main machine state
 	m.toWriter(w, false, full)
 
 	// History
@@ -743,9 +744,8 @@ func sortedDatasetNames(datasets map[string][]*zfs.Dataset) (dNames []string) {
 func (s State) toWriter(w io.Writer, isHistory, full bool) {
 	var prefix string
 	if isHistory {
-		prefix = "  - "
+		fmt.Fprintf(w, i18n.G("  - Name:\t%s\n"), s.ID)
 	}
-	fmt.Fprintf(w, i18n.G("%sName:\t%s\n"), prefix, s.ID)
 	lu := s.LastUsed.Format("2006-01-02 15:04:05")
 
 	if isHistory {
@@ -756,7 +756,6 @@ func (s State) toWriter(w io.Writer, isHistory, full bool) {
 			lu = i18n.G("current")
 		}
 		fmt.Fprintf(w, i18n.G("%sLast Used:\t%s\n"), prefix, lu)
-		fmt.Fprintf(w, i18n.G("%sZSys:\t%t\n"), prefix, s.Datasets[s.ID][0].BootFS)
 	} else {
 		fmt.Fprintf(w, i18n.G("%sCreated on:\t%s\n"), prefix, lu)
 	}

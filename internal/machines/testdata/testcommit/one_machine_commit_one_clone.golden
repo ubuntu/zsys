@@ -1,8 +1,8 @@
 {
    "All": {
       "rpool/clone": {
-         "ID": "rpool/clone",
          "IsZsys": true,
+         "ID": "rpool/clone",
          "LastUsed": "2033-05-18T05:33:20+02:00",
          "Datasets": {
             "rpool/clone": [
@@ -33,7 +33,6 @@
             },
             "rpool/main": {
                "ID": "rpool/main",
-               "IsZsys": true,
                "LastUsed": "2020-09-13T14:26:39+02:00",
                "Datasets": {
                   "rpool/main": [
@@ -54,8 +53,8 @@
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/clone ccccc",
    "Current": {
-      "ID": "rpool/clone",
       "IsZsys": true,
+      "ID": "rpool/clone",
       "LastUsed": "2033-05-18T05:33:20+02:00",
       "Datasets": {
          "rpool/clone": [
@@ -86,7 +85,6 @@
          },
          "rpool/main": {
             "ID": "rpool/main",
-            "IsZsys": true,
             "LastUsed": "2020-09-13T14:26:39+02:00",
             "Datasets": {
                "rpool/main": [

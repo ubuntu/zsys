@@ -1,8 +1,8 @@
 {
    "All": {
       "rpool/ROOT/ubuntu_1234": {
-         "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "2020-05-08T00:01:28+02:00",
          "Datasets": {
             "bpool/BOOT/ubuntu_1234": [
@@ -148,7 +148,6 @@
          "History": {
             "rpool/ROOT/ubuntu_1234@snap1": {
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
-               "IsZsys": true,
                "LastUsed": "2018-12-10T13:20:44+01:00",
                "Datasets": {
                   "bpool/BOOT/ubuntu_1234@snap1": [
@@ -202,7 +201,6 @@
             },
             "rpool/ROOT/ubuntu_1234@snap2": {
                "ID": "rpool/ROOT/ubuntu_1234@snap2",
-               "IsZsys": true,
                "LastUsed": "2019-04-18T04:45:55+02:00",
                "Datasets": {
                   "bpool/BOOT/ubuntu_1234@snap2": [
@@ -257,7 +255,6 @@
             },
             "rpool/ROOT/ubuntu_1234@snap3": {
                "ID": "rpool/ROOT/ubuntu_1234@snap3",
-               "IsZsys": true,
                "LastUsed": "2019-08-24T19:11:06+02:00",
                "Datasets": {
                   "bpool/BOOT/ubuntu_1234@snap3": [

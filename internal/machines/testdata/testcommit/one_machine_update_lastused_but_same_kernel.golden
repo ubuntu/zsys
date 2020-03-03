@@ -1,8 +1,8 @@
 {
    "All": {
       "rpool/main": {
-         "ID": "rpool/main",
          "IsZsys": true,
+         "ID": "rpool/main",
          "LastUsed": "2033-05-18T05:33:20+02:00",
          "Datasets": {
             "rpool/main": [
@@ -19,7 +19,6 @@
          "History": {
             "rpool/clone": {
                "ID": "rpool/clone",
-               "IsZsys": true,
                "LastUsed": "2020-05-08T00:01:28+02:00",
                "Datasets": {
                   "rpool/clone": [
@@ -54,8 +53,8 @@
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/main BOOT_IMAGE=vmlinuz-5.2.0-8-generic ccccc",
    "Current": {
-      "ID": "rpool/main",
       "IsZsys": true,
+      "ID": "rpool/main",
       "LastUsed": "2033-05-18T05:33:20+02:00",
       "Datasets": {
          "rpool/main": [
@@ -72,7 +71,6 @@
       "History": {
          "rpool/clone": {
             "ID": "rpool/clone",
-            "IsZsys": true,
             "LastUsed": "2020-05-08T00:01:28+02:00",
             "Datasets": {
                "rpool/clone": [
