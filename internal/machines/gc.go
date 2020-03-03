@@ -30,14 +30,6 @@ func (s sortedReverseByTimeStates) Less(i, j int) bool {
 }
 func (s sortedReverseByTimeStates) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
-type sortedReverseByTimeUserStates []*UserState
-
-func (s sortedReverseByTimeUserStates) Len() int { return len(s) }
-func (s sortedReverseByTimeUserStates) Less(i, j int) bool {
-	return s[i].LastUsed.After(*s[j].LastUsed)
-}
-func (s sortedReverseByTimeUserStates) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
-
 type keepStatus int
 
 const (
@@ -48,11 +40,6 @@ const (
 
 type stateWithKeep struct {
 	*State
-	keep keepStatus
-}
-
-type userStateWithKeep struct {
-	*UserState
 	keep keepStatus
 }
 
@@ -230,7 +217,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	// 2. GC user datasets
 	log.Debug(ctx, i18n.G("User GC"))
 	// TODO: this is a copy of above, but we keep any states associated with user states, we really need to merge State and UserStates
-	var UserStatesToRemove []*UserState
+	var UserStatesToRemove []*State
 
 	for {
 		statesChanges := false
@@ -238,7 +225,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		for _, m := range ms.all {
 			for _, us := range m.Users {
 				var newestStateIndex int
-				var sortedStates sortedReverseByTimeUserStates
+				var sortedStates sortedReverseByTimeStates
 
 				for _, s := range us {
 					// exclude "current" user state
@@ -283,7 +270,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					}
 
 					// Collect all states for current bucket and mark those having constraints
-					states := make([]userStateWithKeep, 0, oldestStateIndex-newestStateIndex+1)
+					states := make([]stateWithKeep, 0, oldestStateIndex-newestStateIndex+1)
 					log.Debug(ctx, i18n.G("Collecting all states for current bucket"))
 					for i := newestStateIndex; i <= oldestStateIndex; i++ {
 						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), sortedStates[i].ID, sortedStates[i].LastUsed.Format(timeFormat))
@@ -333,9 +320,9 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 							}
 						}
 
-						states = append(states, userStateWithKeep{
-							UserState: s,
-							keep:      keep,
+						states = append(states, stateWithKeep{
+							State: s,
+							keep:  keep,
 						})
 					}
 
@@ -371,7 +358,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 							}
 						}
 
-						UserStatesToRemove = append(UserStatesToRemove, s.UserState)
+						UserStatesToRemove = append(UserStatesToRemove, s.State)
 						nStatesToRemove--
 						statesChanges = true
 					}

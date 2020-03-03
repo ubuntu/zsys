@@ -1326,7 +1326,7 @@ func TestRemoveUserStates(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
-			var states []*machines.UserState
+			var states []*machines.State
 		nextState:
 			for _, n := range tc.states {
 				for _, m := range ms.AllMachines() {

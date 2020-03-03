@@ -19,7 +19,7 @@ import (
 //   * dataset path (fully determinated)
 //   * dataset ID (can match basename, multiple results)
 //   * snapshot name (can match snapshot, multiple results)
-func (ms Machines) GetStateAndDependencies(s string) ([]State, []*UserState, error) {
+func (ms Machines) GetStateAndDependencies(s string) ([]State, []*State, error) {
 	var matches, deps []State
 	for _, m := range ms.all {
 		if s == m.ID || s == filepath.Base(m.ID) {
@@ -87,7 +87,7 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, []*UserState, err
 	}
 
 	// Get clones and snapshots for our userdatasets state save which aren’t linked to a system state
-	var matchesOtherUsers []*UserState
+	var matchesOtherUsers []*State
 	errmsg = ""
 	for dName := range matches[0].UserDatasets {
 		user := userFromDatasetName(dName)
@@ -112,7 +112,7 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, []*UserState, err
 //   * snapshot name (can match snapshot, multiple results)
 // onlyUserStateSave will only list "pure" user state (not linked to any system state) and won't error out
 // if it finds any.
-func (ms Machines) GetUserStateAndDependencies(user, s string, onlyUserStateSave bool) ([]*UserState, error) {
+func (ms Machines) GetUserStateAndDependencies(user, s string, onlyUserStateSave bool) ([]*State, error) {
 	if user == "" {
 		return nil, errors.New(i18n.G("user is mandatory"))
 	}
@@ -120,7 +120,7 @@ func (ms Machines) GetUserStateAndDependencies(user, s string, onlyUserStateSave
 		return nil, errors.New(i18n.G("state id is mandatory"))
 	}
 
-	var matches, candidates, deps []*UserState
+	var matches, candidates, deps []*State
 	for _, m := range ms.all {
 		for id, state := range m.Users[user] {
 			if s == id || s == filepath.Base(id) || fmt.Sprintf("%s_%s", user, s) == filepath.Base(id) || strings.HasSuffix(id, "@"+s) {
@@ -233,7 +233,7 @@ func (m Machine) getStateDependencies(s State) (deps []State) {
 	return deps
 }
 
-func (m Machine) getUserStateDependencies(user string, s *UserState) (deps []*UserState) {
+func (m Machine) getUserStateDependencies(user string, s *State) (deps []*State) {
 	for k := range m.Users[user] {
 		if (s.isSnapshot() && m.Users[user][k].Datasets[m.Users[user][k].ID][0].Origin != s.ID) || // clones pointing to this snapshot
 			(!s.isSnapshot() && !strings.HasPrefix(k, s.ID+"@")) { // k is a snapshot of this clone
@@ -284,7 +284,7 @@ nextState:
 				log.Warningf(ctx, i18n.G("Cannot get list of dependencies for user %s and state %s: %v"), user, route, err)
 				continue
 			}
-			userStatesToRemove := []*UserState{&UserState{ID: route, Datasets: map[string][]*zfs.Dataset{route: ds}}}
+			userStatesToRemove := []*State{&State{ID: route, Datasets: map[string][]*zfs.Dataset{route: ds}}}
 
 			for i := len(us) - 1; i >= 0; i-- {
 				userStatesToRemove = append(userStatesToRemove, us[i])
@@ -310,10 +310,10 @@ nextState:
 // If systemStateID is provided, it will try to untag the association to this system before considering it for removal
 // or not.
 // If systemStateID is empty, all UserStates will be removed without considering their bootfsdataset tags.
-func (ms *Machines) RemoveUserStates(ctx context.Context, states []*UserState, systemStateID string) error {
+func (ms *Machines) RemoveUserStates(ctx context.Context, states []*State, systemStateID string) error {
 	nt := ms.z.NewNoTransaction(ctx)
 
-	var candidates []*UserState
+	var candidates []*State
 	// If we have a snapshot and a filesystem userstate, only keep the filesystem userstate
 	// which will destroy the snapshot.
 	// Snapshots don’t have bootfsdatasets tags, so we need this logic
@@ -430,10 +430,6 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 }
 
 func (s State) isSnapshot() bool {
-	return strings.Contains(s.ID, "@")
-}
-
-func (s UserState) isSnapshot() bool {
 	return strings.Contains(s.ID, "@")
 }
 
