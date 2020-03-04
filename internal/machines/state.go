@@ -147,7 +147,7 @@ nextUserState:
 	for _, userState := range candidates {
 		userStateID := userState.ID
 		for _, m := range ms.all {
-			for _, d := range m.getChildrenDatasets() {
+			for _, d := range m.getUsersDatasets() {
 				if d.Name == userStateID {
 					if onlyUserStateSave {
 						continue nextUserState
@@ -157,7 +157,7 @@ nextUserState:
 			}
 
 			for _, state := range m.History {
-				for _, d := range state.getChildrenDatasets() {
+				for _, d := range state.getUsersDatasets() {
 					if d.Name == userStateID {
 						if onlyUserStateSave {
 							continue nextUserState
@@ -423,6 +423,7 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 	return nil
 }
 
+// getDatasets returns all Datasets from this given state.
 func (s State) getDatasets() []*zfs.Dataset {
 	var r []*zfs.Dataset
 	for _, ds := range s.Datasets {
@@ -431,7 +432,8 @@ func (s State) getDatasets() []*zfs.Dataset {
 	return r
 }
 
-func (s State) getChildrenDatasets() []*zfs.Dataset {
+// getUsersDatasets returns all user datasets attached to this particular state.
+func (s State) getUsersDatasets() []*zfs.Dataset {
 	var r []*zfs.Dataset
 	for _, cs := range s.Users {
 		r = append(r, cs.getDatasets()...)
@@ -439,10 +441,12 @@ func (s State) getChildrenDatasets() []*zfs.Dataset {
 	return r
 }
 
+// isSnapshot returns if this state is a snapshot.
 func (s State) isSnapshot() bool {
 	return strings.Contains(s.ID, "@")
 }
 
+// prependDataset prepends d to ds.
 func prependDataset(ds []*zfs.Dataset, d *zfs.Dataset) []*zfs.Dataset {
 	ds = append(ds, nil)
 	copy(ds[1:], ds)

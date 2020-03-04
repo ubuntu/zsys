@@ -46,7 +46,7 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 		// We skip it if we booted on a snapshot with userdatasets already created. This would mean that EnsureBoot
 		// was called twice before Commit() during this boot. A new boot will create a new suffix id, so we won't block
 		// the machine forever in case of a real issue.
-		needCreateUserDatas := revertUserData && !(bootedOnSnapshot && len(bootedState.getChildrenDatasets()) > 0)
+		needCreateUserDatas := revertUserData && !(bootedOnSnapshot && len(bootedState.getUsersDatasets()) > 0)
 		if err := m.History[root].createClones(t, bootedState.ID, needCreateUserDatas); err != nil {
 			cancel()
 			return false, err
@@ -72,7 +72,7 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 		systemDatasets = append(systemDatasets, ds...)
 	}
 	noAutoDatasets := diffDatasets(ms.allSystemDatasets, systemDatasets)
-	userDatasets := bootedState.getChildrenDatasets()
+	userDatasets := bootedState.getUsersDatasets()
 
 	noAutoDatasets = append(noAutoDatasets, diffDatasets(ms.allUsersDatasets, userDatasets)...)
 	hasChanges, err := switchDatasetsCanMount(t, noAutoDatasets, "noauto")
@@ -128,7 +128,7 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	}
 
 	// Retag new userdatasets if needed
-	userDatasets := bootedState.getChildrenDatasets()
+	userDatasets := bootedState.getUsersDatasets()
 	if err := switchUsersDatasetsTags(t, bootedState.ID, ms.allUsersDatasets, userDatasets); err != nil {
 		cancel()
 		return false, err

@@ -148,18 +148,12 @@ func (ms *Machines) tryReuseUserDataSet(t *zfs.Transaction, user string, oldhome
 	log.Debugf(t.Context(), i18n.G("Trying to check if there is a user or home directory already attached to this machine"))
 
 	// If there this user or home already attached to this machine: retarget home
-	for _, us := range ms.current.State.Users {
+	for userName, us := range ms.current.Users {
 		for _, ds := range us.Datasets {
 			for _, d := range ds {
 				var match bool
 				// try handling user dataset
 				if user != "" {
-					// get user name from dataset
-					n := strings.Split(d.Name, "/")
-					userName := n[len(n)-1]
-					n = strings.Split(userName, "_")
-					userName = strings.Join(n[:len(n)-1], "_")
-
 					// Home path is already attached to current system, but with a different user name. Fail
 					if d.Mountpoint == newhome && user != userName {
 						return false, fmt.Errorf(i18n.G("%q is already associated to %q, which is for a different user name (%q) than %q"), newhome, d.Name, userName, user)
