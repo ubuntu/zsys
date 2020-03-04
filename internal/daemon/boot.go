@@ -1,19 +1,13 @@
 package daemon
 
 import (
-	"context"
 	"fmt"
-	"os/exec"
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/authorizer"
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
-)
-
-const (
-	updateGrubCmd = "update-grub"
 )
 
 // PrepareBoot consolidates canmount states for early boot.
@@ -65,22 +59,19 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 		return nil
 	}
 
-	cmd := exec.Command(updateGrubCmd)
-	logger := &logWriter{ctx: stream.Context()}
-	cmd.Stdout = logger
-	cmd.Stderr = logger
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf(i18n.G("%q returned an error: ")+config.ErrorFormat, updateGrubCmd, err)
+	return updateBootMenu(stream.Context())
+}
+
+// UpdateBootMenu updates machine bootmenu.
+func (s *Server) UpdateBootMenu(req *zsys.Empty, stream zsys.Zsys_UpdateBootMenuServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
+		return err
 	}
 
-	return nil
-}
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
 
-type logWriter struct {
-	ctx context.Context
-}
+	log.Infof(stream.Context(), i18n.G("Updating system boot menu"))
 
-func (lw logWriter) Write(p []byte) (n int, err error) {
-	log.Debug(lw.ctx, string(p))
-	return len(p), nil
+	return updateBootMenu(stream.Context())
 }

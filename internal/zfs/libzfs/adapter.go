@@ -78,7 +78,7 @@ type Interface interface {
 	DatasetOpenAll() (datasets []DZFSInterface, err error)
 	DatasetOpen(name string) (d DZFSInterface, err error)
 	DatasetCreate(path string, dtype DatasetType, props map[Prop]Property) (d DZFSInterface, err error)
-	DatasetSnapshot(path string, recur bool, props map[Prop]Property) (rd DZFSInterface, err error)
+	DatasetSnapshot(path string, recur bool, props map[Prop]Property, userProps map[string]string) (rd DZFSInterface, err error)
 	GenerateID(length int) string
 }
 

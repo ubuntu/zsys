@@ -253,14 +253,14 @@ func (l *LibZFS) DatasetCreate(path string, dtype libzfs.DatasetType, props map[
 }
 
 // DatasetSnapshot creates a snapshot
-func (l *LibZFS) DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (libzfs.DZFSInterface, error) {
+func (l *LibZFS) DatasetSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property, userProps map[string]string) (libzfs.DZFSInterface, error) {
 	if len(strings.Split(path, "@")) != 2 || strings.Split(path, "@")[1] == "" {
 		return nil, fmt.Errorf("%q is not a valid snapshot name", path)
 	}
-	return l.createSnapshot(path, recur, props)
+	return l.createSnapshot(path, recur, props, userProps)
 }
 
-func (l *LibZFS) createSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property) (libzfs.DZFSInterface, error) {
+func (l *LibZFS) createSnapshot(path string, recur bool, props map[libzfs.Prop]libzfs.Property, userProps map[string]string) (libzfs.DZFSInterface, error) {
 	if l.forceLastUsedTime {
 		props[libzfs.DatasetPropCreation] = libzfs.Property{Value: currentMagicTime}
 	}
@@ -271,6 +271,11 @@ func (l *LibZFS) createSnapshot(path string, recur bool, props map[libzfs.Prop]l
 	}
 
 	d := dinterface.(*dZFS)
+	for k, v := range userProps {
+		if err := d.SetUserProperty(k, v); err != nil {
+			return nil, err
+		}
+	}
 
 	if !recur {
 		return d, nil
@@ -282,7 +287,7 @@ func (l *LibZFS) createSnapshot(path string, recur bool, props map[libzfs.Prop]l
 		}
 
 		childPath := c.Dataset.Properties[libzfs.DatasetPropName].Value + "@" + snapshotName
-		_, err := l.createSnapshot(childPath, recur, props)
+		_, err := l.createSnapshot(childPath, recur, props, userProps)
 		if err != nil {
 			return nil, err
 		}

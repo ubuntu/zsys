@@ -210,6 +210,36 @@ func (z *ZsysLogServer) CommitBoot(req *Empty, stream Zsys_CommitBootServer) err
 }
 
 /*
+ * Zsys.UpdateBootMenu()
+ */
+
+// zsysUpdateBootMenuLogStream is a Zsys_UpdateBootMenuServer augmented by its own Context containing the log streamer
+type zsysUpdateBootMenuLogStream struct {
+	Zsys_UpdateBootMenuServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysUpdateBootMenuLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// UpdateBootMenu overrides ZsysServer UpdateBootMenu, installing a logger first
+func (z *ZsysLogServer) UpdateBootMenu(req *Empty, stream Zsys_UpdateBootMenuServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "UpdateBootMenu")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.UpdateBootMenu(req, &zsysUpdateBootMenuLogStream{
+		Zsys_UpdateBootMenuServer: stream,
+		ctx:                       ctx,
+	})
+}
+
+/*
  * Zsys.SaveSystemState()
  */
 
@@ -690,6 +720,19 @@ func (s *zsysCommitBootServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&CommitBootResponse{
 			Reply: &CommitBootResponse_Log{Log: string(p)},
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysUpdateBootMenuServer to an io.Writer
+func (s *zsysUpdateBootMenuServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
 		})
 	if err != nil {
 		return 0, err
