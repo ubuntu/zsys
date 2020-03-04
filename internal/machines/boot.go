@@ -63,7 +63,7 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 	// In case of system revert (either from cloning or rebooting this older dataset without user data revert), the newly
 	// active state won't be the main one, and so, we only take its main state userdata.
 	if !revertUserData {
-		bootedState.UserDatasets = m.UserDatasets
+		bootedState.Users = m.Users
 	}
 
 	// Start switching every non desired system and user datasets to noauto
@@ -124,7 +124,7 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	// In case of system revert (either from cloning or rebooting this older dataset without user data revert), the newly
 	// active state won't be the main one, and so, we only take its main state userdata.
 	if !revertUserData {
-		bootedState.UserDatasets = m.UserDatasets
+		bootedState.Users = m.Users
 	}
 
 	// Retag new userdatasets if needed
@@ -230,7 +230,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// Find user datasets attached to the snapshot and clone them
 	// Only root datasets are cloned
 	userDataSuffix := t.Zfs.GenerateID(6)
-	for _, us := range snapshot.UserDatasets {
+	for _, us := range snapshot.Users {
 		// Recursively clones childrens, which shouldn't have bootfs elements.
 		if err := t.Clone(us.ID, userDataSuffix, false, true); err != nil {
 			return fmt.Errorf(i18n.G("couldn't create new user datasets from %q: %v"), snapshot.ID, err)

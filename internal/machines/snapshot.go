@@ -50,7 +50,7 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 
 	var toSnapshot []*zfs.Dataset
 	if onlyUser != "" {
-		userStates, ok := m.Users[onlyUser]
+		userStates, ok := m.AllUsersStates[onlyUser]
 		if !ok {
 			return "", fmt.Errorf(i18n.G("user %q doesn't exist"), onlyUser)
 		}
@@ -80,7 +80,7 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 		for _, ds := range m.Datasets {
 			toSnapshot = append(toSnapshot, ds...)
 		}
-		for _, us := range m.State.UserDatasets {
+		for _, us := range m.State.Users {
 			for _, ds := range us.Datasets {
 				toSnapshot = append(toSnapshot, ds...)
 			}

@@ -69,7 +69,7 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, []*State, error) 
 				dNames = append(dNames, d.Name)
 			}
 		}
-		for _, us := range state.UserDatasets {
+		for _, us := range state.Users {
 			for _, d := range us.getDatasets() {
 				dNames = append(dNames, d.Name)
 			}
@@ -89,7 +89,7 @@ func (ms Machines) GetStateAndDependencies(s string) ([]State, []*State, error) 
 	// Get clones and snapshots for our userdatasets state save which aren’t linked to a system state
 	var matchesOtherUsers []*State
 	errmsg = ""
-	for user, us := range matches[0].UserDatasets {
+	for user, us := range matches[0].Users {
 		match, err := ms.GetUserStateAndDependencies(user, us.ID, true)
 		if err != nil {
 			errmsg += fmt.Sprintf(i18n.G("one or multiple manually cloned datasets on user %q: %v\n"), user, err)
@@ -121,7 +121,7 @@ func (ms Machines) GetUserStateAndDependencies(user, s string, onlyUserStateSave
 
 	var matches, candidates, deps []*State
 	for _, m := range ms.all {
-		for id, state := range m.Users[user] {
+		for id, state := range m.AllUsersStates[user] {
 			if s == id || s == filepath.Base(id) || fmt.Sprintf("%s_%s", user, s) == filepath.Base(id) || strings.HasSuffix(id, "@"+s) {
 				candidates = append(candidates, state)
 				deps = m.getUserStateDependencies(user, state)
@@ -229,13 +229,13 @@ func (m Machine) getStateDependencies(s State) (deps []State) {
 }
 
 func (m Machine) getUserStateDependencies(user string, s *State) (deps []*State) {
-	for k := range m.Users[user] {
-		if (s.isSnapshot() && m.Users[user][k].Datasets[m.Users[user][k].ID][0].Origin != s.ID) || // clones pointing to this snapshot
+	for k := range m.AllUsersStates[user] {
+		if (s.isSnapshot() && m.AllUsersStates[user][k].Datasets[m.AllUsersStates[user][k].ID][0].Origin != s.ID) || // clones pointing to this snapshot
 			(!s.isSnapshot() && !strings.HasPrefix(k, s.ID+"@")) { // k is a snapshot of this clone
 			continue
 		}
-		deps = append(deps, m.Users[user][k])
-		deps = append(deps, m.getUserStateDependencies(user, m.Users[user][k])...)
+		deps = append(deps, m.AllUsersStates[user][k])
+		deps = append(deps, m.getUserStateDependencies(user, m.AllUsersStates[user][k])...)
 	}
 
 	return deps
@@ -272,7 +272,7 @@ nextState:
 			}
 		}
 
-		for user, ustate := range s.UserDatasets {
+		for user, ustate := range s.Users {
 			us, err := ms.GetUserStateAndDependencies(user, ustate.ID, true)
 			if err != nil {
 				log.Warningf(ctx, i18n.G("Cannot get list of dependencies for user %s and state %s: %v"), user, ustate.ID, err)
@@ -384,7 +384,7 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 
 	// If we have a snapshot system states, we can safely remove all user states (/!\ will fail if there is a clone)
 	if s.isSnapshot() {
-		for _, us := range s.UserDatasets {
+		for _, us := range s.Users {
 			if err := nt.Destroy(us.ID); err != nil {
 				log.Errorf(ctx, i18n.G("Couldn't destroy %s: %v"), us.ID, err)
 			}
@@ -401,7 +401,7 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 	//Untag all datasets associated with this state for non snapshots
 	t, cancel := z.NewTransaction(ctx)
 	defer t.Done()
-	for _, us := range s.UserDatasets {
+	for _, us := range s.Users {
 		for _, d := range us.getDatasets() {
 			var newTags []string
 			for _, n := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
@@ -433,7 +433,7 @@ func (s State) getDatasets() []*zfs.Dataset {
 
 func (s State) getChildrenDatasets() []*zfs.Dataset {
 	var r []*zfs.Dataset
-	for _, cs := range s.UserDatasets {
+	for _, cs := range s.Users {
 		r = append(r, cs.getDatasets()...)
 	}
 	return r

@@ -46,7 +46,7 @@ func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) e
 	// Take same pool as existing userdatasets for current system
 	var userdatasetRoot string
 selectUserDataset:
-	for _, us := range ms.current.UserDatasets {
+	for _, us := range ms.current.Users {
 		for p := range us.Datasets {
 			userdatasetRoot = getUserDatasetRoot(p)
 			break selectUserDataset
@@ -148,7 +148,7 @@ func (ms *Machines) tryReuseUserDataSet(t *zfs.Transaction, user string, oldhome
 	log.Debugf(t.Context(), i18n.G("Trying to check if there is a user or home directory already attached to this machine"))
 
 	// If there this user or home already attached to this machine: retarget home
-	for _, us := range ms.current.State.UserDatasets {
+	for _, us := range ms.current.State.Users {
 		for _, ds := range us.Datasets {
 			for _, d := range ds {
 				var match bool

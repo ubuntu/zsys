@@ -1330,7 +1330,7 @@ func TestRemoveUserStates(t *testing.T) {
 		nextState:
 			for _, n := range tc.states {
 				for _, m := range ms.AllMachines() {
-					for _, alluserstates := range m.Users {
+					for _, alluserstates := range m.AllUsersStates {
 						for route, us := range alluserstates {
 							if route == n {
 								states = append(states, us)

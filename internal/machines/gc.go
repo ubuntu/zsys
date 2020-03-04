@@ -223,14 +223,14 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		statesChanges := false
 
 		for _, m := range ms.all {
-			for _, us := range m.Users {
+			for _, us := range m.AllUsersStates {
 				var newestStateIndex int
 				var sortedStates sortedReverseByTimeStates
 
 			nextUserState:
 				for _, s := range us {
 					// exclude "current" user state fom history
-					for _, us := range m.State.UserDatasets {
+					for _, us := range m.State.Users {
 						if us == s {
 							continue nextUserState
 						}
