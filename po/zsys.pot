@@ -59,8 +59,8 @@ msgstr ""
 msgid "  - Name:\t%s\n"
 msgstr ""
 
-#: internal/daemon/state.go:107 internal/daemon/state.go:113
-#: internal/daemon/state.go:161
+#: internal/daemon/state.go:113 internal/daemon/state.go:119
+#: internal/daemon/state.go:160
 #, c-format
 msgid " - %s (%s)\n"
 msgstr ""
@@ -79,7 +79,7 @@ msgstr ""
 msgid "%q isn't a 'value:source' format type for %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:463
+#: internal/zfs/zfs.go:452
 msgid "%q isn't a snapshot"
 msgstr ""
 
@@ -91,8 +91,7 @@ msgstr ""
 msgid "%q property isn't an int: "
 msgstr ""
 
-#: internal/daemon/boot.go:73 internal/daemon/state.go:43
-#: internal/daemon/state.go:131
+#: internal/daemon/bootmenu.go:23
 msgid "%q returned an error: "
 msgstr ""
 
@@ -106,7 +105,7 @@ msgstr ""
 msgid "%s\t- %s\n"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:177
+#: cmd/zsysd/client/state.go:185
 #, c-format
 msgid ""
 "%s\n"
@@ -252,7 +251,7 @@ msgstr ""
 msgid "Collects all the datasets including manual snapshots and clones."
 msgstr ""
 
-#: internal/daemon/boot.go:54
+#: internal/daemon/boot.go:48
 msgid "Commit current boot state"
 msgstr ""
 
@@ -322,7 +321,7 @@ msgstr ""
 msgid "Couldn't open stat file for process: %v"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:253
+#: cmd/zsysd/client/service.go:254
 msgid "Couldn't open trace file %s: %v"
 msgstr ""
 
@@ -334,7 +333,7 @@ msgstr ""
 msgid "Couldn't retrieve user for %q: %v"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:303
+#: cmd/zsysd/client/service.go:304
 msgid "Couldn't write to file: %v"
 msgstr ""
 
@@ -376,8 +375,12 @@ msgstr ""
 msgid "Didn't find origin %q for %q matching any dataset"
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:41
+#: cmd/zsysd/client/boot.go:47
 msgid "Display if any zfs datasets have been modified to boot"
+msgstr ""
+
+#: cmd/zsysd/client/state.go:56
+msgid "Do not update bootmenu on system state save"
 msgstr ""
 
 #: cmd/zsysd/client/service.go:95
@@ -407,7 +410,7 @@ msgstr ""
 msgid "First state matching for this bucket: %s (%s)"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:59
+#: cmd/zsysd/client/state.go:61
 msgid "Force removing, even if dependencies are found"
 msgstr ""
 
@@ -510,7 +513,7 @@ msgstr ""
 msgid "No more user states left. Stopping analyzing buckets"
 msgstr ""
 
-#: internal/daemon/service.go:155
+#: internal/daemon/service.go:159
 msgid "No response within few seconds"
 msgstr ""
 
@@ -538,7 +541,7 @@ msgid ""
 "and off, synchronously"
 msgstr ""
 
-#: internal/daemon/boot.go:29
+#: internal/daemon/boot.go:23
 msgid "Prepare current boot state"
 msgstr ""
 
@@ -563,7 +566,7 @@ msgstr ""
 msgid "Refreshes machines states."
 msgstr ""
 
-#: internal/daemon/service.go:164
+#: internal/daemon/service.go:168
 msgid "Reloading daemon configuration"
 msgstr ""
 
@@ -572,7 +575,7 @@ msgid "Reloads daemon configuration."
 msgstr ""
 
 #. user name and system or exclusive: TODO
-#: cmd/zsysd/client/state.go:57
+#: cmd/zsysd/client/state.go:59
 msgid "Remove system state (system and users linked to it)"
 msgstr ""
 
@@ -582,16 +585,16 @@ msgid ""
 "state if not linked to any system state."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:58
+#: cmd/zsysd/client/state.go:60
 msgid "Remove the state for a given user or current user if empty"
 msgstr ""
 
-#: internal/daemon/state.go:105
+#: internal/daemon/state.go:111
 #, c-format
 msgid "Removing %s will also remove the following system states:\n"
 msgstr ""
 
-#: internal/daemon/state.go:111 internal/daemon/state.go:159
+#: internal/daemon/state.go:117 internal/daemon/state.go:158
 #, c-format
 msgid "Removing %s will also remove the following user states:\n"
 msgstr ""
@@ -613,52 +616,52 @@ msgstr ""
 msgid "Request to act on user dataset should have a user name attached"
 msgstr ""
 
-#: internal/daemon/service.go:110
+#: internal/daemon/service.go:111
 #, c-format
 msgid "Requesting %s profiling"
 msgstr ""
 
-#: internal/daemon/service.go:81
+#: internal/daemon/service.go:82
 msgid "Requesting a refresh"
 msgstr ""
 
-#: internal/daemon/state.go:94
+#: internal/daemon/state.go:100
 msgid "Requesting removing system state %q"
 msgstr ""
 
-#: internal/daemon/state.go:150
+#: internal/daemon/state.go:149
 msgid "Requesting removing user state %q for user %s"
 msgstr ""
 
-#: internal/daemon/state.go:31
+#: internal/daemon/state.go:30
 msgid "Requesting saving current system state"
 msgstr ""
 
-#: internal/daemon/state.go:29
+#: internal/daemon/state.go:28
 msgid "Requesting saving current system state %q"
 msgstr ""
 
-#: internal/daemon/state.go:67
+#: internal/daemon/state.go:69
 msgid "Requesting saving state %q for user %q"
 msgstr ""
 
-#: internal/daemon/state.go:69
+#: internal/daemon/state.go:71
 msgid "Requesting saving state for user %q"
 msgstr ""
 
-#: internal/daemon/service.go:45
+#: internal/daemon/service.go:46
 msgid "Requesting service states dump"
 msgstr ""
 
-#: internal/daemon/service.go:142
+#: internal/daemon/service.go:146
 msgid "Requesting zsys daemon status"
 msgstr ""
 
-#: internal/daemon/service.go:23
+#: internal/daemon/service.go:24
 msgid "Requesting zsys daemon stop"
 msgstr ""
 
-#: internal/daemon/service.go:174
+#: internal/daemon/service.go:178
 msgid "Requesting zsys daemon to garbage collect"
 msgstr ""
 
@@ -700,11 +703,11 @@ msgstr ""
 msgid "Run daemon state saves garbage collection."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:53
+#: cmd/zsysd/client/state.go:54
 msgid "Save complete system state (users and system)"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:54
+#: cmd/zsysd/client/state.go:55
 msgid "Save the state for a given user or current user if empty"
 msgstr ""
 
@@ -731,7 +734,7 @@ msgstr ""
 msgid "Sets the logging level of the daemon."
 msgstr ""
 
-#: internal/daemon/service.go:70
+#: internal/daemon/service.go:71
 #, c-format
 msgid "Setting logging level to %d"
 msgstr ""
@@ -758,7 +761,7 @@ msgstr ""
 msgid "Stops zsys daemon."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:136
+#: cmd/zsysd/client/state.go:144
 msgid "Successfully saved as %q\n"
 msgstr ""
 
@@ -775,7 +778,7 @@ msgstr ""
 msgid "System have changes, rerun system GC"
 msgstr ""
 
-#: internal/daemon/state.go:91
+#: internal/daemon/state.go:97
 msgid "System state name is required"
 msgstr ""
 
@@ -800,11 +803,11 @@ msgid ""
 "this machine"
 msgstr ""
 
-#: internal/zfs/zfs.go:543
+#: internal/zfs/zfs.go:532
 msgid "Trying to clone %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:677
+#: internal/zfs/zfs.go:666
 msgid "Trying to promote %q"
 msgstr ""
 
@@ -822,13 +825,21 @@ msgstr ""
 msgid "Unassociated user datasets GC"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:241
+#: cmd/zsysd/client/service.go:242
 #, c-format
 msgid "Unsupported trace type: %s"
 msgstr ""
 
 #: internal/machines/boot.go:293
 msgid "Untagging user dataset: %q"
+msgstr ""
+
+#: cmd/zsysd/client/boot.go:40
+msgid "Update system boot menu"
+msgstr ""
+
+#: internal/daemon/boot.go:74
+msgid "Updating system boot menu"
 msgstr ""
 
 #. 2. GC user datasets
@@ -865,7 +876,7 @@ msgstr ""
 msgid "ZFS: an error occured: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:813
+#: internal/zfs/zfs.go:802
 msgid "ZFS: can't set property %q=%q for %q as not a local property (%q)"
 msgstr ""
 
@@ -881,7 +892,7 @@ msgstr ""
 msgid "ZFS: refresh dataset list"
 msgstr ""
 
-#: internal/zfs/zfs.go:716
+#: internal/zfs/zfs.go:705
 msgid "ZFS: request destruction of %q"
 msgstr ""
 
@@ -897,23 +908,23 @@ msgstr ""
 msgid "ZFS: trying to Create %q with mountpoint %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:452
+#: internal/zfs/zfs.go:441
 msgid "ZFS: trying to clone %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:767
+#: internal/zfs/zfs.go:756
 msgid "ZFS: trying to destroy %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:744
+#: internal/zfs/zfs.go:733
 msgid "ZFS: trying to destroy recursively %q @ %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:634
+#: internal/zfs/zfs.go:623
 msgid "ZFS: trying to promote %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:804
+#: internal/zfs/zfs.go:793
 msgid "ZFS: trying to set %q=%q on %q"
 msgstr ""
 
@@ -937,11 +948,11 @@ msgstr ""
 msgid "can't get associated pool: "
 msgstr ""
 
-#: internal/zfs/zfs.go:807
+#: internal/zfs/zfs.go:796
 msgid "can't get dataset to change property on %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:719
+#: internal/zfs/zfs.go:708
 msgid "can't get dataset to destroy %q: "
 msgstr ""
 
@@ -949,7 +960,7 @@ msgstr ""
 msgid "can't list datasets: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:642
+#: internal/zfs/zfs.go:631
 msgid "can't promote %q: it's a snapshot"
 msgstr ""
 
@@ -969,7 +980,7 @@ msgstr ""
 msgid "can't read source of LastUsed property, ignoring:"
 msgstr ""
 
-#: internal/zfs/zfs.go:818
+#: internal/zfs/zfs.go:807
 msgid "can't set dataset property %q=%q for %q: "
 msgstr ""
 
@@ -981,7 +992,7 @@ msgstr ""
 msgid "can't use empty string for new home directory"
 msgstr ""
 
-#: internal/zfs/zfs.go:776
+#: internal/zfs/zfs.go:765
 msgid "cannot destroy dataset %q: %v"
 msgstr ""
 
@@ -989,8 +1000,8 @@ msgstr ""
 msgid "cannot find %q as child of parent %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:359 internal/zfs/zfs.go:459 internal/zfs/zfs.go:638
-#: internal/zfs/zfs.go:656 internal/zfs/zfs.go:684
+#: internal/zfs/zfs.go:359 internal/zfs/zfs.go:448 internal/zfs/zfs.go:627
+#: internal/zfs/zfs.go:645 internal/zfs/zfs.go:673
 msgid "cannot find %q: %v"
 msgstr ""
 
@@ -998,12 +1009,12 @@ msgstr ""
 msgid "cannot find base snapshot %q: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:344 internal/zfs/zfs.go:492 internal/zfs/zfs.go:522
-#: internal/zfs/zfs.go:593 internal/zfs/zfs.go:732
+#: internal/zfs/zfs.go:344 internal/zfs/zfs.go:481 internal/zfs/zfs.go:511
+#: internal/zfs/zfs.go:582 internal/zfs/zfs.go:721
 msgid "cannot find parent for %q: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:787
+#: internal/zfs/zfs.go:776
 msgid "cannot find parent for %s: %v"
 msgstr ""
 
@@ -1036,6 +1047,7 @@ msgstr ""
 #: zsys.streamlogger.go:382 zsys.streamlogger.go:412 zsys.streamlogger.go:442
 #: zsys.streamlogger.go:472 zsys.streamlogger.go:502 zsys.streamlogger.go:532
 #: zsys.streamlogger.go:562 zsys.streamlogger.go:592 zsys.streamlogger.go:622
+#: zsys.streamlogger.go:652
 msgid "couldn't attach a logger to request: %w"
 msgstr ""
 
@@ -1043,11 +1055,11 @@ msgstr ""
 msgid "couldn't change home userdataset for %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:574
+#: internal/zfs/zfs.go:563
 msgid "couldn't clone %q to %q: "
 msgstr ""
 
-#: internal/daemon/boot.go:58
+#: internal/daemon/boot.go:52
 msgid "couldn't commit: "
 msgstr ""
 
@@ -1059,7 +1071,7 @@ msgstr ""
 msgid "couldn't connect to zsys daemon: %v"
 msgstr ""
 
-#: internal/daemon/service.go:49 internal/machines/machines.go:352
+#: internal/daemon/service.go:50 internal/machines/machines.go:352
 msgid "couldn't convert internal state to json: %v"
 msgstr ""
 
@@ -1075,7 +1087,7 @@ msgstr ""
 msgid "couldn't create new user datasets from %q: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:382
+#: internal/zfs/zfs.go:399
 msgid "couldn't create snapshot %q: %v"
 msgstr ""
 
@@ -1087,23 +1099,23 @@ msgstr ""
 msgid "couldn't create userdataset for %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:736
+#: internal/zfs/zfs.go:725
 msgid "couldn't destroy %q and its children: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:723
+#: internal/zfs/zfs.go:712
 msgid "couldn't destroy %q due to clones: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:333 internal/zfs/zfs.go:393 internal/zfs/zfs.go:585
+#: internal/zfs/zfs.go:333 internal/zfs/zfs.go:410 internal/zfs/zfs.go:574
 msgid "couldn't destroy %q for cleanup: %v"
 msgstr ""
 
-#: internal/daemon/service.go:57
+#: internal/daemon/service.go:58
 msgid "couldn't dump machine state"
 msgstr ""
 
-#: cmd/zsysd/daemon/boot.go:25 internal/daemon/boot.go:33
+#: cmd/zsysd/daemon/boot.go:25 internal/daemon/boot.go:27
 msgid "couldn't ensure boot: "
 msgstr ""
 
@@ -1115,11 +1127,11 @@ msgstr ""
 msgid "couldn't fetch matching information: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:338 internal/zfs/zfs.go:623
+#: internal/zfs/zfs.go:338 internal/zfs/zfs.go:612
 msgid "couldn't fetch property of newly created dataset: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:427
+#: internal/zfs/zfs.go:416
 msgid "couldn't fetch property of newly created snapshot: %v"
 msgstr ""
 
@@ -1143,11 +1155,11 @@ msgstr ""
 msgid "couldn't parse kernel command line: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:668
+#: internal/zfs/zfs.go:657
 msgid "couldn't promote %q for cleanup: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:688
+#: internal/zfs/zfs.go:677
 msgid "couldn't promote %q: "
 msgstr ""
 
@@ -1159,11 +1171,11 @@ msgstr ""
 msgid "couldn't read our internal configuration: %v "
 msgstr ""
 
-#: internal/zfs/zfs.go:696
+#: internal/zfs/zfs.go:685
 msgid "couldn't refresh our internal origin and layout cache: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:692
+#: internal/zfs/zfs.go:681
 msgid "couldn't refresh properties for %q: "
 msgstr ""
 
@@ -1176,21 +1188,21 @@ msgstr ""
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
-#: internal/daemon/state.go:170
+#: internal/daemon/state.go:169
 #, c-format
 msgid "couldn't remove state %s for user %s: "
 msgstr ""
 
-#: internal/daemon/state.go:123
+#: internal/daemon/state.go:129
 #, c-format
 msgid "couldn't remove system state %s: "
 msgstr ""
 
-#: internal/daemon/state.go:73
+#: internal/daemon/state.go:75
 msgid "couldn't save state for user %q:"
 msgstr ""
 
-#: internal/daemon/state.go:35
+#: internal/daemon/state.go:34
 msgid "couldn't save system state: "
 msgstr ""
 
@@ -1222,7 +1234,7 @@ msgstr ""
 msgid "couldn't set new home %q to %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:422 internal/zfs/zfs.go:612 internal/zfs/zfs.go:618
+#: internal/zfs/zfs.go:601 internal/zfs/zfs.go:607
 msgid "couldn't set user property %q to %q for %v: "
 msgstr ""
 
@@ -1250,7 +1262,7 @@ msgstr ""
 msgid "didn't find any existing dataset matching %q"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:258
+#: cmd/zsysd/client/service.go:259
 msgid "duration must be a positive integer"
 msgstr ""
 
@@ -1289,7 +1301,7 @@ msgid ""
 "and canmount isn't on"
 msgstr ""
 
-#: internal/zfs/zfs.go:497 internal/zfs/zfs.go:660
+#: internal/zfs/zfs.go:486 internal/zfs/zfs.go:649
 msgid "integrity check failed: %v"
 msgstr ""
 
@@ -1356,7 +1368,7 @@ msgstr ""
 msgid "no ID given and cannot retrieve current machine. Please specify one ID."
 msgstr ""
 
-#: internal/zfs/zfs.go:757
+#: internal/zfs/zfs.go:746
 msgid "no existing snapshot %q: "
 msgstr ""
 
@@ -1387,11 +1399,11 @@ msgstr ""
 msgid "no request ID found on server header"
 msgstr ""
 
-#: internal/zfs/zfs.go:454
+#: internal/zfs/zfs.go:443
 msgid "no suffix was provided for cloning"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:147
+#: cmd/zsysd/client/state.go:155
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
@@ -1444,11 +1456,11 @@ msgstr ""
 msgid "state.LastUsed (%s) before bucket.start (%s). Continuing"
 msgstr ""
 
-#: internal/zfs/zfs.go:749
+#: internal/zfs/zfs.go:738
 msgid "stop destroying dataset on %q, cannot destroy child: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:441
+#: internal/zfs/zfs.go:430
 msgid "stop snapshotting dataset for %q: %v"
 msgstr ""
 
@@ -1473,7 +1485,7 @@ msgstr ""
 msgid "unexpected socket type"
 msgstr ""
 
-#: internal/daemon/service.go:126
+#: internal/daemon/service.go:130
 msgid "unknown type of profiling"
 msgstr ""
 
@@ -1485,15 +1497,19 @@ msgstr ""
 msgid "user is mandatory"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:185
+#: cmd/zsysd/client/state.go:193
 msgid "y"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:185
+#: cmd/zsysd/client/state.go:193
 msgid "yes"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:67 cmd/zsysd/client/state.go:143
+#: cmd/zsysd/client/state.go:72
+msgid "you can't provide no-update-bootmenu option on user state save"
+msgstr ""
+
+#: cmd/zsysd/client/state.go:69 cmd/zsysd/client/state.go:151
 msgid "you can't provide system and user flags at the same time"
 msgstr ""
 
