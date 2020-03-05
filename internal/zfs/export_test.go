@@ -5,6 +5,14 @@ import (
 	"testing"
 )
 
+func SplitSnapshotName(name string) (string, string) {
+	return splitSnapshotName(name)
+}
+
+func (z *Zfs) DatasetByID(name string) *Dataset {
+	return z.allDatasets[name]
+}
+
 func (t *Transaction) RegisterRevert(f func() error) {
 	t.registerRevert(f)
 }

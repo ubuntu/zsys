@@ -3,10 +3,12 @@ package zfs_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
 	"sort"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -702,6 +704,99 @@ func TestSetProperty(t *testing.T) {
 	}
 }
 
+func TestDependencies(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		depsFor string
+		clones  []string
+
+		wantDeps []string
+	}{
+		"Dataset has no child":  {depsFor: "rpool/ROOT/ubuntu/var/lib/apt"},
+		"Dataset has one child": {depsFor: "rpool/ROOT/ubuntu/var/lib", wantDeps: []string{"rpool/ROOT/ubuntu/var/lib/apt"}},
+		"Dataset has snapshots": {depsFor: "rpool/ROOT/ubuntu2", wantDeps: []string{"rpool/ROOT/ubuntu2@snap_u1", "rpool/ROOT/ubuntu2@snap_u2"}},
+
+		"Snapshot has no child":                               {depsFor: "rpool/ROOT/ubuntu/opt/tools@snap_opt"},
+		"Multiple snapshots on same datasets are independent": {depsFor: "rpool/ROOT/ubuntu2@snap_u1"},
+		"Snapshot isn’t impacted by other children datasets":  {depsFor: "rpool/ROOT/ubuntu/var@snap_v1"},
+		"Snapshots has a snapshot child":                      {depsFor: "rpool/ROOT/ubuntu/opt@snap_opt", wantDeps: []string{"rpool/ROOT/ubuntu/opt/tools@snap_opt"}},
+
+		"Dataset has snapshots and children": {depsFor: "rpool/ROOT/ubuntu",
+			wantDeps: []string{
+				"rpool/ROOT/ubuntu@snap_r1",
+				"rpool/ROOT/ubuntu/var@snap_v1", "rpool/ROOT/ubuntu/var/lib/apt", "rpool/ROOT/ubuntu/var/lib", "rpool/ROOT/ubuntu/var",
+				"rpool/ROOT/ubuntu/opt/tools@snap_opt", "rpool/ROOT/ubuntu/opt/tools", "rpool/ROOT/ubuntu/opt@snap_opt", "rpool/ROOT/ubuntu/opt"}},
+
+		"Snapshot with one clone":           {depsFor: "rpool/ROOT/ubuntu2@snap_u1", clones: []string{"rpool/ROOT/ubuntu2@snap_u1"}, wantDeps: []string{"rpool/ROOT/ubuntu2_cloned0"}},
+		"Filesystem dataset with one clone": {depsFor: "rpool/ROOT/ubuntu2", clones: []string{"rpool/ROOT/ubuntu2@snap_u1"}, wantDeps: []string{"rpool/ROOT/ubuntu2@snap_u2", "rpool/ROOT/ubuntu2_cloned0", "rpool/ROOT/ubuntu2@snap_u1"}},
+
+		"Clones on us and children": {depsFor: "rpool/ROOT/ubuntu/opt", clones: []string{"rpool/ROOT/ubuntu/opt@snap_opt"}, wantDeps: []string{
+			"rpool/ROOT/ubuntu/opt_cloned0/tools", "rpool/ROOT/ubuntu/opt/tools@snap_opt",
+			"rpool/ROOT/ubuntu/opt_cloned0", "rpool/ROOT/ubuntu/opt@snap_opt",
+			"rpool/ROOT/ubuntu/opt/tools"}},
+		"Child has clone": {depsFor: "rpool/ROOT/ubuntu/opt", clones: []string{"rpool/ROOT/ubuntu/opt/tools@snap_opt"}, wantDeps: []string{"rpool/ROOT/ubuntu/opt/tools_cloned0", "rpool/ROOT/ubuntu/opt/tools@snap_opt", "rpool/ROOT/ubuntu/opt/tools", "rpool/ROOT/ubuntu/opt@snap_opt"}},
+		"Clone has clone": {depsFor: "rpool/ROOT/ubuntu/opt/tools",
+			clones: []string{"rpool/ROOT/ubuntu/opt/tools@snap_opt", "rpool/ROOT/ubuntu/opt/tools_cloned0@snapcloned0"},
+			wantDeps: []string{"rpool/ROOT/ubuntu/opt/tools_cloned1", "rpool/ROOT/ubuntu/opt/tools_cloned0@snapcloned0",
+				"rpool/ROOT/ubuntu/opt/tools_cloned0", "rpool/ROOT/ubuntu/opt/tools@snap_opt"}},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_n_datasets_n_children_n_snapshots_with_dependencies.yaml"), testutils.WithLibZFS(adapter))
+			defer fPools.Create(dir)()
+
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
+			if err != nil {
+				t.Fatalf("expected no error but got: %v", err)
+			}
+
+			// Scan initial state for no-op
+			trans, _ := z.NewTransaction(context.Background())
+			defer trans.Done()
+
+			// Prepare clone
+			for i, clone := range tc.clones {
+				// Take a snapshot to clone it (FIXME: this support should be in zfs_disk_handler)
+				if i > 0 {
+					err = trans.Snapshot(fmt.Sprintf("snapcloned%d", i-1), strings.Split(clone, "@")[0], false)
+					assert.NoError(t, err, "error in setup")
+				}
+				err = trans.Clone(clone, fmt.Sprintf("cloned%d", i), false, true)
+				assert.NoError(t, err, "error in setup")
+			}
+
+			d := z.DatasetByID(tc.depsFor)
+			if d == nil {
+				t.Fatalf("No dataset found matching %s", tc.depsFor)
+			}
+
+			deps := d.Dependencies(z)
+
+			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
+			// However, we identified 3 rules to ensure that the dependency order (from leaf to root) is respected.
+
+			// rule 1: ensure that the 2 lists have the same elements
+			if len(deps) != len(tc.wantDeps) {
+				t.Fatalf("deps content doesn't have enough elements:\nGot:  %v\nWant: %v", deps, tc.wantDeps)
+			} else {
+				assert.ElementsMatch(t, tc.wantDeps, deps, "didn't get matching dep list content")
+			}
+
+			// rule 2: ensure that all children (snapshots or filesystem datasets) appears before its parent
+			assertChildrenBeforeParents(t, deps)
+
+			// rule 3: ensure that a clone comes before its origin
+			assertCloneComesBeforeItsOrigin(t, z, deps)
+		})
+
+	}
+}
 func TestTransactionsWithZFS(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
@@ -1132,6 +1227,50 @@ func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Datas
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assertDatasetsEquals(t, ta, newZ.Datasets(), inMemory)
+}
+
+// assertChildrenBeforeParents ensure that all children (snapshots or filesystem datasets) appears before its parent
+func assertChildrenBeforeParents(t *testing.T, deps []string) {
+	t.Helper()
+
+	// iterate on child
+	for i, child := range deps {
+		parent, snapshot := zfs.SplitSnapshotName(child)
+		if snapshot == "" {
+			parent = child[:strings.LastIndex(child, "/")]
+		}
+		// search corresponding base from the start
+		for j, candidate := range deps {
+			if candidate != parent {
+				continue
+			}
+			if i > j {
+				t.Errorf("Found child %s after its parent %s: %v", child, candidate, deps)
+			}
+		}
+	}
+}
+
+// assertCloneComesBeforeItsOrigin ensure that a clone comes before its origin
+func assertCloneComesBeforeItsOrigin(t *testing.T, z *zfs.Zfs, deps []string) {
+	t.Helper()
+
+	for i, clone := range deps {
+		orig := z.DatasetByID(clone).Origin
+		if orig != "" {
+			continue
+		}
+
+		// search corresponding origin from the start
+		for j, candidate := range deps {
+			if candidate != orig {
+				continue
+			}
+			if i > j {
+				t.Errorf("Found clone %s after its origin snapshot %s: %v", clone, candidate, deps)
+			}
+		}
+	}
 }
 
 // timeAsserter ensures that dates will be between a start and end time

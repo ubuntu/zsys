@@ -1,0 +1,45 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: ROOT
+        canmount: off
+      - name: ROOT/ubuntu
+        zsys_bootfs: yes
+        last_used: 2019-04-18T02:45:55+00:00
+        mountpoint: /
+        snapshots:
+          - name: snap_r1
+            zsys_bootfs: yes:local
+            mountpoint: /:local
+            canmount: on:local
+      - name: ROOT/ubuntu/var
+        snapshots:
+          - name: snap_v1
+            zsys_bootfs: yes:inherited
+            mountpoint: /var:inherited
+            canmount: on:local
+      - name: ROOT/ubuntu/var/lib
+        zsys_bootfs: no
+      - name: ROOT/ubuntu/var/lib/apt
+      - name: ROOT/ubuntu/opt
+        snapshots:
+          - name: snap_opt
+            zsys_bootfs: yes:inherited
+            mountpoint: /opt:inherited
+            canmount: on:local
+      - name: ROOT/ubuntu/opt/tools
+        snapshots:
+          - name: snap_opt
+            zsys_bootfs: yes:inherited
+            mountpoint: /opt/tools:inherited
+            canmount: on:local
+      - name: ROOT/ubuntu2
+        last_used: 2018-12-10T12:20:44+00:00
+        mountpoint: /
+        snapshots:
+          - name: snap_u1
+            mountpoint: /:local
+            canmount: on:local
+          - name: snap_u2
+            mountpoint: /:local
+            canmount: on:local
