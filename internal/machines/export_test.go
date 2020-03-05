@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"sort"
 	"strings"
+	"testing"
 
 	"github.com/ubuntu/zsys/internal/config"
+	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
 )
 
@@ -67,3 +69,10 @@ func SplitSnapshotName(s string) (string, string) { return splitSnapshotName(s) 
 
 // AllMachines exports machines lists for tests
 func (ms *Machines) AllMachines() map[string]*Machine { return ms.all }
+
+func (ms Machines) CopyForTests(t *testing.T) (copy Machines) {
+	t.Helper()
+
+	testutils.Deepcopy(t, &copy, ms)
+	return copy
+}

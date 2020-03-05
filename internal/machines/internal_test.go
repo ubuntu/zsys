@@ -66,7 +66,7 @@ func TestResolveOrigin(t *testing.T) {
 			var ds []*zfs.Dataset
 			for _, d := range z.Datasets() {
 				d := d
-				ds = append(ds, &d)
+				ds = append(ds, d)
 			}
 			if tc.onlyOnMountpoint == "" {
 				tc.onlyOnMountpoint = "/"

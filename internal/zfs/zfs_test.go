@@ -184,7 +184,7 @@ func TestCreate(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -249,7 +249,7 @@ func TestSnapshot(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -345,7 +345,7 @@ func TestClone(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -429,7 +429,7 @@ func TestPromote(t *testing.T) {
 					t.Fatalf("couldn't setup testbed when prepromoting %q: %v", tc.alreadyPromoted, err)
 				}
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 
 			err = trans.Promote(tc.dataset)
 
@@ -585,7 +585,7 @@ func TestDestroy(t *testing.T) {
 					t.Fatalf("couldn't setup testbed when prepromoting %q: %v", tc.alreadyPromoted, err)
 				}
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 
 			err = z.NewNoTransaction(context.Background()).Destroy(tc.dataset)
 
@@ -672,7 +672,7 @@ func TestSetProperty(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -864,7 +864,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, cancel := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -890,7 +890,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doSnapshot {
@@ -916,7 +916,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doClone {
@@ -938,7 +938,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doPromote {
@@ -957,7 +957,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 							t.Fatalf("couldnt clone to prepare dataset hierarchy: %v", err)
 						}
 						// Reset init state
-						initState = z.Datasets()
+						initState = copyState(z)
 						trans2.Done()
 						state = initState
 					}
@@ -974,7 +974,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doSetProperty {
@@ -991,7 +991,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					haveChanges = true
 				}
 
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			// Final transaction states
@@ -1144,21 +1144,25 @@ func TestInvalidatedTransactionByCancel(t *testing.T) {
 
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
 // DataSlices.
-func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset) zfs.DatasetSlice {
+func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []*zfs.Dataset) zfs.DatasetSlice {
 	t.Helper()
+
+	// We don’t want to impact initial got slice order as it can be reused later on
+	copyDS := make([]zfs.Dataset, 0, len(got))
 
 	// Ensure datasets were created at expected range time and replace them with magic time.
 	var ds []*zfs.Dataset
-	for k := range got {
-		if !got[k].IsSnapshot {
+	for i, d := range got {
+		copyDS = append(copyDS, *d)
+		if !d.IsSnapshot {
 			continue
 		}
-		ds = append(ds, &got[k])
+		ds = append(ds, &copyDS[i])
 	}
 	ta.assertAndReplaceCreationTimeInRange(t, ds)
 
 	// Sort the golden file order to be reproducible.
-	gotForGolden := zfs.DatasetSlice{DS: got}
+	gotForGolden := zfs.DatasetSlice{DS: copyDS}
 	sort.Sort(gotForGolden)
 	return gotForGolden
 }
@@ -1189,41 +1193,40 @@ func datasetsNotEquals(t *testing.T, want, got []zfs.Dataset) {
 
 // assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Datasets() for instance
 // to a golden file.
-func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset) {
+func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []*zfs.Dataset) {
 	t.Helper()
 
 	gotForGolden := transformToReproducibleDatasetSlice(t, ta, got)
-	got = gotForGolden.DS
 
 	// Get expected dataset list from golden file, update as needed.
 	wantFromGolden := zfs.DatasetSlice{}
 	testutils.LoadFromGoldenFile(t, gotForGolden, &wantFromGolden)
 	want := []zfs.Dataset(wantFromGolden.DS)
 
-	datasetsEquals(t, want, got)
+	datasetsEquals(t, want, gotForGolden.DS)
 }
 
 // assertDatasetsEquals compares 2 slices of datasets, after ensuring they can be reproducible.
-func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset) {
+func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []*zfs.Dataset) {
 	t.Helper()
 
-	want = transformToReproducibleDatasetSlice(t, ta, want).DS
-	got = transformToReproducibleDatasetSlice(t, ta, got).DS
+	wantCopy := transformToReproducibleDatasetSlice(t, ta, want).DS
+	gotCopy := transformToReproducibleDatasetSlice(t, ta, got).DS
 
-	datasetsEquals(t, want, got)
+	datasetsEquals(t, wantCopy, gotCopy)
 }
 
 // assertDatasetsNotEquals compares 2 slices of datasets, ater ensuring they can be reproducible.
-func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset) {
+func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []*zfs.Dataset) {
 	t.Helper()
 
-	want = transformToReproducibleDatasetSlice(t, ta, want).DS
-	got = transformToReproducibleDatasetSlice(t, ta, got).DS
+	wantCopy := transformToReproducibleDatasetSlice(t, ta, want).DS
+	gotCopy := transformToReproducibleDatasetSlice(t, ta, got).DS
 
-	datasetsNotEquals(t, want, got)
+	datasetsNotEquals(t, wantCopy, gotCopy)
 }
 
-func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Dataset, adapter libzfs.Interface) {
+func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []*zfs.Dataset, adapter libzfs.Interface) {
 	t.Helper()
 
 	// We should always have New() returning the same state than we manually updated
@@ -1320,4 +1323,16 @@ func failOnZFSPermissionDenied(t *testing.T) {
 	if u.Uid != "0" {
 		t.Fatalf("you don't have permissions to interact with system zfs")
 	}
+}
+
+// copyState freezes a given datasets layout by making copies
+func copyState(z *zfs.Zfs) []*zfs.Dataset {
+	datasets := z.Datasets()
+	ds := make([]*zfs.Dataset, len(datasets))
+
+	for i := range datasets {
+		dcopy := *datasets[i]
+		ds[i] = &dcopy
+	}
+	return ds
 }

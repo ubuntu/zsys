@@ -247,11 +247,11 @@ func TestBoot(t *testing.T) {
 				lzfs.SetDatasetAsMounted(tc.mountedDataset, true)
 			}
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			lzfs.ErrOnClone(tc.cloneErr)
 			lzfs.ErrOnScan(tc.scanErr)
@@ -295,26 +295,26 @@ func TestIdempotentBoot(t *testing.T) {
 	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones_reverting.yaml"), testutils.WithLibZFS(libzfs))
 	defer fPools.Create(dir)()
 
-	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.EnsureBoot(context.Background())
+	hasChanged, err := ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 
 	assert.True(t, hasChanged, "expected first boot to signal a change, but got false")
-	ms2 := ms1
+	msAfterEnsureBoot := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.EnsureBoot(context.Background())
+	hasChanged, err = ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.False(t, hasChanged, "expected second boot to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterEnsureBoot, ms)
 }
 
 // TODO: not really idempotent, but should untag datasets that are tagged with destination datasets, maybe even destroy if it's the only one?
@@ -333,31 +333,31 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	lzfs := libzfs.(*mock.LibZFS)
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_4242", true)
 
-	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.EnsureBoot(context.Background())
+	hasChanged, err := ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.True(t, hasChanged, "expected first boot to signal a change, but got false")
 
-	hasChanged, err = ms1.Commit(context.Background())
+	hasChanged, err = ms.Commit(context.Background())
 	if err != nil {
 		t.Fatal("Commit failed:", err)
 	}
 	assert.True(t, hasChanged, "expected first commit to signal a change, but got false")
-	ms2 := ms1
+	msAfterCommit := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.EnsureBoot(context.Background())
+	hasChanged, err = ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.False(t, hasChanged, "expected second boot to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterCommit, ms)
 }
 
 func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
@@ -372,26 +372,26 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	lzfs := libzfs.(*mock.LibZFS)
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_4242", true)
 
-	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.EnsureBoot(context.Background())
+	hasChanged, err := ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.True(t, hasChanged, "expected first boot to signal a change, but got false")
 
-	ms2 := ms1
+	msAfterEnsureBoot := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.EnsureBoot(context.Background())
+	hasChanged, err = ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.False(t, hasChanged, "expected second boot to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterEnsureBoot, ms)
 }
 
 func TestCommit(t *testing.T) {
@@ -455,7 +455,7 @@ func TestCommit(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
@@ -465,7 +465,7 @@ func TestCommit(t *testing.T) {
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 			lzfs.ErrOnPromote(tc.promoteErr)
 			lzfs.ForceLastUsedTime(true)
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			hasChanged, err := ms.Commit(context.Background())
 			if err != nil {
@@ -508,26 +508,26 @@ func TestIdempotentCommit(t *testing.T) {
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_9876", true)
 	lzfs.ForceLastUsedTime(true)
 
-	ms1, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_9876"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_9876"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.Commit(context.Background())
+	hasChanged, err := ms.Commit(context.Background())
 	if err != nil {
 		t.Fatal("first commit failed:", err)
 	}
 	assert.True(t, hasChanged, "expected first commit to signal a change, but got false")
 
-	ms2 := ms1
+	msAfterCommit := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.Commit(context.Background())
+	hasChanged, err = ms.Commit(context.Background())
 	if err != nil {
 		t.Fatal("second commit failed:", err)
 	}
 	assert.False(t, hasChanged, "expected second commit to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterCommit, ms)
 }
 
 func TestCreateUserData(t *testing.T) {
@@ -590,12 +590,12 @@ func TestCreateUserData(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ForceLastUsedTime(true)
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			lzfs.ErrOnCreate(tc.createErr)
 			lzfs.ErrOnScan(tc.scanErr)
@@ -667,12 +667,12 @@ func TestChangeHomeOnUserData(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ForceLastUsedTime(true)
 
-			initMachines, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			lzfs.ErrOnScan(tc.scanErr)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
@@ -748,14 +748,14 @@ func TestCreateSystemSnapshot(t *testing.T) {
 				tc.cmdline = generateCmdLine("rpool/ROOT/ubuntu_1234")
 			}
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 			lzfs := libzfs.(*mock.LibZFS)
 
 			lzfs.ForceLastUsedTime(true)
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			snapshotName, err := ms.CreateSystemSnapshot(context.Background(), tc.snapshotName)
 			if err != nil {
@@ -845,14 +845,14 @@ func TestCreateUserSnapshot(t *testing.T) {
 				tc.cmdline = generateCmdLine("rpool/ROOT/ubuntu_1234")
 			}
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 			lzfs := libzfs.(*mock.LibZFS)
 
 			lzfs.ForceLastUsedTime(true)
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			snapshotName, err := ms.CreateUserSnapshot(context.Background(), tc.userName, tc.snapshotName)
 			if err != nil {
@@ -1209,12 +1209,12 @@ func TestRemoveSystemStates(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			initMachines, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
@@ -1317,12 +1317,12 @@ func TestRemoveUserStates(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			initMachines, err := machines.New(context.Background(), generateCmdLine(""), machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), generateCmdLine(""), machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
