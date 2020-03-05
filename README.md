@@ -179,9 +179,10 @@ zsysctl save [state id] [flags]
 ##### Options
 
 ```
-  -h, --help          help for save
-  -s, --system        Save complete system state (users and system)
-  -u, --user string   Save the state for a given user or current user if empty
+  -h, --help                 help for save
+      --no-update-bootmenu   Do not update bootmenu on system state save
+  -s, --system               Save complete system state (users and system)
+  -u, --user string          Save the state for a given user or current user if empty
 ```
 
 ##### Options inherited from parent commands
@@ -501,9 +502,10 @@ zsysctl state save [state id] [flags]
 ##### Options
 
 ```
-  -h, --help          help for save
-  -s, --system        Save complete system state (users and system)
-  -u, --user string   Save the state for a given user or current user if empty
+  -h, --help                 help for save
+      --no-update-bootmenu   Do not update bootmenu on system state save
+  -s, --system               Save complete system state (users and system)
+  -u, --user string          Save the state for a given user or current user if empty
 ```
 
 ##### Options inherited from parent commands
