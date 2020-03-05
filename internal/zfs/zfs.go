@@ -819,8 +819,8 @@ func (t *Transaction) SetProperty(name, value, datasetName string, force bool) e
 //   - it has a snapshot (so has child as well)
 //   - there is a clone depending on it (clone depending on snapshot on this dataset,
 //     so meaning that this dataset has a snapshot, so has child as well)
-func (d Dataset) Dependencies(z *Zfs) []string {
-	var deps []string
+func (d Dataset) Dependencies(z *Zfs) []*Dataset {
+	var deps []*Dataset
 	base, snapshot := splitSnapshotName(d.Name)
 
 	for k, dataset := range z.allDatasets {
@@ -850,13 +850,13 @@ func (d Dataset) Dependencies(z *Zfs) []string {
 
 		if isDep {
 			deps = append(deps, dataset.Dependencies(z)...)
-			deps = append(deps, k)
+			deps = append(deps, dataset)
 		}
 	}
 
 	// Deduplicate dependencies, keeping first which will has its inverse deps just after
-	keys := make(map[string]bool)
-	var uniqDeps []string
+	keys := make(map[*Dataset]bool)
+	var uniqDeps []*Dataset
 	for _, entry := range deps {
 		if _, value := keys[entry]; !value {
 			keys[entry] = true

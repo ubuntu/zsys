@@ -781,11 +781,16 @@ func TestDependencies(t *testing.T) {
 			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
 			// However, we identified 3 rules to ensure that the dependency order (from leaf to root) is respected.
 
+			depNames := make([]string, len(deps))
+			for i, d := range deps {
+				depNames[i] = d.Name
+			}
+
 			// rule 1: ensure that the 2 lists have the same elements
 			if len(deps) != len(tc.wantDeps) {
 				t.Fatalf("deps content doesn't have enough elements:\nGot:  %v\nWant: %v", deps, tc.wantDeps)
 			} else {
-				assert.ElementsMatch(t, tc.wantDeps, deps, "didn't get matching dep list content")
+				assert.ElementsMatch(t, tc.wantDeps, depNames, "didn't get matching dep list content")
 			}
 
 			// rule 2: ensure that all children (snapshots or filesystem datasets) appears before its parent
@@ -1230,44 +1235,43 @@ func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Datas
 }
 
 // assertChildrenBeforeParents ensure that all children (snapshots or filesystem datasets) appears before its parent
-func assertChildrenBeforeParents(t *testing.T, deps []string) {
+func assertChildrenBeforeParents(t *testing.T, deps []*zfs.Dataset) {
 	t.Helper()
 
 	// iterate on child
 	for i, child := range deps {
-		parent, snapshot := zfs.SplitSnapshotName(child)
+		parent, snapshot := zfs.SplitSnapshotName(child.Name)
 		if snapshot == "" {
-			parent = child[:strings.LastIndex(child, "/")]
+			parent = child.Name[:strings.LastIndex(child.Name, "/")]
 		}
 		// search corresponding base from the start
 		for j, candidate := range deps {
-			if candidate != parent {
+			if candidate.Name != parent {
 				continue
 			}
 			if i > j {
-				t.Errorf("Found child %s after its parent %s: %v", child, candidate, deps)
+				t.Errorf("Found child %s after its parent %s: %+v", child.Name, candidate.Name, deps)
 			}
 		}
 	}
 }
 
 // assertCloneComesBeforeItsOrigin ensure that a clone comes before its origin
-func assertCloneComesBeforeItsOrigin(t *testing.T, z *zfs.Zfs, deps []string) {
+func assertCloneComesBeforeItsOrigin(t *testing.T, z *zfs.Zfs, deps []*zfs.Dataset) {
 	t.Helper()
 
 	for i, clone := range deps {
-		orig := z.DatasetByID(clone).Origin
-		if orig != "" {
+		if clone.Origin != "" {
 			continue
 		}
 
 		// search corresponding origin from the start
 		for j, candidate := range deps {
-			if candidate != orig {
+			if candidate.Name != clone.Origin {
 				continue
 			}
 			if i > j {
-				t.Errorf("Found clone %s after its origin snapshot %s: %v", clone, candidate, deps)
+				t.Errorf("Found clone %s after its origin snapshot %s: %+v", clone.Name, candidate.Name, deps)
 			}
 		}
 	}
