@@ -812,3 +812,56 @@ func (t *Transaction) SetProperty(name, value, datasetName string, force bool) e
 
 	return nil
 }
+
+// Dependencies returns the list of dataset dependencies in reverse order (deepest first)
+// A dataset has dependencies if:
+//   - it has a subdataset (has child)
+//   - it has a snapshot (so has child as well)
+//   - there is a clone depending on it (clone depending on snapshot on this dataset,
+//     so meaning that this dataset has a snapshot, so has child as well)
+func (d Dataset) Dependencies(z *Zfs) []string {
+	var deps []string
+	base, snapshot := splitSnapshotName(d.Name)
+
+	for k, dataset := range z.allDatasets {
+		var isDep bool
+		if !d.IsSnapshot {
+			// snapshot on filesystem dataset
+			if strings.HasPrefix(k, d.Name+"@") {
+				isDep = true
+			}
+			// direct child
+			if strings.HasPrefix(k, d.Name+"/") && !strings.Contains(strings.TrimPrefix(k, d.Name+"/"), "/") {
+				isDep = true
+			}
+		} else {
+			if dataset.Origin == d.Name {
+				isDep = true
+			}
+			// Consider snapshot child: if d is a snapshot, look if subdataset which has the same base parent
+			// finish with the same snapshot name and consider them linked.
+			if dataset.IsSnapshot {
+				baseDataset, snapshotDataset := splitSnapshotName(dataset.Name)
+				if snapshotDataset == snapshot && strings.HasPrefix(baseDataset, base+"/") {
+					isDep = true
+				}
+			}
+		}
+
+		if isDep {
+			deps = append(deps, dataset.Dependencies(z)...)
+			deps = append(deps, k)
+		}
+	}
+
+	// Deduplicate dependencies, keeping first which will has its inverse deps just after
+	keys := make(map[string]bool)
+	var uniqDeps []string
+	for _, entry := range deps {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			uniqDeps = append(uniqDeps, entry)
+		}
+	}
+	return uniqDeps
+}
