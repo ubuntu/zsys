@@ -136,11 +136,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 		conf:    ms.conf,
 	}
 
-	zDatasets := machines.z.Datasets()
-	datasets := make([]*zfs.Dataset, 0, len(zDatasets))
-	for i := range zDatasets {
-		datasets = append(datasets, &zDatasets[i])
-	}
+	datasets := machines.z.Datasets()
 
 	// Sort datasets so that children datasets are after their parents.
 	sortedDataset := sortedDataset(datasets)
@@ -150,18 +146,18 @@ func (ms *Machines) refresh(ctx context.Context) {
 	origins := resolveOrigin(ctx, []*zfs.Dataset(sortedDataset), "/")
 
 	// First, set main datasets, then set clones
-	mainDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
-	cloneDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
-	otherDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
+	mainDatasets := make([]*zfs.Dataset, 0, len(sortedDataset))
+	cloneDatasets := make([]*zfs.Dataset, 0, len(sortedDataset))
+	otherDatasets := make([]*zfs.Dataset, 0, len(sortedDataset))
 	for _, d := range sortedDataset {
 		if _, exists := origins[d.Name]; !exists {
-			otherDatasets = append(otherDatasets, *d)
+			otherDatasets = append(otherDatasets, d)
 			continue
 		}
 		if *origins[d.Name] == "" {
-			mainDatasets = append(mainDatasets, *d)
+			mainDatasets = append(mainDatasets, d)
 		} else {
-			cloneDatasets = append(cloneDatasets, *d)
+			cloneDatasets = append(cloneDatasets, d)
 		}
 	}
 
@@ -347,7 +343,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 
 // populate attach main system datasets to machines and returns other types of datasets for later triage/attachment, alongside
 // a map to direct access to a given state and machine
-func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, origins map[string]*string) (boots, userdatas, persistents, unmanagedDatasets []*zfs.Dataset) {
+func (ms *Machines) populate(ctx context.Context, allDatasets []*zfs.Dataset, origins map[string]*string) (boots, userdatas, persistents, unmanagedDatasets []*zfs.Dataset) {
 	for _, d := range allDatasets {
 		// we are taking the d address. Ensure we have a local variable that isn’t going to be reused
 		d := d
@@ -368,14 +364,14 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 		// Extract boot datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
 		if strings.HasPrefix(d.Mountpoint, "/boot") {
-			boots = append(boots, &d)
+			boots = append(boots, d)
 			continue
 		}
 
 		// Extract zsys user datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
 		if isUserDataset(d.Name) {
-			userdatas = append(userdatas, &d)
+			userdatas = append(userdatas, d)
 			continue
 		}
 
@@ -383,19 +379,19 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 		// will mount them.
 		if d.CanMount != "on" {
 			log.Debugf(ctx, i18n.G("ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on"), d.Name)
-			unmanagedDatasets = append(unmanagedDatasets, &d)
+			unmanagedDatasets = append(unmanagedDatasets, d)
 			continue
 		}
 
 		// should be persistent datasets
-		persistents = append(persistents, &d)
+		persistents = append(persistents, d)
 	}
 
 	return boots, userdatas, persistents, unmanagedDatasets
 }
 
 // newMachineFromDataset returns a new machine if the given dataset is a main system one.
-func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
+func newMachineFromDataset(d *zfs.Dataset, origin *string) *Machine {
 	// Register all zsys non cloned mountable / to a new machine
 	if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == "" {
 		m := Machine{
@@ -408,7 +404,7 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 			AllUsersStates: make(map[string]map[string]*State),
 			History:        make(map[string]*State),
 		}
-		m.Datasets[d.Name] = []*zfs.Dataset{&d}
+		m.Datasets[d.Name] = []*zfs.Dataset{d}
 		// We don't want lastused to be 1970 in our golden files
 		if d.LastUsed != 0 {
 			lu := time.Unix(int64(d.LastUsed), 0)
@@ -422,13 +418,13 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 // populateSystemAndHistory identified if the given dataset is a system dataset (children of root one) or a history
 // one. It creates and attach the states as needed.
 // It returns ok if the dataset matches any machine and is attached.
-func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset, origin *string) (ok bool) {
+func (ms *Machines) populateSystemAndHistory(ctx context.Context, d *zfs.Dataset, origin *string) (ok bool) {
 	for _, m := range ms.all {
 		// Direct main machine state children
-		if ok, err := isChild(m.ID, d); err != nil {
+		if ok, err := isChild(m.ID, *d); err != nil {
 			log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 		} else if ok {
-			m.Datasets[m.ID] = append(m.Datasets[m.ID], &d)
+			m.Datasets[m.ID] = append(m.Datasets[m.ID], d)
 			return true
 		}
 
@@ -439,7 +435,7 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset,
 				Datasets: make(map[string][]*zfs.Dataset),
 				Users:    make(map[string]*State),
 			}
-			s.Datasets[d.Name] = []*zfs.Dataset{&d}
+			s.Datasets[d.Name] = []*zfs.Dataset{d}
 			m.History[d.Name] = s
 			// We don't want lastused to be 1970 in our golden files
 			if d.LastUsed != 0 {
@@ -451,10 +447,10 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset,
 
 		// Clones or snapshot children
 		for _, h := range m.History {
-			if ok, err := isChild(h.ID, d); err != nil {
+			if ok, err := isChild(h.ID, *d); err != nil {
 				log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 			} else if ok {
-				h.Datasets[h.ID] = append(h.Datasets[h.ID], &d)
+				h.Datasets[h.ID] = append(h.Datasets[h.ID], d)
 				return true
 			}
 		}

@@ -123,7 +123,7 @@ func (z *Zfs) Refresh(ctx context.Context) error {
 }
 
 // Datasets returns all datasets on the system, where parent will always be before children.
-func (z Zfs) Datasets() []Dataset {
+func (z Zfs) Datasets() []*Dataset {
 	ds := make(chan *Dataset)
 
 	var collectChildren func(d *Dataset)
@@ -140,9 +140,9 @@ func (z Zfs) Datasets() []Dataset {
 	}
 	go collectChildren(z.root)
 
-	r := make([]Dataset, 0, len(z.allDatasets))
+	r := make([]*Dataset, 0, len(z.allDatasets))
 	for d := range ds {
-		r = append(r, *d)
+		r = append(r, d)
 	}
 	return r
 }
