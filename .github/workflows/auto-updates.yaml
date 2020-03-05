@@ -2,7 +2,7 @@ name: Update master branch automatically
 on:
   push:
     branches:
-      - master
+      - fix_removal
     paths-ignore:
       - po/*
       - README.md
@@ -13,10 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout code
-      # We don't check a specific commit, but always want to be on latest
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
-          ref: master
+          ref: fix_removal
       # Install go
       - uses: actions/setup-go@v1
         with:
@@ -35,31 +34,20 @@ jobs:
             hasModif="true"
           fi
           echo "::set-output name=modified::${hasModif}"
-      - name: Delete previous branch if present
-        if: steps.checkpo.outputs.modified == 'true'
-        run: |
-          git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY
-          git push -d origin auto-update-po || true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Pull Request
         if: steps.checkpo.outputs.modified == 'true'
-        uses: peter-evans/create-pull-request@v1
+        uses: peter-evans/create-pull-request@v2
         with:
           commit-message: Auto update po files
           title: Auto update po files
           labels: po, automated pr
           body: "[Auto-generated pull request](https://github.com/ubuntu/zsys/actions?query=workflow%3A%22Update+master+branch+automatically%22) by GitHub Action"
           branch: auto-update-po
-          branch-suffix: none
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push and delete branch
+      - name: Push branch
         if: steps.checkpo.outputs.modified == 'true'
         run: |
-          git push origin auto-update-po:master
-          git push -d origin auto-update-po
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git push origin auto-update-po:fix_removal
 
   update-readme:
     name: Update readme file
@@ -68,11 +56,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout code
-      # We don't check a specific commit, but always want to be on latest
-      # update-po also could have pushed a new version.
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
         with:
-          ref: master
+          ref: fix_removal
       # Install go
       - uses: actions/setup-go@v1
         with:
@@ -95,28 +81,17 @@ jobs:
             hasModif="true"
           fi
           echo "::set-output name=modified::${hasModif}"
-      - name: Delete previous branch if present
-        if: steps.checkreadme.outputs.modified == 'true'
-        run: |
-          git remote set-url origin https://x-access-token:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY
-          git push -d origin auto-update-readme || true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create Pull Request
         if: steps.checkreadme.outputs.modified == 'true'
-        uses: peter-evans/create-pull-request@v1
+        uses: peter-evans/create-pull-request@v2
         with:
           commit-message: Auto update readme files
           title: Auto update readme files
           labels: readme, automated pr
           body: "[Auto-generated pull request](https://github.com/ubuntu/zsys/actions?query=workflow%3A%22Update+master+branch+automatically%22) by GitHub Action"
           branch: auto-update-readme
-          branch-suffix: none
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push and delete branch
+      - name: Push branch
         if: steps.checkreadme.outputs.modified == 'true'
         run: |
-          git push origin auto-update-readme:master
-          git push -d origin auto-update-readme
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git push origin auto-update-readme:fix_removal
