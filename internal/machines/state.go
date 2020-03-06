@@ -569,3 +569,61 @@ func (s *State) parentSystemState(ms *Machines) *State {
 	}
 	return nil
 }
+
+// IDToState returns a state object from an Id and an error if there are many
+// name can be:
+// - the full path of a state
+// - the suffix of the state (ubuntu_xxxx)
+// - the snapshot name of the state (xxxx -> @xxxx)
+// - the suffix after _ of the state (xxxx)
+// user limits the research on the given user state, otherwise we limit the search on system states.
+func (ms *Machines) IDToState(name, user string) (*State, error) {
+	var matchingStates []*State
+	for _, m := range ms.all {
+		if user != "" {
+			for _, us := range m.AllUsersStates[user] {
+				if idMatches(us.ID, name) {
+					matchingStates = append(matchingStates, us)
+				}
+			}
+			continue
+		}
+
+		// Active for machine
+		if idMatches(m.ID, name) {
+			matchingStates = append(matchingStates, &m.State)
+		}
+
+		// History
+		for _, h := range m.History {
+			if idMatches(h.ID, name) {
+				matchingStates = append(matchingStates, h)
+			}
+		}
+	}
+
+	if len(matchingStates) == 0 {
+		return nil, fmt.Errorf(i18n.G("no matching state for %s"), name)
+	}
+	if len(matchingStates) > 1 {
+		var errmsg string
+		for _, match := range matchingStates {
+			errmsg += fmt.Sprintf(i18n.G("  - %s (%s)\n"), match.ID, match.LastUsed.Format("2006-01-02 15:04:05"))
+		}
+		return nil, fmt.Errorf(i18n.G("multiple states are matching %s:\n%sPlease use full state path."), name, errmsg)
+	}
+
+	return matchingStates[0], nil
+}
+
+// idMatches returns true if the candidate matches the conditions for a given name.
+// - the full path of a state
+// - the suffix of the state (ubuntu_xxxx)
+// - the snapshot name of the state (xxxx -> @xxxx)
+// - the suffix after _ of the state (xxxx)
+func idMatches(candidate, name string) bool {
+	if candidate == name || filepath.Base(candidate) == name || strings.HasSuffix(candidate, "@"+name) || strings.HasSuffix(candidate, "_"+name) {
+		return true
+	}
+	return false
+}
