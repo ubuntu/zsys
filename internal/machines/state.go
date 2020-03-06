@@ -540,3 +540,32 @@ func prependDataset(ds []*zfs.Dataset, d *zfs.Dataset) []*zfs.Dataset {
 	ds[0] = d
 	return ds
 }
+
+// parentSystemState returns the parent state if exists
+func (s *State) parentSystemState(ms *Machines) *State {
+	// We gave a system state: no parent
+	if len(s.Users) != 0 {
+		return nil
+	}
+
+	for _, m := range ms.all {
+		if m.State.Users != nil {
+			for _, us := range m.State.Users {
+				if s == us {
+					return &m.State
+				}
+			}
+		}
+
+		for _, h := range m.History {
+			if h.Users != nil {
+				for _, us := range h.Users {
+					if s == us {
+						return h
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
