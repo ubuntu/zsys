@@ -14,6 +14,93 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
+// getDependencies returns the list of states that a given one depends on (user or systems) and the external datasets
+// depending on us.
+// Note that a system states will list all its user states (as when requesting to delete a system state, we will delete
+// the associated system states), BUT listing a user state won’t list the associated system states.
+func (s *State) getDependencies(ms *Machines) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
+	// build cache and lookup for all states
+	var allStates []*State
+	for _, m := range ms.all {
+		allStates = append(allStates, &m.State)
+		for _, h := range m.History {
+			allStates = append(allStates, h)
+		}
+		for _, ustates := range m.AllUsersStates {
+			for _, us := range ustates {
+				allStates = append(allStates, us)
+			}
+		}
+	}
+	datasetToState := make(map[*zfs.Dataset]*State)
+	for _, s := range allStates {
+		for _, ds := range s.Datasets {
+			for _, d := range ds {
+				datasetToState[d] = s
+			}
+		}
+	}
+
+	for _, ds := range s.Datasets {
+		// As we detects complete dependencies hierarchy, we only take the root dataset for each route
+		d := ds[0]
+
+		deps := d.Dependencies(ms.z)
+
+		// Look for corresponding state (user or system)
+		for _, dataset := range deps {
+			datasetState := datasetToState[dataset]
+			if datasetState != nil {
+				// We skip current state always as the last one. Discard it if brought by children datasets.
+				if datasetState == s {
+					continue
+				}
+				// If this is a system state, get related user states deps
+				for _, us := range datasetState.Users {
+					uDeps, udDeps := us.getDependencies(ms)
+					stateDeps = append(stateDeps, uDeps...)
+					datasetDeps = append(datasetDeps, udDeps...)
+				}
+				stateDeps = append(stateDeps, datasetState)
+			} else {
+				datasetDeps = append(datasetDeps, dataset)
+			}
+		}
+	}
+
+	// If current state is a system one, add its user states and deps.
+	// (If we added it above before if datasetState == s {continue}, those would be only added if current state had children datasets)
+	for _, us := range s.Users {
+		uDeps, udDeps := us.getDependencies(ms)
+		stateDeps = append(stateDeps, uDeps...)
+		datasetDeps = append(datasetDeps, udDeps...)
+	}
+	// Add current state as the last dep
+	stateDeps = append(stateDeps, s)
+
+	// Deduplicate state dependencies, keeping first which will has its inverse states just after (as depending on getDependecies order)
+	keys := make(map[string]bool)
+	var uniqStateDeps []*State
+	for _, entry := range stateDeps {
+		if _, value := keys[entry.ID]; !value {
+			keys[entry.ID] = true
+			uniqStateDeps = append(uniqStateDeps, entry)
+		}
+	}
+
+	// Deduplicate datasets dependencies, keeping first which will has its inverse deps just after (as depending on getDependecies order)
+	keys = make(map[string]bool)
+	var uniqDatasetDeps []*zfs.Dataset
+	for _, entry := range datasetDeps {
+		if _, value := keys[entry.Name]; !value {
+			keys[entry.Name] = true
+			uniqDatasetDeps = append(uniqDatasetDeps, entry)
+		}
+	}
+
+	return uniqStateDeps, uniqDatasetDeps
+}
+
 // GetStateAndDependencies fetches a given state and all its deps
 // s can be:
 //   * dataset path (fully determinated)
