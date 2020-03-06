@@ -1369,6 +1369,72 @@ func TestRemoveUserStates(t *testing.T) {
 	}
 }
 
+func TestIDToState(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		name string
+		user string
+
+		wantState string
+		wantErr   bool
+	}{
+		"Match full system path ID": {name: "rpool/ROOT/ubuntu_1234", wantState: "rpool/ROOT/ubuntu_1234"},
+		"Match full user path ID":   {name: "rpool/USERDATA/user1_abcd", user: "user1", wantState: "rpool/USERDATA/user1_abcd"},
+
+		"Match suffix system ID":       {name: "5678", wantState: "rpool/ROOT/ubuntu_5678"},
+		"Match dataset path system ID": {name: "ubuntu_5678", wantState: "rpool/ROOT/ubuntu_5678"},
+		"Match unique system snapshot": {name: "snap1", wantState: "rpool/ROOT/ubuntu_1234@snap1"},
+
+		"Limit search on duplicated snapshot name to a single user": {name: "snap1", user: "user1", wantState: "rpool/USERDATA/user1_abcd@snap1"},
+
+		// Multiple matches
+		"Multiple states match system suffix ID": {name: "1234", wantErr: true},
+		"Multiple states match user suffix ID":   {name: "abcd", user: "user1", wantErr: true},
+
+		// No match
+		"Empty name":         {name: "", wantErr: true},
+		"No match at all":    {name: "/doesntexists", wantErr: true},
+		"User doesn’t exist": {name: "foo", user: "userfoo", wantErr: true},
+		"No match on full path ID search without user provided":    {name: "rpool/USERDATA/user1_abcd", wantErr: true},
+		"No match on full path ID search with wrong user provided": {name: "rpool/USERDATA/user1_abcd", user: "userfoo", wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "state_idtostate.yaml"), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			_, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			if err != nil {
+				t.Fatalf("couldn’t create original zfs datasets state")
+			}
+
+			ms, err := machines.New(context.Background(), "", machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			got, err := ms.IDToState(tc.name, tc.user)
+
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("Got an error when expecting none: %v", err)
+				}
+				return
+			} else if tc.wantErr {
+				t.Fatalf("Expected an error but got none")
+			}
+
+			assert.Equal(t, tc.wantState, got.ID, "didn't get expected state")
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()
