@@ -241,6 +241,85 @@ func TestGetDependencies(t *testing.T) {
 	}
 }
 
+func TestParentSystemTest(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		stateName string
+
+		wantState string
+	}{
+		"User reports parent active system state":           {stateName: "rpool/USERDATA/user1_abcd", wantState: "rpool/ROOT/ubuntu_1234"},
+		"User reports parent history clone system state":    {stateName: "rpool/USERDATA/user1_efgh", wantState: "rpool/ROOT/ubuntu_5678"},
+		"User reports parent history snapshot system state": {stateName: "rpool/USERDATA/user1_abcd@snap1", wantState: "rpool/ROOT/ubuntu_1234@snap1"},
+
+		"User reports no parent for user snapshot": {stateName: "rpool/USERDATA/user1_abcd@snapuser1"},
+
+		"Report nothing on system active system state":  {stateName: "rpool/ROOT/ubuntu_1234"},
+		"Report nothing on system history system state": {stateName: "rpool/ROOT/ubuntu_5678"},
+	}
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "state_snapshot_with_userdata_n_clones.yaml"), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			_, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			if err != nil {
+				t.Fatalf("couldn’t create original zfs datasets state")
+			}
+
+			ms, err := New(context.Background(), "", WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			var s *State
+		foundState:
+			for _, m := range ms.all {
+				if tc.stateName == m.ID {
+					s = &m.State
+					break
+				}
+				for _, h := range m.History {
+					if tc.stateName == h.ID {
+						s = h
+						break foundState
+					}
+				}
+				for _, aus := range m.AllUsersStates {
+					for _, us := range aus {
+						if tc.stateName == us.ID {
+							s = us
+							break foundState
+						}
+					}
+				}
+			}
+
+			if s == nil {
+				t.Fatalf("No state found matching %s", tc.stateName)
+			}
+
+			got := s.parentSystemState(&ms)
+
+			if got == nil {
+				if tc.wantState != "" {
+					t.Fatalf("Got a nil state when expecting %s", tc.wantState)
+				}
+				return
+			} else if tc.wantState == "" {
+				t.Fatalf("Expected nil state but got %s", got.ID)
+			}
+
+			assert.Equal(t, tc.wantState, got.ID, "didn't get expected state")
+		})
+	}
+}
+
 // assertDatasetsOrigin compares got maps of origin to reference files, based on test name.
 func assertDatasetsOrigin(t *testing.T, got map[string]*string) {
 	want := make(map[string]*string)
