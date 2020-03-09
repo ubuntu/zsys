@@ -187,33 +187,7 @@ func TestGetDependencies(t *testing.T) {
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-
-			var s *State
-		foundState:
-			for _, m := range ms.all {
-				if tc.stateName == m.ID {
-					s = &m.State
-					break
-				}
-				for _, h := range m.History {
-					if tc.stateName == h.ID {
-						s = h
-						break foundState
-					}
-				}
-				for _, aus := range m.AllUsersStates {
-					for _, us := range aus {
-						if tc.stateName == us.ID {
-							s = us
-							break foundState
-						}
-					}
-				}
-			}
-
-			if s == nil {
-				t.Fatalf("No state found matching %s", tc.stateName)
-			}
+			s := ms.getStateFromName(t, tc.stateName)
 
 			stateDeps, datasetDeps := s.getDependencies(&ms)
 
@@ -276,33 +250,7 @@ func TestParentSystemTest(t *testing.T) {
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-
-			var s *State
-		foundState:
-			for _, m := range ms.all {
-				if tc.stateName == m.ID {
-					s = &m.State
-					break
-				}
-				for _, h := range m.History {
-					if tc.stateName == h.ID {
-						s = h
-						break foundState
-					}
-				}
-				for _, aus := range m.AllUsersStates {
-					for _, us := range aus {
-						if tc.stateName == us.ID {
-							s = us
-							break foundState
-						}
-					}
-				}
-			}
-
-			if s == nil {
-				t.Fatalf("No state found matching %s", tc.stateName)
-			}
+			s := ms.getStateFromName(t, tc.stateName)
 
 			got := s.parentSystemState(&ms)
 
@@ -328,4 +276,36 @@ func assertDatasetsOrigin(t *testing.T, got map[string]*string) {
 	if diff := cmp.Diff(want, got, cmpopts.EquateEmpty()); diff != "" {
 		t.Errorf("Dataset origin mismatch (-want +got):\n%s", diff)
 	}
+}
+
+func (ms *Machines) getStateFromName(t *testing.T, name string) *State {
+	t.Helper()
+
+	var s *State
+foundState:
+	for _, m := range ms.all {
+		if name == m.ID {
+			s = &m.State
+			break
+		}
+		for _, h := range m.History {
+			if name == h.ID {
+				s = h
+				break foundState
+			}
+		}
+		for _, aus := range m.AllUsersStates {
+			for _, us := range aus {
+				if name == us.ID {
+					s = us
+					break foundState
+				}
+			}
+		}
+	}
+
+	if s == nil {
+		t.Fatalf("No state found matching %s", name)
+	}
+	return s
 }
