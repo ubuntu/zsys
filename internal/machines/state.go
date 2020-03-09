@@ -458,41 +458,27 @@ nextState:
 	return nil
 }
 
-// Remove removes a given state by deleting all of its system datasets, untagging user datasets before
-// checking if they can be safely removed. It shouldn’t have any dependency.
-func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
+// Remove removes a given state by deleting all of its system datasets.
+// if linkedStateID is empty, the datasets will be always destroyed, otherwise user datasets will
+// be untagged user datasets before checking if they can be safely removed.
+// This state shouldn’t have any dependency as there is no additional check
+func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string) error {
 	nt := z.NewNoTransaction(ctx)
 
-	for route := range s.Datasets {
-		if err := nt.Destroy(route); err != nil {
-			return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
-		}
-	}
-
-	// If we have a snapshot system states, we can safely remove all user states (/!\ will fail if there is a clone)
-	if s.isSnapshot() {
-		for _, us := range s.Users {
-			if err := nt.Destroy(us.ID); err != nil {
-				log.Errorf(ctx, i18n.G("Couldn't destroy %s: %v"), us.ID, err)
-			}
-		}
-		return nil
-	}
-
-	// Note: if we remove a user States which is a clone, all snapshots (user snapshots) will be removed as well.
+	// Note: if we remove a user States which is a file system dataset, all snapshots (user snapshots) will be removed as well.
 	// This is OK for now as:
-	// - we already asked for direct user request removal (as a dependency of this user state)
+	// - we already asked for direct user request removal on snapshots before (as a dependency of this user state)
 	// - the gc rules are aligned between system and users (and so, if we decide to remove a clone,
 	//   it means that we already have enough states)
 
-	//Untag all datasets associated with this state for non snapshots
-	t, cancel := z.NewTransaction(ctx)
-	defer t.Done()
-	for _, us := range s.Users {
-		for _, d := range us.getDatasets() {
+	// Untag all datasets associated with this state for non snapshots
+	if !s.isSnapshot() && linkedStateID != "" {
+		t, cancel := z.NewTransaction(ctx)
+		defer t.Done()
+		for _, d := range s.getDatasets() {
 			var newTags []string
 			for _, n := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
-				if n != s.ID {
+				if n != linkedStateID {
 					newTags = append(newTags, n)
 					break
 				}
@@ -500,9 +486,30 @@ func (s *State) Remove(ctx context.Context, z *zfs.Zfs) error {
 
 			newTag := strings.Join(newTags, bootfsdatasetsSeparator)
 
+			if newTag == d.BootfsDatasets {
+				continue
+			}
+
 			if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 				cancel()
-				return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, us.ID, d.Name, err)
+				return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, linkedStateID, d.Name, err)
+			}
+		}
+	}
+
+	// If we have a system state, request user cleaning (untag and maybe deletion)
+	for _, us := range s.Users {
+		if err := us.remove(ctx, z, s.ID); err != nil {
+			return err
+		}
+	}
+
+	// Remove directly the datasets if the main route dataset
+	for route, ds := range s.Datasets {
+		if s.isSnapshot() || linkedStateID == "" || ds[0].BootfsDatasets == "" {
+			log.Debugf(ctx, "Destroying %s\n", route)
+			if err := nt.Destroy(route); err != nil {
+				return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
 			}
 		}
 	}
