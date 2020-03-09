@@ -53,30 +53,49 @@ pools:
       mountpoint: /home/user1
       bootfs_datasets: rpool/ROOT/ubuntu_1234
       last_used: 2018-12-10T12:20:44+00:00
+      snapshots:
+        - name: snap1
+          mountpoint: /root:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+        - name: snap2
+          mountpoint: /root:local
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
+        - name: snap3
+          mountpoint: /root:local
+          canmount: on:local
+          creation_time: 2019-08-24T17:11:06+00:00
     - name: USERDATA/root_bcde
       mountpoint: /root
       last_used: 2018-08-03T21:55:33+00:00
       bootfs_datasets: rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_5678
       snapshots:
         - name: snap1
-          mountpoint: /home/user1:local
+          mountpoint: /root:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
         - name: snaproot1
-          zsys_bootfs: yes:local
-          mountpoint: /home/user1:local
+          mountpoint: /root:local
           canmount: on:local
           creation_time: 2019-03-18T02:45:55+00:00
         - name: snap2
-          zsys_bootfs: yes:local
-          mountpoint: /home/user1:local
+          mountpoint: /root:local
           canmount: on:local
           creation_time: 2019-04-18T02:45:55+00:00
         - name: snap3
-          zsys_bootfs: yes:local
-          mountpoint: /home/user1:local
+          mountpoint: /root:local
           canmount: on:local
           creation_time: 2019-08-24T17:11:06+00:00
+    - name: USERDATA/root_bcde/subfor5678
+      mountpoint: /root/subfor5678
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_5678
+      snapshots:
+        - name: snap2
+          mountpoint: /root/subfor5678:inherited
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
     - name: USERDATA/user1_efgh
       mountpoint: /home/user1
       bootfs_datasets: rpool/ROOT/ubuntu_5678
@@ -87,6 +106,43 @@ pools:
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user2_2222
+      mountpoint: /home/user2
+      bootfs_datasets: rpool/ROOT/ubuntu_5678
+      last_used: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user3_3333
+      mountpoint: /home/user3
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      last_used: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user4_for_state_clone
+      mountpoint: /home/user4
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      last_used: 2018-12-10T12:20:44+00:00
+      snapshots:
+        - name: snap_state_clone
+          mountpoint: /home/user4:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user4_clone
+      mountpoint: /home/user4
+      origin: rpool/USERDATA/user4_for_state_clone@snap_state_clone
+    - name: USERDATA/user5_for_manual_clone
+      mountpoint: /home/user5
+      bootfs_datasets: rpool/ROOT/ubuntu_5678
+      last_used: 2018-12-10T12:20:44+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      snapshots:
+        - name: snapuser5
+          mountpoint: /home/user5:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: ROOT/ubuntu_6789
+      zsys_bootfs: yes
+      last_used: 2020-05-07T22:01:28+00:00
+      mountpoint: /
+    - name: clone
+      mountpoint: /clone
+      origin: rpool/USERDATA/user5_for_manual_clone@snapuser5
   - name: bpool
     datasets:
     - name: BOOT
