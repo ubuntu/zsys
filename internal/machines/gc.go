@@ -391,7 +391,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		log.Debug(ctx, i18n.G("Users states have changes, rerun user GC"))
 	}
 
-	// 3. Clean up user datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
+	// 3. Clean up user unmanaged datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
 	// (they, and all snapshots on them will end up in unmanaged datasets)
 	log.Debug(ctx, i18n.G("Unassociated user datasets GC"))
 	var alreadyDestroyedRoot []string
