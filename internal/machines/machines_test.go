@@ -2,6 +2,7 @@ package machines_test
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -1380,27 +1381,28 @@ func TestRemoveState(t *testing.T) {
 
 		destroyErr bool
 
-		isNoOp  bool
-		wantErr bool
+		isNoOp     bool
+		wantErr    bool
+		wantDepErr bool
 	}{
 		"Remove system state, one dataset": {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234"},
 
 		// FIXME: miss bpool and bpool/BOOT from golden file
 		"Remove system state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", state: "rpool/ROOT/ubuntu_1234"},
 		"Remove one system snapshot only":                                    {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_1234@snap3"},
-		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true},
+		"Removing system state try to delete its snapshots":                  {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true, wantDepErr: true},
 
-		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove system state, with system and users snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
-		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantDepErr: true, wantErr: true, isNoOp: true},
 		"Remove system state, with datasets, forced":                              {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
 
 		"Remove user state, one dataset":                       {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1"},
 		"Remove user state, one dataset, no user":              {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", wantErr: true, isNoOp: true},
 		"Remove user state, one dataset, wrong user":           {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "root", wantErr: true, isNoOp: true},
-		"Remove user state, with snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", wantErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove user state, with snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", force: true},
-		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", wantErr: true, isNoOp: true},
+		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true},
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
@@ -1433,6 +1435,13 @@ func TestRemoveState(t *testing.T) {
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
+				}
+				var e *machines.ErrStateHasDependencies
+
+				if tc.wantDepErr {
+					assert.True(t, errors.As(err, &e), "expected ErrStateHasDependencies error type")
+				} else {
+					assert.False(t, errors.As(err, &e), "don't expect ErrStateHasDependencies error type")
 				}
 				return
 			}
