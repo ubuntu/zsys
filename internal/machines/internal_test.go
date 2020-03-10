@@ -307,8 +307,9 @@ pools:
 func TestRemoveInternal(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		stateName     string
-		linkedStateID string
+		stateName               string
+		linkedStateID           string
+		dontRemoveUsersChildren bool
 
 		setPropertyErr bool
 
@@ -366,7 +367,7 @@ func TestRemoveInternal(t *testing.T) {
 
 			s := ms.getStateFromName(t, tc.stateName)
 
-			err = s.remove(context.Background(), ms.z, tc.linkedStateID)
+			err = s.remove(context.Background(), ms.z, tc.linkedStateID, tc.dontRemoveUsersChildren)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)

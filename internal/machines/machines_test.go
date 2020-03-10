@@ -1369,6 +1369,92 @@ func TestRemoveUserStates(t *testing.T) {
 	}
 }
 
+func TestRemoveState(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def            string
+		currentStateID string
+		state          string
+		user           string
+		force          bool
+
+		destroyErr bool
+
+		isNoOp  bool
+		wantErr bool
+	}{
+		"Remove system state, one dataset": {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234"},
+
+		// FIXME: miss bpool and bpool/BOOT from golden file
+		"Remove system state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", state: "rpool/ROOT/ubuntu_1234"},
+		"Remove one system snapshot only":                                    {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_1234@snap3"},
+		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true},
+
+		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Remove system state, with system and users snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
+		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Remove system state, with datasets, forced":                              {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
+
+		"Remove user state, one dataset":                       {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1"},
+		"Remove user state, one dataset, no user":              {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", wantErr: true, isNoOp: true},
+		"Remove user state, one dataset, wrong user":           {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "root", wantErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", wantErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", force: true},
+		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", wantErr: true, isNoOp: true},
+		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true},
+
+		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
+		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			ms, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			initMachines := ms.CopyForTests(t)
+			lzfs := libzfs.(*mock.LibZFS)
+			lzfs.ErrOnDestroy(tc.destroyErr)
+
+			err = ms.RemoveState(context.Background(), tc.state, tc.user, tc.force)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			machinesAfterRescan, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
 func TestIDToState(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
