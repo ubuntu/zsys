@@ -16,6 +16,8 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/streamlogger"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/grpc/status"
 )
 
 var (
@@ -172,89 +174,98 @@ func removeState(args []string) (err error) {
 	}
 	defer client.Close()
 
-	additionalRemovals, err := removeStateGRPC(client, force, system, userName, stateName)
-	if err != nil {
-		return err
+	for {
+		err = removeStateGRPC(client, force, system, userName, stateName)
+		if err == nil {
+			break
+		}
+
+		var recoverableMsg string
+		s := status.Convert(err)
+		for _, d := range s.Details() {
+			switch info := d.(type) {
+			case *errdetails.ErrorInfo:
+				// Does the request needs confirmation?
+				if info.Type == config.UserConfirmationNeeded {
+					recoverableMsg = info.Metadata["msg"]
+				}
+			default:
+			}
+		}
+		if recoverableMsg == "" {
+			return err
+		}
+
+		fmt.Printf(i18n.G("%s\nWould you like to proceed [y/N]? "), recoverableMsg)
+		reader := bufio.NewReader(os.Stdin)
+		answer, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+		answer = strings.TrimSpace(strings.ToLower(answer))
+
+		if !(answer == i18n.G("y") || answer == i18n.G("yes")) {
+			break
+		}
+		force = true
 	}
 
-	// if no additional questions: we are successfully done
-	if additionalRemovals == "" {
-		return nil
-	}
-
-	fmt.Printf(i18n.G("%s\nWould you like to proceed [y/N]? "), additionalRemovals)
-	reader := bufio.NewReader(os.Stdin)
-	answer, err := reader.ReadString('\n')
-	if err != nil {
-		return err
-	}
-	answer = strings.ToLower(answer)
-
-	if answer != i18n.G("y") || answer != i18n.G("yes") {
-		return nil
-	}
-
-	_, err = removeStateGRPC(client, true, system, userName, stateName)
-
-	return err
+	return nil
 }
 
-func removeStateGRPC(client *zsys.ZsysLogClient, force, system bool, userName, stateName string) (string, error) {
-	var additionalRemovals string
-
+func removeStateGRPC(client *zsys.ZsysLogClient, force, system bool, userName, stateName string) error {
 	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
+	var err error
 	if system {
-		stream, err := client.RemoveSystemState(ctx, &zsys.RemoveSystemStateRequest{
+		var stream zsys.Zsys_RemoveSystemStateClient
+		stream, err = client.RemoveSystemState(ctx, &zsys.RemoveSystemStateRequest{
 			StateName: stateName,
 			Force:     force,
 		})
 
 		if err = checkConn(err); err != nil {
-			return "", err
+			return err
 		}
 
 		for {
-			r, err := stream.Recv()
+			_, err = stream.Recv()
 			if err == streamlogger.ErrLogMsg {
 				continue
 			}
-			if err == io.EOF {
+			if err != nil {
+				if err == io.EOF {
+					err = nil
+				}
 				break
 			}
-			if err != nil {
-				return "", err
-			}
-
-			additionalRemovals = r.GetAdditionalRemovals()
 		}
 	} else {
-		stream, err := client.RemoveUserState(ctx, &zsys.RemoveUserStateRequest{
+		var stream zsys.Zsys_RemoveUserStateClient
+		stream, err = client.RemoveUserState(ctx, &zsys.RemoveUserStateRequest{
 			StateName: stateName,
 			UserName:  userName,
 			Force:     force,
 		})
 
 		if err = checkConn(err); err != nil {
-			return "", err
+			return err
 		}
 
 		for {
-			r, err := stream.Recv()
+			_, err = stream.Recv()
 			if err == streamlogger.ErrLogMsg {
 				continue
 			}
-			if err == io.EOF {
+			if err != nil {
+				if err == io.EOF {
+					err = nil
+				}
 				break
 			}
-			if err != nil {
-				return "", err
-			}
-
-			additionalRemovals = r.GetAdditionalRemovals()
 		}
 	}
 
-	return additionalRemovals, nil
+	return err
 }
