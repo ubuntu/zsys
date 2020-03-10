@@ -12,8 +12,8 @@ service Zsys {
 
   rpc SaveSystemState(SaveSystemStateRequest) returns (stream CreateSaveStateResponse);
   rpc SaveUserState(SaveUserStateRequest) returns (stream CreateSaveStateResponse);
-  rpc RemoveSystemState(RemoveSystemStateRequest) returns (stream RemoveStateResponse);
-  rpc RemoveUserState(RemoveUserStateRequest) returns (stream RemoveStateResponse);
+  rpc RemoveSystemState(RemoveSystemStateRequest) returns (stream LogResponse);
+  rpc RemoveUserState(RemoveUserStateRequest) returns (stream LogResponse);
 
   rpc DumpStates(Empty) returns (stream DumpStatesResponse);
   rpc DaemonStop(Empty) returns (stream LogResponse);
@@ -92,13 +92,6 @@ message RemoveUserStateRequest {
   string userName = 1;
   string stateName = 2;
   bool force = 3;
-}
-
-message RemoveStateResponse {
-  oneof reply {
-    string log = 1;
-    string additionalRemovals = 2;
-  }
 }
 
 message DumpStatesResponse {
