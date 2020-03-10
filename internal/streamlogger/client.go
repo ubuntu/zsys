@@ -13,6 +13,7 @@ import (
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 )
@@ -93,8 +94,10 @@ func (w *clientRequestLogStream) RecvMsg(m interface{}) (errFn error) {
 		return err
 	}
 	if err != nil {
-		st, _ := status.FromError(err)
-		return errors.New(st.Message())
+		if st := status.Convert(err); st.Code() == codes.Unknown {
+			return errors.New(st.Message())
+		}
+		return err
 	}
 
 	r, isLogMsg := m.(getLogger)
