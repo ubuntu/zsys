@@ -2,6 +2,7 @@ package daemon
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/ubuntu/zsys"
@@ -9,6 +10,10 @@ import (
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
 	"github.com/ubuntu/zsys/internal/log"
+	"github.com/ubuntu/zsys/internal/machines"
+	"google.golang.org/genproto/googleapis/rpc/errdetails"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 // SaveSystemState creates a snapshot of a system and all users datasets.
@@ -99,33 +104,24 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 
 	log.Infof(stream.Context(), i18n.G("Requesting removing system state %q"), stateName)
 
-	sysStates, additionalUserStates, err := s.Machines.GetStateAndDependencies(stateName)
+	err = s.Machines.RemoveState(stream.Context(), stateName, "", req.GetForce())
 	if err != nil {
-		return err
-	}
+		var e *machines.ErrStateHasDependencies
+		if errors.As(err, &e) {
+			st := status.New(codes.FailedPrecondition, config.UserConfirmationNeeded)
+			stdetails, err := st.WithDetails(&errdetails.ErrorInfo{
+				Type:   config.UserConfirmationNeeded,
+				Domain: "",
+				Metadata: map[string]string{
+					"msg": e.Error(),
+				},
+			})
+			if err != nil {
+				return st.Err()
+			}
 
-	if !req.GetForce() {
-		if len(sysStates) > 1 || len(additionalUserStates) > 1 {
-			var statesToRemoveMsg string
-			if len(sysStates) > 1 {
-				statesToRemoveMsg = fmt.Sprintf(i18n.G("Removing %s will also remove the following system states:\n"), stateName)
-				for _, s := range sysStates[1:] {
-					statesToRemoveMsg += fmt.Sprintf(i18n.G(" - %s (%s)\n"), s.ID, s.LastUsed)
-				}
-			}
-			if len(additionalUserStates) > 0 {
-				statesToRemoveMsg += fmt.Sprintf(i18n.G("Removing %s will also remove the following user states:\n"), stateName)
-				for _, s := range additionalUserStates {
-					statesToRemoveMsg += fmt.Sprintf(i18n.G(" - %s (%s)\n"), s.ID, s.LastUsed)
-				}
-			}
-			stream.Send(&zsys.RemoveStateResponse{Reply: &zsys.RemoveStateResponse_AdditionalRemovals{
-				AdditionalRemovals: statesToRemoveMsg}})
-			return nil
+			return stdetails.Err()
 		}
-	}
-
-	if err := s.Machines.RemoveSystemStates(stream.Context(), sysStates); err != nil {
 		return fmt.Errorf(i18n.G("couldn't remove system state %s: ")+config.ErrorFormat, stateName, err)
 	}
 
@@ -146,27 +142,31 @@ func (s *Server) RemoveUserState(req *zsys.RemoveUserStateRequest, stream zsys.Z
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
+	if stateName == "" {
+		return fmt.Errorf(i18n.G("State name is required"))
+	}
+
 	log.Infof(stream.Context(), i18n.G("Requesting removing user state %q for user %s"), stateName, userName)
 
-	userStates, err := s.Machines.GetUserStateAndDependencies(userName, stateName, false)
+	err := s.Machines.RemoveState(stream.Context(), stateName, "", req.GetForce())
 	if err != nil {
-		return err
-	}
-
-	if !req.GetForce() {
-		if len(userStates) > 1 {
-			statesToRemoveMsg := fmt.Sprintf(i18n.G("Removing %s will also remove the following user states:\n"), stateName)
-			for _, s := range userStates[1:] {
-				statesToRemoveMsg += fmt.Sprintf(i18n.G(" - %s (%s)\n"), s.ID, s.LastUsed)
+		var e *machines.ErrStateHasDependencies
+		if errors.As(err, &e) {
+			st := status.New(codes.FailedPrecondition, config.UserConfirmationNeeded)
+			stdetails, err := st.WithDetails(&errdetails.ErrorInfo{
+				Type:   config.UserConfirmationNeeded,
+				Domain: "",
+				Metadata: map[string]string{
+					"msg": e.Error(),
+				},
+			})
+			if err != nil {
+				return st.Err()
 			}
-			stream.Send(&zsys.RemoveStateResponse{Reply: &zsys.RemoveStateResponse_AdditionalRemovals{
-				AdditionalRemovals: statesToRemoveMsg}})
-			return nil
-		}
-	}
 
-	if err := s.Machines.RemoveUserStates(stream.Context(), userStates, ""); err != nil {
-		return fmt.Errorf(i18n.G("couldn't remove state %s for user %s: ")+config.ErrorFormat, stateName, userName, err)
+			return stdetails.Err()
+		}
+		return fmt.Errorf(i18n.G("couldn't remove user state %s: ")+config.ErrorFormat, stateName, err)
 	}
 
 	return nil

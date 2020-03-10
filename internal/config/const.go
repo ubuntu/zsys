@@ -19,6 +19,9 @@ const (
 
 	// DefaultPath is the default configuration path
 	DefaultPath = "/etc/zsys.conf"
+
+	// UserConfirmationNeeded is a dedicated type for GRPC error which signal that we need more info from user
+	UserConfirmationNeeded = "UserConfirmationNeeded"
 )
 
 var (
