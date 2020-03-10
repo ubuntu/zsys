@@ -14,6 +14,15 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
+// ErrStateHasDependencies is returned when a state operation cannot be performed because a state has dependencies
+type ErrStateHasDependencies struct {
+	s string
+}
+
+func (e *ErrStateHasDependencies) Error() string {
+	return e.s
+}
+
 // getDependencies returns the list of states that a given one depends on (user or systems) and the external datasets
 // depending on us.
 // Note that a system states will list all its user states (as when requesting to delete a system state, we will delete
@@ -491,8 +500,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bo
 			}
 		}
 		if errmsg != "" {
-			// TODO: error type for recognizing this error
-			return errors.New(errmsg)
+			return &ErrStateHasDependencies{s: errmsg}
 		}
 	}
 
