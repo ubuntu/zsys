@@ -458,11 +458,68 @@ nextState:
 	return nil
 }
 
+// RemoveState removes a system or user state with name as Id of the state and an optional user.
+func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bool) error {
+	s, err := ms.IDToState(name, user)
+	if err != nil {
+		return fmt.Errorf(i18n.G("Couldn't find state: %v"), err)
+	}
+
+	if ms.current != nil && s == &ms.current.State {
+		return errors.New(i18n.G("Removing current system state isn't allowed"))
+	}
+
+	states, datasets := s.getDependencies(ms)
+
+	if !force {
+		var errmsg string
+		// we always added us as a system state
+		if len(states) > len(s.Users)+1 {
+			errmsg += fmt.Sprintf(i18n.G("%s has a dependency linked to some states:\n"), s.ID)
+			for i := len(states) - 2; i >= 0; i-- {
+				lu := i18n.G("No timestamp")
+				if states[i].LastUsed != nil {
+					lu = states[i].LastUsed.Format("2006-01-02 15:04:05")
+				}
+				errmsg += fmt.Sprintf(i18n.G("  - %s (%s)\n"), states[i].ID, lu)
+			}
+		}
+		if len(datasets) > 0 {
+			errmsg += fmt.Sprintf(i18n.G("%s has a dependency on some datasets:\n"), s.ID)
+			for i := len(datasets) - 1; i >= 0; i-- {
+				errmsg += fmt.Sprintf(i18n.G("  - %s\n"), datasets[i].Name)
+			}
+		}
+		if errmsg != "" {
+			// TODO: error type for recognizing this error
+			return errors.New(errmsg)
+		}
+	}
+
+	// Remove datasets
+	nt := ms.z.NewNoTransaction(ctx)
+	for _, d := range datasets {
+		if err := nt.Destroy(d.Name); err != nil {
+			return fmt.Errorf(i18n.G("Couldn't remove dataset %s: %v"), d.Name, err)
+		}
+	}
+
+	// Remove only listed states in dependencies. Don’t go on children as they should be listed before
+	for _, state := range states {
+		if err := state.remove(ctx, ms.z, "", true); err != nil {
+			return fmt.Errorf(i18n.G("Couldn't remove state %s: %v"), state.ID, err)
+		}
+	}
+
+	ms.refresh(ctx)
+	return nil
+}
+
 // Remove removes a given state by deleting all of its system datasets.
 // if linkedStateID is empty, the datasets will be always destroyed, otherwise user datasets will
 // be untagged user datasets before checking if they can be safely removed.
 // This state shouldn’t have any dependency as there is no additional check
-func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string) error {
+func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string, dontRemoveUsersChildren bool) error {
 	nt := z.NewNoTransaction(ctx)
 
 	// Note: if we remove a user States which is a file system dataset, all snapshots (user snapshots) will be removed as well.
@@ -498,9 +555,11 @@ func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string) er
 	}
 
 	// If we have a system state, request user cleaning (untag and maybe deletion)
-	for _, us := range s.Users {
-		if err := us.remove(ctx, z, s.ID); err != nil {
-			return err
+	if !dontRemoveUsersChildren {
+		for _, us := range s.Users {
+			if err := us.remove(ctx, z, s.ID, dontRemoveUsersChildren); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -585,6 +644,9 @@ func (s *State) parentSystemState(ms *Machines) *State {
 // - the suffix after _ of the state (xxxx)
 // user limits the research on the given user state, otherwise we limit the search on system states.
 func (ms *Machines) IDToState(name, user string) (*State, error) {
+	if name == "" {
+		return nil, errors.New(i18n.G("state id is mandatory"))
+	}
 	var matchingStates []*State
 	for _, m := range ms.all {
 		if user != "" {
