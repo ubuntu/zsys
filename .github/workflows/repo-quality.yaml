@@ -123,12 +123,14 @@ jobs:
       # Add dependencies
       - name: Upgrade to focal for matching libzfs
         run: |
+          set -x
           sudo apt update
-          sudo apt install -y eatmydata
+          sudo apt install -y eatmydata ubuntu-release-upgrader-core
           sudo ACCEPT_EULA=Y DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
-          sudo sed -i s/bionic/focal/g /etc/apt/sources.list
+          #sudo sed -i s/bionic/focal/g /etc/apt/sources.list
           sudo eatmydata apt update
-          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
+          sudo do-release-upgrade -d --allow-third-party -f DistUpgradeViewNonInteractive
+          # sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
       - name: Install dependencies
         run: |
           #apt update
