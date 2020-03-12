@@ -70,7 +70,9 @@ func (s *State) getDependencies(ms *Machines) (stateDeps []*State, datasetDeps [
 					stateDeps = append(stateDeps, uDeps...)
 					datasetDeps = append(datasetDeps, udDeps...)
 				}
-				stateDeps = append(stateDeps, datasetState)
+				cDeps, cdDeps := datasetState.getDependencies(ms)
+				stateDeps = append(stateDeps, cDeps...)
+				datasetDeps = append(datasetDeps, cdDeps...)
 			} else {
 				datasetDeps = append(datasetDeps, dataset)
 			}
