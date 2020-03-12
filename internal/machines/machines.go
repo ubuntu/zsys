@@ -543,6 +543,9 @@ func (s *State) attachRemainingDatasetsForHistory(boots []*zfs.Dataset) {
 			}
 		}
 		// For clones just match the base datasetname or its children.
+		if d.IsSnapshot {
+			continue
+		}
 
 		// Main boot base dataset (matching machine ID)
 		if strings.HasSuffix(d.Name, "/"+stateID) {
