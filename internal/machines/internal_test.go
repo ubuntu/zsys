@@ -3,6 +3,7 @@ package machines
 import (
 	"context"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -212,6 +213,14 @@ func TestGetDependencies(t *testing.T) {
 			} else {
 				assert.ElementsMatch(t, tc.wantDatasets, datasetNames, "didn't get matching dep list content")
 			}
+
+			// rule 2: ensure that all children (snapshots or filesystem datasets) appears before its parent
+			assertChildrenStatesBeforeParents(t, stateDeps)
+			assertChildrenBeforeParents(t, datasetDeps)
+
+			// rule 3: ensure that a clone comes before its origin
+			assertCloneStatesComesBeforeItsOrigin(t, stateDeps)
+			assertCloneComesBeforeItsOrigin(t, datasetDeps)
 		})
 	}
 }
@@ -424,6 +433,100 @@ func assertMachinesEquals(t *testing.T, m1, m2 Machines) {
 		cmp.AllowUnexported(Machines{}),
 		cmpopts.IgnoreUnexported(zfs.Dataset{}, zfs.DatasetProp{})); diff != "" {
 		t.Errorf("Machines mismatch (-want +got):\n%s", diff)
+	}
+}
+
+// assertChildrenStatesBeforeParents ensure that all children (snapshots or filesystem states) appears before its parent
+func assertChildrenStatesBeforeParents(t *testing.T, deps []*State) {
+	t.Helper()
+
+	// iterate on child
+	for i, child := range deps {
+		parent, snapshot := splitSnapshotName(child.ID)
+		if snapshot == "" {
+			parent = child.ID[:strings.LastIndex(child.ID, "/")]
+		}
+		// search corresponding base from the start
+		for j, candidate := range deps {
+			if candidate.ID != parent {
+				continue
+			}
+			if i > j {
+				t.Errorf("Found child %s after its parent %s: %+v", child.ID, candidate.ID, deps)
+			}
+		}
+	}
+}
+
+// assertCloneStatesComesBeforeItsOrigin ensure that a clone comes before its origin
+func assertCloneStatesComesBeforeItsOrigin(t *testing.T, deps []*State) {
+	t.Helper()
+
+	for i, s := range deps {
+		for _, datasets := range s.Datasets {
+			clone := datasets[0]
+
+			if clone.Origin != "" {
+				continue
+			}
+
+			// search corresponding origin from the start
+			for j, s := range deps {
+				for _, datasets := range s.Datasets {
+					candidate := datasets[0]
+
+					if candidate.Name != clone.Origin {
+						continue
+					}
+					if i > j {
+						t.Errorf("Found clone %s after its origin snapshot %s: %+v", clone.Name, candidate.Name, deps)
+					}
+				}
+			}
+		}
+	}
+}
+
+// assertChildrenBeforeParents ensure that all children (snapshots or filesystem datasets) appears before its parent
+func assertChildrenBeforeParents(t *testing.T, deps []*zfs.Dataset) {
+	t.Helper()
+
+	// iterate on child
+	for i, child := range deps {
+		parent, snapshot := splitSnapshotName(child.Name)
+		if snapshot == "" {
+			parent = child.Name[:strings.LastIndex(child.Name, "/")]
+		}
+		// search corresponding base from the start
+		for j, candidate := range deps {
+			if candidate.Name != parent {
+				continue
+			}
+			if i > j {
+				t.Errorf("Found child %s after its parent %s: %+v", child.Name, candidate.Name, deps)
+			}
+		}
+	}
+}
+
+// assertCloneComesBeforeItsOrigin ensure that a clone comes before its origin
+func assertCloneComesBeforeItsOrigin(t *testing.T, deps []*zfs.Dataset) {
+	t.Helper()
+
+	for i, clone := range deps {
+		if clone.Origin != "" {
+			continue
+		}
+
+		// search corresponding origin from the start
+		for j, candidate := range deps {
+			if candidate.Name != clone.Origin {
+				continue
+			}
+			if i > j {
+				t.Errorf("Found clone %s after its origin snapshot %s: %+v", clone.Name, candidate.Name, deps)
+			}
+		}
 	}
 }
 
