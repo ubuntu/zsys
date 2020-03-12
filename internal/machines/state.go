@@ -50,6 +50,19 @@ func (s *State) getDependencies(ms *Machines) (stateDeps []*State, datasetDeps [
 		}
 	}
 
+	return s.getDependenciesWithCache(ms, allStates, datasetToState, make(map[*State]stateToDeps))
+}
+
+type stateToDeps struct {
+	stateDeps   []*State
+	datasetDeps []*zfs.Dataset
+}
+
+func (s *State) getDependenciesWithCache(ms *Machines, allStates []*State, datasetToState map[*zfs.Dataset]*State, depsResolvedCache map[*State]stateToDeps) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
+	if dep, ok := depsResolvedCache[s]; ok {
+		return dep.stateDeps, dep.datasetDeps
+	}
+
 	for _, ds := range s.Datasets {
 		// As we detects complete dependencies hierarchy, we only take the root dataset for each route
 		d := ds[0]
@@ -66,11 +79,13 @@ func (s *State) getDependencies(ms *Machines) (stateDeps []*State, datasetDeps [
 				}
 				// If this is a system state, get related user states deps
 				for _, us := range datasetState.Users {
-					uDeps, udDeps := us.getDependencies(ms)
+					uDeps, udDeps := us.getDependenciesWithCache(ms, allStates, datasetToState, depsResolvedCache)
+					depsResolvedCache[us] = stateToDeps{uDeps, udDeps}
 					stateDeps = append(stateDeps, uDeps...)
 					datasetDeps = append(datasetDeps, udDeps...)
 				}
-				cDeps, cdDeps := datasetState.getDependencies(ms)
+				cDeps, cdDeps := datasetState.getDependenciesWithCache(ms, allStates, datasetToState, depsResolvedCache)
+				depsResolvedCache[datasetState] = stateToDeps{cDeps, cdDeps}
 				stateDeps = append(stateDeps, cDeps...)
 				datasetDeps = append(datasetDeps, cdDeps...)
 			} else {
@@ -82,7 +97,8 @@ func (s *State) getDependencies(ms *Machines) (stateDeps []*State, datasetDeps [
 	// If current state is a system one, add its user states and deps.
 	// (If we added it above before if datasetState == s {continue}, those would be only added if current state had children datasets)
 	for _, us := range s.Users {
-		uDeps, udDeps := us.getDependencies(ms)
+		uDeps, udDeps := us.getDependenciesWithCache(ms, allStates, datasetToState, depsResolvedCache)
+		depsResolvedCache[us] = stateToDeps{uDeps, udDeps}
 		stateDeps = append(stateDeps, uDeps...)
 		datasetDeps = append(datasetDeps, udDeps...)
 	}
