@@ -12,7 +12,7 @@ const (
 	DefaultSocket = "/run/zsysd.sock"
 
 	// DefaultClientTimeout for client requests
-	DefaultClientTimeout = 30 * time.Second
+	DefaultClientTimeout = 120 * time.Second
 
 	// DefaultServerIdleTimeout is the default time without a request before the server exits
 	DefaultServerIdleTimeout = time.Minute
