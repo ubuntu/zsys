@@ -94,6 +94,9 @@ func TestNew(t *testing.T) {
 		"Snapshot has the same persistents":      {def: "m_snapshot_with_persistent.yaml"},
 		"Clone has the same persistents":         {def: "m_clone_with_persistent.yaml"},
 
+		// Bpool special cases
+		"Machine with bpool with children and snapshots": {def: "state_snapshot_with_userdata_n_system_clones.yaml"},
+
 		// Limit case with no machines
 		"No machine": {def: "d_no_machine.yaml"},
 		"No dataset": {def: "d_no_dataset.yaml"},
