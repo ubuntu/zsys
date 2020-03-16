@@ -179,9 +179,10 @@ zsysctl save [state id] [flags]
 ##### Options
 
 ```
-  -h, --help          help for save
-  -s, --system        Save complete system state (users and system)
-  -u, --user string   Save the state for a given user or current user if empty
+  -h, --help                 help for save
+      --no-update-bootmenu   Do not update bootmenu on system state save
+  -s, --system               Save complete system state (users and system)
+  -u, --user string          Save the state for a given user or current user if empty
 ```
 
 ##### Options inherited from parent commands
@@ -501,9 +502,10 @@ zsysctl state save [state id] [flags]
 ##### Options
 
 ```
-  -h, --help          help for save
-  -s, --system        Save complete system state (users and system)
-  -u, --user string   Save the state for a given user or current user if empty
+  -h, --help                 help for save
+      --no-update-bootmenu   Do not update bootmenu on system state save
+  -s, --system               Save complete system state (users and system)
+  -u, --user string          Save the state for a given user or current user if empty
 ```
 
 ##### Options inherited from parent commands
@@ -659,6 +661,31 @@ zsysctl boot prepare [flags]
 
 ```
   -h, --help   help for prepare
+```
+
+##### Options inherited from parent commands
+
+```
+  -p, --print-changes   Display if any zfs datasets have been modified to boot
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
+#### zsysctl boot update-menu
+
+Update system boot menu
+
+##### Synopsis
+
+Update system boot menu
+
+```
+zsysctl boot update-menu [flags]
+```
+
+##### Options
+
+```
+  -h, --help   help for update-menu
 ```
 
 ##### Options inherited from parent commands
