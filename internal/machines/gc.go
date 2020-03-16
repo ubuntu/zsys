@@ -3,6 +3,7 @@ package machines
 import (
 	"context"
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 	"time"
@@ -153,25 +154,21 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						keep:  keep,
 					})
 				}
+				// next bucket start point
+				newestStateIndex = oldestStateIndex + 1
 
 				// Ensure we have the minimum amount of states on this bucket.
 				nStatesToRemove := len(states) - bucket.samples
 				if nStatesToRemove <= 0 {
 					log.Debugf(ctx, i18n.G("No exceeding states for this bucket (delta: %d). Moving on."), nStatesToRemove)
-					newestStateIndex = oldestStateIndex + 1
 					continue
 				}
 				log.Debugf(ctx, i18n.G("There are %d exceeding states to potentially remove"), nStatesToRemove)
 
-				// FIXME: easy path: Remove first states that we don't keep
-				for _, s := range states {
-					if s.keep == keepYes {
-						continue
-					}
-					if nStatesToRemove == 0 {
-						continue
-					}
+				statesToRemoveForBucket := selectStatesToRemove(ctx, bucket.samples, states)
 
+				for _, s := range statesToRemoveForBucket {
+					statesChanges = true
 					// We are removing that state: purge all datasets from our maps.
 					// We don’t deal with user datasets right now as we only untag them.
 					for _, ds := range s.Datasets {
@@ -186,12 +183,9 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 							}
 						}
 					}
-
-					statesToRemove = append(statesToRemove, s.State)
-					nStatesToRemove--
-					statesChanges = true
 				}
-				newestStateIndex = oldestStateIndex + 1
+
+				statesToRemove = append(statesToRemove, statesToRemoveForBucket...)
 			}
 		}
 
@@ -328,25 +322,21 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 							keep:  keep,
 						})
 					}
+					// next bucket start point
+					newestStateIndex = oldestStateIndex + 1
 
 					// Ensure we have the minimum amount of states on this bucket.
 					nStatesToRemove := len(states) - bucket.samples
 					if nStatesToRemove <= 0 {
 						log.Debugf(ctx, i18n.G("No exceeding states for this bucket (delta: %d). Moving on."), nStatesToRemove)
-						newestStateIndex = oldestStateIndex + 1
 						continue
 					}
 					log.Debugf(ctx, i18n.G("There are %d exceeding states to potentially remove"), nStatesToRemove)
 
-					// FIXME: easy path: Remove first states that we don't keep
-					for _, s := range states {
-						if s.keep == keepYes {
-							continue
-						}
-						if nStatesToRemove == 0 {
-							continue
-						}
+					statesToRemoveForBucket := selectStatesToRemove(ctx, bucket.samples, states)
 
+					for _, s := range statesToRemoveForBucket {
+						statesChanges = true
 						// We are removing that state: purge all datasets from our maps.
 						for _, ds := range s.Datasets {
 							for _, d := range ds {
@@ -360,12 +350,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 								}
 							}
 						}
-
-						UserStatesToRemove = append(UserStatesToRemove, s.State)
-						nStatesToRemove--
-						statesChanges = true
 					}
-					newestStateIndex = oldestStateIndex + 1
+					statesToRemove = append(statesToRemove, statesToRemoveForBucket...)
 				}
 			}
 		}
@@ -506,4 +492,175 @@ func (b bucket) validate(oldState, newState []*stateWithKeep) bool {
 
 func (b bucket) String() string {
 	return fmt.Sprintf("start: %s end:%s samples: %d", b.start.Format(timeFormat), b.end.Format(timeFormat), b.samples)
+}
+
+// selectStatesToRemove selects the maximum number of states to keep to fill a bucket up to samples and spread them evenly over the width of the bucket.
+// When 2 solutions are equal the first match is kept
+func selectStatesToRemove(ctx context.Context, samples int, states []stateWithKeep) (statesToRemove []*State) {
+	log.Debug(ctx, "selecting list of states to remove")
+
+	if len(states) <= samples {
+		log.Debug(ctx, "bucket has enough capacity to keep all the states")
+		return statesToRemove
+	}
+
+	var sumKeep int64 // Start is oldest time and end is newest
+	var toPlace []stateWithKeep
+	var toKeep []stateWithKeep
+	var end, start float64
+
+	// States are supposed to be sorted by reverse time but we cannot assume it's true in this scope
+	for i, e := range states {
+		t := float64(e.LastUsed.Unix())
+		if i == 0 {
+			end = t
+			start = t
+		}
+		if t < start {
+			start = t
+		}
+		if t > end {
+			end = t
+		}
+	}
+	log.Debugf(ctx, "Interval: %.2f - %.2f", start, end)
+	for _, s := range states {
+		if s.keep == keepYes {
+			sumKeep += s.LastUsed.Unix()
+			toKeep = append(toKeep, s)
+			continue
+		}
+		toPlace = append(toPlace, s)
+	}
+
+	freeSlots := samples - len(toKeep)
+	if freeSlots <= 0 {
+		// The bucket is full, do not keep anything
+		log.Debug(ctx, "bucket is full, removing all non-keep states")
+		for _, s := range toPlace {
+			statesToRemove = append(statesToRemove, s.State)
+		}
+		return statesToRemove
+	}
+	cs := combinations(len(toPlace), freeSlots)
+
+	var bestCombination []int
+	var bestIndex int
+	minDistance := end - start
+	curDistance := minDistance
+	log.Debugf(ctx, "Existing n: %d, minDist: %.3f, barycenter: %.3f", len(toKeep), minDistance, start+minDistance/2)
+
+	var dbgMsg string
+	for i, c := range cs {
+		dbgMsg = fmt.Sprintf("    %d - ", i)
+
+		var sumToPlace int64
+		for i := 0; i < freeSlots; i++ {
+			sumToPlace += toPlace[c[i]].LastUsed.Unix()
+			dbgMsg += fmt.Sprintf("%d:%d ", c[i], toPlace[c[i]].LastUsed.Unix())
+		}
+
+		avg := float64(sumKeep+sumToPlace) / float64(samples)
+		curDistance = math.Abs(avg - (start + (end-start)/2))
+		if curDistance < minDistance {
+			minDistance = curDistance
+			bestCombination = c
+			bestIndex = i
+		}
+		log.Debugf(ctx, "%s%d %.3f %.3f", dbgMsg, sumToPlace, avg, curDistance)
+	}
+
+	dbgMsg = fmt.Sprintf("Best solution: dist=%.3f toPlace[%d] = [ ", minDistance, bestIndex)
+	for _, c := range bestCombination {
+		dbgMsg += fmt.Sprintf("%s:%d ", toPlace[c].ID, toPlace[c].LastUsed.Unix())
+	}
+	log.Debugf(ctx, "%s]", dbgMsg)
+
+	// Keep bestCombination and remove everything else not marked toKeep
+	for _, c := range bestCombination {
+		toPlace[c].keep = keepYes
+	}
+
+	for _, s := range toPlace {
+		if s.keep == keepYes {
+			continue
+		}
+		statesToRemove = append(statesToRemove, s.State)
+	}
+	return statesToRemove
+}
+
+const (
+	badNegInput = "combin: negative input"
+	badSetSize  = "combin: n < k"
+)
+
+// combinations generates all of the combinations of k elements from a
+// set of size n. The returned slice has length Binomial(n,k) and each inner slice
+// has length k.
+//
+// n and k must be non-negative with n >= k, otherwise Combinations will panic.
+//
+// This is copied from gonumonum
+func combinations(n, k int) [][]int {
+	combins := binomial(n, k)
+	data := make([][]int, combins)
+	if len(data) == 0 {
+		return data
+	}
+	data[0] = make([]int, k)
+	for i := range data[0] {
+		data[0][i] = i
+	}
+	for i := 1; i < combins; i++ {
+		next := make([]int, k)
+		copy(next, data[i-1])
+		nextCombination(next, n, k)
+		data[i] = next
+	}
+	return data
+}
+
+// binomial returns the binomial coefficient of (n,k), also commonly referred to
+// as "n choose k".
+//
+// The binomial coefficient, C(n,k), is the number of unordered combinations of
+// k elements in a set that is n elements big, and is defined as
+//
+//  C(n,k) = n!/((n-k)!k!)
+//
+// n and k must be non-negative with n >= k, otherwise Binomial will panic.
+// No check is made for overflow.
+// This is copied from gonum
+func binomial(n, k int) int {
+	if n < 0 || k < 0 {
+		panic(badNegInput)
+	}
+	if n < k {
+		panic(badSetSize)
+	}
+	// (n,k) = (n, n-k)
+	if k > n/2 {
+		k = n - k
+	}
+	b := 1
+	for i := 1; i <= k; i++ {
+		b = (n - k + i) * b / i
+	}
+	return b
+}
+
+// nextCombination generates the combination after s, overwriting the input value.
+// This is copied from gonum
+func nextCombination(s []int, n, k int) {
+	for j := k - 1; j >= 0; j-- {
+		if s[j] == n+j-k {
+			continue
+		}
+		s[j]++
+		for l := j + 1; l < k; l++ {
+			s[l] = s[j] + l - j
+		}
+		break
+	}
 }
