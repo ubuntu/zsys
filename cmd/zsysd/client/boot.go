@@ -48,6 +48,7 @@ func init() {
 	rootCmd.AddCommand(bootCmd)
 	bootCmd.AddCommand(bootPrepareCmd)
 	bootCmd.AddCommand(bootCommitCmd)
+	bootCmd.AddCommand(updateMenuCmd)
 }
 
 func bootPrepare(printModifiedBoot bool) (err error) {
