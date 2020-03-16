@@ -226,6 +226,11 @@ func (t *Transaction) Context() context.Context {
 	return t.ctx
 }
 
+// Context returns the current context of the transaction
+func (nt *NoTransaction) Context() context.Context {
+	return nt.ctx
+}
+
 // findDatasetByName returns given dataset from path, handling special case of dataset
 // not found in hashmap and virtual root dataset.
 func (z *Zfs) findDatasetByName(path string) (*Dataset, error) {
@@ -819,23 +824,29 @@ func (t *Transaction) SetProperty(name, value, datasetName string, force bool) e
 //   - it has a snapshot (so has child as well)
 //   - there is a clone depending on it (clone depending on snapshot on this dataset,
 //     so meaning that this dataset has a snapshot, so has child as well)
-func (d Dataset) Dependencies(z *Zfs) []*Dataset {
+func (nt *NoTransaction) Dependencies(d Dataset) []*Dataset {
+	ctx := nt.ctx
+
 	var deps []*Dataset
 	base, snapshot := splitSnapshotName(d.Name)
+	log.Debugf(ctx, "calculating dependencies for dataset %s", d.Name)
 
-	for k, dataset := range z.allDatasets {
+	for k, dataset := range nt.Zfs.allDatasets {
 		var isDep bool
 		if !d.IsSnapshot {
 			// snapshot on filesystem dataset
 			if strings.HasPrefix(k, d.Name+"@") {
+				log.Debugf(ctx, "found dependency: snapshot %s", k)
 				isDep = true
 			}
 			// direct child
 			if strings.HasPrefix(k, d.Name+"/") && !strings.Contains(strings.TrimPrefix(k, d.Name+"/"), "/") {
+				log.Debugf(ctx, "found dependency: dkirect child %s", k)
 				isDep = true
 			}
 		} else {
 			if dataset.Origin == d.Name {
+				log.Debugf(ctx, "found dependency: origin %s", dataset.Name)
 				isDep = true
 			}
 			// Consider snapshot child: if d is a snapshot, look if subdataset which has the same base parent
@@ -843,13 +854,14 @@ func (d Dataset) Dependencies(z *Zfs) []*Dataset {
 			if dataset.IsSnapshot {
 				baseDataset, snapshotDataset := splitSnapshotName(dataset.Name)
 				if snapshotDataset == snapshot && strings.HasPrefix(baseDataset, base+"/") {
+					log.Debugf(ctx, "found dependency: snapshot child %s", dataset.Name)
 					isDep = true
 				}
 			}
 		}
 
 		if isDep {
-			deps = append(deps, dataset.Dependencies(z)...)
+			deps = append(deps, nt.Dependencies(*dataset)...)
 			deps = append(deps, dataset)
 		}
 	}

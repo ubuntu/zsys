@@ -27,7 +27,9 @@ func (e *ErrStateHasDependencies) Error() string {
 // depending on us.
 // Note that a system states will list all its user states (as when requesting to delete a system state, we will delete
 // the associated system states), BUT listing a user state won’t list the associated system states.
-func (s *State) getDependencies(ms *Machines) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
+func (s *State) getDependencies(ctx context.Context, ms *Machines) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
+	nt := ms.z.NewNoTransaction(ctx)
+
 	// build cache and lookup for all states
 	var allStates []*State
 	for _, m := range ms.all {
@@ -50,7 +52,7 @@ func (s *State) getDependencies(ms *Machines) (stateDeps []*State, datasetDeps [
 		}
 	}
 
-	return s.getDependenciesWithCache(ms, allStates, datasetToState, make(map[*State]stateToDeps))
+	return s.getDependenciesWithCache(nt, allStates, datasetToState, make(map[*State]stateToDeps))
 }
 
 type stateToDeps struct {
@@ -58,16 +60,17 @@ type stateToDeps struct {
 	datasetDeps []*zfs.Dataset
 }
 
-func (s *State) getDependenciesWithCache(ms *Machines, allStates []*State, datasetToState map[*zfs.Dataset]*State, depsResolvedCache map[*State]stateToDeps) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
+func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, allStates []*State, datasetToState map[*zfs.Dataset]*State, depsResolvedCache map[*State]stateToDeps) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
 	if dep, ok := depsResolvedCache[s]; ok {
 		return dep.stateDeps, dep.datasetDeps
 	}
 
+	log.Debugf(nt.Context(), "getDependenciesWithCache for state %s", s.ID)
 	for _, ds := range s.Datasets {
 		// As we detects complete dependencies hierarchy, we only take the root dataset for each route
 		d := ds[0]
 
-		deps := d.Dependencies(ms.z)
+		deps := nt.Dependencies(*d)
 
 		// Look for corresponding state (user or system)
 		for _, dataset := range deps {
@@ -79,12 +82,13 @@ func (s *State) getDependenciesWithCache(ms *Machines, allStates []*State, datas
 				}
 				// If this is a system state, get related user states deps
 				for _, us := range datasetState.Users {
-					uDeps, udDeps := us.getDependenciesWithCache(ms, allStates, datasetToState, depsResolvedCache)
+					log.Debugf(nt.Context(), i18n.G("Getting dependencies for user state %s"), us.ID)
+					uDeps, udDeps := us.getDependenciesWithCache(nt, allStates, datasetToState, depsResolvedCache)
 					depsResolvedCache[us] = stateToDeps{uDeps, udDeps}
 					stateDeps = append(stateDeps, uDeps...)
 					datasetDeps = append(datasetDeps, udDeps...)
 				}
-				cDeps, cdDeps := datasetState.getDependenciesWithCache(ms, allStates, datasetToState, depsResolvedCache)
+				cDeps, cdDeps := datasetState.getDependenciesWithCache(nt, allStates, datasetToState, depsResolvedCache)
 				depsResolvedCache[datasetState] = stateToDeps{cDeps, cdDeps}
 				stateDeps = append(stateDeps, cDeps...)
 				datasetDeps = append(datasetDeps, cdDeps...)
@@ -97,7 +101,8 @@ func (s *State) getDependenciesWithCache(ms *Machines, allStates []*State, datas
 	// If current state is a system one, add its user states and deps.
 	// (If we added it above before if datasetState == s {continue}, those would be only added if current state had children datasets)
 	for _, us := range s.Users {
-		uDeps, udDeps := us.getDependenciesWithCache(ms, allStates, datasetToState, depsResolvedCache)
+		log.Debugf(nt.Context(), i18n.G("Getting dependencies for user state %s"), us.ID)
+		uDeps, udDeps := us.getDependenciesWithCache(nt, allStates, datasetToState, depsResolvedCache)
 		depsResolvedCache[us] = stateToDeps{uDeps, udDeps}
 		stateDeps = append(stateDeps, uDeps...)
 		datasetDeps = append(datasetDeps, udDeps...)
@@ -139,7 +144,16 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bo
 		return errors.New(i18n.G("Removing current system state isn't allowed"))
 	}
 
-	states, datasets := s.getDependencies(ms)
+	states, datasets := s.getDependencies(ctx, ms)
+
+	log.Debug(ctx, "Depending states found:")
+	for _, s := range states {
+		log.Debugf(ctx, "    - %s", s.ID)
+	}
+	log.Debug(ctx, "Depending datasets found:")
+	for _, d := range datasets {
+		log.Debugf(ctx, "    - %s", d.Name)
+	}
 
 	if !force {
 		var errmsg string
@@ -191,6 +205,8 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bo
 func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string, dontRemoveUsersChildren bool) error {
 	nt := z.NewNoTransaction(ctx)
 
+	log.Debugf(ctx, i18n.G("Removing state %s. linkedStateID: %s, dontRemoveUsersChildren: %t\n"), s.ID, linkedStateID, dontRemoveUsersChildren)
+
 	// Note: if we remove a user States which is a file system dataset, all snapshots (user snapshots) will be removed as well.
 	// This is OK for now as:
 	// - we already asked for direct user request removal on snapshots before (as a dependency of this user state)
@@ -199,6 +215,7 @@ func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string, do
 
 	// Untag all datasets associated with this state for non snapshots
 	if !s.isSnapshot() && linkedStateID != "" {
+		log.Debug(ctx, i18n.G("Untagging all datasets\n"))
 		t, cancel := z.NewTransaction(ctx)
 		defer t.Done()
 		for _, d := range s.getDatasets() {
@@ -215,6 +232,8 @@ func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string, do
 			if newTag == d.BootfsDatasets {
 				continue
 			}
+
+			log.Debugf(ctx, i18n.G("Setting new bootfs tag %s on %s\n"), newTag, d.Name)
 
 			if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
 				cancel()
