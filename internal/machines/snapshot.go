@@ -50,7 +50,7 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 
 	var toSnapshot []*zfs.Dataset
 	if onlyUser != "" {
-		userStates, ok := m.Users[onlyUser]
+		userState, ok := m.State.Users[onlyUser]
 		if !ok {
 			return "", fmt.Errorf(i18n.G("user %q doesn't exist"), onlyUser)
 		}
@@ -60,27 +60,9 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 				return "", fmt.Errorf(i18n.G("A snapshot %q already exists on system and can create an incoherent state"), name)
 			}
 		}
-
-		// Only filter datasets attached to current state, as some subdataset could be linked to another
-		// system state but not that particular one.
-		for _, userState := range userStates {
-			// Don't take snapshots of snapshots
-			if userState.isSnapshot() {
-				continue
-			}
-			for _, d := range userState.Datasets {
-				if nameInBootfsDatasets(m.ID, *d) {
-					toSnapshot = append(toSnapshot, d)
-				}
-			}
-		}
+		toSnapshot = userState.getDatasets()
 	} else {
-		for _, ds := range m.SystemDatasets {
-			toSnapshot = append(toSnapshot, ds...)
-		}
-		for _, ds := range m.UserDatasets {
-			toSnapshot = append(toSnapshot, ds...)
-		}
+		toSnapshot = append(m.State.getDatasets(), m.State.getUsersDatasets()...)
 	}
 	for _, d := range toSnapshot {
 		if err := t.Snapshot(name, d.Name, false); err != nil {

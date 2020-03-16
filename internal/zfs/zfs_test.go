@@ -3,10 +3,12 @@ package zfs_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
 	"sort"
+	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -182,7 +184,7 @@ func TestCreate(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -247,7 +249,7 @@ func TestSnapshot(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -343,7 +345,7 @@ func TestClone(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -427,7 +429,7 @@ func TestPromote(t *testing.T) {
 					t.Fatalf("couldn't setup testbed when prepromoting %q: %v", tc.alreadyPromoted, err)
 				}
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 
 			err = trans.Promote(tc.dataset)
 
@@ -583,7 +585,7 @@ func TestDestroy(t *testing.T) {
 					t.Fatalf("couldn't setup testbed when prepromoting %q: %v", tc.alreadyPromoted, err)
 				}
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 
 			err = z.NewNoTransaction(context.Background()).Destroy(tc.dataset)
 
@@ -670,7 +672,7 @@ func TestSetProperty(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -702,6 +704,104 @@ func TestSetProperty(t *testing.T) {
 	}
 }
 
+func TestDependencies(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		depsFor string
+		clones  []string
+
+		wantDeps []string
+	}{
+		"Dataset has no child":  {depsFor: "rpool/ROOT/ubuntu/var/lib/apt"},
+		"Dataset has one child": {depsFor: "rpool/ROOT/ubuntu/var/lib", wantDeps: []string{"rpool/ROOT/ubuntu/var/lib/apt"}},
+		"Dataset has snapshots": {depsFor: "rpool/ROOT/ubuntu2", wantDeps: []string{"rpool/ROOT/ubuntu2@snap_u1", "rpool/ROOT/ubuntu2@snap_u2"}},
+
+		"Snapshot has no child":                               {depsFor: "rpool/ROOT/ubuntu/opt/tools@snap_opt"},
+		"Multiple snapshots on same datasets are independent": {depsFor: "rpool/ROOT/ubuntu2@snap_u1"},
+		"Snapshot isn’t impacted by other children datasets":  {depsFor: "rpool/ROOT/ubuntu/var@snap_v1"},
+		"Snapshots has a snapshot child":                      {depsFor: "rpool/ROOT/ubuntu/opt@snap_opt", wantDeps: []string{"rpool/ROOT/ubuntu/opt/tools@snap_opt"}},
+
+		"Dataset has snapshots and children": {depsFor: "rpool/ROOT/ubuntu",
+			wantDeps: []string{
+				"rpool/ROOT/ubuntu@snap_r1",
+				"rpool/ROOT/ubuntu/var@snap_v1", "rpool/ROOT/ubuntu/var/lib/apt", "rpool/ROOT/ubuntu/var/lib", "rpool/ROOT/ubuntu/var",
+				"rpool/ROOT/ubuntu/opt/tools@snap_opt", "rpool/ROOT/ubuntu/opt/tools", "rpool/ROOT/ubuntu/opt@snap_opt", "rpool/ROOT/ubuntu/opt"}},
+
+		"Snapshot with one clone":           {depsFor: "rpool/ROOT/ubuntu2@snap_u1", clones: []string{"rpool/ROOT/ubuntu2@snap_u1"}, wantDeps: []string{"rpool/ROOT/ubuntu2_cloned0"}},
+		"Filesystem dataset with one clone": {depsFor: "rpool/ROOT/ubuntu2", clones: []string{"rpool/ROOT/ubuntu2@snap_u1"}, wantDeps: []string{"rpool/ROOT/ubuntu2@snap_u2", "rpool/ROOT/ubuntu2_cloned0", "rpool/ROOT/ubuntu2@snap_u1"}},
+
+		"Clones on us and children": {depsFor: "rpool/ROOT/ubuntu/opt", clones: []string{"rpool/ROOT/ubuntu/opt@snap_opt"}, wantDeps: []string{
+			"rpool/ROOT/ubuntu/opt_cloned0/tools", "rpool/ROOT/ubuntu/opt/tools@snap_opt",
+			"rpool/ROOT/ubuntu/opt_cloned0", "rpool/ROOT/ubuntu/opt@snap_opt",
+			"rpool/ROOT/ubuntu/opt/tools"}},
+		"Child has clone": {depsFor: "rpool/ROOT/ubuntu/opt", clones: []string{"rpool/ROOT/ubuntu/opt/tools@snap_opt"}, wantDeps: []string{"rpool/ROOT/ubuntu/opt/tools_cloned0", "rpool/ROOT/ubuntu/opt/tools@snap_opt", "rpool/ROOT/ubuntu/opt/tools", "rpool/ROOT/ubuntu/opt@snap_opt"}},
+		"Clone has clone": {depsFor: "rpool/ROOT/ubuntu/opt/tools",
+			clones: []string{"rpool/ROOT/ubuntu/opt/tools@snap_opt", "rpool/ROOT/ubuntu/opt/tools_cloned0@snapcloned0"},
+			wantDeps: []string{"rpool/ROOT/ubuntu/opt/tools_cloned1", "rpool/ROOT/ubuntu/opt/tools_cloned0@snapcloned0",
+				"rpool/ROOT/ubuntu/opt/tools_cloned0", "rpool/ROOT/ubuntu/opt/tools@snap_opt"}},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "one_pool_n_datasets_n_children_n_snapshots_with_dependencies.yaml"), testutils.WithLibZFS(adapter))
+			defer fPools.Create(dir)()
+
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
+			if err != nil {
+				t.Fatalf("expected no error but got: %v", err)
+			}
+
+			// Scan initial state for no-op
+			trans, _ := z.NewTransaction(context.Background())
+			defer trans.Done()
+
+			// Prepare clone
+			for i, clone := range tc.clones {
+				// Take a snapshot to clone it (FIXME: this support should be in zfs_disk_handler)
+				if i > 0 {
+					err = trans.Snapshot(fmt.Sprintf("snapcloned%d", i-1), strings.Split(clone, "@")[0], false)
+					assert.NoError(t, err, "error in setup")
+				}
+				err = trans.Clone(clone, fmt.Sprintf("cloned%d", i), false, true)
+				assert.NoError(t, err, "error in setup")
+			}
+
+			d := z.DatasetByID(tc.depsFor)
+			if d == nil {
+				t.Fatalf("No dataset found matching %s", tc.depsFor)
+			}
+
+			deps := d.Dependencies(z)
+
+			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
+			// However, we identified 3 rules to ensure that the dependency order (from leaf to root) is respected.
+
+			depNames := make([]string, len(deps))
+			for i, d := range deps {
+				depNames[i] = d.Name
+			}
+
+			// rule 1: ensure that the 2 lists have the same elements
+			if len(deps) != len(tc.wantDeps) {
+				t.Fatalf("deps content doesn't have enough elements:\nGot:  %v\nWant: %v", deps, tc.wantDeps)
+			} else {
+				assert.ElementsMatch(t, tc.wantDeps, depNames, "didn't get matching dep list content")
+			}
+
+			// rule 2: ensure that all children (snapshots or filesystem datasets) appears before its parent
+			assertChildrenBeforeParents(t, deps)
+
+			// rule 3: ensure that a clone comes before its origin
+			assertCloneComesBeforeItsOrigin(t, z, deps)
+		})
+
+	}
+}
 func TestTransactionsWithZFS(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
@@ -764,7 +864,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 			if err != nil {
 				t.Fatalf("expected no error but got: %v", err)
 			}
-			initState := z.Datasets()
+			initState := copyState(z)
 			trans, cancel := z.NewTransaction(context.Background())
 			defer trans.Done()
 
@@ -790,7 +890,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doSnapshot {
@@ -816,7 +916,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doClone {
@@ -838,7 +938,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doPromote {
@@ -857,7 +957,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 							t.Fatalf("couldnt clone to prepare dataset hierarchy: %v", err)
 						}
 						// Reset init state
-						initState = z.Datasets()
+						initState = copyState(z)
 						trans2.Done()
 						state = initState
 					}
@@ -874,7 +974,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			if tc.doSetProperty {
@@ -891,7 +991,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					haveChanges = true
 				}
 
-				state = z.Datasets()
+				state = copyState(z)
 			}
 
 			// Final transaction states
@@ -1044,21 +1144,25 @@ func TestInvalidatedTransactionByCancel(t *testing.T) {
 
 // transformToReproducibleDatasetSlice applied transformation to ensure that the comparison is reproducible via
 // DataSlices.
-func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []zfs.Dataset) zfs.DatasetSlice {
+func transformToReproducibleDatasetSlice(t *testing.T, ta timeAsserter, got []*zfs.Dataset) zfs.DatasetSlice {
 	t.Helper()
+
+	// We don’t want to impact initial got slice order as it can be reused later on
+	copyDS := make([]zfs.Dataset, 0, len(got))
 
 	// Ensure datasets were created at expected range time and replace them with magic time.
 	var ds []*zfs.Dataset
-	for k := range got {
-		if !got[k].IsSnapshot {
+	for i, d := range got {
+		copyDS = append(copyDS, *d)
+		if !d.IsSnapshot {
 			continue
 		}
-		ds = append(ds, &got[k])
+		ds = append(ds, &copyDS[i])
 	}
 	ta.assertAndReplaceCreationTimeInRange(t, ds)
 
 	// Sort the golden file order to be reproducible.
-	gotForGolden := zfs.DatasetSlice{DS: got}
+	gotForGolden := zfs.DatasetSlice{DS: copyDS}
 	sort.Sort(gotForGolden)
 	return gotForGolden
 }
@@ -1089,41 +1193,40 @@ func datasetsNotEquals(t *testing.T, want, got []zfs.Dataset) {
 
 // assertDatasetsToGolden compares (and update if needed) a slice of dataset got from a Datasets() for instance
 // to a golden file.
-func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []zfs.Dataset) {
+func assertDatasetsToGolden(t *testing.T, ta timeAsserter, got []*zfs.Dataset) {
 	t.Helper()
 
 	gotForGolden := transformToReproducibleDatasetSlice(t, ta, got)
-	got = gotForGolden.DS
 
 	// Get expected dataset list from golden file, update as needed.
 	wantFromGolden := zfs.DatasetSlice{}
 	testutils.LoadFromGoldenFile(t, gotForGolden, &wantFromGolden)
 	want := []zfs.Dataset(wantFromGolden.DS)
 
-	datasetsEquals(t, want, got)
+	datasetsEquals(t, want, gotForGolden.DS)
 }
 
 // assertDatasetsEquals compares 2 slices of datasets, after ensuring they can be reproducible.
-func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset) {
+func assertDatasetsEquals(t *testing.T, ta timeAsserter, want, got []*zfs.Dataset) {
 	t.Helper()
 
-	want = transformToReproducibleDatasetSlice(t, ta, want).DS
-	got = transformToReproducibleDatasetSlice(t, ta, got).DS
+	wantCopy := transformToReproducibleDatasetSlice(t, ta, want).DS
+	gotCopy := transformToReproducibleDatasetSlice(t, ta, got).DS
 
-	datasetsEquals(t, want, got)
+	datasetsEquals(t, wantCopy, gotCopy)
 }
 
 // assertDatasetsNotEquals compares 2 slices of datasets, ater ensuring they can be reproducible.
-func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []zfs.Dataset) {
+func assertDatasetsNotEquals(t *testing.T, ta timeAsserter, want, got []*zfs.Dataset) {
 	t.Helper()
 
-	want = transformToReproducibleDatasetSlice(t, ta, want).DS
-	got = transformToReproducibleDatasetSlice(t, ta, got).DS
+	wantCopy := transformToReproducibleDatasetSlice(t, ta, want).DS
+	gotCopy := transformToReproducibleDatasetSlice(t, ta, got).DS
 
-	datasetsNotEquals(t, want, got)
+	datasetsNotEquals(t, wantCopy, gotCopy)
 }
 
-func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Dataset, adapter libzfs.Interface) {
+func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []*zfs.Dataset, adapter libzfs.Interface) {
 	t.Helper()
 
 	// We should always have New() returning the same state than we manually updated
@@ -1132,6 +1235,49 @@ func assertIdempotentWithNew(t *testing.T, ta timeAsserter, inMemory []zfs.Datas
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assertDatasetsEquals(t, ta, newZ.Datasets(), inMemory)
+}
+
+// assertChildrenBeforeParents ensure that all children (snapshots or filesystem datasets) appears before its parent
+func assertChildrenBeforeParents(t *testing.T, deps []*zfs.Dataset) {
+	t.Helper()
+
+	// iterate on child
+	for i, child := range deps {
+		parent, snapshot := zfs.SplitSnapshotName(child.Name)
+		if snapshot == "" {
+			parent = child.Name[:strings.LastIndex(child.Name, "/")]
+		}
+		// search corresponding base from the start
+		for j, candidate := range deps {
+			if candidate.Name != parent {
+				continue
+			}
+			if i > j {
+				t.Errorf("Found child %s after its parent %s: %+v", child.Name, candidate.Name, deps)
+			}
+		}
+	}
+}
+
+// assertCloneComesBeforeItsOrigin ensure that a clone comes before its origin
+func assertCloneComesBeforeItsOrigin(t *testing.T, z *zfs.Zfs, deps []*zfs.Dataset) {
+	t.Helper()
+
+	for i, clone := range deps {
+		if clone.Origin != "" {
+			continue
+		}
+
+		// search corresponding origin from the start
+		for j, candidate := range deps {
+			if candidate.Name != clone.Origin {
+				continue
+			}
+			if i > j {
+				t.Errorf("Found clone %s after its origin snapshot %s: %+v", clone.Name, candidate.Name, deps)
+			}
+		}
+	}
 }
 
 // timeAsserter ensures that dates will be between a start and end time
@@ -1177,4 +1323,16 @@ func failOnZFSPermissionDenied(t *testing.T) {
 	if u.Uid != "0" {
 		t.Fatalf("you don't have permissions to interact with system zfs")
 	}
+}
+
+// copyState freezes a given datasets layout by making copies
+func copyState(z *zfs.Zfs) []*zfs.Dataset {
+	datasets := z.Datasets()
+	ds := make([]*zfs.Dataset, len(datasets))
+
+	for i := range datasets {
+		dcopy := *datasets[i]
+		ds[i] = &dcopy
+	}
+	return ds
 }

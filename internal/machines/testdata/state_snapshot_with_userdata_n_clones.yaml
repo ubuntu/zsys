@@ -53,16 +53,12 @@ pools:
       mountpoint: /home/user1
       bootfs_datasets: rpool/ROOT/ubuntu_1234
       last_used: 2018-12-10T12:20:44+00:00
-    - name: USERDATA/root_bcde
-      mountpoint: /root
-      last_used: 2018-08-03T21:55:33+00:00
-      bootfs_datasets: rpool/ROOT/ubuntu_1234,rpool/ROOT/ubuntu_5678
       snapshots:
         - name: snap1
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
-        - name: snaproot1
+        - name: snapuser1
           zsys_bootfs: yes:local
           mountpoint: /home/user1:local
           canmount: on:local
@@ -77,6 +73,30 @@ pools:
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2019-08-24T17:11:06+00:00
+    - name: USERDATA/root_bcde
+      mountpoint: /root
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      snapshots:
+        - name: snap1
+          mountpoint: /root:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+        - name: snaproot1
+          zsys_bootfs: yes:local
+          mountpoint: /root:local
+          canmount: on:local
+          creation_time: 2019-03-18T02:45:55+00:00
+        - name: snap2
+          zsys_bootfs: yes:local
+          mountpoint: /root:local
+          canmount: on:local
+          creation_time: 2019-04-18T02:45:55+00:00
+        - name: snap3
+          zsys_bootfs: yes:local
+          mountpoint: /root:local
+          canmount: on:local
+          creation_time: 2019-08-24T17:11:06+00:00
     - name: USERDATA/user1_efgh
       mountpoint: /home/user1
       bootfs_datasets: rpool/ROOT/ubuntu_5678
@@ -84,6 +104,50 @@ pools:
       origin: rpool/USERDATA/user1_abcd@snap2
       snapshots:
         - name: snapuser2
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+        - name: snapuser3
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+        - name: snapuser5
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user1_ijkl
+      origin: rpool/USERDATA/user1_efgh@snapuser2
+    - name: USERDATA/user1_mnop
+      origin: rpool/USERDATA/user1_efgh@snapuser2
+      snapshots:
+        - name: snapuser3
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user1_qrst
+      origin: rpool/USERDATA/user1_efgh@snapuser2
+      snapshots:
+        - name: snapuser3
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user1_uvwx
+      origin: rpool/USERDATA/user1_qrst@snapuser3
+      snapshots:
+        - name: snapuser4
+          mountpoint: /home/user1:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/root_fghi
+      mountpoint: /root
+      origin: rpool/USERDATA/root_bcde@snaproot1
+    - name: USERDATA/root_cdef
+      mountpoint: /root
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_5678
+      origin: rpool/USERDATA/root_bcde@snap2
+      snapshots:
+        - name: snaproot2
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00

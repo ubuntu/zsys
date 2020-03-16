@@ -1,10 +1,10 @@
 {
    "All": {
       "rpool/ROOT/ubuntu_1234": {
-         "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/ROOT/ubuntu_1234": [
                {
                   "Name": "rpool/ROOT/ubuntu_1234",
@@ -24,10 +24,10 @@
          ]
       },
       "rpool/ROOT/ubuntu_5678": {
-         "ID": "rpool/ROOT/ubuntu_5678",
          "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu_5678",
          "LastUsed": "2018-12-10T13:20:44+01:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/ROOT/ubuntu_5678": [
                {
                   "Name": "rpool/ROOT/ubuntu_5678",

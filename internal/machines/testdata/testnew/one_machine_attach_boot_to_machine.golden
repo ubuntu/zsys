@@ -1,10 +1,10 @@
 {
    "All": {
       "rpool/ROOT/ubuntu_1234": {
-         "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "bpool/BOOT/ubuntu_1234": [
                {
                   "Name": "bpool/BOOT/ubuntu_1234",

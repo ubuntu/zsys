@@ -22,6 +22,7 @@ type LibZFS struct {
 
 	errOnCreate       bool
 	errOnClone        bool
+	errOnDestroy      bool
 	errOnPromote      bool
 	errOnScan         bool
 	errOnSetProperty  bool
@@ -332,6 +333,11 @@ func (l *LibZFS) ErrOnCreate(shouldErr bool) {
 	l.errOnCreate = shouldErr
 }
 
+// ErrOnDestroy forces a failure of the mock on destroy operation
+func (l *LibZFS) ErrOnDestroy(shouldErr bool) {
+	l.errOnDestroy = shouldErr
+}
+
 // ForceLastUsedTime ensures that any LastUsed property is set to the magic time for reproducibility
 func (l *LibZFS) ForceLastUsedTime(force bool) {
 	l.forceLastUsedTime = force
@@ -489,6 +495,10 @@ func (d *dZFS) setPropertyWithSource(p libzfs.Prop, value, source string) error 
 
 func (d *dZFS) Destroy(Defer bool) (err error) {
 	d.assertDatasetOpened()
+
+	if d.libZFSMock.errOnDestroy {
+		return errors.New("Error on Destroy requested")
+	}
 
 	d.libZFSMock.mu.Lock()
 	defer d.libZFSMock.mu.Unlock()

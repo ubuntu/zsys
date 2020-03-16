@@ -770,8 +770,8 @@ func (s *zsysSaveUserStateServer) Write(p []byte) (n int, err error) {
 // Write promote zsysRemoveSystemStateServer to an io.Writer
 func (s *zsysRemoveSystemStateServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
-		&RemoveStateResponse{
-			Reply: &RemoveStateResponse_Log{Log: string(p)},
+		&LogResponse{
+			Log: string(p),
 		})
 	if err != nil {
 		return 0, err
@@ -783,8 +783,8 @@ func (s *zsysRemoveSystemStateServer) Write(p []byte) (n int, err error) {
 // Write promote zsysRemoveUserStateServer to an io.Writer
 func (s *zsysRemoveUserStateServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
-		&RemoveStateResponse{
-			Reply: &RemoveStateResponse_Log{Log: string(p)},
+		&LogResponse{
+			Log: string(p),
 		})
 	if err != nil {
 		return 0, err

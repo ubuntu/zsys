@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checkout code
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       # Install go
       - uses: actions/setup-go@v1
         with:
@@ -35,10 +35,9 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    container: ubuntu:rolling
+    container: ubuntu:devel
     steps:
-      # Checkout code
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       # Add dependencies
       - name: Install dependencies
         run: |
@@ -54,15 +53,15 @@ jobs:
   generators:
     name: Generated files are up to date
     runs-on: ubuntu-latest
-    container: ubuntu:rolling
+    container: ubuntu:devel
     steps:
-      # Checkout code
-      - uses: actions/checkout@v1
       # Add dependencies
       - name: Install dependencies
         run: |
           apt update
           apt install -y ca-certificates gcc libzfslinux-dev protobuf-compiler golang-goprotobuf-dev gettext git
+      # Checkout code (using git that we just installed)
+      - uses: actions/checkout@v2
       # Install go
       - uses: actions/setup-go@v1
         with:
@@ -73,10 +72,10 @@ jobs:
   extended-quality:
     name: Extended quality checks
     runs-on: ubuntu-latest
-    container: ubuntu:rolling
+    container: ubuntu:devel
     steps:
       # Checkout code
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       # Add dependencies
       - name: Install dependencies
         run: |
@@ -126,7 +125,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y eatmydata
-          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
+          sudo ACCEPT_EULA=Y DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
           sudo sed -i s/bionic/focal/g /etc/apt/sources.list
           sudo eatmydata apt update
           sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade

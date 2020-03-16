@@ -1,10 +1,10 @@
 {
    "All": {
       "rpool/main": {
-         "ID": "rpool/main",
          "IsZsys": true,
+         "ID": "rpool/main",
          "LastUsed": "2033-05-18T05:33:20+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/main": [
                {
                   "Name": "rpool/main",
@@ -19,9 +19,8 @@
          "History": {
             "rpool/clone": {
                "ID": "rpool/clone",
-               "IsZsys": true,
                "LastUsed": "2020-05-08T00:01:28+02:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/clone": [
                      {
                         "Name": "rpool/clone",
@@ -37,7 +36,7 @@
             "rpool/main@snap1": {
                "ID": "rpool/main@snap1",
                "LastUsed": "2019-12-31T08:36:17+01:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/main@snap1": [
                      {
                         "Name": "rpool/main@snap1",
@@ -54,10 +53,10 @@
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool/main BOOT_IMAGE=vmlinuz-9.9.9-9-generic ccccc",
    "Current": {
-      "ID": "rpool/main",
       "IsZsys": true,
+      "ID": "rpool/main",
       "LastUsed": "2033-05-18T05:33:20+02:00",
-      "SystemDatasets": {
+      "Datasets": {
          "rpool/main": [
             {
                "Name": "rpool/main",
@@ -72,9 +71,8 @@
       "History": {
          "rpool/clone": {
             "ID": "rpool/clone",
-            "IsZsys": true,
             "LastUsed": "2020-05-08T00:01:28+02:00",
-            "SystemDatasets": {
+            "Datasets": {
                "rpool/clone": [
                   {
                      "Name": "rpool/clone",
@@ -90,7 +88,7 @@
          "rpool/main@snap1": {
             "ID": "rpool/main@snap1",
             "LastUsed": "2019-12-31T08:36:17+01:00",
-            "SystemDatasets": {
+            "Datasets": {
                "rpool/main@snap1": [
                   {
                      "Name": "rpool/main@snap1",

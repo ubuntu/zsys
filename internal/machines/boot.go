@@ -46,7 +46,7 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 		// We skip it if we booted on a snapshot with userdatasets already created. This would mean that EnsureBoot
 		// was called twice before Commit() during this boot. A new boot will create a new suffix id, so we won't block
 		// the machine forever in case of a real issue.
-		needCreateUserDatas := revertUserData && !(bootedOnSnapshot && len(bootedState.UserDatasets) > 0)
+		needCreateUserDatas := revertUserData && !(bootedOnSnapshot && len(bootedState.getUsersDatasets()) > 0)
 		if err := m.History[root].createClones(t, bootedState.ID, needCreateUserDatas); err != nil {
 			cancel()
 			return false, err
@@ -63,19 +63,17 @@ func (ms *Machines) EnsureBoot(ctx context.Context) (bool, error) {
 	// In case of system revert (either from cloning or rebooting this older dataset without user data revert), the newly
 	// active state won't be the main one, and so, we only take its main state userdata.
 	if !revertUserData {
-		bootedState.UserDatasets = m.UserDatasets
+		bootedState.Users = m.Users
 	}
 
 	// Start switching every non desired system and user datasets to noauto
 	var systemDatasets []*zfs.Dataset
-	for _, ds := range bootedState.SystemDatasets {
+	for _, ds := range bootedState.Datasets {
 		systemDatasets = append(systemDatasets, ds...)
 	}
 	noAutoDatasets := diffDatasets(ms.allSystemDatasets, systemDatasets)
-	var userDatasets []*zfs.Dataset
-	for _, ds := range bootedState.UserDatasets {
-		userDatasets = append(userDatasets, ds...)
-	}
+	userDatasets := bootedState.getUsersDatasets()
+
 	noAutoDatasets = append(noAutoDatasets, diffDatasets(ms.allUsersDatasets, userDatasets)...)
 	hasChanges, err := switchDatasetsCanMount(t, noAutoDatasets, "noauto")
 	if err != nil {
@@ -126,21 +124,18 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	// In case of system revert (either from cloning or rebooting this older dataset without user data revert), the newly
 	// active state won't be the main one, and so, we only take its main state userdata.
 	if !revertUserData {
-		bootedState.UserDatasets = m.UserDatasets
+		bootedState.Users = m.Users
 	}
 
 	// Retag new userdatasets if needed
-	var userDatasets []*zfs.Dataset
-	for _, ds := range bootedState.UserDatasets {
-		userDatasets = append(userDatasets, ds...)
-	}
+	userDatasets := bootedState.getUsersDatasets()
 	if err := switchUsersDatasetsTags(t, bootedState.ID, ms.allUsersDatasets, userDatasets); err != nil {
 		cancel()
 		return false, err
 	}
 
 	var systemDatasets []*zfs.Dataset
-	for _, ds := range bootedState.SystemDatasets {
+	for _, ds := range bootedState.Datasets {
 		systemDatasets = append(systemDatasets, ds...)
 	}
 	// System and users datasets: set lastUsed
@@ -219,7 +214,7 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// before Commit() during this boot. A new boot will create a new suffix id, so we won't block the machine forever
 	// in case of a real issue.
 	// Clone fails on system dataset already exists and skipping requested -> ok, other clone fails -> return error
-	for route := range snapshot.SystemDatasets {
+	for route := range snapshot.Datasets {
 		log.Infof(t.Context(), i18n.G("cloning %q and children"), route)
 		if err := t.Clone(route, suffix, true, true); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't create new subdatasets from %q. Assuming it has already been created successfully: %v"), route, err)
@@ -235,18 +230,18 @@ func (snapshot State) createClones(t *zfs.Transaction, bootedStateID string, nee
 	// Find user datasets attached to the snapshot and clone them
 	// Only root datasets are cloned
 	userDataSuffix := t.Zfs.GenerateID(6)
-	for route := range snapshot.UserDatasets {
+	for _, us := range snapshot.Users {
 		// Recursively clones childrens, which shouldn't have bootfs elements.
-		if err := t.Clone(route, userDataSuffix, false, true); err != nil {
+		if err := t.Clone(us.ID, userDataSuffix, false, true); err != nil {
 			return fmt.Errorf(i18n.G("couldn't create new user datasets from %q: %v"), snapshot.ID, err)
 		}
 		// Associate this parent new user dataset to its parent system dataset
-		base, _ := splitSnapshotName(route)
+		base, _ := splitSnapshotName(us.ID)
 		// Reformat the name with the new uuid and clone now the dataset.
 		suffixIndex := strings.LastIndex(base, "_")
 		userdatasetName := base[:suffixIndex] + "_" + userDataSuffix
 		if err := t.SetProperty(libzfs.BootfsDatasetsProp, bootedStateID, userdatasetName, false); err != nil {
-			return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, bootedStateID, route, err)
+			return fmt.Errorf(i18n.G("couldn't add %q to BootfsDatasets property of %q: ")+config.ErrorFormat, bootedStateID, us.ID, err)
 		}
 	}
 

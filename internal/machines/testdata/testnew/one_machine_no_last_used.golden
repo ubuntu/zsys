@@ -1,9 +1,9 @@
 {
    "All": {
       "rpool": {
-         "ID": "rpool",
          "IsZsys": true,
-         "SystemDatasets": {
+         "ID": "rpool",
+         "Datasets": {
             "rpool": [
                {
                   "Name": "rpool",

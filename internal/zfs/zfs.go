@@ -123,7 +123,7 @@ func (z *Zfs) Refresh(ctx context.Context) error {
 }
 
 // Datasets returns all datasets on the system, where parent will always be before children.
-func (z Zfs) Datasets() []Dataset {
+func (z Zfs) Datasets() []*Dataset {
 	ds := make(chan *Dataset)
 
 	var collectChildren func(d *Dataset)
@@ -140,9 +140,9 @@ func (z Zfs) Datasets() []Dataset {
 	}
 	go collectChildren(z.root)
 
-	r := make([]Dataset, 0, len(z.allDatasets))
+	r := make([]*Dataset, 0, len(z.allDatasets))
 	for d := range ds {
-		r = append(r, *d)
+		r = append(r, d)
 	}
 	return r
 }
@@ -811,4 +811,57 @@ func (t *Transaction) SetProperty(name, value, datasetName string, force bool) e
 	t.registerRevert(func() error { return d.setProperty(name, origV, origS) })
 
 	return nil
+}
+
+// Dependencies returns the list of dataset dependencies in reverse order (deepest first)
+// A dataset has dependencies if:
+//   - it has a subdataset (has child)
+//   - it has a snapshot (so has child as well)
+//   - there is a clone depending on it (clone depending on snapshot on this dataset,
+//     so meaning that this dataset has a snapshot, so has child as well)
+func (d Dataset) Dependencies(z *Zfs) []*Dataset {
+	var deps []*Dataset
+	base, snapshot := splitSnapshotName(d.Name)
+
+	for k, dataset := range z.allDatasets {
+		var isDep bool
+		if !d.IsSnapshot {
+			// snapshot on filesystem dataset
+			if strings.HasPrefix(k, d.Name+"@") {
+				isDep = true
+			}
+			// direct child
+			if strings.HasPrefix(k, d.Name+"/") && !strings.Contains(strings.TrimPrefix(k, d.Name+"/"), "/") {
+				isDep = true
+			}
+		} else {
+			if dataset.Origin == d.Name {
+				isDep = true
+			}
+			// Consider snapshot child: if d is a snapshot, look if subdataset which has the same base parent
+			// finish with the same snapshot name and consider them linked.
+			if dataset.IsSnapshot {
+				baseDataset, snapshotDataset := splitSnapshotName(dataset.Name)
+				if snapshotDataset == snapshot && strings.HasPrefix(baseDataset, base+"/") {
+					isDep = true
+				}
+			}
+		}
+
+		if isDep {
+			deps = append(deps, dataset.Dependencies(z)...)
+			deps = append(deps, dataset)
+		}
+	}
+
+	// Deduplicate dependencies, keeping first which will has its inverse deps just after
+	keys := make(map[*Dataset]bool)
+	var uniqDeps []*Dataset
+	for _, entry := range deps {
+		if _, value := keys[entry]; !value {
+			keys[entry] = true
+			uniqDeps = append(uniqDeps, entry)
+		}
+	}
+	return uniqDeps
 }

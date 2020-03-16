@@ -1,10 +1,10 @@
 {
    "All": {
       "rpool/ROOT/ubuntu_1234": {
-         "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/ROOT/ubuntu_1234": [
                {
                   "Name": "rpool/ROOT/ubuntu_1234",
@@ -22,23 +22,12 @@
                }
             ]
          },
-         "UserDatasets": {
-            "rpool/USERDATA/root_bcde": [
-               {
-                  "Name": "rpool/USERDATA/root_bcde",
-                  "Mountpoint": "/root",
-                  "CanMount": "on",
-                  "LastUsed": 1533333333,
-                  "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
-               }
-            ]
-         },
          "Users": {
             "root": {
-               "rpool/USERDATA/root_bcde": {
-                  "ID": "rpool/USERDATA/root_bcde",
-                  "LastUsed": "2018-08-03T23:55:33+02:00",
-                  "Datasets": [
+               "ID": "rpool/USERDATA/root_bcde",
+               "LastUsed": "2018-08-03T23:55:33+02:00",
+               "Datasets": {
+                  "rpool/USERDATA/root_bcde": [
                      {
                         "Name": "rpool/USERDATA/root_bcde",
                         "Mountpoint": "/root",
@@ -50,12 +39,30 @@
                }
             }
          },
+         "AllUsersStates": {
+            "root": {
+               "rpool/USERDATA/root_bcde": {
+                  "ID": "rpool/USERDATA/root_bcde",
+                  "LastUsed": "2018-08-03T23:55:33+02:00",
+                  "Datasets": {
+                     "rpool/USERDATA/root_bcde": [
+                        {
+                           "Name": "rpool/USERDATA/root_bcde",
+                           "Mountpoint": "/root",
+                           "CanMount": "on",
+                           "LastUsed": 1533333333,
+                           "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+                        }
+                     ]
+                  }
+               }
+            }
+         },
          "History": {
             "rpool/ROOT/ubuntu_1234@system_root_snapshot": {
                "ID": "rpool/ROOT/ubuntu_1234@system_root_snapshot",
-               "IsZsys": true,
                "LastUsed": "2019-12-31T08:36:17+01:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/ROOT/ubuntu_1234@system_root_snapshot": [
                      {
                         "Name": "rpool/ROOT/ubuntu_1234@system_root_snapshot",

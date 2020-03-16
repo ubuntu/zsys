@@ -122,7 +122,7 @@ func (fpools FakePools) Fatalf(format string, args ...interface{}) {
 
 func (fpools FakePools) cleanup() {
 	if *keepPool {
-		fmt.Printf("Keep pool(s) as requesting for debug. Please zpool export them afterwards and remove %q\n", filepath.Dir(fpools.tempFiles[0]))
+		fpools.t.Logf("Keep pool(s) as requesting for debug. Please zpool export them afterwards and remove %q\n", filepath.Dir(fpools.tempFiles[0]))
 		return
 	}
 

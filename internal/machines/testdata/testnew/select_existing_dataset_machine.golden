@@ -1,10 +1,10 @@
 {
    "All": {
       "rpool": {
-         "ID": "rpool",
          "IsZsys": true,
+         "ID": "rpool",
          "LastUsed": "2020-09-13T14:26:39+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool": [
                {
                   "Name": "rpool",
@@ -20,10 +20,10 @@
    },
    "Cmdline": "aaaaa bbbbb root=ZFS=rpool ccccc",
    "Current": {
-      "ID": "rpool",
       "IsZsys": true,
+      "ID": "rpool",
       "LastUsed": "2020-09-13T14:26:39+02:00",
-      "SystemDatasets": {
+      "Datasets": {
          "rpool": [
             {
                "Name": "rpool",

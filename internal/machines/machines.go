@@ -40,43 +40,30 @@ type Machines struct {
 // Machine is a group of Main and its History children states
 // TODO: History should be replaced with States as a map and main state points to it
 type Machine struct {
+	// IsZsys states if we have a zsys system. The other datasets type will be empty otherwise.
+	IsZsys bool `json:",omitempty"`
 	// Main machine State
 	State
-	// Users is a per user reference to each of its state
-	Users map[string]map[string]UserState `json:",omitempty"`
+	// AllUsersStates is a per user reference to each of its state
+	AllUsersStates map[string]map[string]*State `json:",omitempty"`
 	// History is a map or root system datasets to all its possible State
 	History map[string]*State `json:",omitempty"`
+	// PersistentDatasets are all datasets that are canmount=on and and not in ROOT, USERDATA or BOOT dataset containers.
+	// Those are common between all machines, as persistent (and detected without snapshot information)
+	PersistentDatasets []*zfs.Dataset `json:",omitempty"`
 }
 
 // State is a finite regroupement of multiple ID and elements corresponding to a bootable machine instance.
 type State struct {
 	// ID is the path to the root system dataset for this State.
 	ID string
-	// IsZsys states if we have a zsys system. The other datasets type will be empty otherwise.
-	IsZsys bool `json:",omitempty"`
 	// LastUsed is the last time this state was used
 	LastUsed *time.Time `json:",omitempty"`
-	// SystemDatasets are all datasets that constitutes this State (in <pool>/ROOT/ + <pool>/BOOT/).
+	// Datasets are all datasets that constitutes this State (in <pool>/ROOT/ + <pool>/BOOT/).
 	// The map index is each route for datasets.
-	SystemDatasets map[string][]*zfs.Dataset `json:",omitempty"`
-	// UserDatasets are all datasets that are attached to the given State (in <pool>/USERDATA/)
-	UserDatasets map[string][]*zfs.Dataset `json:",omitempty"`
-	// PersistentDatasets are all datasets that are canmount=on and and not in ROOT, USERDATA or BOOT dataset containers.
-	// Those are common between all machines, as persistent (and detected without snapshot information)
-	PersistentDatasets []*zfs.Dataset `json:",omitempty"`
-}
-
-// machineAndState is an internal helper to associate a dataset path to a machine and state
-type machineAndState struct {
-	state   *State
-	machine *Machine
-}
-
-// UserState represents a particular state for a user
-type UserState struct {
-	ID       string
-	LastUsed *time.Time `json:",omitempty"`
-	Datasets []*zfs.Dataset
+	Datasets map[string][]*zfs.Dataset `json:",omitempty"`
+	// Users are all users states that are depending of that system state
+	Users map[string]*State `json:",omitempty"`
 }
 
 const (
@@ -149,11 +136,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 		conf:    ms.conf,
 	}
 
-	zDatasets := machines.z.Datasets()
-	datasets := make([]*zfs.Dataset, 0, len(zDatasets))
-	for i := range zDatasets {
-		datasets = append(datasets, &zDatasets[i])
-	}
+	datasets := machines.z.Datasets()
 
 	// Sort datasets so that children datasets are after their parents.
 	sortedDataset := sortedDataset(datasets)
@@ -163,23 +146,23 @@ func (ms *Machines) refresh(ctx context.Context) {
 	origins := resolveOrigin(ctx, []*zfs.Dataset(sortedDataset), "/")
 
 	// First, set main datasets, then set clones
-	mainDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
-	cloneDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
-	otherDatasets := make([]zfs.Dataset, 0, len(sortedDataset))
+	mainDatasets := make([]*zfs.Dataset, 0, len(sortedDataset))
+	cloneDatasets := make([]*zfs.Dataset, 0, len(sortedDataset))
+	otherDatasets := make([]*zfs.Dataset, 0, len(sortedDataset))
 	for _, d := range sortedDataset {
 		if _, exists := origins[d.Name]; !exists {
-			otherDatasets = append(otherDatasets, *d)
+			otherDatasets = append(otherDatasets, d)
 			continue
 		}
 		if *origins[d.Name] == "" {
-			mainDatasets = append(mainDatasets, *d)
+			mainDatasets = append(mainDatasets, d)
 		} else {
-			cloneDatasets = append(cloneDatasets, *d)
+			cloneDatasets = append(cloneDatasets, d)
 		}
 	}
 
 	// First, handle system datasets (active for each machine and history) and return remaining ones.
-	mns, boots, flattenedUserDatas, persistents, unmanagedDatasets := machines.populate(ctx, append(append(mainDatasets, cloneDatasets...), otherDatasets...), origins)
+	boots, flattenedUserDatas, persistents, unmanagedDatasets := machines.populate(ctx, append(append(mainDatasets, cloneDatasets...), otherDatasets...), origins)
 
 	// Get a userdata map from parent to its children
 	rootUserDatasets := getRootDatasets(ctx, flattenedUserDatas)
@@ -190,6 +173,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 	}
 	originsUserDatasets := resolveOrigin(ctx, rootsOnlyUserDatasets, "")
 
+	statesAndMachines := machines.getAllStatesOnMachines()
 	unattachedSnapshotsUserDatasets, unattachedClonesUserDatasets := make(map[*zfs.Dataset][]*zfs.Dataset), make(map[*zfs.Dataset][]*zfs.Dataset) // user only snapshots or clone (not linked to a system state)
 	for r, children := range rootUserDatasets {
 		// Handle snapshots userdatasets
@@ -197,11 +181,12 @@ func (ms *Machines) refresh(ctx context.Context) {
 			var associateWithAtLeastOne bool
 
 			_, snapshot := splitSnapshotName(r.Name)
-			for n, ms := range mns {
+			for s, m := range statesAndMachines {
 				// Snapshots are not necessarily with a dataset ID matching its parent of dataset promotions, just match
 				// its name.
-				if strings.HasSuffix(n, "@"+snapshot) {
-					ms.machine.addUserDatasets(ctx, r, children, ms.state)
+				if strings.HasSuffix(s.ID, "@"+snapshot) {
+					user, us := m.addUserState(ctx, r, children)
+					s.Users[user] = us
 					associateWithAtLeastOne = true
 					continue
 				}
@@ -211,13 +196,12 @@ func (ms *Machines) refresh(ctx context.Context) {
 			}
 			unattachedSnapshotsUserDatasets[r] = children
 			continue
-		}
+		} else {
+			// Handle regular userdatasets (main or clone), associated to a system state
 
-		// Handle regular userdatasets (main or clone), associated to a system state
-		if !r.IsSnapshot {
 			var associateWithAtLeastOne bool
-			for n, ms := range mns {
-				if !nameInBootfsDatasets(n, *r) {
+			for s, m := range statesAndMachines {
+				if !nameInBootfsDatasets(s.ID, *r) {
 					continue
 				}
 
@@ -227,12 +211,13 @@ func (ms *Machines) refresh(ctx context.Context) {
 					// We don’t break the outer loop here because we can have the case of:
 					// - main userdataset is associated with 2 states
 					// - one child is associated with only one of them
-					if !nameInBootfsDatasets(n, *d) {
+					if !nameInBootfsDatasets(s.ID, *d) {
 						continue
 					}
 					associatedChildren = append(associatedChildren, d)
 				}
-				ms.machine.addUserDatasets(ctx, r, associatedChildren, ms.state)
+				user, us := m.addUserState(ctx, r, associatedChildren)
+				s.Users[user] = us
 			}
 
 			if associateWithAtLeastOne {
@@ -267,10 +252,10 @@ func (ms *Machines) refresh(ctx context.Context) {
 		var associateWithAtLeastOne bool
 		for _, m := range machines.all {
 			var associated bool
-			for _, UserStates := range m.Users {
+			for _, UserStates := range m.AllUsersStates {
 				for _, UserState := range UserStates {
 					if UserState.ID == origin {
-						m.addUserDatasets(ctx, r, children, nil)
+						m.addUserState(ctx, r, children)
 						associated = true
 						associateWithAtLeastOne = true
 						break
@@ -294,9 +279,9 @@ func (ms *Machines) refresh(ctx context.Context) {
 		user := userFromDatasetName(r.Name)
 		var associated bool
 		for _, m := range machines.all {
-			for _, UserState := range m.Users[user] {
+			for _, UserState := range m.AllUsersStates[user] {
 				if UserState.ID == base {
-					m.addUserDatasets(ctx, r, children, nil)
+					m.addUserState(ctx, r, children)
 					associated = true
 					break
 				}
@@ -323,13 +308,13 @@ func (ms *Machines) refresh(ctx context.Context) {
 		m.attachRemainingDatasets(ctx, boots, persistents)
 
 		// attach to global list all system datasets of this machine
-		for id := range m.SystemDatasets {
-			machines.allSystemDatasets = append(machines.allSystemDatasets, m.SystemDatasets[id]...)
+		for id := range m.Datasets {
+			machines.allSystemDatasets = append(machines.allSystemDatasets, m.Datasets[id]...)
 		}
 		for _, k := range sortedStateKeys(m.History) {
 			h := m.History[k]
-			for id := range h.SystemDatasets {
-				machines.allSystemDatasets = append(machines.allSystemDatasets, h.SystemDatasets[id]...)
+			for id := range h.Datasets {
+				machines.allSystemDatasets = append(machines.allSystemDatasets, h.Datasets[id]...)
 			}
 		}
 	}
@@ -358,9 +343,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 
 // populate attach main system datasets to machines and returns other types of datasets for later triage/attachment, alongside
 // a map to direct access to a given state and machine
-func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, origins map[string]*string) (mns map[string]machineAndState, boots, userdatas, persistents, unmanagedDatasets []*zfs.Dataset) {
-	mns = make(map[string]machineAndState)
-
+func (ms *Machines) populate(ctx context.Context, allDatasets []*zfs.Dataset, origins map[string]*string) (boots, userdatas, persistents, unmanagedDatasets []*zfs.Dataset) {
 	for _, d := range allDatasets {
 		// we are taking the d address. Ensure we have a local variable that isn’t going to be reused
 		d := d
@@ -368,15 +351,11 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 		m := newMachineFromDataset(d, origins[d.Name])
 		if m != nil {
 			ms.all[d.Name] = m
-			mns[d.Name] = machineAndState{
-				state:   &m.State,
-				machine: m,
-			}
 			continue
 		}
 
 		// Check for children, clones and snapshots
-		if ms.populateSystemAndHistory(ctx, d, origins[d.Name], &mns) {
+		if ms.populateSystemAndHistory(ctx, d, origins[d.Name]) {
 			continue
 		}
 
@@ -385,14 +364,14 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 		// Extract boot datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
 		if strings.HasPrefix(d.Mountpoint, "/boot") {
-			boots = append(boots, &d)
+			boots = append(boots, d)
 			continue
 		}
 
 		// Extract zsys user datasets if any. We can't attach them directly with machines as if they are on another pool,
 		// the machine is not necessiraly loaded yet.
 		if isUserDataset(d.Name) {
-			userdatas = append(userdatas, &d)
+			userdatas = append(userdatas, d)
 			continue
 		}
 
@@ -400,32 +379,32 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []zfs.Dataset, ori
 		// will mount them.
 		if d.CanMount != "on" {
 			log.Debugf(ctx, i18n.G("ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on"), d.Name)
-			unmanagedDatasets = append(unmanagedDatasets, &d)
+			unmanagedDatasets = append(unmanagedDatasets, d)
 			continue
 		}
 
 		// should be persistent datasets
-		persistents = append(persistents, &d)
+		persistents = append(persistents, d)
 	}
 
-	return mns, boots, userdatas, persistents, unmanagedDatasets
+	return boots, userdatas, persistents, unmanagedDatasets
 }
 
 // newMachineFromDataset returns a new machine if the given dataset is a main system one.
-func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
+func newMachineFromDataset(d *zfs.Dataset, origin *string) *Machine {
 	// Register all zsys non cloned mountable / to a new machine
 	if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == "" {
 		m := Machine{
+			IsZsys: d.BootFS,
 			State: State{
-				ID:             d.Name,
-				IsZsys:         d.BootFS,
-				SystemDatasets: make(map[string][]*zfs.Dataset),
-				UserDatasets:   make(map[string][]*zfs.Dataset),
+				ID:       d.Name,
+				Datasets: make(map[string][]*zfs.Dataset),
+				Users:    make(map[string]*State),
 			},
-			Users:   make(map[string]map[string]UserState),
-			History: make(map[string]*State),
+			AllUsersStates: make(map[string]map[string]*State),
+			History:        make(map[string]*State),
 		}
-		m.SystemDatasets[d.Name] = []*zfs.Dataset{&d}
+		m.Datasets[d.Name] = []*zfs.Dataset{d}
 		// We don't want lastused to be 1970 in our golden files
 		if d.LastUsed != 0 {
 			lu := time.Unix(int64(d.LastUsed), 0)
@@ -439,45 +418,39 @@ func newMachineFromDataset(d zfs.Dataset, origin *string) *Machine {
 // populateSystemAndHistory identified if the given dataset is a system dataset (children of root one) or a history
 // one. It creates and attach the states as needed.
 // It returns ok if the dataset matches any machine and is attached.
-func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset, origin *string, mns *map[string]machineAndState) (ok bool) {
+func (ms *Machines) populateSystemAndHistory(ctx context.Context, d *zfs.Dataset, origin *string) (ok bool) {
 	for _, m := range ms.all {
-
 		// Direct main machine state children
-		if ok, err := isChild(m.ID, d); err != nil {
+		if ok, err := isChild(m.ID, *d); err != nil {
 			log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 		} else if ok {
-			m.SystemDatasets[m.ID] = append(m.SystemDatasets[m.ID], &d)
+			m.Datasets[m.ID] = append(m.Datasets[m.ID], d)
 			return true
 		}
 
 		// Clones or snapshot root dataset (origins points to origin dataset)
 		if d.Mountpoint == "/" && d.CanMount != "off" && origin != nil && *origin == m.ID {
 			s := &State{
-				ID:             d.Name,
-				IsZsys:         d.BootFS,
-				SystemDatasets: make(map[string][]*zfs.Dataset),
-				UserDatasets:   make(map[string][]*zfs.Dataset),
+				ID:       d.Name,
+				Datasets: make(map[string][]*zfs.Dataset),
+				Users:    make(map[string]*State),
 			}
-			s.SystemDatasets[d.Name] = []*zfs.Dataset{&d}
+			s.Datasets[d.Name] = []*zfs.Dataset{d}
 			m.History[d.Name] = s
 			// We don't want lastused to be 1970 in our golden files
 			if d.LastUsed != 0 {
 				lu := time.Unix(int64(d.LastUsed), 0)
 				m.History[d.Name].LastUsed = &lu
 			}
-			(*mns)[d.Name] = machineAndState{
-				state:   s,
-				machine: m,
-			}
 			return true
 		}
 
 		// Clones or snapshot children
 		for _, h := range m.History {
-			if ok, err := isChild(h.ID, d); err != nil {
+			if ok, err := isChild(h.ID, *d); err != nil {
 				log.Warningf(ctx, i18n.G("ignoring %q as couldn't assert if it's a child: ")+config.ErrorFormat, d.Name, err)
 			} else if ok {
-				h.SystemDatasets[h.ID] = append(h.SystemDatasets[h.ID], &d)
+				h.Datasets[h.ID] = append(h.Datasets[h.ID], d)
 				return true
 			}
 		}
@@ -486,31 +459,27 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d zfs.Dataset,
 	return false
 }
 
-// addUserDatasets attach user datasets to a given state and append to the map of all users on the machine
-func (m *Machine) addUserDatasets(ctx context.Context, r *zfs.Dataset, children []*zfs.Dataset, state *State) {
-	// Add dataset to given state
-	if state != nil {
-		state.UserDatasets[r.Name] = []*zfs.Dataset{r}
-		state.UserDatasets[r.Name] = append(state.UserDatasets[r.Name], children...)
-	}
-
-	user := userFromDatasetName(r.Name)
-	if m.Users[user] == nil {
-		m.Users[user] = make(map[string]UserState)
-	}
-
-	// Attach to global user map new userData
-	// If the dataset has already been added  it is overwritten
-	s := UserState{
+// addUserState creates and attach a new user state to the machine users map.
+// It returns the username and the created state
+func (m *Machine) addUserState(ctx context.Context, r *zfs.Dataset, children []*zfs.Dataset) (string, *State) {
+	s := &State{
 		ID:       r.Name,
-		Datasets: append([]*zfs.Dataset{r}, children...),
+		Datasets: map[string][]*zfs.Dataset{r.Name: append([]*zfs.Dataset{r}, children...)},
 	}
 	// We don't want lastused to be 1970 in our golden files
 	if r.LastUsed != 0 {
 		lu := time.Unix(int64(r.LastUsed), 0)
 		s.LastUsed = &lu
 	}
-	m.Users[user][r.Name] = s
+
+	// Attach to global user map new userData
+	// If the dataset has already been added  it is overwritten
+	user := userFromDatasetName(r.Name)
+	if m.AllUsersStates[user] == nil {
+		m.AllUsersStates[user] = make(map[string]*State)
+	}
+	m.AllUsersStates[user][r.Name] = s
+	return user, s
 }
 
 // attachRemainingDatasets attaches to machine boot and persistent datasets if they fit current machine.
@@ -528,9 +497,9 @@ func (m *Machine) attachRemainingDatasets(ctx context.Context, boots, persistent
 		// Main boot base dataset (matching machine ID)
 		if strings.HasSuffix(d.Name, "/"+machineID) {
 			bootDatasetsID = d.Name
-			m.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+			m.Datasets[bootDatasetsID] = []*zfs.Dataset{d}
 		} else if bootDatasetsID != "" && strings.HasPrefix(d.Name, bootDatasetsID+"/") { // child
-			m.SystemDatasets[bootDatasetsID] = append(m.SystemDatasets[bootDatasetsID], d)
+			m.Datasets[bootDatasetsID] = append(m.Datasets[bootDatasetsID], d)
 		}
 	}
 
@@ -541,13 +510,13 @@ func (m *Machine) attachRemainingDatasets(ctx context.Context, boots, persistent
 	// We want reproducibility, so iterate to attach datasets in a given order.
 	for _, k := range sortedStateKeys(m.History) {
 		h := m.History[k]
-		h.attachRemainingDatasetsForHistory(boots, persistents)
+		h.attachRemainingDatasetsForHistory(boots)
 	}
 }
 
-// attachRemainingDatasetsForHistory attaches to a given history state boot and persistent datasets if they fit.
+// attachRemainingDatasetsForHistory attaches to a given history state boot datasets if they fit.
 // It's similar to attachRemainingDatasets with some particular rules on snapshots.
-func (s *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Dataset) {
+func (s *State) attachRemainingDatasetsForHistory(boots []*zfs.Dataset) {
 	// stateID is the basename of the State.
 	stateID := filepath.Base(s.ID)
 
@@ -564,28 +533,28 @@ func (s *State) attachRemainingDatasetsForHistory(boots, persistents []*zfs.Data
 			// its name and take the first route we find.
 			if bootDatasetsID == "" && strings.HasSuffix(d.Name, "@"+snapshot) {
 				bootDatasetsID = d.Name
-				s.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+				s.Datasets[bootDatasetsID] = []*zfs.Dataset{d}
 				continue
 			} else if bootDatasetsID != "" {
 				baseBootDatasetsID, _ := splitSnapshotName(bootDatasetsID)
 				if strings.HasPrefix(d.Name, baseBootDatasetsID+"/") && strings.HasSuffix(d.Name, "@"+snapshot) { // child
-					s.SystemDatasets[bootDatasetsID] = append(s.SystemDatasets[bootDatasetsID], d)
+					s.Datasets[bootDatasetsID] = append(s.Datasets[bootDatasetsID], d)
 				}
 			}
 		}
 		// For clones just match the base datasetname or its children.
+		if d.IsSnapshot {
+			continue
+		}
 
 		// Main boot base dataset (matching machine ID)
 		if strings.HasSuffix(d.Name, "/"+stateID) {
 			bootDatasetsID = d.Name
-			s.SystemDatasets[bootDatasetsID] = []*zfs.Dataset{d}
+			s.Datasets[bootDatasetsID] = []*zfs.Dataset{d}
 		} else if bootDatasetsID != "" && strings.HasPrefix(d.Name, bootDatasetsID+"/") { // child
-			s.SystemDatasets[bootDatasetsID] = append(s.SystemDatasets[bootDatasetsID], d)
+			s.Datasets[bootDatasetsID] = append(s.Datasets[bootDatasetsID], d)
 		}
 	}
-
-	// Persistent datasets
-	s.PersistentDatasets = persistents
 }
 
 // isZsys returns if there is a current machine, and if it's the case, if it's zsys.
@@ -647,9 +616,22 @@ func (ms Machines) GetMachine(ID string) (*Machine, error) {
 func (m Machine) Info(full bool) (string, error) {
 	var out bytes.Buffer
 	w := tabwriter.NewWriter(&out, 0, 0, 1, ' ', 0)
+	fmt.Fprintf(w, i18n.G("Name:\t%s\n"), m.ID)
+	fmt.Fprintf(w, i18n.G("ZSys:\t%t\n"), m.isZsys)
 
-	// Main machine
+	// Main machine state
 	m.toWriter(w, false, full)
+
+	if full {
+		if len(m.PersistentDatasets) == 0 {
+			fmt.Fprintf(w, i18n.G("Persistent Datasets: None\n"))
+		} else {
+			fmt.Fprintf(w, i18n.G("Persistent Datasets:\n"))
+			for _, n := range m.PersistentDatasets {
+				fmt.Fprintf(w, i18n.G("\t- %s\n"), n)
+			}
+		}
+	}
 
 	// History
 	fmt.Fprintf(w, i18n.G("History:\n"))
@@ -670,7 +652,7 @@ func (m Machine) Info(full bool) (string, error) {
 
 	// Users
 	keys = nil
-	for k := range m.Users {
+	for k := range m.AllUsersStates {
 		keys = append(keys, k)
 	}
 	sort.Sort(sort.StringSlice(keys))
@@ -680,18 +662,21 @@ func (m Machine) Info(full bool) (string, error) {
 	for _, user := range keys {
 		fmt.Fprintf(w, i18n.G("  - Name:\t%s\n"), user)
 
-		if len(m.Users[user]) == 0 {
+		if len(m.AllUsersStates[user]) == 0 {
 			fmt.Fprintf(w, i18n.G("    History:\tEmpty\n"))
 			continue
 		}
 
 		fmt.Fprintf(w, i18n.G("    History:\t\n"))
 
-		timeToState := make(map[string]UserState)
-		for id, s := range m.Users[user] {
+		timeToState := make(map[string]*State)
+	nextUserState:
+		for id, s := range m.AllUsersStates[user] {
 			// exclude "current" user state fom history
-			if _, exists := m.UserDatasets[s.ID]; exists {
-				continue
+			for _, us := range m.State.Users {
+				if us == s {
+					continue nextUserState
+				}
 			}
 
 			k := fmt.Sprintf("%010d_%s", s.LastUsed.Unix(), id)
@@ -708,8 +693,10 @@ func (m Machine) Info(full bool) (string, error) {
 
 			if full {
 				var ud []string
-				for _, d := range s.Datasets {
-					ud = append(ud, d.Name)
+				for _, ds := range s.Datasets {
+					for _, d := range ds {
+						ud = append(ud, d.Name)
+					}
 				}
 				fmt.Fprintf(w, i18n.G("     - %s: %s\n"), s.LastUsed.Format("2006-01-02 15:04:05"), strings.Join(ud, ", "))
 				continue
@@ -743,48 +730,39 @@ func sortedDatasetNames(datasets map[string][]*zfs.Dataset) (dNames []string) {
 func (s State) toWriter(w io.Writer, isHistory, full bool) {
 	var prefix string
 	if isHistory {
-		prefix = "  - "
+		fmt.Fprintf(w, i18n.G("  - Name:\t%s\n"), s.ID)
 	}
-	fmt.Fprintf(w, i18n.G("%sName:\t%s\n"), prefix, s.ID)
 	lu := s.LastUsed.Format("2006-01-02 15:04:05")
 
 	if isHistory {
 		prefix = "    "
 	}
 	if !isHistory {
-		if s.SystemDatasets[s.ID][0].Mounted {
+		if s.Datasets[s.ID][0].Mounted {
 			lu = i18n.G("current")
 		}
 		fmt.Fprintf(w, i18n.G("%sLast Used:\t%s\n"), prefix, lu)
-		fmt.Fprintf(w, i18n.G("%sZSys:\t%t\n"), prefix, s.SystemDatasets[s.ID][0].BootFS)
 	} else {
 		fmt.Fprintf(w, i18n.G("%sCreated on:\t%s\n"), prefix, lu)
 	}
 
 	if full {
-		fmt.Fprintf(w, i18n.G("%sLast Booted Kernel:\t%s\n"), prefix, s.SystemDatasets[s.ID][0].LastBootedKernel)
+		fmt.Fprintf(w, i18n.G("%sLast Booted Kernel:\t%s\n"), prefix, s.Datasets[s.ID][0].LastBootedKernel)
 		fmt.Fprintf(w, i18n.G("%sSystem Datasets:\n"), prefix)
 
-		for _, n := range sortedDatasetNames(s.SystemDatasets) {
+		for _, n := range sortedDatasetNames(s.Datasets) {
 			fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
 		}
 
-		if len(s.UserDatasets) > 0 {
+		if len(s.Users) > 0 {
 			fmt.Fprintf(w, i18n.G("%sUser Datasets:\n"), prefix)
-			for _, n := range sortedDatasetNames(s.UserDatasets) {
-				fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
+			for u, us := range s.Users {
+				fmt.Fprintf(w, i18n.G("%s\tUser: %s\n"), prefix, u)
+				for _, n := range sortedDatasetNames(us.Datasets) {
+					fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
+				}
 			}
 		}
-
-		if len(s.PersistentDatasets) == 0 {
-			fmt.Fprintf(w, i18n.G("%sPersistent Datasets: None\n"), prefix)
-		} else {
-			fmt.Fprintf(w, i18n.G("%sPersistent Datasets:\n"), prefix)
-			for _, n := range s.PersistentDatasets {
-				fmt.Fprintf(w, i18n.G("%s\t- %s\n"), prefix, n)
-			}
-		}
-
 	}
 }
 
@@ -867,4 +845,16 @@ func (ms Machines) MarshalJSON() ([]byte, error) {
 	mt.UnmanagedDatasets = ms.unmanagedDatasets
 
 	return json.Marshal(mt)
+}
+
+// getAllStatesOnMachines returns the association of all states to their corresponding machine
+func (ms *Machines) getAllStatesOnMachines() map[*State]*Machine {
+	r := make(map[*State]*Machine)
+	for _, m := range ms.all {
+		r[&m.State] = m
+		for _, h := range m.History {
+			r[h] = m
+		}
+	}
+	return r
 }

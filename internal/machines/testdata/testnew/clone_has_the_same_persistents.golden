@@ -1,10 +1,10 @@
 {
    "All": {
       "rpool/ROOT/ubuntu_1234": {
-         "ID": "rpool/ROOT/ubuntu_1234",
          "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu_1234",
          "LastUsed": "2019-04-18T04:45:55+02:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/ROOT/ubuntu_1234": [
                {
                   "Name": "rpool/ROOT/ubuntu_1234",
@@ -15,19 +15,11 @@
                }
             ]
          },
-         "PersistentDatasets": [
-            {
-               "Name": "rpool/opt",
-               "Mountpoint": "/opt",
-               "CanMount": "on"
-            }
-         ],
          "History": {
             "rpool/ROOT/ubuntu_1234@snap1": {
                "ID": "rpool/ROOT/ubuntu_1234@snap1",
-               "IsZsys": true,
                "LastUsed": "2018-12-10T13:20:44+01:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/ROOT/ubuntu_1234@snap1": [
                      {
                         "Name": "rpool/ROOT/ubuntu_1234@snap1",
@@ -38,20 +30,12 @@
                         "LastUsed": 1544444444
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/opt",
-                     "Mountpoint": "/opt",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             },
             "rpool/ROOT/ubuntu_5678": {
                "ID": "rpool/ROOT/ubuntu_5678",
-               "IsZsys": true,
                "LastUsed": "2019-12-31T08:36:17+01:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/ROOT/ubuntu_5678": [
                      {
                         "Name": "rpool/ROOT/ubuntu_5678",
@@ -62,16 +46,16 @@
                         "Origin": "rpool/ROOT/ubuntu_1234@snap1"
                      }
                   ]
-               },
-               "PersistentDatasets": [
-                  {
-                     "Name": "rpool/opt",
-                     "Mountpoint": "/opt",
-                     "CanMount": "on"
-                  }
-               ]
+               }
             }
-         }
+         },
+         "PersistentDatasets": [
+            {
+               "Name": "rpool/opt",
+               "Mountpoint": "/opt",
+               "CanMount": "on"
+            }
+         ]
       }
    },
    "AllSystemDatasets": [

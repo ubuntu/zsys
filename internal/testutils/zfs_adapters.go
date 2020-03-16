@@ -1,8 +1,6 @@
 package testutils
 
 import (
-	"fmt"
-
 	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 	"github.com/ubuntu/zsys/internal/zfs/libzfs/mock"
 )
@@ -10,13 +8,14 @@ import (
 // TestHelper maps testing.T and testing.B
 type testHelper interface {
 	Helper()
+	Logf(format string, args ...interface{})
 }
 
 // GetMockZFS always return a zfs mock object
 func GetMockZFS(t testHelper) LibZFSInterface {
 	t.Helper()
 
-	fmt.Println("Running tests with mocked libzfs")
+	t.Logf("Running tests with mocked libzfs")
 	mock := mock.New()
 	return &mock
 }

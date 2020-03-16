@@ -2,6 +2,7 @@ package machines_test
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -92,6 +93,9 @@ func TestNew(t *testing.T) {
 		"Two machines have the same persistents": {def: "m_two_machines_with_persistent.yaml"},
 		"Snapshot has the same persistents":      {def: "m_snapshot_with_persistent.yaml"},
 		"Clone has the same persistents":         {def: "m_clone_with_persistent.yaml"},
+
+		// Bpool special cases
+		"Machine with bpool with children and snapshots": {def: "state_snapshot_with_userdata_n_system_clones.yaml"},
 
 		// Limit case with no machines
 		"No machine": {def: "d_no_machine.yaml"},
@@ -247,11 +251,11 @@ func TestBoot(t *testing.T) {
 				lzfs.SetDatasetAsMounted(tc.mountedDataset, true)
 			}
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			lzfs.ErrOnClone(tc.cloneErr)
 			lzfs.ErrOnScan(tc.scanErr)
@@ -295,26 +299,26 @@ func TestIdempotentBoot(t *testing.T) {
 	fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_layout2_machines_with_snapshots_clones_reverting.yaml"), testutils.WithLibZFS(libzfs))
 	defer fPools.Create(dir)()
 
-	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.EnsureBoot(context.Background())
+	hasChanged, err := ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 
 	assert.True(t, hasChanged, "expected first boot to signal a change, but got false")
-	ms2 := ms1
+	msAfterEnsureBoot := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.EnsureBoot(context.Background())
+	hasChanged, err = ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.False(t, hasChanged, "expected second boot to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterEnsureBoot, ms)
 }
 
 // TODO: not really idempotent, but should untag datasets that are tagged with destination datasets, maybe even destroy if it's the only one?
@@ -333,31 +337,31 @@ func TestIdempotentBootSnapshotSuccess(t *testing.T) {
 	lzfs := libzfs.(*mock.LibZFS)
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_4242", true)
 
-	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.EnsureBoot(context.Background())
+	hasChanged, err := ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.True(t, hasChanged, "expected first boot to signal a change, but got false")
 
-	hasChanged, err = ms1.Commit(context.Background())
+	hasChanged, err = ms.Commit(context.Background())
 	if err != nil {
 		t.Fatal("Commit failed:", err)
 	}
 	assert.True(t, hasChanged, "expected first commit to signal a change, but got false")
-	ms2 := ms1
+	msAfterCommit := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.EnsureBoot(context.Background())
+	hasChanged, err = ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.False(t, hasChanged, "expected second boot to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterCommit, ms)
 }
 
 func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
@@ -372,26 +376,26 @@ func TestIdempotentBootSnapshotBeforeCommit(t *testing.T) {
 	lzfs := libzfs.(*mock.LibZFS)
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_4242", true)
 
-	ms1, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLineWithRevert("rpool/ROOT/ubuntu_5678@snap3"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.EnsureBoot(context.Background())
+	hasChanged, err := ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.True(t, hasChanged, "expected first boot to signal a change, but got false")
 
-	ms2 := ms1
+	msAfterEnsureBoot := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.EnsureBoot(context.Background())
+	hasChanged, err = ms.EnsureBoot(context.Background())
 	if err != nil {
 		t.Fatalf("expected no error but got: %v", err)
 	}
 	assert.False(t, hasChanged, "expected second boot to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterEnsureBoot, ms)
 }
 
 func TestCommit(t *testing.T) {
@@ -455,7 +459,7 @@ func TestCommit(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
@@ -465,7 +469,7 @@ func TestCommit(t *testing.T) {
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 			lzfs.ErrOnPromote(tc.promoteErr)
 			lzfs.ForceLastUsedTime(true)
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			hasChanged, err := ms.Commit(context.Background())
 			if err != nil {
@@ -508,26 +512,26 @@ func TestIdempotentCommit(t *testing.T) {
 	lzfs.SetDatasetAsMounted("rpool/ROOT/ubuntu_9876", true)
 	lzfs.ForceLastUsedTime(true)
 
-	ms1, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_9876"), machines.WithLibZFS(libzfs))
+	ms, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_9876"), machines.WithLibZFS(libzfs))
 	if err != nil {
 		t.Error("expected success but got an error at first scan on machines", err)
 	}
 
-	hasChanged, err := ms1.Commit(context.Background())
+	hasChanged, err := ms.Commit(context.Background())
 	if err != nil {
 		t.Fatal("first commit failed:", err)
 	}
 	assert.True(t, hasChanged, "expected first commit to signal a change, but got false")
 
-	ms2 := ms1
+	msAfterCommit := ms.CopyForTests(t)
 
-	hasChanged, err = ms2.Commit(context.Background())
+	hasChanged, err = ms.Commit(context.Background())
 	if err != nil {
 		t.Fatal("second commit failed:", err)
 	}
 	assert.False(t, hasChanged, "expected second commit to signal no change, but got true")
 
-	assertMachinesEquals(t, ms1, ms2)
+	assertMachinesEquals(t, msAfterCommit, ms)
 }
 
 func TestCreateUserData(t *testing.T) {
@@ -590,12 +594,12 @@ func TestCreateUserData(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ForceLastUsedTime(true)
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			lzfs.ErrOnCreate(tc.createErr)
 			lzfs.ErrOnScan(tc.scanErr)
@@ -667,12 +671,12 @@ func TestChangeHomeOnUserData(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ForceLastUsedTime(true)
 
-			initMachines, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			lzfs.ErrOnScan(tc.scanErr)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
@@ -748,14 +752,14 @@ func TestCreateSystemSnapshot(t *testing.T) {
 				tc.cmdline = generateCmdLine("rpool/ROOT/ubuntu_1234")
 			}
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 			lzfs := libzfs.(*mock.LibZFS)
 
 			lzfs.ForceLastUsedTime(true)
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			snapshotName, err := ms.CreateSystemSnapshot(context.Background(), tc.snapshotName)
 			if err != nil {
@@ -845,14 +849,14 @@ func TestCreateUserSnapshot(t *testing.T) {
 				tc.cmdline = generateCmdLine("rpool/ROOT/ubuntu_1234")
 			}
 
-			initMachines, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 			lzfs := libzfs.(*mock.LibZFS)
 
 			lzfs.ForceLastUsedTime(true)
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 
 			snapshotName, err := ms.CreateUserSnapshot(context.Background(), tc.userName, tc.snapshotName)
 			if err != nil {
@@ -892,310 +896,46 @@ func TestCreateUserSnapshot(t *testing.T) {
 	}
 }
 
-func TestGetStateAndDependencies(t *testing.T) {
-	t.Parallel()
-	tests := map[string]struct {
-		def          string
-		promoteState string
-		depsFor      string
-
-		wantDeps     []string
-		wantUserDeps []string
-		wantErr      bool
-	}{
-		"Get itself, no snapshot": {def: "m_with_userdata.yaml", depsFor: "rpool/ROOT/ubuntu_1234", wantDeps: []string{"rpool/ROOT/ubuntu_1234"}},
-		"Get snapshots on one state, no clone": {def: "state_snapshot_with_userdata_02.yaml", depsFor: "rpool/ROOT/ubuntu_1234",
-			wantDeps: []string{
-				"rpool/ROOT/ubuntu_1234",
-				"rpool/ROOT/ubuntu_1234@snap1",
-				"rpool/ROOT/ubuntu_1234@snap2",
-				"rpool/ROOT/ubuntu_1234@snap3",
-			},
-		},
-		"Get deps for current machine": {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/ROOT/ubuntu_1234",
-			wantDeps: []string{
-				"rpool/ROOT/ubuntu_1234",
-				"rpool/ROOT/ubuntu_1234@snap1",
-				"rpool/ROOT/ubuntu_1234@snap2",
-				"rpool/ROOT/ubuntu_5678",
-				"rpool/ROOT/ubuntu_1234@snap3",
-			},
-		},
-		"Get deps for current machine clone": {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/ROOT/ubuntu_5678", wantDeps: []string{"rpool/ROOT/ubuntu_5678"}},
-		"Get deps for current machine with promoted clone (with snapshot one dependency)": {def: "state_snapshot_with_userdata_01.yaml", promoteState: "rpool/ROOT/ubuntu_5678", depsFor: "rpool/ROOT/ubuntu_5678",
-			wantDeps: []string{
-				"rpool/ROOT/ubuntu_5678",
-				"rpool/ROOT/ubuntu_5678@snap1",
-				"rpool/ROOT/ubuntu_5678@snap2",
-				"rpool/ROOT/ubuntu_1234",
-				"rpool/ROOT/ubuntu_1234@snap3",
-			},
-		},
-
-		// User deps unlinked to system state
-		"Get user snapshots on one state, no clone": {def: "state_snapshot_with_userdata_07.yaml", depsFor: "rpool/ROOT/ubuntu_5678",
-			wantDeps:     []string{"rpool/ROOT/ubuntu_5678"},
-			wantUserDeps: []string{"rpool/USERDATA/root_cdef@snaproot1"},
-		},
-		"Get user manual clone on one state": {def: "state_snapshot_with_userdata_07.yaml", depsFor: "rpool/ROOT/ubuntu_1234@snap3",
-			wantDeps: []string{
-				"rpool/ROOT/ubuntu_1234@snap3",
-				"rpool/ROOT/ubuntu_9999",
-			},
-			wantUserDeps: []string{
-				"rpool/USERDATA/root_defg@snaproot2",
-				"rpool/USERDATA/root_ghij",
-			},
-		},
-		"Err if getting user manual clone errors out (user manual clone in persistent or remaining datasets)": {def: "state_snapshot_with_userdata_05.yaml", depsFor: "rpool/ROOT/ubuntu_5678", wantErr: true},
-
-		// Match tests
-		"Match current machine on base name":     {def: "m_with_userdata.yaml", depsFor: "ubuntu_1234", wantDeps: []string{"rpool/ROOT/ubuntu_1234"}},
-		"Match history machine on snapshot name": {def: "state_snapshot_with_userdata_01.yaml", depsFor: "snap1", wantDeps: []string{"rpool/ROOT/ubuntu_1234@snap1"}},
-		"Match history on base name":             {def: "state_snapshot_with_userdata_01.yaml", depsFor: "ubuntu_5678", wantDeps: []string{"rpool/ROOT/ubuntu_5678"}},
-
-		"Multiple match on snapshot name":     {def: "state_snapshot_with_userdata_03.yaml", depsFor: "snap1", wantErr: true},
-		"Multiple match on base dataset name": {def: "state_snapshot_with_userdata_04.yaml", depsFor: "ubuntu_1234", wantErr: true},
-		"No matches":                          {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/ROOT/ubuntu_doesntexist", wantErr: true},
-
-		// Manual user clones
-		"Manual clone on our removal list on remaining datatasets":  {def: "state_snapshot_with_userdata_with_manual_system_clone_unmanaged.yaml", depsFor: "rpool/ROOT/ubuntu_1234", wantErr: true},
-		"Manual clone on our removal list on persistent datatasets": {def: "state_snapshot_with_userdata_with_manual_system_clone_persistent.yaml", depsFor: "rpool/ROOT/ubuntu_1234", wantErr: true},
-	}
-
-	for name, tc := range tests {
-		tc := tc
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			dir, cleanup := testutils.TempDir(t)
-			defer cleanup()
-
-			libzfs := testutils.GetMockZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
-			defer fPools.Create(dir)()
-
-			ms, err := machines.New(context.Background(), generateCmdLine(tc.promoteState), machines.WithLibZFS(libzfs))
-			if err != nil {
-				t.Error("expected success but got an error scanning for machines", err)
-			}
-			if tc.promoteState != "" {
-				if _, err = ms.EnsureBoot(context.Background()); err != nil {
-					t.Fatalf("Setup fail: %v", err)
-				}
-				if _, err = ms.Commit(context.Background()); err != nil {
-					t.Fatalf("Setup fail: %v", err)
-				}
-			}
-			stateDeps, userStateDeps, err := ms.GetStateAndDependencies(tc.depsFor)
-			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				return
-			}
-			if err == nil && tc.wantErr {
-				t.Fatal("expected an error but got none")
-			}
-
-			var deps []string
-			for _, s := range stateDeps {
-				deps = append(deps, s.ID)
-			}
-
-			var userDeps []string
-			for _, s := range userStateDeps {
-				userDeps = append(userDeps, s.ID)
-			}
-
-			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
-			// However, we identified 4 rules to ensure that the dependency order (from root to leaf) is respected.
-
-			// rule 1: ensure that the 2 lists have the same elements
-			if len(deps) != len(tc.wantDeps) {
-				t.Fatalf("deps content doesn't have enough elements:\nGot:  %v\nWant: %v", deps, tc.wantDeps)
-			} else {
-				assert.ElementsMatch(t, tc.wantDeps, deps, "didn't get matching dep list content")
-			}
-			if len(userDeps) != len(tc.wantUserDeps) {
-				t.Fatalf("user deps content doesn't have enough elements:\nGot:  %v\nWant: %v", userDeps, tc.wantUserDeps)
-			} else {
-				assert.ElementsMatch(t, tc.wantUserDeps, userDeps, "didn't get matching user dep list content")
-			}
-
-			// rule 2: ensure that no snapshot from a base appears before that base
-			assertSnapshotAfterItsBaseState(t, deps)
-			assertSnapshotAfterItsBaseState(t, userDeps)
-
-			// rule 3: ensure that the order between a snapshot and an immediately following dataset is preserved (snapshot to clone)
-			assertSnapshotToCloneOrderIsPreserved(t, tc.wantDeps, deps)
-			assertSnapshotToCloneOrderIsPreserved(t, tc.wantUserDeps, userDeps)
-
-			// rule 4: snapshots from a parent datasets appear before OR only after any snapshots on a child dataset
-			assertNoParentSnapshotBeforeChildren(t, deps)
-			assertNoParentSnapshotBeforeChildren(t, userDeps)
-		})
-	}
-}
-
-func TestGetUserStateAndDependencies(t *testing.T) {
-	t.Parallel()
-	tests := map[string]struct {
-		def               string
-		depsFor           string
-		user              string
-		onlyUserStateSave bool
-
-		wantDeps []string
-		wantErr  bool
-	}{
-		"User manual snapshot, no clone":             {def: "state_snapshot_with_userdata_03.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_abcd@snapuser1", wantDeps: []string{"rpool/USERDATA/user1_abcd@snapuser1"}},
-		"User manual clone":                          {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_ijkl", wantDeps: []string{"rpool/USERDATA/user1_ijkl"}},
-		"User manual clone with snapshots, no clone": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_mnop", wantDeps: []string{"rpool/USERDATA/user1_mnop", "rpool/USERDATA/user1_mnop@snapuser3"}},
-		"User manual clone with snapshots, with clone and snapshots": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_qrst",
-			wantDeps: []string{
-				"rpool/USERDATA/user1_qrst",
-				"rpool/USERDATA/user1_qrst@snapuser3",
-				"rpool/USERDATA/user1_uvwx",
-				"rpool/USERDATA/user1_uvwx@snapuser4",
-			}},
-
-		// Match tests
-		"Match on base name":           {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "ijkl", wantDeps: []string{"rpool/USERDATA/user1_ijkl"}},
-		"Match on base name with user": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "user1_ijkl", wantDeps: []string{"rpool/USERDATA/user1_ijkl"}},
-		"Match on snapshot name":       {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "snapuser4", wantDeps: []string{"rpool/USERDATA/user1_uvwx@snapuser4"}},
-
-		"Is dataset linked to a system state":                {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_abcd", wantErr: true},
-		"Is snapshot linked to a system state":               {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snap2", wantErr: true},
-		"Is snapshot linked via its clone to a system state": {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snaproot1", wantErr: true},
-
-		"Ignore, with onlyUserStateSave, the only dataset linked to a system state": {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_abcd", onlyUserStateSave: true},
-		"Ignore, with onlyUserStateSave, the snapshot and clone linked to a system state but list other": {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snap2", onlyUserStateSave: true,
-			wantDeps: []string{"rpool/USERDATA/root_cdef@snaproot2"}},
-		"Ignore, with onlyUserStateSave, the snapshot linked via its clone but list itself": {def: "state_snapshot_with_userdata_05.yaml", user: "root", depsFor: "rpool/USERDATA/root_bcde@snaproot1", onlyUserStateSave: true,
-			wantDeps: []string{"rpool/USERDATA/root_bcde@snaproot1"}},
-
-		"Manual clone on our removal list on remaining datatasets":  {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser5", wantErr: true},
-		"Manual clone on our removal list on persistent datatasets": {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "rpool/USERDATA/user1_efgh@snapuser3", wantErr: true},
-
-		"No user provided":                    {def: "state_snapshot_with_userdata_01.yaml", user: "", depsFor: "rpool/USERDATA/user1_efgh@snapuser2", wantErr: true},
-		"No target name provided":             {def: "state_snapshot_with_userdata_01.yaml", user: "user1", depsFor: "", wantErr: true},
-		"No match as on different user":       {def: "state_snapshot_with_userdata_01.yaml", user: "user99", depsFor: "rpool/USERDATA/user1_efgh@snapuser2", wantErr: true},
-		"Multiple match on snapshot name":     {def: "state_snapshot_with_userdata_05.yaml", user: "user1", depsFor: "snapuser3", wantErr: true},
-		"Multiple match on base dataset name": {def: "state_snapshot_with_userdata_04.yaml", user: "user1", depsFor: "abcd", wantErr: true},
-		"No matches":                          {def: "state_snapshot_with_userdata_01.yaml", depsFor: "rpool/USERDATA/user_doesntexist", wantErr: true},
-	}
-
-	for name, tc := range tests {
-		tc := tc
-		t.Run(name, func(t *testing.T) {
-			t.Parallel()
-			dir, cleanup := testutils.TempDir(t)
-			defer cleanup()
-
-			libzfs := testutils.GetMockZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
-			defer fPools.Create(dir)()
-
-			ms, err := machines.New(context.Background(), generateCmdLine("rpool/ROOT/ubuntu_1234"), machines.WithLibZFS(libzfs))
-			if err != nil {
-				t.Error("expected success but got an error scanning for machines", err)
-			}
-			stateDeps, err := ms.GetUserStateAndDependencies(tc.user, tc.depsFor, tc.onlyUserStateSave)
-			if err != nil {
-				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
-				}
-				return
-			}
-			if err == nil && tc.wantErr {
-				t.Fatal("expected an error but got none")
-			}
-
-			var deps []string
-			for _, s := range stateDeps {
-				deps = append(deps, s.ID)
-			}
-
-			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
-			// However, we identified 4 rules to ensure that the dependency order (from root to leaf) is respected.
-
-			// rule 1: ensure that the 2 lists have the same elements
-			if len(deps) != len(tc.wantDeps) {
-				t.Fatalf("deps content doesn't have enough elements:\nGot:  %v\nWant: %v", deps, tc.wantDeps)
-			} else {
-				assert.ElementsMatch(t, tc.wantDeps, deps, "didn't get matching dep list content")
-			}
-
-			// rule 2: ensure that no snapshot from a base appears before that base
-			assertSnapshotAfterItsBaseState(t, deps)
-
-			// rule 3: ensure that the order between a snapshot and an immediately following dataset is preserved (snapshot to clone)
-			assertSnapshotToCloneOrderIsPreserved(t, tc.wantDeps, deps)
-
-			// rule 4: snapshots from a parent datasets appear before OR only after any snapshots on a child dataset
-			assertNoParentSnapshotBeforeChildren(t, deps)
-		})
-	}
-}
-
-func TestRemoveSystemStates(t *testing.T) {
+func TestRemoveState(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
 		def            string
 		currentStateID string
-		states         []string
+		state          string
+		user           string
+		force          bool
 
-		setPropertyErr bool
+		destroyErr bool
 
-		isNoOp  bool
-		wantErr bool
+		isNoOp     bool
+		wantErr    bool
+		wantDepErr bool
 	}{
-		"Remove non current state, one dataset": {def: "m_with_userdata.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}},
+		"Remove system state, one dataset": {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234"},
+
 		// FIXME: miss bpool and bpool/BOOT from golden file
-		"Remove non current state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}},
-		"Remove one snapshot only":                    {def: "state_snapshot_with_userdata_02.yaml", states: []string{"rpool/ROOT/ubuntu_1234@snap3"}},
-		"Removing main dataset deletes its snapshots": {def: "state_snapshot_with_userdata_02.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}},
+		"Remove system state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", state: "rpool/ROOT/ubuntu_1234"},
+		"Remove one system snapshot only":                                    {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_1234@snap3"},
+		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", force: true},
+		"Removing system state try to delete its snapshots":                  {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true, wantDepErr: true},
 
-		"Remove multiple states in correct order": {def: "state_snapshot_with_userdata_02.yaml", states: []string{
-			"rpool/ROOT/ubuntu_1234@snap3",
-			"rpool/ROOT/ubuntu_1234@snap2",
-			"rpool/ROOT/ubuntu_1234@snap1",
-			"rpool/ROOT/ubuntu_1234",
-		}},
-		"Remove multiple states with clones in correct order": {def: "state_snapshot_with_userdata_01.yaml", states: []string{
-			"rpool/ROOT/ubuntu_1234@snap3",
-			"rpool/ROOT/ubuntu_5678",
-			"rpool/ROOT/ubuntu_1234@snap2",
-			"rpool/ROOT/ubuntu_1234@snap1",
-			"rpool/ROOT/ubuntu_1234",
-		}},
+		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove system state, with system and users snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
+		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantDepErr: true, wantErr: true, isNoOp: true},
+		"Remove system state, with datasets, forced":                              {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
 
-		"Remove userdataset if unique and untagg shared ones":                                           {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}},
-		"Ignore dataset on failed to untag userdataset":                                                 {def: "state_snapshot_with_userdata_06.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}, setPropertyErr: true},
-		"Issue a warning only on userdata manual clone on which our userdata for this state depends on": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/ROOT/ubuntu_5678"}},
+		"Remove user state, one dataset":                       {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1"},
+		"Remove user state, one dataset, no user":              {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", wantErr: true, isNoOp: true},
+		"Remove user state, one dataset, wrong user":           {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "root", wantErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", force: true},
+		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true},
 
-		// Complex case, with clone of userdatasets associated to multiple systems
-		//FIXME FLACKY: "Complex": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234"}},
-
-		// remove 1234 before 5678. It’s a isNoOp as we try to remove first one
-		"Remove multiple states with clones in incorrect order": {def: "state_snapshot_with_userdata_01.yaml", states: []string{
-			"rpool/ROOT/ubuntu_1234",
-			"rpool/ROOT/ubuntu_1234@snap1",
-			"rpool/ROOT/ubuntu_1234@snap2",
-			"rpool/ROOT/ubuntu_5678",
-			"rpool/ROOT/ubuntu_1234@snap3",
-		}, wantErr: true, isNoOp: true},
-
-		"Snapshots are removed even if provided after main dataset": {def: "state_snapshot_with_userdata_02.yaml", states: []string{
-			"rpool/ROOT/ubuntu_1234",
-			"rpool/ROOT/ubuntu_1234@snap1",
-			"rpool/ROOT/ubuntu_1234@snap2",
-			"rpool/ROOT/ubuntu_1234@snap3",
-		}},
-
-		"No state given": {def: "m_with_userdata.yaml", isNoOp: true},
-		"Error on trying to remove current state": {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true, isNoOp: true},
-		"Error on missing dependent state":        {def: "state_snapshot_with_userdata_01.yaml", states: []string{"rpool/ROOT/ubuntu_1234"}, wantErr: true},
+		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
+		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
 	}
 
 	for name, tc := range tests {
@@ -1209,37 +949,26 @@ func TestRemoveSystemStates(t *testing.T) {
 			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			initMachines, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
+			ms, err := machines.New(context.Background(), generateCmdLine(tc.currentStateID), machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
+			initMachines := ms.CopyForTests(t)
 			lzfs := libzfs.(*mock.LibZFS)
-			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+			lzfs.ErrOnDestroy(tc.destroyErr)
 
-			var states []machines.State
-		nextState:
-			for _, n := range tc.states {
-				for _, m := range ms.AllMachines() {
-					if m.ID == n {
-						states = append(states, m.State)
-						continue nextState
-					}
-					for _, h := range m.History {
-						if h.ID == n {
-							states = append(states, *h)
-							continue nextState
-						}
-					}
-				}
-				t.Fatalf("Setup error: can't find %s in machine list", n)
-			}
-
-			err = ms.RemoveSystemStates(context.Background(), states)
+			err = ms.RemoveState(context.Background(), tc.state, tc.user, tc.force)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
+				}
+				var e *machines.ErrStateHasDependencies
+
+				if tc.wantDepErr {
+					assert.True(t, errors.As(err, &e), "expected ErrStateHasDependencies error type")
+				} else {
+					assert.False(t, errors.As(err, &e), "don't expect ErrStateHasDependencies error type")
 				}
 				return
 			}
@@ -1262,109 +991,68 @@ func TestRemoveSystemStates(t *testing.T) {
 		})
 	}
 }
-
-func TestRemoveUserStates(t *testing.T) {
+func TestIDToState(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def           string
-		states        []string
-		systemStateID string
+		name string
+		user string
 
-		setPropertyErr bool
-		destroyErr     bool
-
-		isNoOp  bool
-		wantErr bool
+		wantState string
+		wantErr   bool
 	}{
-		"User snapshot": {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd@automatedusersnapshot"}},
-		"Filesystem dataset without considering tag": {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}},
-		"Filesystem dataset with children":           {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd"}},
+		"Match full system path ID": {name: "rpool/ROOT/ubuntu_1234", wantState: "rpool/ROOT/ubuntu_1234"},
+		"Match full user path ID":   {name: "rpool/USERDATA/user1_abcd", user: "user1", wantState: "rpool/USERDATA/user1_abcd"},
 
-		"Filesystem dataset having snapshot without listing it":                                       {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd"}},
-		"Filesystem dataset having snapshot listing it":                                               {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd", "rpool/USERDATA/user1_abcd@automatedusersnapshot"}},
-		"Filesystem dataset with children, having snapshot with different names without listing them": {def: "m_with_userdata_and_multiple_snapshots.yaml", states: []string{"rpool/USERDATA/user1_abcd"}},
-		"Filesystem dataset with clones listing them":                                                 {def: "m_clone_with_userdata_with_children.yaml", states: []string{"rpool/USERDATA/user1_abcd", "rpool/USERDATA/user1_efgh"}},
+		"Match suffix system ID":       {name: "5678", wantState: "rpool/ROOT/ubuntu_5678"},
+		"Match dataset path system ID": {name: "ubuntu_5678", wantState: "rpool/ROOT/ubuntu_5678"},
+		"Match unique system snapshot": {name: "snap1", wantState: "rpool/ROOT/ubuntu_1234@snap1"},
 
-		// Untag cases
-		"User snapshot ignores tags":                           {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/user1_abcd@automatedusersnapshot"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
-		"Filesystem dataset with only this tag is removed":     {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
-		"Filesystem dataset with different tag is kept":        {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}, systemStateID: "rpool/ROOT/ubuntu_doesntexit", isNoOp: true},
-		"Filesystem dataset associated with 2 tags only untag": {def: "m_two_machines_with_same_userdata.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
+		"Limit search on duplicated snapshot name to a single user": {name: "snap1", user: "user1", wantState: "rpool/USERDATA/user1_abcd@snap1"},
 
-		//FIXME FLACKY: "Parent is associated with 2 tags, child with only one, remove common one destroys child":                            {def: "m_with_userdata_child_associated_one_state.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
-		"Parent is associated with 2 tags, child with only one, remove the one only on parent don't destroy parent or child": {def: "m_with_userdata_child_associated_one_state.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, systemStateID: "rpool/ROOT/ubuntu_9999"},
+		// Multiple matches
+		"Multiple states match system suffix ID": {name: "1234", wantErr: true},
+		"Multiple states match user suffix ID":   {name: "abcd", user: "user1", wantErr: true},
 
-		// remove when clone not associated with same machine
-		// TODO: this and the complex case dont’t give what we really expect. We will need to change the strategy for removing datasets
-		// for complex layouts.
-		//"Untag and remove clones as expected": {def: "state_snapshot_with_userdata_05.yaml", states: []string{"rpool/USERDATA/root_bcde", "rpool/USERDATA/root_cdef", "rpool/USERDATA/root_fghi"}, systemStateID: "rpool/ROOT/ubuntu_1234"},
-
-		"Err on failed to untag userdataset": {def: "m_with_userdata_user_snapshot.yaml", states: []string{"rpool/USERDATA/root_bcde"}, systemStateID: "rpool/ROOT/ubuntu_doesntexit", setPropertyErr: true, wantErr: true},
-
-		// Error cases
-		"Err on filesystem dataset with clones before filesystem":    {def: "m_clone_with_userdata_with_children.yaml", states: []string{"rpool/USERDATA/user1_efgh", "rpool/USERDATA/user1_abcd"}, wantErr: true},
-		"Err on filesystem dataset with clones without listing them": {def: "m_clone_with_userdata_with_children.yaml", states: []string{"rpool/USERDATA/user1_abcd"}, wantErr: true},
+		// No match
+		"Empty name":         {name: "", wantErr: true},
+		"No match at all":    {name: "/doesntexists", wantErr: true},
+		"User doesn’t exist": {name: "foo", user: "userfoo", wantErr: true},
+		"No match on full path ID search without user provided":    {name: "rpool/USERDATA/user1_abcd", wantErr: true},
+		"No match on full path ID search with wrong user provided": {name: "rpool/USERDATA/user1_abcd", user: "userfoo", wantErr: true},
 	}
 
 	for name, tc := range tests {
 		tc := tc
 		t.Run(name, func(t *testing.T) {
-			t.Parallel()
 			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
 
 			libzfs := testutils.GetMockZFS(t)
-			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "state_idtostate.yaml"), testutils.WithLibZFS(libzfs))
 			defer fPools.Create(dir)()
 
-			initMachines, err := machines.New(context.Background(), generateCmdLine(""), machines.WithLibZFS(libzfs))
+			_, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			if err != nil {
+				t.Fatalf("couldn’t create original zfs datasets state")
+			}
+
+			ms, err := machines.New(context.Background(), "", machines.WithLibZFS(libzfs))
 			if err != nil {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			ms := initMachines
-			lzfs := libzfs.(*mock.LibZFS)
-			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+			got, err := ms.IDToState(tc.name, tc.user)
 
-			var states []machines.UserState
-		nextState:
-			for _, n := range tc.states {
-				for _, m := range ms.AllMachines() {
-					for _, alluserstates := range m.Users {
-						for route, us := range alluserstates {
-							if route == n {
-								states = append(states, us)
-								continue nextState
-							}
-						}
-					}
-				}
-				t.Fatalf("Setup error: can't find %s in userdataset list", n)
-			}
-
-			err = ms.RemoveUserStates(context.Background(), states, tc.systemStateID)
 			if err != nil {
 				if !tc.wantErr {
-					t.Fatalf("expected no error but got: %v", err)
+					t.Fatalf("Got an error when expecting none: %v", err)
 				}
 				return
-			}
-			if err == nil && tc.wantErr {
-				t.Fatal("expected an error but got none")
-			}
-
-			if tc.isNoOp {
-				assertMachinesEquals(t, initMachines, ms)
-			} else {
-				assertMachinesToGolden(t, ms)
-				assertMachinesNotEquals(t, initMachines, ms)
+			} else if tc.wantErr {
+				t.Fatalf("Expected an error but got none")
 			}
 
-			machinesAfterRescan, err := machines.New(context.Background(), generateCmdLine(""), machines.WithLibZFS(libzfs))
-			if err != nil {
-				t.Error("expected success but got an error scanning for machines", err)
-			}
-			assertMachinesEquals(t, machinesAfterRescan, ms)
+			assert.Equal(t, tc.wantState, got.ID, "didn't get expected state")
 		})
 	}
 }
@@ -1437,86 +1125,6 @@ func assertMachinesNotEquals(t *testing.T, m1, m2 machines.Machines) {
 		cmp.AllowUnexported(machines.Machines{}),
 		cmpopts.IgnoreUnexported(zfs.Dataset{}, zfs.DatasetProp{})); diff == "" {
 		t.Errorf("Machines are equals where we expected not to:\n%+v", pp.Sprint(m1))
-	}
-}
-
-// assertSnapshotAfterItsBase ensure that all snapshots only appear once its base state
-func assertSnapshotAfterItsBaseState(t *testing.T, states []string) {
-	t.Helper()
-
-	for i, s := range states {
-		base, snapshot := machines.SplitSnapshotName(s)
-		if snapshot != "" {
-			continue
-		}
-		for j, ss := range states {
-			b, snapshot2 := machines.SplitSnapshotName(ss)
-			if b != base || snapshot2 == "" {
-				continue
-			}
-			if j > i {
-				continue
-			}
-			t.Errorf("Found snapshot %s before base dataset %s: %v", ss, s, states)
-		}
-	}
-}
-
-// assertSnapshotToCloneOrderIsPreserved ensure that a close comes immediatly after its origin
-func assertSnapshotToCloneOrderIsPreserved(t *testing.T, want []string, got []string) {
-	t.Helper()
-
-	for k, w := range want {
-		if k == 0 {
-			continue
-		}
-		if _, snapshot := machines.SplitSnapshotName(w); snapshot == "" {
-			previousState := want[k-1]
-
-			// note: we know that g is in got as we checked content equality between got and want before
-			for j, g := range got {
-				if g != previousState {
-					continue
-				}
-				if j+1 > len(w) {
-					t.Errorf("%s is last element of got and should be immediately followed by %s:\n%s", g, w, strings.Join(got, "\n"))
-					break
-				}
-				if got[j+1] != w {
-					t.Errorf("%s should be immediately followed by %s:\n%s", g, w, strings.Join(got, "\n"))
-				}
-			}
-		}
-	}
-}
-
-// assertNoParentSnapshotBeforeChildren ensure that snapshots from a parent datasets appear before OR only after any snapshot on a child dataset
-func assertNoParentSnapshotBeforeChildren(t *testing.T, states []string) {
-	t.Helper()
-
-	for i, s := range states {
-		if i == 0 || i == len(states)-1 {
-			continue
-		}
-		if newBase, snapshot := machines.SplitSnapshotName(s); snapshot == "" {
-			previousBase, _ := machines.SplitSnapshotName(states[i-1])
-
-			var previousBaseFound bool
-			for _, s2 := range states[i+1:] {
-				base, _ := machines.SplitSnapshotName(s2)
-
-				if !previousBaseFound {
-					if base == previousBase {
-						previousBaseFound = true
-					}
-					continue
-				}
-				if base == newBase {
-					t.Errorf("found %s after a snapshot of %s:\n%s", s2, previousBase, strings.Join(states, "\n"))
-				}
-			}
-		}
-
 	}
 }
 

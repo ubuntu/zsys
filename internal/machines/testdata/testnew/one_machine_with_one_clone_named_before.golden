@@ -1,10 +1,10 @@
 {
    "All": {
       "rpool/b": {
-         "ID": "rpool/b",
          "IsZsys": true,
+         "ID": "rpool/b",
          "LastUsed": "2019-12-31T08:36:17+01:00",
-         "SystemDatasets": {
+         "Datasets": {
             "rpool/b": [
                {
                   "Name": "rpool/b",
@@ -18,9 +18,8 @@
          "History": {
             "rpool/a": {
                "ID": "rpool/a",
-               "IsZsys": true,
                "LastUsed": "2020-09-13T14:26:39+02:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/a": [
                      {
                         "Name": "rpool/a",
@@ -36,7 +35,7 @@
             "rpool/b@snap1": {
                "ID": "rpool/b@snap1",
                "LastUsed": "2020-05-08T00:01:28+02:00",
-               "SystemDatasets": {
+               "Datasets": {
                   "rpool/b@snap1": [
                      {
                         "Name": "rpool/b@snap1",

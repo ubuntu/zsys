@@ -70,7 +70,7 @@ func Load(ctx context.Context, path string) (ZConfig, error) {
 		if path != DefaultPath {
 			return c, fmt.Errorf(i18n.G("failed to load configuration file %s: %v "), path, err)
 		}
-		log.Info(ctx, i18n.G("couldn't find default configuration path, fallback to internal default"))
+		log.Debug(ctx, i18n.G("couldn't find default configuration path, fallback to internal default"))
 		if f, err = internalAssets.Open(filepath.Base(path)); err != nil {
 			return c, fmt.Errorf(i18n.G("couldn't read our internal configuration: %v "), path, err)
 		}

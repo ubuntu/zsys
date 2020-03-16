@@ -21,9 +21,7 @@ jobs:
           { distro: rolling, go: golang-1.13-go },
       ]
     steps:
-    - uses: actions/checkout@v1
-      with:
-        fetch-depth: 1
+    - uses: actions/checkout@v2
     - name: Login to github docker registry
       run: echo "${GITHUB_TOKEN}" | docker login -u zsys-gha --password-stdin "${DOCKER_REGISTRY}"
       env:
