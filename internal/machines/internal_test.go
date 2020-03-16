@@ -197,7 +197,7 @@ func TestGetDependencies(t *testing.T) {
 			}
 			s := ms.getStateFromName(t, tc.stateName)
 
-			stateDeps, datasetDeps := s.getDependencies(&ms)
+			stateDeps, datasetDeps := s.getDependencies(context.Background(), &ms)
 
 			stateNames := make([]string, len(stateDeps))
 			for i, s := range stateDeps {

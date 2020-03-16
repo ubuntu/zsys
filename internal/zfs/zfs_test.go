@@ -776,7 +776,9 @@ func TestDependencies(t *testing.T) {
 				t.Fatalf("No dataset found matching %s", tc.depsFor)
 			}
 
-			deps := d.Dependencies(z)
+			nt := z.NewNoTransaction(context.Background())
+
+			deps := nt.Dependencies(*d)
 
 			// We can’t rely on the order of the original list, as we iterate over maps in the implementation.
 			// However, we identified 3 rules to ensure that the dependency order (from leaf to root) is respected.
