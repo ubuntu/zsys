@@ -3,8 +3,10 @@ package machines
 import (
 	"context"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
@@ -225,7 +227,7 @@ func TestGetDependencies(t *testing.T) {
 	}
 }
 
-func TestParentSystemTest(t *testing.T) {
+func TestParentSystemState(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
 		stateName string
@@ -398,6 +400,77 @@ func TestRemoveInternal(t *testing.T) {
 
 			assertMachinesToGolden(t, got)
 		})
+	}
+}
+
+func TestSelectStatesToRemove(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		samples       int     // Number of slots in the bucket
+		statesToKeep  []int64 // List of seconds from startOfTime
+		statesToPlace []int64 // List of seconds from startOfTime
+		timeOffset    int64   // Seconds since epoch
+
+		wantStates []string
+	}{
+		"keep all - bucket has enough capacity": {samples: 5, statesToKeep: []int64{1, 3}, statesToPlace: []int64{2}, wantStates: nil},
+		"keep none - bucket is already full":    {samples: 3, statesToKeep: []int64{1, 3, 5}, statesToPlace: []int64{2, 4, 6}, wantStates: []string{"p0", "p1", "p2"}},
+		"do not remove keep states":             {samples: 3, statesToKeep: []int64{1, 3, 5, 7}, wantStates: nil},
+		"remove one":                            {samples: 4, statesToKeep: []int64{1, 3, 5}, statesToPlace: []int64{2, 4}, wantStates: []string{"p1"}},
+		"remove two":                            {samples: 4, statesToKeep: []int64{10, 20, 30}, statesToPlace: []int64{12, 17, 25}, wantStates: []string{"p0", "p2"}},
+		"keep oldest":                           {samples: 5, statesToKeep: []int64{20, 25, 30}, statesToPlace: []int64{3, 7, 9, 25}, wantStates: []string{"p2", "p3"}},
+		"keep newest":                           {samples: 5, statesToKeep: []int64{0, 5, 10}, statesToPlace: []int64{10, 15, 20, 25}, wantStates: []string{"p0", "p1"}},
+		"spread evenly":                         {samples: 7, statesToKeep: []int64{0, 15, 30}, statesToPlace: []int64{0, 5, 10, 15, 25, 30}, wantStates: []string{"p2", "p3"}},
+		"spread evenly with offset":             {samples: 7, statesToKeep: []int64{0, 15, 30}, statesToPlace: []int64{0, 5, 10, 15, 25, 30}, timeOffset: 1111111111, wantStates: []string{"p2", "p3"}},
+
+		// no keep states, no states to place
+		"no keep state":      {samples: 2, statesToPlace: []int64{1, 2, 4}, wantStates: []string{"p1"}},
+		"no states to place": {samples: 2, statesToKeep: []int64{1, 2, 4}, wantStates: nil},
+
+		// same timestamps
+		"same timestamp - keep one":  {samples: 4, statesToKeep: []int64{1, 3, 5}, statesToPlace: []int64{2, 2, 4}, wantStates: []string{"p1", "p2"}},
+		"same timestamp - keep none": {samples: 3, statesToKeep: []int64{1, 3, 5}, statesToPlace: []int64{2, 2, 4}, wantStates: []string{"p0", "p1", "p2"}},
+		"same timestamp - keep all":  {samples: 6, statesToKeep: []int64{1, 3, 5}, statesToPlace: []int64{2, 2, 4}, wantStates: nil},
+	}
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+
+			// Initialisation of the states with keep
+			var states []stateWithKeep
+			for i, s := range tc.statesToKeep {
+				lu := time.Unix(tc.timeOffset+s, 0)
+				s := State{
+					ID:       "k" + strconv.Itoa(i), // Unique index
+					LastUsed: &lu,
+				}
+				states = append(states, stateWithKeep{State: &s, keep: keepYes})
+			}
+			for i, s := range tc.statesToPlace {
+				lu := time.Unix(tc.timeOffset+s, 0)
+				s := State{
+					ID:       "p" + strconv.Itoa(i), // Unique index
+					LastUsed: &lu,
+				}
+				states = append(states, stateWithKeep{State: &s, keep: keepUnknown})
+			}
+
+			got := selectStatesToRemove(context.Background(), tc.samples, states)
+			assertStatesToKeepMatch(t, tc.wantStates, got)
+		})
+	}
+}
+
+func assertStatesToKeepMatch(t *testing.T, want []string, got []*State) {
+	var gotIDs []string
+
+	// Extract all the IDs
+	for _, g := range got {
+		gotIDs = append(gotIDs, g.ID)
+	}
+
+	if diff := cmp.Diff(want, gotIDs); diff != "" {
+		t.Errorf("states to remove mismatch (-want +got):\n%s", diff)
 	}
 }
 
