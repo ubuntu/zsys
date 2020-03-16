@@ -2,6 +2,8 @@ package machines
 
 import (
 	"context"
+	"flag"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -17,8 +19,10 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs/mock"
 )
 
-func init() {
-	config.SetVerboseMode(1)
+func TestMain(m *testing.M) {
+	flag.Parse()
+	config.SetVerboseMode(2)
+	os.Exit(m.Run())
 }
 
 func TestResolveOrigin(t *testing.T) {
