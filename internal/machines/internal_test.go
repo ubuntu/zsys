@@ -21,7 +21,7 @@ import (
 
 func TestMain(m *testing.M) {
 	flag.Parse()
-	config.SetVerboseMode(2)
+	config.SetVerboseMode(1)
 	os.Exit(m.Run())
 }
 
@@ -459,7 +459,7 @@ func TestSelectStatesToRemove(t *testing.T) {
 				states = append(states, stateWithKeep{State: &s, keep: keepUnknown})
 			}
 
-			got := selectStatesToRemove(context.Background(), tc.samples, states, false)
+			got := selectStatesToRemove(context.Background(), tc.samples, states)
 			assertStatesToKeepMatch(t, tc.wantStates, got)
 		})
 	}
