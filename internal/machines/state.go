@@ -171,7 +171,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 		for _, s := range states {
 			ss := s.parentSystemState(ms)
 			if ss != nil {
-				errmsg = fmt.Sprintf(i18n.G("%s is linked to a system state: %s\n"), s.ID, ss.ID) + errmsg
+				errmsg += fmt.Sprintf(i18n.G("%s is linked to a system state: %s\n"), s.ID, ss.ID)
 			}
 		}
 		if errmsg != "" {
