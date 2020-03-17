@@ -475,6 +475,7 @@ zsysctl state remove [state id] [flags]
 ##### Options
 
 ```
+      --dry-run       Dry run, will not remove anything
   -f, --force         Force removing, even if dependencies are found
   -h, --help          help for remove
   -s, --system        Remove system state (system and users linked to it)
