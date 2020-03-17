@@ -86,12 +86,14 @@ message CreateSaveStateResponse {
 message RemoveSystemStateRequest {
   string stateName = 1;
   bool force = 2;
+  bool dryrun = 3;
 }
 
 message RemoveUserStateRequest {
   string userName = 1;
   string stateName = 2;
   bool force = 3;
+  bool dryrun = 4;
 }
 
 message DumpStatesResponse {

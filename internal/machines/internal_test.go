@@ -21,7 +21,7 @@ import (
 
 func TestMain(m *testing.M) {
 	flag.Parse()
-	config.SetVerboseMode(2)
+	config.SetVerboseMode(1)
 	os.Exit(m.Run())
 }
 

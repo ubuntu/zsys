@@ -135,6 +135,26 @@ pools:
           mountpoint: /home/user5:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user6_forclone
+      mountpoint: /home/user6
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      last_used: 2018-12-10T12:20:44+00:00
+      snapshots:
+        - name: snapuser6
+          mountpoint: /home/user6:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user6_clone1
+      mountpoint: /home/user6
+      origin: rpool/USERDATA/user6_forclone@snapuser6
+      snapshots:
+        - name: snapuser6clone1
+          mountpoint: /home/user6:local
+          canmount: on:local
+          creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user6_clone2
+      mountpoint: /home/user6
+      origin: rpool/USERDATA/user6_clone1@snapuser6clone1
     - name: ROOT/ubuntu_6789
       zsys_bootfs: yes
       last_used: 2020-05-07T22:01:28+00:00

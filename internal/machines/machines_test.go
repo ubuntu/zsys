@@ -924,18 +924,21 @@ func TestRemoveState(t *testing.T) {
 		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantDepErr: true, wantErr: true, isNoOp: true},
 		"Remove system state, with datasets, forced":                              {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
 
-		"Remove user state, one dataset":                       {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1"},
-		"Remove user state, one dataset, no user":              {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", wantErr: true, isNoOp: true},
-		"Remove user state, one dataset, wrong user":           {def: "m_with_userdata.yaml", state: "rpool/USERDATA/user1_abcd", user: "root", wantErr: true, isNoOp: true},
-		"Remove user state, with snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", wantErr: true, wantDepErr: true, isNoOp: true},
-		"Remove user state, with snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", force: true},
-		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
-		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true},
+		"Remove user state, one dataset":                       {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "user4"},
+		"Remove user state, one dataset, no user":              {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", wantErr: true, isNoOp: true},
+		"Remove user state, one dataset, wrong user":           {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "root", wantErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones":         {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones, forced": {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", force: true},
+		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", force: true},
+		"Remove user snapshot state":                           {def: "state_remove.yaml", state: "rpool/USERDATA/user1_efgh@snapuser2", user: "user1"},
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
-		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
-		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
-		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
+		"Error on trying to remove current state":                 {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Error on destroy state, one dataset":                     {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets":              {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
+		"Can’t remove user leaf snapshot linked to system state":  {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true, wantErr: true, isNoOp: true},
+		"Can’t remove user snapshot state linked to system state": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -958,7 +961,7 @@ func TestRemoveState(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 			lzfs.ErrOnDestroy(tc.destroyErr)
 
-			err = ms.RemoveState(context.Background(), tc.state, tc.user, tc.force)
+			err = ms.RemoveState(context.Background(), tc.state, tc.user, tc.force, false)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -1041,7 +1044,7 @@ func TestIDToState(t *testing.T) {
 				t.Error("expected success but got an error scanning for machines", err)
 			}
 
-			got, err := ms.IDToState(tc.name, tc.user)
+			got, err := ms.IDToState(context.Background(), tc.name, tc.user)
 
 			if err != nil {
 				if !tc.wantErr {

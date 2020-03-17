@@ -67,7 +67,7 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, allStates []*Sta
 
 	log.Debugf(nt.Context(), "getDependenciesWithCache for state %s", s.ID)
 	for _, ds := range s.Datasets {
-		// As we detects complete dependencies hierarchy, we only take the root dataset for each route
+		// As we detect complete dependencies hierarchy, we only take the root dataset for each route
 		d := ds[0]
 
 		deps := nt.Dependencies(*d)
@@ -134,8 +134,8 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, allStates []*Sta
 }
 
 // RemoveState removes a system or user state with name as Id of the state and an optional user.
-func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bool) error {
-	s, err := ms.IDToState(name, user)
+func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, dryrun bool) error {
+	s, err := ms.IDToState(ctx, name, user)
 	if err != nil {
 		return fmt.Errorf(i18n.G("Couldn't find state: %v"), err)
 	}
@@ -179,9 +179,27 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bo
 		}
 	}
 
+	// Check all dep datasets to not be linked to any system state
+	if user != "" {
+		var errmsg string
+		for _, s := range states {
+			ss := s.parentSystemState(ms)
+			if ss != nil {
+				errmsg += fmt.Sprintf(i18n.G("%s is linked to a system state: %s\n"), s.ID, ss.ID)
+			}
+		}
+		if errmsg != "" {
+			return fmt.Errorf(i18n.G("%s can't be removed as linked some system states:\n%s"), s.ID, errmsg)
+		}
+	}
+
 	// Remove datasets
 	nt := ms.z.NewNoTransaction(ctx)
 	for _, d := range datasets {
+		if dryrun {
+			log.RemotePrintf(ctx, i18n.G("Deleting dataset %s\n"), d.Name)
+			continue
+		}
 		if err := nt.Destroy(d.Name); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove dataset %s: %v"), d.Name, err)
 		}
@@ -189,6 +207,10 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bo
 
 	// Remove only listed states in dependencies. Don’t go on children as they should be listed before
 	for _, state := range states {
+		if dryrun {
+			log.RemotePrintf(ctx, i18n.G("Deleting state %s\n"), state.ID)
+			continue
+		}
 		if err := state.remove(ctx, ms.z, "", true); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove state %s: %v"), state.ID, err)
 		}
@@ -331,7 +353,8 @@ func (s *State) parentSystemState(ms *Machines) *State {
 // - the snapshot name of the state (xxxx -> @xxxx)
 // - the suffix after _ of the state (xxxx)
 // user limits the research on the given user state, otherwise we limit the search on system states.
-func (ms *Machines) IDToState(name, user string) (*State, error) {
+func (ms *Machines) IDToState(ctx context.Context, name, user string) (*State, error) {
+	log.Debugf(ctx, "finding a matching state for id %s and user %s", name, user)
 	if name == "" {
 		return nil, errors.New(i18n.G("state id is mandatory"))
 	}

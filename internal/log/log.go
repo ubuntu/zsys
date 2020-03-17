@@ -84,6 +84,23 @@ func Infof(ctx context.Context, format string, args ...interface{}) {
 	logrus.Infof(format, args...)
 }
 
+// RemotePrint logs a message that is only written on the remote
+// client end stream referenced by ctx.
+func RemotePrint(ctx context.Context, args ...interface{}) {
+	RemotePrintf(ctx, "%s", args...)
+}
+
+// RemotePrintf logs a message that is only written on the remote
+// client end stream referenced by ctx.
+func RemotePrintf(ctx context.Context, format string, args ...interface{}) {
+	if info, ok := ctx.Value(requestInfoKey).(*requestInfo); ok {
+		l := info.logger.GetLevel()
+		info.logger.SetLevel(InfoLevel)
+		info.logger.Printf(format, args...)
+		info.logger.SetLevel(l)
+	}
+}
+
 // Warning logs a message at level Warning on the standard logger
 // and may push to the stream referenced by ctx.
 func Warning(ctx context.Context, args ...interface{}) {
