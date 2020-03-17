@@ -459,7 +459,7 @@ func TestSelectStatesToRemove(t *testing.T) {
 				states = append(states, stateWithKeep{State: &s, keep: keepUnknown})
 			}
 
-			got := selectStatesToRemove(context.Background(), tc.samples, states)
+			got := selectStatesToRemove(context.Background(), tc.samples, states, false)
 			assertStatesToKeepMatch(t, tc.wantStates, got)
 		})
 	}

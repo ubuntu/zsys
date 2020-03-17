@@ -46,6 +46,7 @@ var (
 	noUpdateBootMenu bool
 	userName         string
 	force            bool
+	dryrun           bool
 )
 
 func init() {
@@ -61,6 +62,7 @@ func init() {
 	stateremoveCmd.Flags().BoolVarP(&system, "system", "s", false, i18n.G("Remove system state (system and users linked to it)"))
 	stateremoveCmd.Flags().StringVarP(&userName, "user", "u", "", i18n.G("Remove the state for a given user or current user if empty"))
 	stateremoveCmd.Flags().BoolVarP(&force, "force", "f", false, i18n.G("Force removing, even if dependencies are found"))
+	stateremoveCmd.Flags().BoolVarP(&dryrun, "dryrun", "", false, i18n.G("Dry run, will not remove anything"))
 
 	cmdhandler.RegisterAlias(statesaveCmd, rootCmd)
 }
@@ -175,7 +177,7 @@ func removeState(args []string) (err error) {
 	defer client.Close()
 
 	for {
-		err = removeStateGRPC(client, force, system, userName, stateName)
+		err = removeStateGRPC(client, force, dryrun, system, userName, stateName)
 		if err == nil {
 			break
 		}
@@ -213,7 +215,7 @@ func removeState(args []string) (err error) {
 	return nil
 }
 
-func removeStateGRPC(client *zsys.ZsysLogClient, force, system bool, userName, stateName string) error {
+func removeStateGRPC(client *zsys.ZsysLogClient, force, dryrun, system bool, userName, stateName string) error {
 	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
@@ -223,6 +225,7 @@ func removeStateGRPC(client *zsys.ZsysLogClient, force, system bool, userName, s
 		stream, err = client.RemoveSystemState(ctx, &zsys.RemoveSystemStateRequest{
 			StateName: stateName,
 			Force:     force,
+			Dryrun:    dryrun,
 		})
 
 		if err = checkConn(err); err != nil {
@@ -247,6 +250,7 @@ func removeStateGRPC(client *zsys.ZsysLogClient, force, system bool, userName, s
 			StateName: stateName,
 			UserName:  userName,
 			Force:     force,
+			Dryrun:    dryrun,
 		})
 
 		if err = checkConn(err); err != nil {

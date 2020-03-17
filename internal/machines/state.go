@@ -129,8 +129,8 @@ func (s *State) getDependenciesWithCache(ms *Machines, allStates []*State, datas
 }
 
 // RemoveState removes a system or user state with name as Id of the state and an optional user.
-func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bool) error {
-	s, err := ms.IDToState(name, user)
+func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, dryrun bool) error {
+	s, err := ms.IDToState(ctx, name, user)
 	if err != nil {
 		return fmt.Errorf(i18n.G("Couldn't find state: %v"), err)
 	}
@@ -168,6 +168,10 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bo
 	// Remove datasets
 	nt := ms.z.NewNoTransaction(ctx)
 	for _, d := range datasets {
+		if dryrun {
+			log.RemotePrintf(ctx, i18n.G("Deleting dataset %s\n"), d.Name)
+			continue
+		}
 		if err := nt.Destroy(d.Name); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove dataset %s: %v"), d.Name, err)
 		}
@@ -175,6 +179,10 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force bo
 
 	// Remove only listed states in dependencies. Don’t go on children as they should be listed before
 	for _, state := range states {
+		if dryrun {
+			log.RemotePrintf(ctx, i18n.G("Deleting state %s\n"), state.ID)
+			continue
+		}
 		if err := state.remove(ctx, ms.z, "", true); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove state %s: %v"), state.ID, err)
 		}

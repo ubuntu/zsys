@@ -104,7 +104,7 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 
 	log.Infof(stream.Context(), i18n.G("Requesting removing system state %q"), stateName)
 
-	err = s.Machines.RemoveState(stream.Context(), stateName, "", req.GetForce())
+	err = s.Machines.RemoveState(stream.Context(), stateName, "", req.GetForce(), req.GetDryrun())
 	if err != nil {
 		var e *machines.ErrStateHasDependencies
 		if errors.As(err, &e) {
@@ -125,6 +125,9 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 		return fmt.Errorf(i18n.G("couldn't remove system state %s: ")+config.ErrorFormat, stateName, err)
 	}
 
+	if req.GetDryrun() {
+		return nil
+	}
 	return updateBootMenu(stream.Context())
 }
 
@@ -148,7 +151,7 @@ func (s *Server) RemoveUserState(req *zsys.RemoveUserStateRequest, stream zsys.Z
 
 	log.Infof(stream.Context(), i18n.G("Requesting removing user state %q for user %s"), stateName, userName)
 
-	err := s.Machines.RemoveState(stream.Context(), stateName, "", req.GetForce())
+	err := s.Machines.RemoveState(stream.Context(), stateName, userName, req.GetForce(), req.GetDryrun())
 	if err != nil {
 		var e *machines.ErrStateHasDependencies
 		if errors.As(err, &e) {
