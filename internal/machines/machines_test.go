@@ -931,13 +931,14 @@ func TestRemoveState(t *testing.T) {
 		"Remove user state, with snapshots and clones, forced": {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", force: true},
 		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", force: true},
+		"Remove user snapshot state":                           {def: "state_remove.yaml", state: "rpool/USERDATA/user1_efgh@snapuser2", user: "user1"},
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
-		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
-		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
-		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
-
-		// Add snapshots for systems and users
+		"Error on trying to remove current state":                 {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Error on destroy state, one dataset":                     {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets":              {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
+		"Can’t remove user leaf snapshot linked to system state":  {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true, wantErr: true, isNoOp: true},
+		"Can’t remove user snapshot state linked to system state": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
