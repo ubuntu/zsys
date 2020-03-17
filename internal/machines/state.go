@@ -64,7 +64,7 @@ func (s *State) getDependenciesWithCache(ms *Machines, allStates []*State, datas
 	}
 
 	for _, ds := range s.Datasets {
-		// As we detects complete dependencies hierarchy, we only take the root dataset for each route
+		// As we detect complete dependencies hierarchy, we only take the root dataset for each route
 		d := ds[0]
 
 		deps := d.Dependencies(ms.z)
@@ -162,6 +162,20 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 		}
 		if errmsg != "" {
 			return &ErrStateHasDependencies{s: errmsg}
+		}
+	}
+
+	// Check all dep datasets to not be linked to any system state
+	if user != "" {
+		var errmsg string
+		for _, s := range states {
+			ss := s.parentSystemState(ms)
+			if ss != nil {
+				errmsg = fmt.Sprintf(i18n.G("%s is linked to a system state: %s\n"), s.ID, ss.ID) + errmsg
+			}
+		}
+		if errmsg != "" {
+			return fmt.Errorf(i18n.G("%s can't be removed as linked some system states:\n%s"), s.ID, errmsg)
 		}
 	}
 
