@@ -927,8 +927,8 @@ func TestRemoveState(t *testing.T) {
 		"Remove user state, one dataset":                       {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "user4"},
 		"Remove user state, one dataset, no user":              {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", wantErr: true, isNoOp: true},
 		"Remove user state, one dataset, wrong user":           {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "root", wantErr: true, isNoOp: true},
-		"Remove user state, with snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", wantErr: true, wantDepErr: true, isNoOp: true},
-		"Remove user state, with snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", user: "user1", state: "rpool/USERDATA/user1_abcd", force: true},
+		"Remove user state, with snapshots and clones":         {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones, forced": {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", force: true},
 		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", force: true},
 
