@@ -49,7 +49,7 @@ msgstr ""
 msgid "  - %s\n"
 msgstr ""
 
-#: internal/machines/state.go:168 internal/machines/state.go:368
+#: internal/machines/state.go:168 internal/machines/state.go:391
 #, c-format
 msgid "  - %s (%s)\n"
 msgstr ""
@@ -103,11 +103,18 @@ msgstr ""
 msgid "%s\tUser: %s\n"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:199
+#: cmd/zsysd/client/state.go:201
 #, c-format
 msgid ""
 "%s\n"
 "Would you like to proceed [y/N]? "
+msgstr ""
+
+#: internal/machines/state.go:192
+#, c-format
+msgid ""
+"%s can't be removed as linked some system states:\n"
+"%s"
 msgstr ""
 
 #: internal/machines/state.go:162
@@ -118,6 +125,11 @@ msgstr ""
 #: internal/machines/state.go:172
 #, c-format
 msgid "%s has a dependency on some datasets:\n"
+msgstr ""
+
+#: internal/machines/state.go:188
+#, c-format
+msgid "%s is linked to a system state: %s\n"
 msgstr ""
 
 #: cmd/zsysd/cmdhandler/suggest.go:14
@@ -267,7 +279,7 @@ msgid ""
 "created successfully: %v"
 msgstr ""
 
-#: internal/machines/state.go:259
+#: internal/machines/state.go:281
 msgid "Couldn't destroy %s: %v"
 msgstr ""
 
@@ -309,11 +321,11 @@ msgstr ""
 msgid "Couldn't register grpc server: %v"
 msgstr ""
 
-#: internal/machines/state.go:186
+#: internal/machines/state.go:204
 msgid "Couldn't remove dataset %s: %v"
 msgstr ""
 
-#: internal/machines/state.go:193
+#: internal/machines/state.go:215
 msgid "Couldn't remove state %s: %v"
 msgstr ""
 
@@ -355,6 +367,16 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to modify"
 msgstr ""
 
+#: internal/machines/state.go:200
+#, c-format
+msgid "Deleting dataset %s\n"
+msgstr ""
+
+#: internal/machines/state.go:211
+#, c-format
+msgid "Deleting state %s\n"
+msgstr ""
+
 #: cmd/zsysd/cmdhandler/suggest.go:51
 msgid "Did you mean this?\n"
 msgstr ""
@@ -367,8 +389,12 @@ msgstr ""
 msgid "Display if any zfs datasets have been modified to boot"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:58
+#: cmd/zsysd/client/state.go:59
 msgid "Do not update bootmenu on system state save"
+msgstr ""
+
+#: cmd/zsysd/client/state.go:65
+msgid "Dry run, will not remove anything"
 msgstr ""
 
 #: cmd/zsysd/client/service.go:95
@@ -398,7 +424,7 @@ msgstr ""
 msgid "First state matching for this bucket: %s (%s)"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:63
+#: cmd/zsysd/client/state.go:64
 msgid "Force removing, even if dependencies are found"
 msgstr ""
 
@@ -585,7 +611,7 @@ msgid "Reloads daemon configuration."
 msgstr ""
 
 #. user name and system or exclusive: TODO
-#: cmd/zsysd/client/state.go:61
+#: cmd/zsysd/client/state.go:62
 msgid "Remove system state (system and users linked to it)"
 msgstr ""
 
@@ -595,7 +621,7 @@ msgid ""
 "state if not linked to any system state."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:62
+#: cmd/zsysd/client/state.go:63
 msgid "Remove the state for a given user or current user if empty"
 msgstr ""
 
@@ -603,7 +629,7 @@ msgstr ""
 msgid "Removing current system state isn't allowed"
 msgstr ""
 
-#: internal/machines/state.go:208
+#: internal/machines/state.go:230
 msgid "Removing state %s. linkedStateID: %s, dontRemoveUsersChildren: %t\n"
 msgstr ""
 
@@ -637,7 +663,7 @@ msgstr ""
 msgid "Requesting removing system state %q"
 msgstr ""
 
-#: internal/daemon/state.go:149
+#: internal/daemon/state.go:152
 msgid "Requesting removing user state %q for user %s"
 msgstr ""
 
@@ -711,11 +737,11 @@ msgstr ""
 msgid "Run daemon state saves garbage collection."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:56
+#: cmd/zsysd/client/state.go:57
 msgid "Save complete system state (users and system)"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:57
+#: cmd/zsysd/client/state.go:58
 msgid "Save the state for a given user or current user if empty"
 msgstr ""
 
@@ -747,7 +773,7 @@ msgstr ""
 msgid "Setting logging level to %d"
 msgstr ""
 
-#: internal/machines/state.go:236
+#: internal/machines/state.go:258
 #, c-format
 msgid "Setting new bootfs tag %s on %s\n"
 msgstr ""
@@ -766,7 +792,7 @@ msgid ""
 "done. Default is CPU profiling with a 30s timeout."
 msgstr ""
 
-#: internal/daemon/state.go:146
+#: internal/daemon/state.go:149
 msgid "State name is required"
 msgstr ""
 
@@ -778,7 +804,7 @@ msgstr ""
 msgid "Stops zsys daemon."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:146
+#: cmd/zsysd/client/state.go:148
 msgid "Successfully saved as %q\n"
 msgstr ""
 
@@ -847,7 +873,7 @@ msgstr ""
 msgid "Unsupported trace type: %s"
 msgstr ""
 
-#: internal/machines/state.go:218
+#: internal/machines/state.go:240
 msgid "Untagging all datasets\n"
 msgstr ""
 
@@ -1203,7 +1229,7 @@ msgstr ""
 msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
-#: internal/machines/boot.go:290 internal/machines/state.go:240
+#: internal/machines/boot.go:290 internal/machines/state.go:262
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -1212,7 +1238,7 @@ msgstr ""
 msgid "couldn't remove system state %s: "
 msgstr ""
 
-#: internal/daemon/state.go:169
+#: internal/daemon/state.go:172
 #, c-format
 msgid "couldn't remove user state %s: "
 msgstr ""
@@ -1364,7 +1390,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: internal/machines/state.go:370
+#: internal/machines/state.go:393
 #, c-format
 msgid ""
 "multiple states are matching %s:\n"
@@ -1392,7 +1418,7 @@ msgstr ""
 msgid "no machine matches %s"
 msgstr ""
 
-#: internal/machines/state.go:363
+#: internal/machines/state.go:386
 #, c-format
 msgid "no matching state for %s"
 msgstr ""
@@ -1409,7 +1435,7 @@ msgstr ""
 msgid "no suffix was provided for cloning"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:157
+#: cmd/zsysd/client/state.go:159
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
@@ -1441,7 +1467,7 @@ msgstr ""
 msgid "set current time to %q"
 msgstr ""
 
-#: internal/machines/state.go:336
+#: internal/machines/state.go:359
 msgid "state id is mandatory"
 msgstr ""
 
@@ -1487,19 +1513,19 @@ msgstr ""
 msgid "user %q doesn't exist"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:207
+#: cmd/zsysd/client/state.go:209
 msgid "y"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:207
+#: cmd/zsysd/client/state.go:209
 msgid "yes"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:74
+#: cmd/zsysd/client/state.go:76
 msgid "you can't provide no-update-bootmenu option on user state save"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:71 cmd/zsysd/client/state.go:153
+#: cmd/zsysd/client/state.go:73 cmd/zsysd/client/state.go:155
 msgid "you can't provide system and user flags at the same time"
 msgstr ""
 
