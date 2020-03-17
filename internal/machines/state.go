@@ -334,7 +334,8 @@ func (s *State) parentSystemState(ms *Machines) *State {
 // - the snapshot name of the state (xxxx -> @xxxx)
 // - the suffix after _ of the state (xxxx)
 // user limits the research on the given user state, otherwise we limit the search on system states.
-func (ms *Machines) IDToState(name, user string) (*State, error) {
+func (ms *Machines) IDToState(ctx context.Context, name, user string) (*State, error) {
+	log.Debugf(ctx, "finding a matching state for id %s and user %s", name, user)
 	if name == "" {
 		return nil, errors.New(i18n.G("state id is mandatory"))
 	}
