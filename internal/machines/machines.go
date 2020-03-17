@@ -35,6 +35,7 @@ type Machines struct {
 
 	z    *zfs.Zfs
 	conf config.ZConfig
+	time Nower
 }
 
 // Machine is a group of Main and its History children states
@@ -81,15 +82,28 @@ func WithLibZFS(libzfs libzfs.Interface) func(o *options) error {
 
 type options struct {
 	libzfs libzfs.Interface
+	time   Nower
 }
 
 type option func(*options) error
+
+// Nower allows to override current time and return a fixed value instead
+type Nower interface {
+	Now() time.Time
+}
+
+type timeAdapter struct{}
+
+func (timeAdapter) Now() time.Time {
+	return time.Now()
+}
 
 // New detects and generate machines elems
 func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) {
 	log.Info(ctx, i18n.G("Building new machines list"))
 	args := options{
 		libzfs: &libzfs.Adapter{},
+		time:   timeAdapter{},
 	}
 	for _, o := range opts {
 		if err := o(&args); err != nil {
@@ -112,6 +126,7 @@ func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) 
 		cmdline: cmdline,
 		z:       z,
 		conf:    conf,
+		time:    args.time,
 	}
 	machines.refresh(ctx)
 	return machines, nil
@@ -134,6 +149,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 		cmdline: ms.cmdline,
 		z:       ms.z,
 		conf:    ms.conf,
+		time:    ms.time,
 	}
 
 	datasets := machines.z.Datasets()
