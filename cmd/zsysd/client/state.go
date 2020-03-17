@@ -62,7 +62,7 @@ func init() {
 	stateremoveCmd.Flags().BoolVarP(&system, "system", "s", false, i18n.G("Remove system state (system and users linked to it)"))
 	stateremoveCmd.Flags().StringVarP(&userName, "user", "u", "", i18n.G("Remove the state for a given user or current user if empty"))
 	stateremoveCmd.Flags().BoolVarP(&force, "force", "f", false, i18n.G("Force removing, even if dependencies are found"))
-	stateremoveCmd.Flags().BoolVarP(&dryrun, "dryrun", "", false, i18n.G("Dry run, will not remove anything"))
+	stateremoveCmd.Flags().BoolVarP(&dryrun, "dry-run", "", false, i18n.G("Dry run, will not remove anything"))
 
 	cmdhandler.RegisterAlias(statesaveCmd, rootCmd)
 }
