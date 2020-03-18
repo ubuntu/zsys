@@ -38,6 +38,8 @@ func TestNew(t *testing.T) {
 		"One machine, attach boot to machine":          {def: "m_with_separate_boot.yaml"},
 		"One machine, with persistent datasets":        {def: "m_with_persistent.yaml"},
 
+		"One machine with children, snapshot on subdataset": {def: "d_one_machine_with_children_snapshot_on_subdataset.yaml"},
+
 		// Machine <-> snapshot interactions
 		"One machine with one snapshot":                              {def: "d_one_machine_with_one_snapshot.yaml"},
 		"One machine with snapshot having less datasets than parent": {def: "d_one_machine_with_snapshot_less_datasets.yaml"},

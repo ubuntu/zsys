@@ -391,9 +391,9 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []*zfs.Dataset, or
 			continue
 		}
 
-		// At this point, it's either non zfs system or persistent dataset. Filters out canmount != "on" as nothing
-		// will mount them.
-		if d.CanMount != "on" {
+		// At this point, it's either non zsys system, snapshot on a subdataset only or persistent dataset.
+		// Filters out canmount != "on" as nothing will mount them and exclude snapshots.
+		if d.CanMount != "on" || d.IsSnapshot {
 			log.Debugf(ctx, i18n.G("ignoring %q: either an orphan clone or not a boot, user or system datasets and canmount isn't on"), d.Name)
 			unmanagedDatasets = append(unmanagedDatasets, d)
 			continue

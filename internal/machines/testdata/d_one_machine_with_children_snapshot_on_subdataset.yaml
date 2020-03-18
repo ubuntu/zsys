@@ -1,0 +1,16 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: .
+        zsys_bootfs: yes
+        last_used: 2020-09-13T12:26:39+00:00
+        last_booted_kernel: vmlinuz-5.2.0-8-generic
+        mountpoint: /
+      - name: opt
+        snapshots:
+          - name: optonly
+            canmount: on:local
+            mountpoint: /opt:inherited
+            zsys_bootfs: yes:inherited
+            creation_time: 2020-05-07T22:01:28+00:00
+
