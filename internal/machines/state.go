@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/i18n"
@@ -162,7 +163,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 			errmsg += fmt.Sprintf(i18n.G("%s has a dependency linked to some states:\n"), s.ID)
 			for i := len(states) - 2; i >= 0; i-- {
 				lu := i18n.G("No timestamp")
-				if states[i].LastUsed != nil {
+				if !states[i].LastUsed.Equal(time.Time{}) {
 					lu = states[i].LastUsed.Format("2006-01-02 15:04:05")
 				}
 				errmsg += fmt.Sprintf(i18n.G("  - %s (%s)\n"), states[i].ID, lu)

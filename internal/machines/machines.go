@@ -59,7 +59,7 @@ type State struct {
 	// ID is the path to the root system dataset for this State.
 	ID string
 	// LastUsed is the last time this state was used
-	LastUsed *time.Time `json:",omitempty"`
+	LastUsed time.Time `json:",omitempty"`
 	// Datasets are all datasets that constitutes this State (in <pool>/ROOT/ + <pool>/BOOT/).
 	// The map index is each route for datasets.
 	Datasets map[string][]*zfs.Dataset `json:",omitempty"`
@@ -423,8 +423,7 @@ func newMachineFromDataset(d *zfs.Dataset, origin *string) *Machine {
 		m.Datasets[d.Name] = []*zfs.Dataset{d}
 		// We don't want lastused to be 1970 in our golden files
 		if d.LastUsed != 0 {
-			lu := time.Unix(int64(d.LastUsed), 0)
-			m.State.LastUsed = &lu
+			m.State.LastUsed = time.Unix(int64(d.LastUsed), 0)
 		}
 		return &m
 	}
@@ -455,8 +454,7 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d *zfs.Dataset
 			m.History[d.Name] = s
 			// We don't want lastused to be 1970 in our golden files
 			if d.LastUsed != 0 {
-				lu := time.Unix(int64(d.LastUsed), 0)
-				m.History[d.Name].LastUsed = &lu
+				m.History[d.Name].LastUsed = time.Unix(int64(d.LastUsed), 0)
 			}
 			return true
 		}
@@ -484,8 +482,7 @@ func (m *Machine) addUserState(ctx context.Context, r *zfs.Dataset, children []*
 	}
 	// We don't want lastused to be 1970 in our golden files
 	if r.LastUsed != 0 {
-		lu := time.Unix(int64(r.LastUsed), 0)
-		s.LastUsed = &lu
+		s.LastUsed = time.Unix(int64(r.LastUsed), 0)
 	}
 
 	// Attach to global user map new userData

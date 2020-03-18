@@ -27,7 +27,7 @@ type sortedReverseByTimeStates []*State
 
 func (s sortedReverseByTimeStates) Len() int { return len(s) }
 func (s sortedReverseByTimeStates) Less(i, j int) bool {
-	return s[i].LastUsed.After(*s[j].LastUsed)
+	return s[i].LastUsed.After(s[j].LastUsed)
 }
 func (s sortedReverseByTimeStates) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 

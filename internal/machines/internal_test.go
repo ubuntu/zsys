@@ -446,7 +446,7 @@ func TestSelectStatesToRemove(t *testing.T) {
 				lu := time.Unix(tc.timeOffset+s, 0)
 				s := State{
 					ID:       "k" + strconv.Itoa(i), // Unique index
-					LastUsed: &lu,
+					LastUsed: lu,
 				}
 				states = append(states, stateWithKeep{State: &s, keep: keepYes})
 			}
@@ -454,7 +454,7 @@ func TestSelectStatesToRemove(t *testing.T) {
 				lu := time.Unix(tc.timeOffset+s, 0)
 				s := State{
 					ID:       "p" + strconv.Itoa(i), // Unique index
-					LastUsed: &lu,
+					LastUsed: lu,
 				}
 				states = append(states, stateWithKeep{State: &s, keep: keepUnknown})
 			}
