@@ -495,14 +495,29 @@ func (d *dZFS) setPropertyWithSource(p libzfs.Prop, value, source string) error 
 
 func (d *dZFS) Destroy(Defer bool) (err error) {
 	d.assertDatasetOpened()
+	n := d.Dataset.Properties[libzfs.DatasetPropName].Value
 
 	if d.libZFSMock.errOnDestroy {
 		return errors.New("Error on Destroy requested")
 	}
+	fmt.Println("destroying", n)
 
 	d.libZFSMock.mu.Lock()
 	defer d.libZFSMock.mu.Unlock()
-	delete(d.libZFSMock.datasets, d.Dataset.Properties[libzfs.DatasetPropName].Value)
+	for name, dataset := range d.libZFSMock.datasets {
+		if n == name {
+			continue
+		}
+		if strings.HasPrefix(name, n+"/") || strings.HasPrefix(name, n+"@") {
+			return fmt.Errorf("can't remove %s: it has at least one child: %s", n, name)
+		}
+		if dataset.Dataset.Properties[libzfs.DatasetPropOrigin].Value == n {
+			return fmt.Errorf("can't remove %s: it has at least one clone: %s", n, name)
+		}
+		fmt.Println("origin of ", name, "is", dataset.Dataset.Properties[libzfs.DatasetPropOrigin].Value)
+
+	}
+	delete(d.libZFSMock.datasets, n)
 	return nil
 }
 
