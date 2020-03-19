@@ -20,8 +20,13 @@ import (
 )
 
 func TestMain(m *testing.M) {
+	vv := flag.Bool("vv", false, "More verbosity")
 	flag.Parse()
+
 	config.SetVerboseMode(1)
+	if *vv {
+		config.SetVerboseMode(2)
+	}
 	os.Exit(m.Run())
 }
 
