@@ -236,13 +236,18 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 }
 
 // Remove removes a given state by deleting all of its system datasets.
-// if linkedStateID is empty, the datasets will be always destroyed, otherwise user datasets will
-// be untagged user datasets before checking if they can be safely removed.
-// This state shouldn’t have any dependency as there is no additional check
-func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string, dontRemoveUsersChildren bool) error {
+// If called on system states: always try to destroy this state
+// If called on user states:
+// - if linkedStateID is empty -> this is a direct call on this state, always try to destroy.
+// - otherwise if linkedStateID is NOT empty, the following rule applies in order:
+//   + onlyUntagLinkedUsers is set when called from GC. It will prevent destroying any user datasets.
+//   + if the state is a snapshot: destroy it
+//   + if the user state is still linked to any system state: prevent destruction
+//   + if the user state has some snapshots as children: : prevent destruction
+func (s *State) remove(ctx context.Context, z *zfs.Zfs, onlyUntagLinkedUsers bool, linkedStateID string) error {
 	nt := z.NewNoTransaction(ctx)
 
-	log.Debugf(ctx, i18n.G("Removing state %s. linkedStateID: %s, dontRemoveUsersChildren: %t\n"), s.ID, linkedStateID, dontRemoveUsersChildren)
+	log.Debugf(ctx, i18n.G("Removing state %s. linkedStateID: %s, dontRemoveUsersChildren: %t\n"), s.ID, linkedStateID, onlyUntagLinkedUsers)
 
 	// Note: if we remove a user States which is a file system dataset, all snapshots (user snapshots) will be removed as well.
 	// This is OK for now as:
@@ -280,21 +285,36 @@ func (s *State) remove(ctx context.Context, z *zfs.Zfs, linkedStateID string, do
 	}
 
 	// If we have a system state, request user cleaning (untag and maybe deletion)
-	if !dontRemoveUsersChildren {
-		for _, us := range s.Users {
-			if err := us.remove(ctx, z, s.ID, dontRemoveUsersChildren); err != nil {
-				return err
-			}
+	for _, us := range s.Users {
+		if err := us.remove(ctx, z, onlyUntagLinkedUsers, s.ID); err != nil {
+			return err
 		}
 	}
 
-	// Remove directly the datasets if the main route dataset
+	// Remove directly the datasets if it’s a system state or we wanted to delete user states.
 	for route, ds := range s.Datasets {
-		if s.isSnapshot() || linkedStateID == "" || ds[0].BootfsDatasets == "" {
-			log.Debugf(ctx, "Destroying %s\n", route)
-			if err := nt.Destroy(route); err != nil {
-				return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
+		// If called directly on user datasets -> destroy (skip those checks)
+		if s.Users == nil && linkedStateID != "" {
+			// We explicitely requested to not destroy any user datasets on indirect call -> keep
+			// (GC case when destroying a system state for instance)
+			if onlyUntagLinkedUsers {
+				log.Debugf(ctx, "Users state %s destruction called  and onUntagUsers is set. Skipping destruction\n", route)
+				continue
 			}
+
+			// File system user state still linked to a system state -> keep
+			if !s.isSnapshot() && ds[0].BootfsDatasets != "" {
+				continue
+			}
+
+			// File system user state which has children snapshots -> keep
+			if !s.isSnapshot() && ds[0].HasSnapshotInHierarchy() {
+				continue
+			}
+		}
+		log.Debugf(ctx, "Destroying %s\n", route)
+		if err := nt.Destroy(route); err != nil {
+			return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
 		}
 	}
 

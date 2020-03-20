@@ -377,7 +377,7 @@ func TestRemoveInternal(t *testing.T) {
 
 			s := ms.getStateFromName(t, tc.stateName)
 
-			err = s.remove(context.Background(), ms.z, tc.linkedStateID, tc.dontRemoveUsersChildren)
+			err = s.remove(context.Background(), ms.z, tc.onlyUntagUsers, tc.linkedStateID)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
@@ -619,8 +619,8 @@ foundState:
 			}
 		}
 		for _, aus := range m.AllUsersStates {
-			for _, us := range aus {
-				if name == us.ID {
+			for id, us := range aus {
+				if name == id {
 					s = us
 					break foundState
 				}
