@@ -703,6 +703,7 @@ func (t *nestedTransaction) promoteRecursive(d *Dataset) error {
 }
 
 // Destroy recursively all children, including dataset named "name".
+// If the dataset is a filesystem dataset, only remove it and children if there is no snapshots in the descendants.
 // If the dataset is a snapshot, navigate through the hierarchy to delete all dataset with the same snapshot name.
 // Note that destruction can't be rollbacked as filesystem content can't be recreated, so we don't accept them
 // in a transactional Zfs element.
@@ -725,6 +726,10 @@ func (nt *NoTransaction) Destroy(name string) error {
 		if err != nil {
 			return fmt.Errorf(i18n.G("cannot find parent for %q: %v"), d.Name, err)
 		}
+	}
+
+	if d.HasSnapshotInHierarchy() {
+		return fmt.Errorf(i18n.G("couldn't destroy %q: it's a filesystem dataset which has snapshots"), d.Name)
 	}
 	if err := nt.destroyRecursive(target, snapName); err != nil {
 		return fmt.Errorf(i18n.G("couldn't destroy %q and its children: %v"), name, err)

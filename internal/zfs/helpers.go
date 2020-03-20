@@ -273,6 +273,19 @@ func (d Dataset) checkSnapshotHierarchyIntegrity(snapshotName string, snapshotOn
 	return nil
 }
 
+// HasSnapshotInHierarchy checks that the hierarchy of current dataset has a snapshot
+func (d Dataset) HasSnapshotInHierarchy() bool {
+	if d.IsSnapshot {
+		return false
+	}
+	for _, cd := range d.children {
+		if cd.IsSnapshot || cd.HasSnapshotInHierarchy() {
+			return true
+		}
+	}
+	return false
+}
+
 // checkNoClone checks that the hierarchy has no clone.
 func (d *Dataset) checkNoClone() error {
 	// TODO: this reopens the pool entirely, so can be a little bit slow. Could be reimplemented ourselves.
