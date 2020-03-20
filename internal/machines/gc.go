@@ -48,7 +48,7 @@ type stateWithKeep struct {
 func (ms *Machines) GC(ctx context.Context, all bool) error {
 	now := time.Now()
 
-	buckets := computeBuckets(now, ms.conf.History)
+	buckets := computeBuckets(ctx, now, ms.conf.History)
 	keepLast := ms.conf.History.KeepLast
 
 	allDatasets := make([]*zfs.Dataset, 0, len(ms.allSystemDatasets)+len(ms.allPersistentDatasets)+len(ms.allUsersDatasets)+len(ms.unmanagedDatasets))
@@ -74,9 +74,11 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	var statesToRemove []*State
 
 	// 1. System GC
-	log.Debug(ctx, i18n.G("System GC"))
-
+	log.Debug(ctx, i18n.G("GC System"))
+	var gcPassNum int
 	for {
+		gcPassNum++
+		log.Debugf(ctx, "GC System Pass #%d", gcPassNum)
 		statesChanges := false
 
 		for _, m := range ms.all {
@@ -92,7 +94,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 				// End of the array, nothing else to do.
 				if newestStateIndex >= len(sortedStates) {
-					log.Debug(ctx, i18n.G("No more system states left. Stopping analyzing buckets"))
+					log.Debugf(ctx, "No more system states left for pass #%d. Go to next pass", gcPassNum)
 					break
 				}
 
@@ -208,12 +210,14 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		log.Debug(ctx, i18n.G("System have changes, rerun system GC"))
 	}
 
-	// 2. GC user datasets
-	log.Debug(ctx, i18n.G("User GC"))
+	// 2. GC user datasets. Note that we will only collect user states that are independent of system states.
+	log.Debug(ctx, i18n.G("GC User"))
 	// TODO: this is a copy of above, but we keep any states associated with user states, we really need to merge State and UserStates
 	var UserStatesToRemove []*State
-
+	gcPassNum = 0
 	for {
+		gcPassNum++
+		log.Debugf(ctx, "GC User Pass #%d", gcPassNum)
 		statesChanges := false
 
 		for _, m := range ms.all {
@@ -239,7 +243,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 					// End of the array, nothing else to do.
 					if newestStateIndex >= len(sortedStates) {
-						log.Debug(ctx, i18n.G("No more user states left. Stopping analyzing buckets"))
+						log.Debugf(ctx, "No more user states left for pass #%d. Go to next pass", gcPassNum)
+
 						break
 					}
 
@@ -362,8 +367,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 		// Remove the given states.
 		nt := ms.z.NewNoTransaction(ctx)
-		for _, s := range UserStatesToRemove {
-			log.Infof(ctx, i18n.G("Removing state: %s"), s.ID)
+		for _, s := range statesToRemove {
+			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
 			if err := nt.Destroy(s.Datasets[s.ID][0].Name); err != nil {
 				log.Errorf(ctx, i18n.G("Couldn't destroy user state %s: %v"), s, err)
 			}
@@ -433,7 +438,8 @@ func removeFromSlice(s []string, name string) (r []string) {
 
 // computeBuckets initializes the list of buckets in which the dataset will be sorted.
 // Buckets are defined from the main configuration file.
-func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket) {
+func computeBuckets(ctx context.Context, now time.Time, rules config.HistoryRules) (buckets []bucket) {
+	log.Debugf(ctx, "calculating buckets")
 	nowDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	end := nowDay.Add(time.Duration(-rules.GCStartAfter * timeDay))
 
@@ -443,8 +449,10 @@ func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket)
 		end:     now,
 		samples: -1,
 	})
+	log.Debugf(ctx, "bucket keep all: start:%s, end:%s, samples:%d", buckets[len(buckets)-1].start, buckets[len(buckets)-1].end, buckets[len(buckets)-1].samples)
 
 	for _, rule := range rules.GCRules {
+		log.Debugf(ctx, "Rule %s, buckets: %d, length, %d", rule.Name, rule.Buckets, rule.BucketLength)
 		buckerDuration := time.Duration(timeDay * rule.BucketLength)
 
 		startPeriod := end.Add(-time.Duration(int(buckerDuration) * rule.Buckets))
@@ -455,6 +463,7 @@ func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket)
 				end:     d.Add(buckerDuration),
 				samples: rule.SamplesPerBucket,
 			})
+			log.Debugf(ctx, "  -  start:%s end:%s samples:%d", buckets[len(buckets)-1].start, buckets[len(buckets)-1].end, buckets[len(buckets)-1].samples)
 		}
 		end = startPeriod
 	}
@@ -465,6 +474,7 @@ func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket)
 		end:     end,
 		samples: 0,
 	})
+	log.Debugf(ctx, "bucket oldest: start:%s end:%s samples:%d", buckets[len(buckets)-1].start, buckets[len(buckets)-1].end, buckets[len(buckets)-1].samples)
 
 	return buckets
 }
