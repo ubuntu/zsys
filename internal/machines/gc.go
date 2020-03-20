@@ -82,6 +82,10 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		statesChanges := false
 
 		for _, m := range ms.all {
+			if !m.isZsys() {
+				continue
+			}
+
 			var newestStateIndex int
 			var sortedStates sortedReverseByTimeStates
 			for _, s := range m.History {
