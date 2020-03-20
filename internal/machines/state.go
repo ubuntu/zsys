@@ -53,7 +53,7 @@ func (s *State) getDependencies(ctx context.Context, ms *Machines) (stateDeps []
 		}
 	}
 
-	return s.getDependenciesWithCache(nt, allStates, datasetToState, make(map[*State]stateToDeps))
+	return s.getDependenciesWithCache(nt, ms, allStates, datasetToState, make(map[*State]stateToDeps))
 }
 
 type stateToDeps struct {
@@ -61,7 +61,7 @@ type stateToDeps struct {
 	datasetDeps []*zfs.Dataset
 }
 
-func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, allStates []*State, datasetToState map[*zfs.Dataset]*State, depsResolvedCache map[*State]stateToDeps) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
+func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, ms *Machines, allStates []*State, datasetToState map[*zfs.Dataset]*State, depsResolvedCache map[*State]stateToDeps) (stateDeps []*State, datasetDeps []*zfs.Dataset) {
 	if dep, ok := depsResolvedCache[s]; ok {
 		return dep.stateDeps, dep.datasetDeps
 	}
@@ -84,12 +84,12 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, allStates []*Sta
 				// If this is a system state, get related user states deps
 				for _, us := range datasetState.Users {
 					log.Debugf(nt.Context(), i18n.G("Getting dependencies for user state %s"), us.ID)
-					uDeps, udDeps := us.getDependenciesWithCache(nt, allStates, datasetToState, depsResolvedCache)
+					uDeps, udDeps := us.getDependenciesWithCache(nt, ms, allStates, datasetToState, depsResolvedCache)
 					depsResolvedCache[us] = stateToDeps{uDeps, udDeps}
 					stateDeps = append(stateDeps, uDeps...)
 					datasetDeps = append(datasetDeps, udDeps...)
 				}
-				cDeps, cdDeps := datasetState.getDependenciesWithCache(nt, allStates, datasetToState, depsResolvedCache)
+				cDeps, cdDeps := datasetState.getDependenciesWithCache(nt, ms, allStates, datasetToState, depsResolvedCache)
 				depsResolvedCache[datasetState] = stateToDeps{cDeps, cdDeps}
 				stateDeps = append(stateDeps, cDeps...)
 				datasetDeps = append(datasetDeps, cdDeps...)
@@ -103,7 +103,7 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, allStates []*Sta
 	// (If we added it above before if datasetState == s {continue}, those would be only added if current state had children datasets)
 	for _, us := range s.Users {
 		log.Debugf(nt.Context(), i18n.G("Getting dependencies for user state %s"), us.ID)
-		uDeps, udDeps := us.getDependenciesWithCache(nt, allStates, datasetToState, depsResolvedCache)
+		uDeps, udDeps := us.getDependenciesWithCache(nt, ms, allStates, datasetToState, depsResolvedCache)
 		depsResolvedCache[us] = stateToDeps{uDeps, udDeps}
 		stateDeps = append(stateDeps, uDeps...)
 		datasetDeps = append(datasetDeps, udDeps...)
@@ -112,13 +112,27 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, allStates []*Sta
 	stateDeps = append(stateDeps, s)
 
 	// Deduplicate state dependencies, keeping first which will has its inverse states just after (as depending on getDependecies order)
+	// We discare also all user states that are linked to a listed system state (as this is what will purge it)
 	keys := make(map[string]bool)
 	var uniqStateDeps []*State
+nextState:
 	for _, entry := range stateDeps {
-		if _, value := keys[entry.ID]; !value {
-			keys[entry.ID] = true
-			uniqStateDeps = append(uniqStateDeps, entry)
+		if _, alreadyAnalyzed := keys[entry.ID]; alreadyAnalyzed {
+			continue
 		}
+		keys[entry.ID] = true
+
+		// User states, check if we have a system state in the list
+		if entry.Users == nil {
+			ps := entry.parentSystemState(ms)
+			for _, b := range stateDeps {
+				if b == ps {
+					continue nextState
+				}
+			}
+		}
+
+		uniqStateDeps = append(uniqStateDeps, entry)
 	}
 
 	// Deduplicate datasets dependencies, keeping first which will has its inverse deps just after (as depending on getDependecies order)
