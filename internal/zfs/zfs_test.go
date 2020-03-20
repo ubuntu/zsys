@@ -544,15 +544,15 @@ func TestDestroy(t *testing.T) {
 	}{
 		"Leaf simple":                    {def: "layout1__one_pool_n_datasets.yaml", dataset: "rpool/ROOT/ubuntu_1234/var/lib/apt"},
 		"Hierarchy simple":               {def: "layout1__one_pool_n_datasets.yaml", dataset: "rpool/ROOT/ubuntu_1234"},
-		"Hierarchy with snapshots":       {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234"},
-		"Hierarchy with promoted clones": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", alreadyPromoted: "rpool/ROOT/ubuntu_5678"},
+		"Hierarchy with promoted clones": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r2", alreadyPromoted: "rpool/ROOT/ubuntu_5678"},
 
 		"Leaf snapshot simple": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234/var/lib/apt@snap_r1"},
 		"Hierarchy snapshot":   {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234@snap_r1"},
 
-		"Dataset doesn't exists":                    {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist", wantErr: true, isNoOp: true},
-		"Hierarchy with unpromoted clones":          {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
-		"Hierarchy with unpromoted clones non root": {def: "layout1__one_pool_n_datasets_n_snapshots_with_started_clone.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234/var@snap_r1", wantErr: true, isNoOp: true},
+		"Dataset doesn't exists":                      {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_doesntexist", wantErr: true, isNoOp: true},
+		"Hierarchy with unpromoted clones":            {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234@snap_r1", wantErr: true, isNoOp: true},
+		"Hierarchy with unpromoted clones non root":   {def: "layout1__one_pool_n_datasets_n_snapshots_with_started_clone.yaml", dataset: "rpool/ROOT/ubuntu_1234", cloneFrom: "rpool/ROOT/ubuntu_1234/var@snap_r1", wantErr: true, isNoOp: true},
+		"Hierarchy with snapshots can’t be destroyed": {def: "layout1__one_pool_n_datasets_n_snapshots.yaml", dataset: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {

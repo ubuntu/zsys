@@ -22,7 +22,7 @@
       "Mountpoint": "/",
       "CanMount": "noauto",
       "BootFS": true,
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
          "Mountpoint": "local",
          "CanMount": "local",
@@ -35,7 +35,7 @@
       "Mountpoint": "/opt",
       "CanMount": "noauto",
       "BootFS": true,
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
@@ -59,11 +59,26 @@
       }
    },
    {
+      "Name": "rpool/ROOT/ubuntu_5678/opt@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/opt",
+      "CanMount": "on",
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited"
+      }
+   },
+   {
       "Name": "rpool/ROOT/ubuntu_5678/var",
       "Mountpoint": "/var",
       "CanMount": "noauto",
       "BootFS": true,
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
@@ -75,7 +90,7 @@
       "Name": "rpool/ROOT/ubuntu_5678/var/lib",
       "Mountpoint": "/var/lib",
       "CanMount": "noauto",
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
@@ -87,7 +102,7 @@
       "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt",
       "Mountpoint": "/var/lib/apt",
       "CanMount": "noauto",
-      "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
@@ -110,12 +125,40 @@
       }
    },
    {
+      "Name": "rpool/ROOT/ubuntu_5678/var/lib/apt@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib/apt",
+      "CanMount": "on",
+      "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited"
+      }
+   },
+   {
       "Name": "rpool/ROOT/ubuntu_5678/var/lib@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/var/lib",
       "CanMount": "on",
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678/var/lib@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/var/lib",
+      "CanMount": "on",
+      "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
          "Mountpoint": "inherited",
          "CanMount": "local",
@@ -139,6 +182,21 @@
       }
    },
    {
+      "Name": "rpool/ROOT/ubuntu_5678/var@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/var",
+      "CanMount": "on",
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local",
+         "BootFS": "inherited",
+         "LastBootedKernel": "inherited"
+      }
+   },
+   {
       "Name": "rpool/ROOT/ubuntu_5678@snap_r1",
       "IsSnapshot": true,
       "Mountpoint": "/",
@@ -146,6 +204,21 @@
       "BootFS": true,
       "LastUsed": 2000000000,
       "LastBootedKernel": "vmlinuz-5.2.0-8-generic",
+      "Sources": {
+         "Mountpoint": "local",
+         "CanMount": "local",
+         "BootFS": "local",
+         "LastBootedKernel": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu_5678@snap_r2",
+      "IsSnapshot": true,
+      "Mountpoint": "/",
+      "CanMount": "on",
+      "BootFS": true,
+      "LastUsed": 2000000000,
+      "LastBootedKernel": "vmlinuz-5.0.0-0-generic",
       "Sources": {
          "Mountpoint": "local",
          "CanMount": "local",
