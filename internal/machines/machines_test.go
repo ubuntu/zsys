@@ -1010,6 +1010,10 @@ func TestIDToState(t *testing.T) {
 
 		"Limit search on duplicated snapshot name to a single user": {name: "snap1", user: "user1", wantState: "rpool/USERDATA/user1_abcd@snap1"},
 
+		// User datasets shared between machines
+		"Match on user generated ID":                 {name: "jklm-rpool.ROOT.ubuntu-1234", user: "user2", wantState: "rpool/USERDATA/user2_jklm"},
+		"Doesn’t match on user dataset regular name": {name: "rpool/USERDATA/user2_jklm", user: "user2", wantErr: true},
+
 		// Multiple matches
 		"Multiple states match system suffix ID": {name: "1234", wantErr: true},
 		"Multiple states match user suffix ID":   {name: "abcd", user: "user1", wantErr: true},

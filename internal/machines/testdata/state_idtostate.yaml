@@ -108,6 +108,10 @@ pools:
           mountpoint: /home/user1:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
+    - name: USERDATA/user2_jklm
+      mountpoint: /home/user2
+      bootfs_datasets: rpool/ROOT/ubuntu_1234,rpool2/ROOT/ubuntu_1234
+      last_used: 2018-12-10T12:20:44+00:00
   - name: rpool2
     datasets:
     - name: ROOT
