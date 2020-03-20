@@ -122,15 +122,13 @@ func TestGetDependencies(t *testing.T) {
 			wantDatasets: []string{"rpool/ROOT/ubuntu_manual"},
 		},
 
-		// System states with user states
+		// System states with user states don’t list user states
 		"Leaf system state with userdata": {def: "m_clone_with_userdata.yaml", stateName: "rpool/ROOT/ubuntu_5678",
-			wantStates: []string{"rpool/USERDATA/user1_efgh", "rpool/ROOT/ubuntu_5678"}},
+			wantStates: []string{"rpool/ROOT/ubuntu_5678"}},
 		"System state with clone with userdata (less users on clone -> user has been created)": {def: "m_clone_with_userdata.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{"rpool/USERDATA/root_bcde", "rpool/USERDATA/user1_efgh", "rpool/USERDATA/user1_abcd@snap1", "rpool/USERDATA/user1_abcd",
-				"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234"}},
+			wantStates: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234"}},
 		"System state with clone with userdata (more users on clone -> user has been deleted)": {def: "m_clone_with_clone_has_more_users.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{"rpool/USERDATA/user1_efgh", "rpool/USERDATA/user1_abcd@snap1", "rpool/USERDATA/user1_abcd", "rpool/USERDATA/root_bcde",
-				"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234"}},
+			wantStates: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234"}},
 
 		// Multiclones
 		"Leaf user clone with snapshots": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/USERDATA/user1_mnop",
@@ -151,27 +149,19 @@ func TestGetDependencies(t *testing.T) {
 				"rpool/USERDATA/user1_abcd@snap1", "rpool/USERDATA/user1_abcd"},
 			wantDatasets: []string{"rpool/user1_xyz", "rpool/user1_aaaa"}},
 		"Root system with mutiple clones and bpool": {def: "state_snapshot_with_userdata_n_system_clones.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{"rpool/USERDATA/root_bcde@snap1",
-				"rpool/ROOT/ubuntu_1234@snap1",
-				"rpool/USERDATA/root_cdef@snaproot1", "rpool/USERDATA/root_cdef@snap4", "rpool/USERDATA/root_cdef", "rpool/USERDATA/root_bcde@snap2",
-				"rpool/ROOT/ubuntu_1234@snap2",
-				"rpool/USERDATA/root_ghij", "rpool/USERDATA/root_defg@snaproot2", "rpool/USERDATA/root_defg",
+			wantStates: []string{
+				"rpool/USERDATA/root_cdef@snaproot1",
+				"rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234@snap2",
+				"rpool/USERDATA/root_ghij", "rpool/USERDATA/root_defg@snaproot2",
 				"rpool/ROOT/ubuntu_9999", "rpool/ROOT/ubuntu_5678@snap4", "rpool/ROOT/ubuntu_5678",
-				"rpool/USERDATA/root_bcde@snap3",
-				"rpool/ROOT/ubuntu_1234@snap3",
-				"rpool/USERDATA/root_bcde", "rpool/USERDATA/user1_abcd",
-				"rpool/ROOT/ubuntu_1234"}},
+				"rpool/ROOT/ubuntu_1234@snap3", "rpool/ROOT/ubuntu_1234"}},
 		"Root system with mutiple clones and bpool and manual clone": {def: "state_snapshot_with_userdata_n_system_clones_manual_clone.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{"rpool/USERDATA/root_bcde@snap1",
-				"rpool/ROOT/ubuntu_1234@snap1",
-				"rpool/USERDATA/root_cdef@snaproot1", "rpool/USERDATA/root_cdef@snap4", "rpool/USERDATA/root_cdef", "rpool/USERDATA/root_bcde@snap2",
-				"rpool/ROOT/ubuntu_1234@snap2",
-				"rpool/USERDATA/root_ghij", "rpool/USERDATA/root_defg@snaproot2", "rpool/USERDATA/root_defg",
+			wantStates: []string{
+				"rpool/USERDATA/root_cdef@snaproot1",
+				"rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234@snap2",
+				"rpool/USERDATA/root_ghij", "rpool/USERDATA/root_defg@snaproot2",
 				"rpool/ROOT/ubuntu_9999", "rpool/ROOT/ubuntu_5678@snap4", "rpool/ROOT/ubuntu_5678",
-				"rpool/USERDATA/root_bcde@snap3",
-				"rpool/ROOT/ubuntu_1234@snap3",
-				"rpool/USERDATA/root_bcde", "rpool/USERDATA/user1_abcd",
-				"rpool/ROOT/ubuntu_1234"},
+				"rpool/ROOT/ubuntu_1234@snap3", "rpool/ROOT/ubuntu_1234"},
 			wantDatasets: []string{"rpool/manualclone"}},
 
 		// User state linked to a system state: we never list the associated system state (complexity outbreak), it will be treated by the caller
