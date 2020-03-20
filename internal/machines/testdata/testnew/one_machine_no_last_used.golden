@@ -3,6 +3,7 @@
       "rpool": {
          "IsZsys": true,
          "ID": "rpool",
+         "LastUsed": "0001-01-01T00:00:00Z",
          "Datasets": {
             "rpool": [
                {

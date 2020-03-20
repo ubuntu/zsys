@@ -213,6 +213,7 @@
                },
                "rpool/USERDATA/root_ghij": {
                   "ID": "rpool/USERDATA/root_ghij",
+                  "LastUsed": "0001-01-01T00:00:00Z",
                   "Datasets": {
                      "rpool/USERDATA/root_ghij": [
                         {

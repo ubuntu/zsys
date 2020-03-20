@@ -273,6 +273,7 @@
                },
                "rpool/USERDATA/user1_xxxxxx": {
                   "ID": "rpool/USERDATA/user1_xxxxxx",
+                  "LastUsed": "0001-01-01T00:00:00Z",
                   "Datasets": {
                      "rpool/USERDATA/user1_xxxxxx": [
                         {
@@ -631,6 +632,7 @@
             },
             "rpool/ROOT/ubuntu_4242": {
                "ID": "rpool/ROOT/ubuntu_4242",
+               "LastUsed": "0001-01-01T00:00:00Z",
                "Datasets": {
                   "bpool/BOOT/ubuntu_4242": [
                      {
@@ -746,6 +748,7 @@
                "Users": {
                   "user1": {
                      "ID": "rpool/USERDATA/user1_xxxxxx",
+                     "LastUsed": "0001-01-01T00:00:00Z",
                      "Datasets": {
                         "rpool/USERDATA/user1_xxxxxx": [
                            {
@@ -1088,6 +1091,7 @@
             },
             "rpool/ROOT/ubuntu_9876": {
                "ID": "rpool/ROOT/ubuntu_9876",
+               "LastUsed": "0001-01-01T00:00:00Z",
                "Datasets": {
                   "bpool/BOOT/ubuntu_9876": [
                      {
@@ -1661,6 +1665,7 @@
             },
             "rpool/USERDATA/user1_xxxxxx": {
                "ID": "rpool/USERDATA/user1_xxxxxx",
+               "LastUsed": "0001-01-01T00:00:00Z",
                "Datasets": {
                   "rpool/USERDATA/user1_xxxxxx": [
                      {
@@ -2019,6 +2024,7 @@
          },
          "rpool/ROOT/ubuntu_4242": {
             "ID": "rpool/ROOT/ubuntu_4242",
+            "LastUsed": "0001-01-01T00:00:00Z",
             "Datasets": {
                "bpool/BOOT/ubuntu_4242": [
                   {
@@ -2134,6 +2140,7 @@
             "Users": {
                "user1": {
                   "ID": "rpool/USERDATA/user1_xxxxxx",
+                  "LastUsed": "0001-01-01T00:00:00Z",
                   "Datasets": {
                      "rpool/USERDATA/user1_xxxxxx": [
                         {
@@ -2476,6 +2483,7 @@
          },
          "rpool/ROOT/ubuntu_9876": {
             "ID": "rpool/ROOT/ubuntu_9876",
+            "LastUsed": "0001-01-01T00:00:00Z",
             "Datasets": {
                "bpool/BOOT/ubuntu_9876": [
                   {
