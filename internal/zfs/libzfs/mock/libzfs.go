@@ -500,7 +500,6 @@ func (d *dZFS) Destroy(Defer bool) (err error) {
 	if d.libZFSMock.errOnDestroy {
 		return errors.New("Error on Destroy requested")
 	}
-	fmt.Println("destroying", n)
 
 	d.libZFSMock.mu.Lock()
 	defer d.libZFSMock.mu.Unlock()
@@ -514,8 +513,6 @@ func (d *dZFS) Destroy(Defer bool) (err error) {
 		if dataset.Dataset.Properties[libzfs.DatasetPropOrigin].Value == n {
 			return fmt.Errorf("can't remove %s: it has at least one clone: %s", n, name)
 		}
-		fmt.Println("origin of ", name, "is", dataset.Dataset.Properties[libzfs.DatasetPropOrigin].Value)
-
 	}
 	delete(d.libZFSMock.datasets, n)
 	return nil

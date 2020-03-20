@@ -18,10 +18,6 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs/mock"
 )
 
-func init() {
-	config.SetVerboseMode(1)
-}
-
 func TestNew(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
