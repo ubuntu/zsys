@@ -217,7 +217,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	// 2. GC user datasets. Note that we will only collect user states that are independent of system states.
 	log.Debug(ctx, i18n.G("GC User"))
 	// TODO: this is a copy of above, but we keep any states associated with user states, we really need to merge State and UserStates
-	var UserStatesToRemove []*State
+	statesToRemove = nil
 	gcPassNum = 0
 	for {
 		gcPassNum++
@@ -378,8 +378,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 			}
 		}
 
-		UserStatesToRemove = nil
-		// TODO: only if changes
+		statesToRemove = nil
 		if err := ms.Refresh(ctx); err != nil {
 			return fmt.Errorf("Couldn't refresh machine list: %v", err)
 		}
