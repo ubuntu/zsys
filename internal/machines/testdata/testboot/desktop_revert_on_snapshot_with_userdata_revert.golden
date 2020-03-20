@@ -225,7 +225,23 @@
                      ]
                   }
                },
-               "rpool/USERDATA/user1_efgh": {
+               "rpool/USERDATA/user1_efgh-rpool.ROOT.ubuntu-5678": {
+                  "ID": "rpool/USERDATA/user1_efgh",
+                  "LastUsed": "2018-12-10T13:20:44+01:00",
+                  "Datasets": {
+                     "rpool/USERDATA/user1_efgh": [
+                        {
+                           "Name": "rpool/USERDATA/user1_efgh",
+                           "Mountpoint": "/home/user1",
+                           "CanMount": "noauto",
+                           "LastUsed": 1544444444,
+                           "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678",
+                           "Origin": "rpool/USERDATA/user1_abcd@snap1"
+                        }
+                     ]
+                  }
+               },
+               "rpool/USERDATA/user1_efgh-rpool.ROOT.ubuntu-9876": {
                   "ID": "rpool/USERDATA/user1_efgh",
                   "LastUsed": "2018-12-10T13:20:44+01:00",
                   "Datasets": {
@@ -1617,7 +1633,23 @@
                   ]
                }
             },
-            "rpool/USERDATA/user1_efgh": {
+            "rpool/USERDATA/user1_efgh-rpool.ROOT.ubuntu-5678": {
+               "ID": "rpool/USERDATA/user1_efgh",
+               "LastUsed": "2018-12-10T13:20:44+01:00",
+               "Datasets": {
+                  "rpool/USERDATA/user1_efgh": [
+                     {
+                        "Name": "rpool/USERDATA/user1_efgh",
+                        "Mountpoint": "/home/user1",
+                        "CanMount": "noauto",
+                        "LastUsed": 1544444444,
+                        "BootfsDatasets": "rpool/ROOT/ubuntu_9876,rpool/ROOT/ubuntu_5678",
+                        "Origin": "rpool/USERDATA/user1_abcd@snap1"
+                     }
+                  ]
+               }
+            },
+            "rpool/USERDATA/user1_efgh-rpool.ROOT.ubuntu-9876": {
                "ID": "rpool/USERDATA/user1_efgh",
                "LastUsed": "2018-12-10T13:20:44+01:00",
                "Datasets": {

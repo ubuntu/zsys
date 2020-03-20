@@ -49,7 +49,7 @@
          },
          "AllUsersStates": {
             "root": {
-               "rpool/USERDATA/root_bcde": {
+               "rpool/USERDATA/root_bcde-rpool.ROOT.ubuntu-1234": {
                   "ID": "rpool/USERDATA/root_bcde",
                   "LastUsed": "2018-08-03T23:55:33+02:00",
                   "Datasets": {
@@ -66,7 +66,7 @@
                }
             },
             "user1": {
-               "rpool/USERDATA/user1_abcd": {
+               "rpool/USERDATA/user1_abcd-rpool.ROOT.ubuntu-1234": {
                   "ID": "rpool/USERDATA/user1_abcd",
                   "LastUsed": "2018-12-10T13:20:44+01:00",
                   "Datasets": {
@@ -133,7 +133,7 @@
          },
          "AllUsersStates": {
             "root": {
-               "rpool/USERDATA/root_bcde": {
+               "rpool/USERDATA/root_bcde-rpool.ROOT.ubuntu-5678": {
                   "ID": "rpool/USERDATA/root_bcde",
                   "LastUsed": "2018-08-03T23:55:33+02:00",
                   "Datasets": {
@@ -150,7 +150,7 @@
                }
             },
             "user1": {
-               "rpool/USERDATA/user1_abcd": {
+               "rpool/USERDATA/user1_abcd-rpool.ROOT.ubuntu-5678": {
                   "ID": "rpool/USERDATA/user1_abcd",
                   "LastUsed": "2018-12-10T13:20:44+01:00",
                   "Datasets": {
@@ -219,7 +219,7 @@
       },
       "AllUsersStates": {
          "root": {
-            "rpool/USERDATA/root_bcde": {
+            "rpool/USERDATA/root_bcde-rpool.ROOT.ubuntu-5678": {
                "ID": "rpool/USERDATA/root_bcde",
                "LastUsed": "2018-08-03T23:55:33+02:00",
                "Datasets": {
@@ -236,7 +236,7 @@
             }
          },
          "user1": {
-            "rpool/USERDATA/user1_abcd": {
+            "rpool/USERDATA/user1_abcd-rpool.ROOT.ubuntu-5678": {
                "ID": "rpool/USERDATA/user1_abcd",
                "LastUsed": "2018-12-10T13:20:44+01:00",
                "Datasets": {
