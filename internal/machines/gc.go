@@ -46,7 +46,7 @@ type stateWithKeep struct {
 
 // GC starts garbage collection for system and users
 func (ms *Machines) GC(ctx context.Context, all bool) error {
-	now := time.Now()
+	now := ms.time.Now()
 
 	buckets := computeBuckets(ctx, now, ms.conf.History)
 	keepLast := ms.conf.History.KeepLast
