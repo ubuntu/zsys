@@ -80,9 +80,21 @@ func WithLibZFS(libzfs libzfs.Interface) func(o *options) error {
 	}
 }
 
+// WithConfig allows overriding the default configuration file with a mock
+func WithConfig(path string) func(o *options) error {
+	return func(o *options) error {
+		if path == "" {
+			return nil
+		}
+		o.configPath = path
+		return nil
+	}
+}
+
 type options struct {
-	libzfs libzfs.Interface
-	time   Nower
+	configPath string
+	libzfs     libzfs.Interface
+	time       Nower
 }
 
 type option func(*options) error
@@ -102,8 +114,9 @@ func (timeAdapter) Now() time.Time {
 func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) {
 	log.Info(ctx, i18n.G("Building new machines list"))
 	args := options{
-		libzfs: &libzfs.Adapter{},
-		time:   timeAdapter{},
+		configPath: config.DefaultPath,
+		libzfs:     &libzfs.Adapter{},
+		time:       timeAdapter{},
 	}
 	for _, o := range opts {
 		if err := o(&args); err != nil {
@@ -116,7 +129,7 @@ func New(ctx context.Context, cmdline string, opts ...option) (Machines, error) 
 		return Machines{}, fmt.Errorf(i18n.G("couldn't scan zfs filesystem"), err)
 	}
 
-	conf, err := config.Load(ctx, config.DefaultPath)
+	conf, err := config.Load(ctx, args.configPath)
 	if err != nil {
 		return Machines{}, fmt.Errorf(i18n.G("couldn't load zsys configuration"), err)
 	}
