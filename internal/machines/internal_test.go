@@ -317,37 +317,39 @@ pools:
 func TestRemoveInternal(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		stateName               string
-		linkedStateID           string
-		dontRemoveUsersChildren bool
+		stateName      string
+		linkedStateID  string
+		onlyUntagUsers bool
 
 		setPropertyErr bool
 
 		wantErr bool
 		isNoOp  bool
 	}{
-		"Initial state":                                 {}, // This state doesn’t call remove at all but is used to compare golden files
-		"Remove user state unconditionnally":            {stateName: "rpool/USERDATA/user2_2222"},
-		"Remove user state conditionnally":              {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "rpool/ROOT/ubuntu_5678"},
-		"Don't remove user state on bad state id match": {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "doesnt match"},
-
-		"Remove user state unconditionnally linked to 2 states":                   {stateName: "rpool/USERDATA/user3_3333"},
-		"Remove user state unconditionnally linked to 2 states and its snapshots": {stateName: "rpool/USERDATA/root_bcde"},
-		"Unassociate user state linked to one state":                              {stateName: "rpool/USERDATA/user3_3333", linkedStateID: "rpool/ROOT/ubuntu_1234"},
+		"Initial state": {}, // This state doesn’t call remove at all but is used to compare golden files
 
 		"Remove user snapshot state":                                    {stateName: "rpool/USERDATA/root_bcde@snaproot1"},
 		"Remove user snapshot state (linked to system state: no check)": {stateName: "rpool/USERDATA/root_bcde@snap2"},
 		"Remove user snapshot clone state":                              {stateName: "rpool/USERDATA/user4_clone"},
 
-		"Remove system state without user datasets": {stateName: "rpool/ROOT/ubuntu_6789"},
-		"Remove system state and its user datasets": {stateName: "rpool/ROOT/ubuntu_5678"},
+		"Remove system state and only untag user datasets":      {stateName: "rpool/ROOT/ubuntu_8901", onlyUntagUsers: true},
+		"Remove user state unconditionnally":                    {stateName: "rpool/USERDATA/user2_2222"},
+		"Remove user state conditionnally":                      {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "rpool/ROOT/ubuntu_5678"},
+		"Don't remove user state on bad state id match":         {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "doesnt match"},
+		"Remove user state unconditionnally linked to 2 states": {stateName: "rpool/USERDATA/user8_gggg-rpool.ROOT.ubuntu-1234"},
+		"Unassociate user state linked to one state":            {stateName: "rpool/USERDATA/user8_gggg-rpool.ROOT.ubuntu-1234", linkedStateID: "rpool/ROOT/ubuntu_1234"},
 
-		// Error on clones from state
-		"Error on removing state with state clone":   {stateName: "rpool/USERDATA/user4_for_state_clone", wantErr: true},
-		"Error on removing state with dataset clone": {stateName: "rpool/USERDATA/user5_for_manual_clone", wantErr: true},
+		"Remove system state without user datasets":                                        {stateName: "rpool/ROOT/ubuntu_6789"},
+		"Remove system state and its user datasets":                                        {stateName: "rpool/ROOT/ubuntu_8901"},
+		"Remove system state remove some user states and unassociate others linked to two": {stateName: "rpool/ROOT/ubuntu_5678"},
 
-		"Revert unassociate user state if we get an error":          {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "rpool/ROOT/ubuntu_5678", setPropertyErr: true, wantErr: true, isNoOp: true},
-		"Don’t destroy system state if user remove issues an error": {stateName: "rpool/ROOT/ubuntu_5678", setPropertyErr: true, wantErr: true, isNoOp: true},
+		// Error on clones from state. Called with empty linkedStateID
+		"Error on removing directly state with state clone":   {stateName: "rpool/USERDATA/user4_for_state_clone", wantErr: true},
+		"Error on removing directly state with dataset clone": {stateName: "rpool/USERDATA/user5_for_manual_clone", wantErr: true},
+
+		"Revert unassociate user state if we get an error":            {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "rpool/ROOT/ubuntu_5678", setPropertyErr: true, wantErr: true, isNoOp: true},
+		"Don’t destroy system state if user remove issues an error":   {stateName: "rpool/ROOT/ubuntu_5678", setPropertyErr: true, wantErr: true, isNoOp: true},
+		"Don’t destroy filesystem state if it has children snapshots": {stateName: "rpool/ROOT/ubuntu_7890", wantErr: true, isNoOp: true},
 	}
 	for name, tc := range tests {
 		tc := tc
