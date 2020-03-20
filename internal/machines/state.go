@@ -226,7 +226,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 			log.RemotePrintf(ctx, i18n.G("Deleting state %s\n"), state.ID)
 			continue
 		}
-		if err := state.remove(ctx, ms.z, "", true); err != nil {
+		if err := state.remove(ctx, ms.z, false, ""); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove state %s: %v"), state.ID, err)
 		}
 	}
@@ -376,8 +376,8 @@ func (ms *Machines) IDToState(ctx context.Context, name, user string) (*State, e
 	var matchingStates []*State
 	for _, m := range ms.all {
 		if user != "" {
-			for _, us := range m.AllUsersStates[user] {
-				if idMatches(us.ID, name) {
+			for id, us := range m.AllUsersStates[user] {
+				if idMatches(id, name) {
 					matchingStates = append(matchingStates, us)
 				}
 			}

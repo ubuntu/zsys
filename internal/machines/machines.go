@@ -214,7 +214,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 				// Snapshots are not necessarily with a dataset ID matching its parent of dataset promotions, just match
 				// its name.
 				if strings.HasSuffix(s.ID, "@"+snapshot) {
-					user, us := m.addUserState(ctx, r, children)
+					user, us := m.addUserState(ctx, s.ID, r, children)
 					s.Users[user] = us
 					associateWithAtLeastOne = true
 					continue
@@ -245,7 +245,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 					}
 					associatedChildren = append(associatedChildren, d)
 				}
-				user, us := m.addUserState(ctx, r, associatedChildren)
+				user, us := m.addUserState(ctx, s.ID, r, associatedChildren)
 				s.Users[user] = us
 			}
 
@@ -284,7 +284,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 			for _, UserStates := range m.AllUsersStates {
 				for _, UserState := range UserStates {
 					if UserState.ID == origin {
-						m.addUserState(ctx, r, children)
+						m.addUserState(ctx, "", r, children)
 						associated = true
 						associateWithAtLeastOne = true
 						break
@@ -310,7 +310,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 		for _, m := range machines.all {
 			for _, UserState := range m.AllUsersStates[user] {
 				if UserState.ID == base {
-					m.addUserState(ctx, r, children)
+					m.addUserState(ctx, "", r, children)
 					associated = true
 					break
 				}
@@ -488,7 +488,7 @@ func (ms *Machines) populateSystemAndHistory(ctx context.Context, d *zfs.Dataset
 
 // addUserState creates and attach a new user state to the machine users map.
 // It returns the username and the created state
-func (m *Machine) addUserState(ctx context.Context, r *zfs.Dataset, children []*zfs.Dataset) (string, *State) {
+func (m *Machine) addUserState(ctx context.Context, systemStateID string, r *zfs.Dataset, children []*zfs.Dataset) (string, *State) {
 	s := &State{
 		ID:       r.Name,
 		Datasets: map[string][]*zfs.Dataset{r.Name: append([]*zfs.Dataset{r}, children...)},
@@ -499,12 +499,16 @@ func (m *Machine) addUserState(ctx context.Context, r *zfs.Dataset, children []*
 	}
 
 	// Attach to global user map new userData
-	// If the dataset has already been added  it is overwritten
+	// If the dataset is associated to multiple system, suffix it
 	user := userFromDatasetName(r.Name)
 	if m.AllUsersStates[user] == nil {
 		m.AllUsersStates[user] = make(map[string]*State)
 	}
-	m.AllUsersStates[user][r.Name] = s
+	indexAllUserStates := r.Name
+	if !r.IsSnapshot && len(strings.Split(r.BootfsDatasets, bootfsdatasetsSeparator)) > 1 {
+		indexAllUserStates += "-" + strings.ReplaceAll(strings.ReplaceAll(systemStateID, "/", "."), "_", "-")
+	}
+	m.AllUsersStates[user][indexAllUserStates] = s
 	return user, s
 }
 
@@ -724,10 +728,10 @@ func (m Machine) Info(full bool) (string, error) {
 						ud = append(ud, d.Name)
 					}
 				}
-				fmt.Fprintf(w, i18n.G("     - %s: %s\n"), s.LastUsed.Format("2006-01-02 15:04:05"), strings.Join(ud, ", "))
+				fmt.Fprintf(w, i18n.G("     - %s (%s): %s\n"), k, s.LastUsed.Format("2006-01-02 15:04:05"), strings.Join(ud, ", "))
 				continue
 			}
-			fmt.Fprintf(w, i18n.G("     - %s\n"), s.LastUsed.Format("2006-01-02 15:04:05"))
+			fmt.Fprintf(w, i18n.G("     - %s (%s)\n"), k, s.LastUsed.Format("2006-01-02 15:04:05"))
 		}
 	}
 	if err := w.Flush(); err != nil {
