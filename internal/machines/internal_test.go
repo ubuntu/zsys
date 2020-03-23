@@ -402,7 +402,7 @@ func TestRemoveInternal(t *testing.T) {
 
 			s := ms.getStateFromName(t, tc.stateName)
 
-			err = s.remove(context.Background(), ms.z, tc.onlyUntagUsers, tc.linkedStateID)
+			err = s.remove(context.Background(), &ms, tc.onlyUntagUsers, tc.linkedStateID)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)

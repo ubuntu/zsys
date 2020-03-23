@@ -215,7 +215,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 			log.RemotePrintf(ctx, i18n.G("Deleting state %s\n"), state.ID)
 			continue
 		}
-		if err := state.remove(ctx, ms.z, false, ""); err != nil {
+		if err := state.remove(ctx, ms, false, ""); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove state %s: %v"), state.ID, err)
 		}
 	}
@@ -233,8 +233,8 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 //   + if the state is a snapshot: destroy it
 //   + if the user state is still linked to any system state: prevent destruction
 //   + if the user state has some snapshots as children: : prevent destruction
-func (s *State) remove(ctx context.Context, z *zfs.Zfs, onlyUntagLinkedUsers bool, linkedStateID string) error {
-	nt := z.NewNoTransaction(ctx)
+func (s *State) remove(ctx context.Context, ms *Machines, onlyUntagLinkedUsers bool, linkedStateID string) error {
+	nt := ms.z.NewNoTransaction(ctx)
 
 	log.Debugf(ctx, i18n.G("Removing state %s. linkedStateID: %s, dontRemoveUsersChildren: %t\n"), s.ID, linkedStateID, onlyUntagLinkedUsers)
 
@@ -247,7 +247,7 @@ func (s *State) remove(ctx context.Context, z *zfs.Zfs, onlyUntagLinkedUsers boo
 	// Untag all datasets associated with this state for non snapshots
 	if !s.isSnapshot() && linkedStateID != "" {
 		log.Debug(ctx, i18n.G("Untagging all datasets\n"))
-		t, cancel := z.NewTransaction(ctx)
+		t, cancel := ms.z.NewTransaction(ctx)
 		defer t.Done()
 		for _, d := range s.getDatasets() {
 			var newTags []string
@@ -275,12 +275,13 @@ func (s *State) remove(ctx context.Context, z *zfs.Zfs, onlyUntagLinkedUsers boo
 
 	// If we have a system state, request user cleaning (untag and maybe deletion)
 	for _, us := range s.Users {
-		if err := us.remove(ctx, z, onlyUntagLinkedUsers, s.ID); err != nil {
+		if err := us.remove(ctx, ms, onlyUntagLinkedUsers, s.ID); err != nil {
 			return err
 		}
 	}
 
 	// Remove directly the datasets if it’s a system state or we wanted to delete user states.
+	var stateDestroyed bool
 	for route, ds := range s.Datasets {
 		// If called directly on user datasets -> destroy (skip those checks)
 		if s.Users == nil && linkedStateID != "" {
@@ -304,6 +305,18 @@ func (s *State) remove(ctx context.Context, z *zfs.Zfs, onlyUntagLinkedUsers boo
 		log.Debugf(ctx, "Destroying %s\n", route)
 		if err := nt.Destroy(route); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
+		}
+		stateDestroyed = true
+	}
+
+	if stateDestroyed {
+		if ps := s.parentSystemState(ms); ps != nil {
+			for user, us := range ps.Users {
+				if us == s {
+					delete(ps.Users, user)
+					break
+				}
+			}
 		}
 	}
 
