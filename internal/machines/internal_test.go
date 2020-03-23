@@ -3,6 +3,7 @@ package machines
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -216,7 +217,8 @@ func TestGetDependencies(t *testing.T) {
 			}
 
 			// rule 2: ensure that all children (snapshots or filesystem datasets) appears before its parent
-			assertChildrenStatesBeforeParents(t, stateDeps)
+			assertSnapshotsStatesBeforeParents(t, stateDeps)
+
 			assertChildrenBeforeParents(t, datasetDeps)
 
 			// rule 3: ensure that a clone comes before its origin
@@ -510,24 +512,49 @@ func assertMachinesEquals(t *testing.T, m1, m2 Machines) {
 	}
 }
 
-// assertChildrenStatesBeforeParents ensure that all children (snapshots or filesystem states) appears before its parent
-func assertChildrenStatesBeforeParents(t *testing.T, deps []*State) {
+// assertSnapshotsStatesBeforeParents ensure that all snapshots appears just before its parent
+func assertSnapshotsStatesBeforeParents(t *testing.T, deps []*State) {
 	t.Helper()
 
-	// iterate on child
-	for i, child := range deps {
-		parent, snapshot := splitSnapshotName(child.ID)
-		if snapshot == "" {
-			parent = child.ID[:strings.LastIndex(child.ID, "/")]
-		}
-		// search corresponding base from the start
-		for j, candidate := range deps {
-			if candidate.ID != parent {
-				continue
+	var currentSnapshotParent string
+	// iterate on states to fetch parent
+	for i, state := range deps {
+		fmt.Println(state.ID)
+		parent, _ := splitSnapshotName(state.ID)
+		if state.isSnapshot() {
+			if currentSnapshotParent == "" {
+				currentSnapshotParent = parent
 			}
-			if i > j {
-				t.Errorf("Found child %s after its parent %s: %+v", child.ID, candidate.ID, deps)
+
+			if parent != currentSnapshotParent {
+				for j := i + 1; j < len(deps); j++ {
+					p, _ := SplitSnapshotName(deps[j].ID)
+					if currentSnapshotParent == p {
+						var d string
+						for _, v := range deps {
+							d += fmt.Sprintf(" %s", v.ID)
+						}
+						t.Errorf("Found snapshot from %s having its parent in the dep list followed by %s: %s", currentSnapshotParent, state.ID, d)
+						break
+					}
+				}
+				currentSnapshotParent = parent
 			}
+		} else {
+			if currentSnapshotParent != "" && parent != currentSnapshotParent {
+				for j := i + 1; j < len(deps); j++ {
+					p, _ := SplitSnapshotName(deps[j].ID)
+					if currentSnapshotParent == p {
+						var d string
+						for _, v := range deps {
+							d += fmt.Sprintf(" %s", v.ID)
+						}
+						t.Errorf("Found snapshot from %s having its parent in the dep list followed by %s: %s", currentSnapshotParent, state.ID, d)
+						break
+					}
+				}
+			}
+			currentSnapshotParent = ""
 		}
 	}
 }
