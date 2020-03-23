@@ -120,16 +120,6 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, ms *Machines, al
 		}
 		keys[entry.ID] = true
 
-		// User states, check if we have a system state in the list
-		if entry.Users == nil {
-			ps := entry.parentSystemState(ms)
-			for _, b := range stateDeps {
-				if b == ps {
-					continue nextState
-				}
-			}
-		}
-
 		// Keep position only for with filesystem datasets states or snapshots without parent
 		uniqStateDeps = append(uniqStateDeps, entry)
 	}
