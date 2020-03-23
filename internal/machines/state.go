@@ -112,24 +112,24 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, ms *Machines, al
 	stateDeps = append(stateDeps, s)
 
 	// Deduplicate state dependencies, keeping first which will has its inverse states just after (as depending on getDependecies order)
-	keys := make(map[string]bool)
+	keys := make(map[*State]bool)
 	var uniqStateDeps []*State
 	for _, entry := range stateDeps {
-		if _, alreadyAnalyzed := keys[entry.ID]; alreadyAnalyzed {
+		if _, alreadyAnalyzed := keys[entry]; alreadyAnalyzed {
 			continue
 		}
-		keys[entry.ID] = true
+		keys[entry] = true
 
 		// Keep position only for with filesystem datasets states or snapshots without parent
 		uniqStateDeps = append(uniqStateDeps, entry)
 	}
 
 	// Deduplicate datasets dependencies, keeping first which will has its inverse deps just after (as depending on getDependecies order)
-	keys = make(map[string]bool)
+	keysDS := make(map[string]bool)
 	var uniqDatasetDeps []*zfs.Dataset
 	for _, entry := range datasetDeps {
-		if _, value := keys[entry.Name]; !value {
-			keys[entry.Name] = true
+		if _, value := keysDS[entry.Name]; !value {
+			keysDS[entry.Name] = true
 			uniqDatasetDeps = append(uniqDatasetDeps, entry)
 		}
 	}
