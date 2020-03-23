@@ -111,10 +111,14 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, ms *Machines, al
 	// Add current state as the last dep
 	stateDeps = append(stateDeps, s)
 
+	statesByName := make(map[string]*State)
 	// Deduplicate state dependencies, keeping first which will has its inverse states just after (as depending on getDependecies order)
 	// We discare also all user states that are linked to a listed system state (as this is what will purge it)
+	// Also, to have a clear order between states and snapshots, we move all snapshots from a state immediately before
+	// his filesystem dataset state.
 	keys := make(map[string]bool)
 	var uniqStateDeps []*State
+	stateToMovableSnapshots := make(map[string][]*State)
 nextState:
 	for _, entry := range stateDeps {
 		if _, alreadyAnalyzed := keys[entry.ID]; alreadyAnalyzed {
@@ -132,7 +136,40 @@ nextState:
 			}
 		}
 
+		statesByName[entry.ID] = entry
+
+		// Keep position only for with filesystem datasets states or snapshots without parent
 		uniqStateDeps = append(uniqStateDeps, entry)
+	}
+
+	var orderedStateDeps []*State
+	for _, entry := range uniqStateDeps {
+		if entry.isSnapshot() {
+			parent, _ := splitSnapshotName(entry.ID)
+
+			if _, exists := statesByName[parent]; exists {
+				stateToMovableSnapshots[parent] = append(stateToMovableSnapshots[parent], entry)
+				continue
+			}
+		}
+		orderedStateDeps = append(orderedStateDeps, entry)
+	}
+
+	// attach snapshots immediately before parent
+	for i := 0; i < len(orderedStateDeps); i++ {
+		parentName := orderedStateDeps[i].ID
+		snapshots, ok := stateToMovableSnapshots[parentName]
+		if !ok {
+			continue
+		}
+		shiftBy := len(snapshots)
+		filler := make([]*State, shiftBy)
+		orderedStateDeps = append(orderedStateDeps, filler...)
+
+		// shift current element and following to later in the slice
+		copy(orderedStateDeps[i+shiftBy:], orderedStateDeps[i:])
+		copy(orderedStateDeps[i:], snapshots)
+		i += shiftBy
 	}
 
 	// Deduplicate datasets dependencies, keeping first which will has its inverse deps just after (as depending on getDependecies order)
@@ -145,7 +182,7 @@ nextState:
 		}
 	}
 
-	return uniqStateDeps, uniqDatasetDeps
+	return orderedStateDeps, uniqDatasetDeps
 }
 
 // RemoveState removes a system or user state with name as Id of the state and an optional user.
