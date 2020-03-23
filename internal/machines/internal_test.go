@@ -187,6 +187,18 @@ func TestGetDependencies(t *testing.T) {
 				"rpool/USERDATA/root_bcde", "rpool/USERDATA/user1_abcd", "rpool/ROOT/ubuntu_1234"},
 			wantDatasets: []string{"rpool/manualclone"}},
 
+		// User state linked to 2 machines has the user state object (different object) listed twice
+		"User state linked to 2 machines": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/ROOT/ubuntu_machine2clone",
+			wantStates: []string{
+				"rpool/USERDATA/user1_machine2", "rpool/ROOT/ubuntu_machine2clone"}},
+		"User state linked to 2 machines, remove main machine": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/ROOT/ubuntu_machine2",
+			wantStates: []string{
+				"rpool/USERDATA/user1_machine2", "rpool/ROOT/ubuntu_machine2clone",
+				"rpool/ROOT/ubuntu_machine2@snapmachine2",
+				// "rpool/USERDATA/user1_machine2" is another instance (which can have different route and subdatasets) than "rpool/USERDATA/user1_machine2"
+				"rpool/USERDATA/user1_machine2", "rpool/ROOT/ubuntu_machine2",
+			}},
+
 		// User state linked to a system state: we never list the associated system state (complexity outbreak), it will be treated by the caller
 		"Leaf user state doesn’t list its system state": {def: "m_clone_with_userdata.yaml", stateName: "rpool/USERDATA/user1_efgh",
 			wantStates: []string{"rpool/USERDATA/user1_efgh"}},
