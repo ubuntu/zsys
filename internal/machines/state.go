@@ -178,11 +178,32 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 		if len(states) > len(s.Users)+1 {
 			errmsg += fmt.Sprintf(i18n.G("%s has a dependency linked to some states:\n"), s.ID)
 			for i := len(states) - 2; i >= 0; i-- {
+				curr := states[i]
 				lu := i18n.G("No timestamp")
-				if !states[i].LastUsed.Equal(time.Time{}) {
-					lu = states[i].LastUsed.Format("2006-01-02 15:04:05")
+				if !curr.LastUsed.Equal(time.Time{}) {
+					lu = curr.LastUsed.Format("2006-01-02 15:04:05")
 				}
-				errmsg += fmt.Sprintf(i18n.G("  - %s (%s)\n"), states[i].ID, lu)
+				var additionalInfo string
+				if curr.linkedStateID != "" {
+					additionalInfo = fmt.Sprintf(" "+i18n.G("to unlink from %s"), curr.linkedStateID)
+				} else {
+					bmap := make(map[string]bool)
+					for _, d := range curr.Datasets {
+						for _, b := range strings.Split(d[0].BootfsDatasets, bootfsdatasetsSeparator) {
+							bmap[b] = true
+						}
+					}
+					var keys []string
+					for k := range bmap {
+						if strings.TrimSpace(k) != "" {
+							keys = append(keys, k)
+						}
+					}
+					if len(keys) > 0 {
+						additionalInfo = fmt.Sprintf(" "+i18n.G("to remove. Currently linked to %s"), strings.Join(keys, ", "))
+					}
+				}
+				errmsg += fmt.Sprintf(i18n.G("  - %s (%s)%s\n"), curr.ID, lu, additionalInfo)
 			}
 		}
 		if len(datasets) > 0 {
