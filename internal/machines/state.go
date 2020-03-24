@@ -249,7 +249,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 			log.RemotePrintf(ctx, i18n.G("Deleting state %s\n"), state.ID)
 			continue
 		}
-		if err := state.remove(ctx, ms, ""); err != nil {
+		if err := state.remove(ctx, ms, state.linkedStateID); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove state %s: %v"), state.ID, err)
 		}
 	}
