@@ -45,6 +45,7 @@ type stateWithKeep struct {
 }
 
 // GC starts garbage collection for system and users
+// If all is set manual snapshots are considered too
 func (ms *Machines) GC(ctx context.Context, all bool) error {
 	now := ms.time.Now()
 
@@ -225,6 +226,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		statesChanges := false
 
 		for _, m := range ms.all {
+			// FIXME: we count same user state multiple times if linked to multiple bootfs systems
 			for _, us := range m.AllUsersStates {
 				var newestStateIndex int
 				var sortedStates sortedReverseByTimeStates
@@ -370,6 +372,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		}
 
 		// Remove the given states.
+		// Should call remove() TO REWORK
 		nt := ms.z.NewNoTransaction(ctx)
 		for _, s := range statesToRemove {
 			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
@@ -388,6 +391,10 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	// 3. Clean up user unmanaged datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
 	// (they, and all snapshots on them will end up in unmanaged datasets)
 	log.Debug(ctx, i18n.G("Unassociated user datasets GC"))
+	// TODO: in alluserDatasets, we have potentially some unlinked users (this was the only filesystem dataset, no clone attached and having snapshots)
+	// that we should GC by checking for deps first
+	// we have done them in the end
+	// test: USERDATA/user5_for_manual_clone is in alluserdatasets only after removing ubuntu_5678 in state_removal_internal.yaml
 	var alreadyDestroyedRoot []string
 	nt := ms.z.NewNoTransaction(ctx)
 nextDataset:

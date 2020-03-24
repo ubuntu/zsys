@@ -151,6 +151,7 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, ms *Machines, re
 }
 
 // RemoveState removes a system or user state with name as Id of the state and an optional user.
+// It will prevent removing user states linked to an viable system state.
 func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, dryrun bool) error {
 	s, err := ms.IDToState(ctx, name, user)
 	if err != nil {

@@ -407,41 +407,6 @@ func TestParentSystemState(t *testing.T) {
 	}
 }
 
-/*
-FIXME 2020-03-09: This case fails with the current data structure.
-Case of a user state attached to 2 different machines, one of the machine has a subdataset.
-In this case, the state with the same ID is added twice to allUsersDatasets.
-
-This is described by the following test definition:
-
-pools:
-  - name: rpool
-    datasets:
-    - name: ROOT
-    - name: ROOT/ubuntu_1234
-[...]
-    - name: ROOT/ubuntu_5678
-[...]
-    - name: ROOT/ubuntu_1234/opt
-[...]
-    - name: ROOT/ubuntu_5678/opt
-      origin: rpool/ROOT/ubuntu_1234/opt@snap2
-    - name: USERDATA
-      canmount: off
-    - name: USERDATA/user1_abcd
-[...]
-    - name: USERDATA/root_bcde
-    - name: USERDATA/root_bcde/subfor5678
-      mountpoint: /root/subfor5678
-      last_used: 2018-08-03T21:55:33+00:00
-      bootfs_datasets: rpool/ROOT/ubuntu_5678
-      snapshots:
-        - name: snap2
-          mountpoint: /root/subfor5678:inherited
-          canmount: on:local
-          creation_time: 2019-04-18T02:45:55+00:00
-
-*/
 func TestRemoveInternal(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
