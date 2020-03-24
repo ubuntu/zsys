@@ -98,112 +98,205 @@ func TestResolveOrigin(t *testing.T) {
 
 func TestGetDependencies(t *testing.T) {
 	t.Parallel()
+	type stateWithLinkedState struct {
+		state  string
+		reason string
+	}
 	tests := map[string]struct {
 		def       string
 		stateName string
 
-		wantStates   []string
+		wantStates   []stateWithLinkedState
 		wantDatasets []string
 	}{
-		"Simple leaf state":                        {def: "m_clone_simple.yaml", stateName: "rpool/ROOT/ubuntu_5678", wantStates: []string{"rpool/ROOT/ubuntu_5678"}},
-		"Simple leaf state with children datasets": {def: "m_clone_with_children.yaml", stateName: "rpool/ROOT/ubuntu_5678", wantStates: []string{"rpool/ROOT/ubuntu_5678"}},
+		"Simple leaf state": {def: "m_clone_simple.yaml", stateName: "rpool/ROOT/ubuntu_5678",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"}}},
+		"Simple leaf state with children datasets": {def: "m_clone_with_children.yaml", stateName: "rpool/ROOT/ubuntu_5678",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"}}},
 		"Simple snapshot state": {def: "m_clone_simple.yaml", stateName: "rpool/ROOT/ubuntu_1234@snap1",
-			wantStates: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1"}},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"}}},
 		"Simple snapshot state with children datasets": {def: "m_clone_with_children.yaml", stateName: "rpool/ROOT/ubuntu_1234@snap1",
-			wantStates: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1"}},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"}}},
 		"Simple state with clone": {def: "m_clone_simple.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234"}},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234"}}},
 		"Simple state with clone with children datasets": {def: "m_clone_with_children.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{"rpool/ROOT/ubuntu_5678", "rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234"}},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234"}}},
 
 		// State with clone dataset
 		"Simple state with manual clone": {def: "m_clone_simple_with_manual_clone.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates:   []string{"rpool/ROOT/ubuntu_1234@snap1", "rpool/ROOT/ubuntu_1234"},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234"}},
 			wantDatasets: []string{"rpool/ROOT/ubuntu_manual"},
 		},
 
 		// System states with user states don’t list user states
 		"Leaf system state with userdata": {def: "m_clone_with_userdata.yaml", stateName: "rpool/ROOT/ubuntu_5678",
-			wantStates: []string{"rpool/USERDATA/user1_efgh", "rpool/ROOT/ubuntu_5678"}},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh", reason: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"}}},
 		"System state with clone with userdata (less users on clone -> user has been created)": {def: "m_clone_with_userdata.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{"rpool/USERDATA/user1_efgh", "rpool/ROOT/ubuntu_5678", "rpool/USERDATA/user1_abcd@snap1", "rpool/ROOT/ubuntu_1234@snap1", "rpool/USERDATA/root_bcde", "rpool/USERDATA/user1_abcd", "rpool/ROOT/ubuntu_1234"}},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh", reason: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap1", reason: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde", reason: "rpool/ROOT/ubuntu_1234"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd", reason: "rpool/ROOT/ubuntu_1234"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234"}}},
 		"System state with clone with userdata (more users on clone -> user has been deleted)": {def: "m_clone_with_clone_has_more_users.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{
-				"rpool/USERDATA/user1_efgh", "rpool/USERDATA/root_bcde", "rpool/ROOT/ubuntu_5678",
-				"rpool/USERDATA/user1_abcd@snap1", "rpool/ROOT/ubuntu_1234@snap1",
-				"rpool/USERDATA/user1_abcd", "rpool/ROOT/ubuntu_1234"}},
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde", reason: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh", reason: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap1", reason: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd", reason: "rpool/ROOT/ubuntu_1234"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234"}}},
 
-		// Multiclones
-		"Leaf user clone with snapshots": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/USERDATA/user1_mnop",
-			wantStates: []string{"rpool/USERDATA/user1_mnop@snapuser3", "rpool/USERDATA/user1_mnop"}},
-		"Root user with mutiple clones and system - user snapshots": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/USERDATA/user1_abcd",
-			wantStates: []string{"rpool/USERDATA/user1_abcd@snap3", "rpool/USERDATA/user1_abcd@snapuser1",
-				"rpool/USERDATA/user1_efgh@snapuser5", "rpool/USERDATA/user1_uvwx@snapuser4", "rpool/USERDATA/user1_uvwx",
-				"rpool/USERDATA/user1_qrst@snapuser3", "rpool/USERDATA/user1_qrst", "rpool/USERDATA/user1_mnop@snapuser3",
-				"rpool/USERDATA/user1_mnop", "rpool/USERDATA/user1_ijkl", "rpool/USERDATA/user1_efgh@snapuser2",
-				"rpool/USERDATA/user1_efgh@snapuser3", "rpool/USERDATA/user1_efgh", "rpool/USERDATA/user1_abcd@snap2",
-				"rpool/USERDATA/user1_abcd@snap1", "rpool/USERDATA/user1_abcd"}},
-		"Root user with mutiple clones and system - user snapshots with manual clone datasets": {def: "state_snapshot_with_userdata_n_clones_linked_datasets.yaml", stateName: "rpool/USERDATA/user1_abcd",
-			wantStates: []string{"rpool/USERDATA/user1_abcd@snap3", "rpool/USERDATA/user1_abcd@snapuser1",
-				"rpool/USERDATA/user1_efgh@snapuser5", "rpool/USERDATA/user1_uvwx@snapuser4", "rpool/USERDATA/user1_uvwx",
-				"rpool/USERDATA/user1_qrst@snapuser3", "rpool/USERDATA/user1_qrst", "rpool/USERDATA/user1_mnop@snapuser3",
-				"rpool/USERDATA/user1_mnop", "rpool/USERDATA/user1_ijkl", "rpool/USERDATA/user1_efgh@snapuser2",
-				"rpool/USERDATA/user1_efgh@snapuser3", "rpool/USERDATA/user1_efgh", "rpool/USERDATA/user1_abcd@snap2",
-				"rpool/USERDATA/user1_abcd@snap1", "rpool/USERDATA/user1_abcd"},
-			wantDatasets: []string{"rpool/user1_xyz", "rpool/user1_aaaa"}},
-		"Root system with mutiple clones and bpool": {def: "state_snapshot_with_userdata_n_system_clones.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{
-				"rpool/USERDATA/root_ghij",
-				"rpool/USERDATA/root_defg@snaproot2",
-				"rpool/USERDATA/root_defg",
-				"rpool/ROOT/ubuntu_9999",
-				"rpool/USERDATA/root_cdef@snap4",
-				"rpool/ROOT/ubuntu_5678@snap4",
-				"rpool/USERDATA/root_cdef@snaproot1",
-				"rpool/USERDATA/root_cdef",
-				"rpool/ROOT/ubuntu_5678",
-				"rpool/USERDATA/root_bcde@snap3",
-				"rpool/ROOT/ubuntu_1234@snap3",
-				"rpool/USERDATA/root_bcde@snap2",
-				"rpool/ROOT/ubuntu_1234@snap2",
-				"rpool/USERDATA/root_bcde@snap1",
-				"rpool/ROOT/ubuntu_1234@snap1",
-				"rpool/USERDATA/root_bcde",
-				"rpool/USERDATA/user1_abcd",
-				"rpool/ROOT/ubuntu_1234"}},
+		// User states
+		"User clone attached to secondary machine. No relation between machine states. Remove user don’t list attached system states": {def: "state_two_machines_linked_user_clone.yaml", stateName: "rpool/USERDATA/user_machine1",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user_machine2"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_machine1@snapshot"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_machine1"}}},
+		"User clone attached to two machines. Request suppression on origin triggers unconditional suppression on clone": {def: "state_user_clone_linked_to_two_machines.yaml", stateName: "rpool/USERDATA/user_first",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_first@snapshot"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_first"}}},
+		"User clone attached to two machines. Request suppression on machine with user origin only untag them and doesn’t affect clone": {def: "state_user_clone_linked_to_two_machines.yaml", stateName: "rpool/ROOT/ubuntu_first",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user_first", reason: "rpool/ROOT/ubuntu_first"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_first", reason: "rpool/ROOT/ubuntu_first"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_first"}}},
+		"User attached to two machines. Request suppression on machine with user origin only untag them and doesn’t affect clone": {def: "state_user_clone_linked_to_two_machines.yaml", stateName: "rpool/ROOT/ubuntu_first",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user_first", reason: "rpool/ROOT/ubuntu_first"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_first", reason: "rpool/ROOT/ubuntu_first"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_first"}}},
+		"User attached to two machines and clone to a third. Request suppression on user": {def: "state_user_clone_linked_to_third_machine.yaml", stateName: "rpool/USERDATA/user_linked-rpool.ROOT.ubuntu-machine2",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_linked@snapshot"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_linked"}}},
+		"User attached to two machines and clone to a third. Request suppression on one machine don’t list clone": {def: "state_user_clone_linked_to_third_machine.yaml", stateName: "rpool/ROOT/ubuntu_machine1",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/root_linked", reason: "rpool/ROOT/ubuntu_machine1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_linked", reason: "rpool/ROOT/ubuntu_machine1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_machine1"}}},
+		"Leaf user state doesn’t list its system state": {def: "m_clone_with_userdata.yaml", stateName: "rpool/USERDATA/user1_efgh",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh"}}},
 
-		"Root system with mutiple clones and bpool and manual clone": {def: "state_snapshot_with_userdata_n_system_clones_manual_clone.yaml", stateName: "rpool/ROOT/ubuntu_1234",
-			wantStates: []string{
-				"rpool/USERDATA/root_bcde@snap1", "rpool/ROOT/ubuntu_1234@snap1",
-				"rpool/USERDATA/root_cdef@snap4",
-				"rpool/USERDATA/root_cdef@snaproot1", "rpool/USERDATA/root_cdef",
-				"rpool/USERDATA/root_bcde@snap2", "rpool/ROOT/ubuntu_1234@snap2",
-				"rpool/USERDATA/root_ghij",
-				"rpool/USERDATA/root_defg@snaproot2",
-				"rpool/USERDATA/root_defg", "rpool/ROOT/ubuntu_9999",
-				"rpool/ROOT/ubuntu_5678@snap4",
-				"rpool/ROOT/ubuntu_5678",
-				"rpool/USERDATA/root_bcde@snap3", "rpool/ROOT/ubuntu_1234@snap3",
-				"rpool/USERDATA/root_bcde", "rpool/USERDATA/user1_abcd", "rpool/ROOT/ubuntu_1234"},
-			wantDatasets: []string{"rpool/manualclone"}},
-
-		// User state linked to 2 machines has the user state object (different object) listed twice
-		"User state linked to 2 machines": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/ROOT/ubuntu_machine2clone",
-			wantStates: []string{
-				"rpool/USERDATA/user1_machine2", "rpool/ROOT/ubuntu_machine2clone"}},
-		"User state linked to 2 machines, remove main machine": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/ROOT/ubuntu_machine2",
-			wantStates: []string{
-				"rpool/USERDATA/user1_machine2", "rpool/ROOT/ubuntu_machine2clone",
-				"rpool/ROOT/ubuntu_machine2@snapmachine2",
+		// User state linked to 2 state of a machine has the user state object (different object) listed twice
+		"User state linked via 2 states": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/ROOT/ubuntu_machine2clone",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_machine2", reason: "rpool/ROOT/ubuntu_machine2clone"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_machine2clone"}}},
+		"User state linked to 2 states, remove main machine": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/ROOT/ubuntu_machine2",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_machine2", reason: "rpool/ROOT/ubuntu_machine2clone"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_machine2clone"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_machine2@snapmachine2"},
 				// "rpool/USERDATA/user1_machine2" is another instance (which can have different route and subdatasets) than "rpool/USERDATA/user1_machine2"
-				"rpool/USERDATA/user1_machine2", "rpool/ROOT/ubuntu_machine2",
+				stateWithLinkedState{state: "rpool/USERDATA/user1_machine2", reason: "rpool/ROOT/ubuntu_machine2"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_machine2"},
 			}},
 
-		// User state linked to a system state: we never list the associated system state (complexity outbreak), it will be treated by the caller
-		"Leaf user state doesn’t list its system state": {def: "m_clone_with_userdata.yaml", stateName: "rpool/USERDATA/user1_efgh",
-			wantStates: []string{"rpool/USERDATA/user1_efgh"}},
-		"User state with clone doesn’t list corresponding system states and other user states": {def: "m_clone_with_userdata.yaml", stateName: "rpool/USERDATA/user1_abcd",
-			wantStates: []string{"rpool/USERDATA/user1_efgh", "rpool/USERDATA/user1_abcd@snap1", "rpool/USERDATA/user1_abcd"}},
+		// Multiclones for users
+		"Leaf user clone with snapshots": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/USERDATA/user1_mnop",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_mnop@snapuser3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_mnop"}}},
+		"Root user with mutiple clones and system - user snapshots": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/USERDATA/user1_abcd",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snapuser1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh@snapuser5"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_uvwx@snapuser4"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_uvwx"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_qrst@snapuser3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_qrst"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_mnop@snapuser3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_mnop"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_ijkl"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh@snapuser2"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh@snapuser3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap2"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd"}}},
+		"Root user with mutiple clones and system - user snapshots with manual clone datasets": {def: "state_snapshot_with_userdata_n_clones_linked_datasets.yaml", stateName: "rpool/USERDATA/user1_abcd",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snapuser1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh@snapuser5"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_uvwx@snapuser4"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_uvwx"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_qrst@snapuser3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_qrst"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_mnop@snapuser3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_mnop"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_ijkl"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh@snapuser2"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh@snapuser3"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh"}, stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap2"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd"}},
+			wantDatasets: []string{"rpool/user1_xyz", "rpool/user1_aaaa"}},
+
+		// Multiclones for system
+		"Root system with mutiple clones and bpool": {def: "state_snapshot_with_userdata_n_system_clones.yaml", stateName: "rpool/ROOT/ubuntu_1234",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde@snap2", reason: "rpool/ROOT/ubuntu_1234@snap2"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap2"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_defg", reason: "rpool/ROOT/ubuntu_9999"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_9999"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_cdef@snap4", reason: "rpool/ROOT/ubuntu_5678@snap4"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678@snap4"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_cdef", reason: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde@snap3", reason: "rpool/ROOT/ubuntu_1234@snap3"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap3"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde@snap1", reason: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd", reason: "rpool/ROOT/ubuntu_1234"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde", reason: "rpool/ROOT/ubuntu_1234"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234"},
+			}},
+
+		"Root system with mutiple clones and bpool and manual clone": {def: "state_snapshot_with_userdata_n_system_clones_manual_clone.yaml", stateName: "rpool/ROOT/ubuntu_1234",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde@snap2", reason: "rpool/ROOT/ubuntu_1234@snap2"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap2"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_defg", reason: "rpool/ROOT/ubuntu_9999"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_9999"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_cdef@snap4", reason: "rpool/ROOT/ubuntu_5678@snap4"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678@snap4"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_cdef", reason: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_5678"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde@snap3", reason: "rpool/ROOT/ubuntu_1234@snap3"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap3"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde@snap1", reason: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user1_abcd", reason: "rpool/ROOT/ubuntu_1234"},
+				stateWithLinkedState{state: "rpool/USERDATA/root_bcde", reason: "rpool/ROOT/ubuntu_1234"},
+				stateWithLinkedState{state: "rpool/ROOT/ubuntu_1234"},
+			},
+			wantDatasets: []string{"rpool/manualclone"}},
 	}
 
 	for name, tc := range tests {
@@ -229,9 +322,9 @@ func TestGetDependencies(t *testing.T) {
 
 			stateDeps, datasetDeps := s.getDependencies(context.Background(), &ms)
 
-			stateNames := make([]string, len(stateDeps))
+			resultStates := make([]stateWithLinkedState, len(stateDeps))
 			for i, s := range stateDeps {
-				stateNames[i] = s.ID
+				resultStates[i] = stateWithLinkedState{reason: s.linkedStateID, state: s.ID}
 			}
 			datasetNames := make([]string, len(datasetDeps))
 			for i, d := range datasetDeps {
@@ -240,14 +333,14 @@ func TestGetDependencies(t *testing.T) {
 
 			// Ensure that the 2 lists have the same elements
 			if len(stateDeps) != len(tc.wantStates) {
-				t.Errorf("states content doesn't have enough elements:\nGot:  %v\nWant: %v", stateNames, tc.wantStates)
+				t.Errorf("states content doesn't have enough elements:\nGot:  %+v\nWant: %+v", resultStates, tc.wantStates)
 			} else {
-				assert.ElementsMatch(t, tc.wantStates, stateNames, "didn't get matching states list content")
+				assert.ElementsMatch(t, resultStates, tc.wantStates, "didn't get matching states list content")
 			}
 			if len(datasetDeps) != len(tc.wantDatasets) {
-				t.Errorf("dataset deps content doesn't have enough elements:\nGot:  %v\nWant: %v", datasetNames, tc.wantDatasets)
+				t.Errorf("dataset deps content doesn't have enough elements:\nGot:  %+v\nWant: %+v", datasetNames, tc.wantDatasets)
 			} else {
-				assert.ElementsMatch(t, tc.wantDatasets, datasetNames, "didn't get matching dep list content")
+				assert.ElementsMatch(t, datasetNames, tc.wantDatasets, "didn't get matching dep list content")
 			}
 
 			// rule 2: ensure that all children (snapshots or filesystem datasets) appears before its parent
@@ -546,17 +639,19 @@ func assertMachinesEquals(t *testing.T, m1, m2 Machines) {
 }
 
 // assertChildrenStatesBeforeParents ensure that all children (snapshots or filesystem states) appears before its parent
-func assertChildrenStatesBeforeParents(t *testing.T, deps []*State) {
+func assertChildrenStatesBeforeParents(t *testing.T, deps []stateWithLinkedState) {
 	t.Helper()
 
 	// iterate on child
-	for i, child := range deps {
+	for i, d := range deps {
+		child := d.State
 		parent, snapshot := splitSnapshotName(child.ID)
 		if snapshot == "" {
 			parent = child.ID[:strings.LastIndex(child.ID, "/")]
 		}
 		// search corresponding base from the start
-		for j, candidate := range deps {
+		for j, c := range deps {
+			candidate := c.State
 			if candidate.ID != parent {
 				continue
 			}
@@ -568,10 +663,11 @@ func assertChildrenStatesBeforeParents(t *testing.T, deps []*State) {
 }
 
 // assertCloneStatesComesBeforeItsOrigin ensure that a clone comes before its origin
-func assertCloneStatesComesBeforeItsOrigin(t *testing.T, deps []*State) {
+func assertCloneStatesComesBeforeItsOrigin(t *testing.T, deps []stateWithLinkedState) {
 	t.Helper()
 
-	for i, s := range deps {
+	for i, ls := range deps {
+		s := ls.State
 		for _, datasets := range s.Datasets {
 			clone := datasets[0]
 
@@ -580,7 +676,8 @@ func assertCloneStatesComesBeforeItsOrigin(t *testing.T, deps []*State) {
 			}
 
 			// search corresponding origin from the start
-			for j, s := range deps {
+			for j, ls := range deps {
+				s := ls.State
 				for _, datasets := range s.Datasets {
 					candidate := datasets[0]
 
