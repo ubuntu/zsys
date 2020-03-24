@@ -33,6 +33,8 @@ type stateWithLinkedState struct {
 // depending on us.
 // Note that a system states will list all its user states (as when requesting to delete a system state, we will delete
 // the associated system states), BUT listing a user state won’t list the associated system states.
+// If we unlink an user system states from a system state (due to the system state being removed), we don’t consider we will destroy
+// this user state immediately, and keep it for clones and snapshots (we don’t go over its deps).
 func (s *State) getDependencies(ctx context.Context, ms *Machines) (stateDeps []stateWithLinkedState, datasetDeps []*zfs.Dataset) {
 	nt := ms.z.NewNoTransaction(ctx)
 
@@ -71,6 +73,11 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, ms *Machines, re
 	// Look in cache
 	if dep, ok := depsResolvedCache[stateWithLinkedState{s, reason}]; ok {
 		return dep.stateDeps, dep.datasetDeps
+	}
+
+	// We will only untag the datasets and not remove them, only return ourself
+	if reason != "" {
+		return []stateWithLinkedState{stateWithLinkedState{State: s, linkedStateID: reason}}, nil
 	}
 
 	for _, ds := range s.Datasets {
