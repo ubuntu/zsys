@@ -914,11 +914,12 @@ func TestRemoveState(t *testing.T) {
 		// FIXME: miss bpool and bpool/BOOT from golden file
 		"Remove system state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", state: "rpool/ROOT/ubuntu_1234"},
 		"Remove one system snapshot only":                                    {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_1234@snap3"},
-		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", force: true},
 		"Removing system state try to delete its snapshots":                  {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true, wantDepErr: true},
+		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", force: true},
 
 		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove system state, with system and users snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
+		"Remove system state when user datasets are linked to 2 states":           {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_5678"},
 		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantDepErr: true, wantErr: true, isNoOp: true},
 		"Remove system state, with datasets, forced":                              {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
 
@@ -927,16 +928,20 @@ func TestRemoveState(t *testing.T) {
 		"Remove user state, one dataset, wrong user":           {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "root", wantErr: true, isNoOp: true},
 		"Remove user state, with snapshots and clones":         {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove user state, with snapshots and clones, forced": {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", force: true},
-		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
-		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", force: true},
+		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone@snapuser5", user: "user5", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone@snapuser5", user: "user5", force: true},
 		"Remove user snapshot state":                           {def: "state_remove.yaml", state: "rpool/USERDATA/user1_efgh@snapuser2", user: "user1"},
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
-		"Error on trying to remove current state":                 {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
-		"Error on destroy state, one dataset":                     {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
-		"Error on destroy user state, with datasets":              {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
-		"Can’t remove user leaf snapshot linked to system state":  {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true, wantErr: true, isNoOp: true},
-		"Can’t remove user snapshot state linked to system state": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true, wantErr: true, isNoOp: true},
+		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone", user: "user5", force: true, destroyErr: true, wantErr: true},
+
+		// TODO: check if we want to relax those
+		"Can’t remove user leaf snapshot linked to system state":                 {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", wantErr: true, isNoOp: true},
+		"Can’t remove user leaf snapshot linked to system state, even forced":    {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true, wantErr: true, isNoOp: true},
+		"Can’t remove user filesystem state linked to system state":              {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Can’t remove user filesystem state linked to system state, even forced": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -992,6 +997,7 @@ func TestRemoveState(t *testing.T) {
 		})
 	}
 }
+
 func TestIDToState(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
