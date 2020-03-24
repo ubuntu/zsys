@@ -305,6 +305,16 @@ func (s *State) remove(ctx context.Context, ms *Machines, linkedStateID string) 
 		}
 	}
 
+	// Unlink from parent
+	if ps := s.parentSystemState(ms); ps != nil {
+		for user, us := range ps.Users {
+			if us == s {
+				delete(ps.Users, user)
+				break
+			}
+		}
+	}
+
 	// If we have a system state, request user cleaning (untag and maybe deletion)
 	for _, us := range s.Users {
 		if err := us.remove(ctx, ms, s.ID); err != nil {
@@ -322,16 +332,6 @@ func (s *State) remove(ctx context.Context, ms *Machines, linkedStateID string) 
 		log.Debugf(ctx, "Destroying %s\n", route)
 		if err := nt.Destroy(route); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
-		}
-	}
-
-	// Unlink from parent
-	if ps := s.parentSystemState(ms); ps != nil {
-		for user, us := range ps.Users {
-			if us == s {
-				delete(ps.Users, user)
-				break
-			}
 		}
 	}
 
