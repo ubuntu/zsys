@@ -468,6 +468,7 @@ func TestRemoveInternal(t *testing.T) {
 		"Remove system state without user datasets":                                 {stateName: "rpool/ROOT/ubuntu_6789"},
 		"Remove system state and only untag user datasets":                          {stateName: "rpool/ROOT/ubuntu_8901"},
 		"Remove system state remove unassociate some linked with one or two bootfs": {stateName: "rpool/ROOT/ubuntu_5678"},
+		"Remove system state snapshot keep user datasets snapshot (but unlinked)":   {stateName: "rpool/ROOT/ubuntu_1234@snap3"},
 
 		// Error on clones from state. Called with empty linkedStateID
 		"Error on removing directly state with state clone":   {stateName: "rpool/USERDATA/user4_for_state_clone", wantErr: true},
