@@ -203,7 +203,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		// Remove the given states.
 		for _, s := range statesToRemove {
 			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
-			if err := s.remove(ctx, ms.z, true, ""); err != nil {
+			if err := s.remove(ctx, ms, ""); err != nil {
 				log.Errorf(ctx, i18n.G("Couldn't fully destroy state %s: %v"), s.ID, err)
 			}
 		}

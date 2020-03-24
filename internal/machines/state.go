@@ -222,13 +222,13 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 		}
 	}
 
-	// Remove only listed states in dependencies. Don’t go on children as they should be listed before
+	// Remove only listed states in dependencies.
 	for _, state := range states {
 		if dryrun {
 			log.RemotePrintf(ctx, i18n.G("Deleting state %s\n"), state.ID)
 			continue
 		}
-		if err := state.remove(ctx, ms, false, ""); err != nil {
+		if err := state.remove(ctx, ms, ""); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't remove state %s: %v"), state.ID, err)
 		}
 	}
@@ -237,19 +237,17 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 	return nil
 }
 
-// Remove removes a given state by deleting all of its system datasets.
-// If called on system states: always try to destroy this state
+// Remove removes a given state by deleting all of its system datasets and unlink user states
+// If called on system states: always try to destroy this state. all user states will be unlinked.
 // If called on user states:
-// - if linkedStateID is empty -> this is a direct call on this state, always try to destroy.
-// - otherwise if linkedStateID is NOT empty, the following rule applies in order:
-//   + onlyUntagLinkedUsers is set when called from GC. It will prevent destroying any user datasets.
-//   + if the state is a snapshot: destroy it
-//   + if the user state is still linked to any system state: prevent destruction
-//   + if the user state has some snapshots as children: : prevent destruction
-func (s *State) remove(ctx context.Context, ms *Machines, onlyUntagLinkedUsers bool, linkedStateID string) error {
+// - with empty linkedStateID -> this is a direct call on this state, always try to destroy.
+// - with a non empty linkedStateID -> indirect call, only unlink to this system state. This is a no-op on
+// snapshots.
+// If the user state has some snapshots as children: this will error out.
+func (s *State) remove(ctx context.Context, ms *Machines, linkedStateID string) error {
 	nt := ms.z.NewNoTransaction(ctx)
 
-	log.Debugf(ctx, i18n.G("Removing state %s. linkedStateID: %s, dontRemoveUsersChildren: %t\n"), s.ID, linkedStateID, onlyUntagLinkedUsers)
+	log.Debugf(ctx, i18n.G("Removing state %s. linkedStateID: %s\n"), s.ID, linkedStateID)
 
 	// Note: if we remove a user States which is a file system dataset, all snapshots (user snapshots) will be removed as well.
 	// This is OK for now as:
@@ -288,47 +286,30 @@ func (s *State) remove(ctx context.Context, ms *Machines, onlyUntagLinkedUsers b
 
 	// If we have a system state, request user cleaning (untag and maybe deletion)
 	for _, us := range s.Users {
-		if err := us.remove(ctx, ms, onlyUntagLinkedUsers, s.ID); err != nil {
+		if err := us.remove(ctx, ms, s.ID); err != nil {
 			return err
 		}
 	}
 
-	// Remove directly the datasets if it’s a system state or we wanted to delete user states.
-	var stateDestroyed bool
-	for route, ds := range s.Datasets {
-		// If called directly on user datasets -> destroy (skip those checks)
-		if s.Users == nil && linkedStateID != "" {
-			// We explicitely requested to not destroy any user datasets on indirect call -> keep
-			// (GC case when destroying a system state for instance)
-			if onlyUntagLinkedUsers {
-				log.Debugf(ctx, "Users state %s destruction called  and onUntagUsers is set. Skipping destruction\n", route)
-				continue
-			}
+	// Only destroy if called directly
+	if linkedStateID != "" {
+		return nil
+	}
 
-			// File system user state still linked to a system state -> keep
-			if !s.isSnapshot() && ds[0].BootfsDatasets != "" {
-				continue
-			}
-
-			// File system user state which has children snapshots -> keep
-			if !s.isSnapshot() && ds[0].HasSnapshotInHierarchy() {
-				continue
-			}
-		}
+	// Remove the datasets
+	for route := range s.Datasets {
 		log.Debugf(ctx, "Destroying %s\n", route)
 		if err := nt.Destroy(route); err != nil {
 			return fmt.Errorf(i18n.G("Couldn't destroy %s: %v"), route, err)
 		}
-		stateDestroyed = true
 	}
 
-	if stateDestroyed {
-		if ps := s.parentSystemState(ms); ps != nil {
-			for user, us := range ps.Users {
-				if us == s {
-					delete(ps.Users, user)
-					break
-				}
+	// Unlink from parent
+	if ps := s.parentSystemState(ms); ps != nil {
+		for user, us := range ps.Users {
+			if us == s {
+				delete(ps.Users, user)
+				break
 			}
 		}
 	}

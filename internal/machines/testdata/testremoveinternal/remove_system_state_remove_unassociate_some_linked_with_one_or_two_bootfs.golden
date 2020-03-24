@@ -260,6 +260,21 @@
                         }
                      ]
                   }
+               },
+               "rpool/USERDATA/user1_efgh": {
+                  "ID": "rpool/USERDATA/user1_efgh",
+                  "LastUsed": "2018-12-10T13:20:44+01:00",
+                  "Datasets": {
+                     "rpool/USERDATA/user1_efgh": [
+                        {
+                           "Name": "rpool/USERDATA/user1_efgh",
+                           "Mountpoint": "/home/user1",
+                           "CanMount": "on",
+                           "LastUsed": 1544444444,
+                           "Origin": "rpool/USERDATA/user1_abcd@snap2"
+                        }
+                     ]
+                  }
                }
             },
             "user3": {
@@ -960,6 +975,19 @@
          "Mountpoint": "/root",
          "CanMount": "on",
          "LastUsed": 1566666666
+      },
+      {
+         "Name": "rpool/USERDATA/user1_efgh",
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1544444444,
+         "Origin": "rpool/USERDATA/user1_abcd@snap2"
+      },
+      {
+         "Name": "rpool/USERDATA/user2_2222",
+         "Mountpoint": "/home/user2",
+         "CanMount": "on",
+         "LastUsed": 1544444444
       },
       {
          "Name": "rpool/USERDATA/user3_3333",

@@ -445,9 +445,8 @@ pools:
 func TestRemoveInternal(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		stateName      string
-		linkedStateID  string
-		onlyUntagUsers bool
+		stateName     string
+		linkedStateID string
 
 		setPropertyErr bool
 
@@ -460,16 +459,15 @@ func TestRemoveInternal(t *testing.T) {
 		"Remove user snapshot state (linked to system state: no check)": {stateName: "rpool/USERDATA/root_bcde@snap2"},
 		"Remove user snapshot clone state":                              {stateName: "rpool/USERDATA/user4_clone"},
 
-		"Remove system state and only untag user datasets":      {stateName: "rpool/ROOT/ubuntu_8901", onlyUntagUsers: true},
 		"Remove user state unconditionnally":                    {stateName: "rpool/USERDATA/user2_2222"},
-		"Remove user state conditionnally":                      {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "rpool/ROOT/ubuntu_5678"},
+		"Remove user state only untag even if last association": {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "rpool/ROOT/ubuntu_5678"},
 		"Don't remove user state on bad state id match":         {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "doesnt match"},
 		"Remove user state unconditionnally linked to 2 states": {stateName: "rpool/USERDATA/user8_gggg-rpool.ROOT.ubuntu-1234"},
 		"Unassociate user state linked to one state":            {stateName: "rpool/USERDATA/user8_gggg-rpool.ROOT.ubuntu-1234", linkedStateID: "rpool/ROOT/ubuntu_1234"},
 
-		"Remove system state without user datasets":                                        {stateName: "rpool/ROOT/ubuntu_6789"},
-		"Remove system state and its user datasets":                                        {stateName: "rpool/ROOT/ubuntu_8901"},
-		"Remove system state remove some user states and unassociate others linked to two": {stateName: "rpool/ROOT/ubuntu_5678"},
+		"Remove system state without user datasets":                                 {stateName: "rpool/ROOT/ubuntu_6789"},
+		"Remove system state and only untag user datasets":                          {stateName: "rpool/ROOT/ubuntu_8901"},
+		"Remove system state remove unassociate some linked with one or two bootfs": {stateName: "rpool/ROOT/ubuntu_5678"},
 
 		// Error on clones from state. Called with empty linkedStateID
 		"Error on removing directly state with state clone":   {stateName: "rpool/USERDATA/user4_for_state_clone", wantErr: true},
@@ -507,7 +505,7 @@ func TestRemoveInternal(t *testing.T) {
 
 			s := ms.getStateFromName(t, tc.stateName)
 
-			err = s.remove(context.Background(), &ms, tc.onlyUntagUsers, tc.linkedStateID)
+			err = s.remove(context.Background(), &ms, tc.linkedStateID)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
