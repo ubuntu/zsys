@@ -259,6 +259,10 @@ func (ms *Machines) refresh(ctx context.Context) {
 
 	// Handle regular userdatasets (main or clone), not associated to a system state.
 
+	// FIXME: here, we have clone user datasets from a snapshot attached to a user datasets that should be attached to the machine state
+	// gc_system_with_users_clone.yaml with user1_clone for instance
+	// We should also consider its snapshots, clones of those snapshots and so on
+
 	// This is a userdataset "snapshot" clone dataset.
 	for r, children := range unattachedClonesUserDatasets {
 		// WARNING: We only consider the dataset "group" (clones and promoted) attached to main state of a given machine

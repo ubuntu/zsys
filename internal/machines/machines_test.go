@@ -81,6 +81,9 @@ func TestNew(t *testing.T) {
 		"Clone with user dataset with children manually created":         {def: "m_clone_with_userdata_with_children_manually_created.yaml"},
 		"Userdata with children associated only to one state":            {def: "m_with_userdata_child_associated_one_state.yaml"},
 		"Userdata is linked to no machines":                              {def: "m_with_userdata_linked_to_no_machines.yaml"},
+		// FIXME: see comment in machines.go. we should have user1_clone attached to the machine
+		// consider other cases with it having snapshots, being attached as well and clone on this clone
+		"User clone without bootfs dataset is still attached to the right machine via its snapshot": {def: "gc_system_with_users_clone.yaml"},
 
 		// Userdata user snapshots
 		"Userdata has a user snapshot":              {def: "m_with_userdata_user_snapshot.yaml"},
