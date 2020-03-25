@@ -21,45 +21,50 @@ msgstr ""
 msgid "\t%v\n"
 msgstr ""
 
-#: internal/machines/machines.go:631
+#: internal/machines/machines.go:665
 #, c-format
 msgid "\t- %s\n"
 msgstr ""
 
+#: internal/machines/machines.go:738
+#, c-format
+msgid "     - %s (%s)\n"
+msgstr ""
+
+#: internal/machines/machines.go:735
+#, c-format
+msgid "     - %s (%s): %s\n"
+msgstr ""
+
 #: internal/machines/machines.go:704
-#, c-format
-msgid "     - %s\n"
-msgstr ""
-
-#: internal/machines/machines.go:701
-#, c-format
-msgid "     - %s: %s\n"
-msgstr ""
-
-#: internal/machines/machines.go:670
 msgid "    History:\t\n"
 msgstr ""
 
-#: internal/machines/machines.go:666
+#: internal/machines/machines.go:700
 msgid "    History:\tEmpty\n"
 msgstr ""
 
-#: internal/machines/machines.go:607 internal/machines/state.go:174
+#: internal/machines/machines.go:641 internal/machines/state.go:213
 #, c-format
 msgid "  - %s\n"
 msgstr ""
 
-#: internal/machines/state.go:168 internal/machines/state.go:391
+#: internal/machines/state.go:444
 #, c-format
 msgid "  - %s (%s)\n"
 msgstr ""
 
-#: internal/machines/machines.go:663 internal/machines/machines.go:733
+#: internal/machines/state.go:207
+#, c-format
+msgid "  - %s (%s)%s\n"
+msgstr ""
+
+#: internal/machines/machines.go:697 internal/machines/machines.go:767
 #, c-format
 msgid "  - Name:\t%s\n"
 msgstr ""
 
-#: internal/zfs/helpers.go:284
+#: internal/zfs/helpers.go:297
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
@@ -81,7 +86,7 @@ msgstr ""
 msgid "%q isn't a zsys snapshot with a valid %q property: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:112 internal/zfs/helpers.go:331
+#: internal/zfs/helpers.go:112 internal/zfs/helpers.go:344
 msgid "%q property isn't an int: "
 msgstr ""
 
@@ -89,16 +94,16 @@ msgstr ""
 msgid "%q returned an error: "
 msgstr ""
 
-#: internal/machines/machines.go:801
+#: internal/machines/machines.go:835
 msgid "%s\t%t\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:754 internal/machines/machines.go:762
+#: internal/machines/machines.go:788 internal/machines/machines.go:796
 #, c-format
 msgid "%s\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:760
+#: internal/machines/machines.go:794
 #, c-format
 msgid "%s\tUser: %s\n"
 msgstr ""
@@ -110,24 +115,24 @@ msgid ""
 "Would you like to proceed [y/N]? "
 msgstr ""
 
-#: internal/machines/state.go:192
+#: internal/machines/state.go:231
 #, c-format
 msgid ""
 "%s can't be removed as linked some system states:\n"
 "%s"
 msgstr ""
 
-#: internal/machines/state.go:162
+#: internal/machines/state.go:180
 #, c-format
 msgid "%s has a dependency linked to some states:\n"
 msgstr ""
 
-#: internal/machines/state.go:172
+#: internal/machines/state.go:211
 #, c-format
 msgid "%s has a dependency on some datasets:\n"
 msgstr ""
 
-#: internal/machines/state.go:188
+#: internal/machines/state.go:227
 #, c-format
 msgid "%s is linked to a system state: %s\n"
 msgstr ""
@@ -147,32 +152,32 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/machines/machines.go:746
+#: internal/machines/machines.go:780
 #, c-format
 msgid "%sCreated on:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:750
+#: internal/machines/machines.go:784
 #, c-format
 msgid "%sLast Booted Kernel:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:744
+#: internal/machines/machines.go:778
 #, c-format
 msgid "%sLast Used:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:751
+#: internal/machines/machines.go:785
 #, c-format
 msgid "%sSystem Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:758
+#: internal/machines/machines.go:792
 #, c-format
 msgid "%sUser Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:775
+#: internal/machines/machines.go:809
 msgid "--\t----\t---------\n"
 msgstr ""
 
@@ -194,7 +199,7 @@ msgstr ""
 msgid "An error occurred when reverting a Zfs transaction: "
 msgstr ""
 
-#: internal/machines/gc.go:126 internal/machines/gc.go:273
+#: internal/machines/gc.go:134 internal/machines/gc.go:291
 msgid "Analyzing state %v: %v"
 msgstr ""
 
@@ -210,7 +215,7 @@ msgstr ""
 msgid "Booting on snapshot: %q cloned to %q\n"
 msgstr ""
 
-#: internal/machines/machines.go:90
+#: internal/machines/machines.go:115
 msgid "Building new machines list"
 msgstr ""
 
@@ -228,11 +233,11 @@ msgstr ""
 
 #. list of clones for a given origin (snapshot)
 #. List of snapshots for a given dataset
-#: internal/machines/gc.go:59
+#: internal/machines/gc.go:60
 msgid "Collect datasets"
 msgstr ""
 
-#: internal/machines/gc.go:124 internal/machines/gc.go:271
+#: internal/machines/gc.go:132 internal/machines/gc.go:288
 msgid "Collecting all states for current bucket"
 msgstr ""
 
@@ -265,7 +270,7 @@ msgstr ""
 msgid "Control() error: %s"
 msgstr ""
 
-#: internal/daemon/daemon.go:85 internal/machines/machines.go:96
+#: internal/daemon/daemon.go:85 internal/machines/machines.go:123
 msgid "Couldn't apply option to server: %v"
 msgstr ""
 
@@ -279,34 +284,38 @@ msgid ""
 "created successfully: %v"
 msgstr ""
 
-#: internal/machines/state.go:281
+#: internal/machines/state.go:335
 msgid "Couldn't destroy %s: %v"
 msgstr ""
 
-#: internal/machines/gc.go:402
+#: internal/machines/gc.go:426
 msgid "Couldn't destroy unmanaged user dataset %s: %v"
-msgstr ""
-
-#: internal/machines/gc.go:368
-msgid "Couldn't destroy user state %s: %v"
 msgstr ""
 
 #: internal/authorizer/authorizer.go:187
 msgid "Couldn't determine start time of client process: %v"
 msgstr ""
 
-#: internal/machines/machines.go:248 internal/machines/machines.go:272
-#: internal/machines/machines.go:292
+#: internal/machines/machines.go:281 internal/machines/machines.go:305
+#: internal/machines/machines.go:325
 #, c-format
 msgid "Couldn't find any association for user dataset %s"
 msgstr ""
 
-#: internal/machines/state.go:140
+#: internal/machines/state.go:158
 msgid "Couldn't find state: %v"
 msgstr ""
 
-#: internal/machines/gc.go:201
-msgid "Couldn't fully destroy state %s: %v"
+#: internal/machines/gc.go:211
+msgid ""
+"Couldn't fully destroy state %s: %v\n"
+"Putting it in keep list."
+msgstr ""
+
+#: internal/machines/gc.go:387
+msgid ""
+"Couldn't fully destroy user state %s: %v.\n"
+"Putting it in keep list."
 msgstr ""
 
 #: internal/authorizer/authorizer.go:181
@@ -321,11 +330,11 @@ msgstr ""
 msgid "Couldn't register grpc server: %v"
 msgstr ""
 
-#: internal/machines/state.go:204
+#: internal/machines/state.go:243
 msgid "Couldn't remove dataset %s: %v"
 msgstr ""
 
-#: internal/machines/state.go:215
+#: internal/machines/state.go:254
 msgid "Couldn't remove state %s: %v"
 msgstr ""
 
@@ -367,12 +376,12 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to modify"
 msgstr ""
 
-#: internal/machines/state.go:200
+#: internal/machines/state.go:239
 #, c-format
 msgid "Deleting dataset %s\n"
 msgstr ""
 
-#: internal/machines/state.go:211
+#: internal/machines/state.go:250
 #, c-format
 msgid "Deleting state %s\n"
 msgstr ""
@@ -419,13 +428,23 @@ msgid ""
 "early boot"
 msgstr ""
 
-#: internal/machines/gc.go:113 internal/machines/gc.go:260
+#: internal/machines/gc.go:121 internal/machines/gc.go:277
 #, c-format
 msgid "First state matching for this bucket: %s (%s)"
 msgstr ""
 
 #: cmd/zsysd/client/state.go:64
 msgid "Force removing, even if dependencies are found"
+msgstr ""
+
+#. 1. System GC
+#: internal/machines/gc.go:79
+msgid "GC System"
+msgstr ""
+
+#. 2. GC user datasets. Note that we will only collect user states that are independent of system states.
+#: internal/machines/gc.go:223
+msgid "GC User"
 msgstr ""
 
 #: cmd/zsysd/completion.go:15
@@ -437,7 +456,7 @@ msgstr ""
 msgid "GetsockoptUcred() error: %s"
 msgstr ""
 
-#: internal/machines/state.go:85 internal/machines/state.go:104
+#: internal/machines/state.go:99 internal/machines/state.go:118
 #, c-format
 msgid "Getting dependencies for user state %s"
 msgstr ""
@@ -447,11 +466,11 @@ msgid "Give more detail informations on each machine."
 msgstr ""
 
 #. History
-#: internal/machines/machines.go:637
+#: internal/machines/machines.go:671
 msgid "History:\n"
 msgstr ""
 
-#: internal/machines/machines.go:774
+#: internal/machines/machines.go:808
 msgid "ID\tZSys\tLast Used\n"
 msgstr ""
 
@@ -459,29 +478,27 @@ msgstr ""
 msgid "Idle timeout expired"
 msgstr ""
 
-#: internal/machines/gc.go:279
-msgid ""
-"Keeping %v as it's not a snapshot, and necessarily associated to a system "
-"state"
+#: internal/machines/gc.go:296
+msgid "Keeping %v as it's not a snapshot and associated to a system state"
 msgstr ""
 
-#: internal/machines/gc.go:117 internal/machines/gc.go:264
+#: internal/machines/gc.go:125 internal/machines/gc.go:281
 msgid "Keeping all snapshots for this bucket"
 msgstr ""
 
-#: internal/machines/gc.go:297
+#: internal/machines/gc.go:316
 msgid "Keeping as snapshot %v is associated to a system snapshot"
 msgstr ""
 
-#: internal/machines/gc.go:144 internal/machines/gc.go:311
+#: internal/machines/gc.go:154 internal/machines/gc.go:331
 msgid "Keeping snapshot %v as at least %s dataset has dependencies"
 msgstr ""
 
-#: internal/machines/gc.go:135 internal/machines/gc.go:285
+#: internal/machines/gc.go:143 internal/machines/gc.go:302
 msgid "Keeping snapshot %v as it's in the last %d snapshots"
 msgstr ""
 
-#: internal/machines/gc.go:132 internal/machines/gc.go:282
+#: internal/machines/gc.go:140 internal/machines/gc.go:299
 msgid "Keeping snapshot %v as it's not a zsys one"
 msgstr ""
 
@@ -507,7 +524,7 @@ msgid ""
 "_suffix (at least .*_<onechar>): %q"
 msgstr ""
 
-#: internal/machines/machines.go:619
+#: internal/machines/machines.go:653
 #, c-format
 msgid "Name:\t%s\n"
 msgstr ""
@@ -524,24 +541,16 @@ msgstr ""
 msgid "New dataNew dataset found: %q"
 msgstr ""
 
-#: internal/machines/gc.go:163 internal/machines/gc.go:331
+#: internal/machines/gc.go:173 internal/machines/gc.go:351
 #, c-format
 msgid "No exceeding states for this bucket (delta: %d). Moving on."
-msgstr ""
-
-#: internal/machines/gc.go:95
-msgid "No more system states left. Stopping analyzing buckets"
-msgstr ""
-
-#: internal/machines/gc.go:242
-msgid "No more user states left. Stopping analyzing buckets"
 msgstr ""
 
 #: internal/daemon/service.go:159
 msgid "No response within few seconds"
 msgstr ""
 
-#: internal/machines/state.go:164
+#: internal/machines/state.go:183
 msgid "No timestamp"
 msgstr ""
 
@@ -549,11 +558,11 @@ msgstr ""
 msgid "Permission denied: %w"
 msgstr ""
 
-#: internal/machines/machines.go:629
+#: internal/machines/machines.go:663
 msgid "Persistent Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:627
+#: internal/machines/machines.go:661
 msgid "Persistent Datasets: None\n"
 msgstr ""
 
@@ -625,17 +634,13 @@ msgstr ""
 msgid "Remove the state for a given user or current user if empty"
 msgstr ""
 
-#: internal/machines/state.go:144
+#: internal/machines/state.go:162
 msgid "Removing current system state isn't allowed"
 msgstr ""
 
-#: internal/machines/state.go:230
-msgid "Removing state %s. linkedStateID: %s, dontRemoveUsersChildren: %t\n"
-msgstr ""
-
-#: internal/machines/gc.go:199 internal/machines/gc.go:366
+#: internal/machines/state.go:272
 #, c-format
-msgid "Removing state: %s"
+msgid "Removing state %s. linkedStateID: %s\n"
 msgstr ""
 
 #: cmd/zsysd/client/userdata.go:31
@@ -751,8 +756,17 @@ msgid ""
 "state. state_id is generated if not provided."
 msgstr ""
 
+#: internal/machines/gc.go:209 internal/machines/gc.go:385
+#, c-format
+msgid "Selecting state to remove: %s"
+msgstr ""
+
 #: cmd/zsysd/client/service.go:24
 msgid "Service management"
+msgstr ""
+
+#: cmd/zsysd/main.go:49
+msgid "Service took too long to respond. Disconnecting client."
 msgstr ""
 
 #: internal/daemon/daemon.go:151
@@ -773,7 +787,7 @@ msgstr ""
 msgid "Setting logging level to %d"
 msgstr ""
 
-#: internal/machines/state.go:258
+#: internal/machines/state.go:300
 #, c-format
 msgid "Setting new bootfs tag %s on %s\n"
 msgstr ""
@@ -812,12 +826,7 @@ msgstr ""
 msgid "Switch dataset %q to mount %q"
 msgstr ""
 
-#. 1. System GC
-#: internal/machines/gc.go:77
-msgid "System GC"
-msgstr ""
-
-#: internal/machines/gc.go:208
+#: internal/machines/gc.go:219
 msgid "System have changes, rerun system GC"
 msgstr ""
 
@@ -835,7 +844,7 @@ msgid ""
 "can't be reused"
 msgstr ""
 
-#: internal/machines/gc.go:166 internal/machines/gc.go:334
+#: internal/machines/gc.go:176 internal/machines/gc.go:354
 #, c-format
 msgid "There are %d exceeding states to potentially remove"
 msgstr ""
@@ -862,9 +871,9 @@ msgstr ""
 msgid "Type of profiling cpu or mem. Default is cpu."
 msgstr ""
 
-#. 3. Clean up user unmanaged datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
+#. 3. Clean up user user datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
 #. (they, and all snapshots on them will end up in unmanaged datasets)
-#: internal/machines/gc.go:382
+#: internal/machines/gc.go:401
 msgid "Unassociated user datasets GC"
 msgstr ""
 
@@ -873,7 +882,7 @@ msgstr ""
 msgid "Unsupported trace type: %s"
 msgstr ""
 
-#: internal/machines/state.go:240
+#: internal/machines/state.go:282
 msgid "Untagging all datasets\n"
 msgstr ""
 
@@ -889,20 +898,15 @@ msgstr ""
 msgid "Updating system boot menu"
 msgstr ""
 
-#. 2. GC user datasets
-#: internal/machines/gc.go:212
-msgid "User GC"
-msgstr ""
-
 #: cmd/zsysd/client/userdata.go:18
 msgid "User datasets creation and rename"
 msgstr ""
 
-#: internal/machines/gc.go:377
+#: internal/machines/gc.go:396
 msgid "Users states have changes, rerun user GC"
 msgstr ""
 
-#: internal/machines/machines.go:660
+#: internal/machines/machines.go:694
 msgid "Users:\n"
 msgstr ""
 
@@ -923,7 +927,7 @@ msgstr ""
 msgid "ZFS: an error occured: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:807
+#: internal/zfs/zfs.go:817
 msgid "ZFS: can't set property %q=%q for %q as not a local property (%q)"
 msgstr ""
 
@@ -939,7 +943,7 @@ msgstr ""
 msgid "ZFS: refresh dataset list"
 msgstr ""
 
-#: internal/zfs/zfs.go:710
+#: internal/zfs/zfs.go:711
 msgid "ZFS: request destruction of %q"
 msgstr ""
 
@@ -959,19 +963,20 @@ msgstr ""
 msgid "ZFS: trying to clone %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:761
+#: internal/zfs/zfs.go:771
 msgid "ZFS: trying to destroy %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:738
-msgid "ZFS: trying to destroy recursively %q @ %q"
+#: internal/zfs/zfs.go:748
+#, c-format
+msgid "ZFS: trying to destroy recursively %s@%s"
 msgstr ""
 
 #: internal/zfs/zfs.go:628
 msgid "ZFS: trying to promote %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:798
+#: internal/zfs/zfs.go:808
 msgid "ZFS: trying to set %q=%q on %q"
 msgstr ""
 
@@ -979,11 +984,11 @@ msgstr ""
 msgid "ZFS: trying to snapshot %q, recursive: %v"
 msgstr ""
 
-#: internal/machines/machines.go:620
+#: internal/machines/machines.go:654
 msgid "ZSys:\t%t\n"
 msgstr ""
 
-#: internal/machines/gc.go:91 internal/machines/gc.go:238
+#: internal/machines/gc.go:99 internal/machines/gc.go:255
 msgid "bucket %+v"
 msgstr ""
 
@@ -999,11 +1004,11 @@ msgstr ""
 msgid "can't get associated pool: "
 msgstr ""
 
-#: internal/zfs/zfs.go:801
+#: internal/zfs/zfs.go:811
 msgid "can't get dataset to change property on %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:713
+#: internal/zfs/zfs.go:714
 msgid "can't get dataset to destroy %q: "
 msgstr ""
 
@@ -1031,7 +1036,7 @@ msgstr ""
 msgid "can't read source of LastUsed property, ignoring:"
 msgstr ""
 
-#: internal/zfs/zfs.go:812
+#: internal/zfs/zfs.go:822
 msgid "can't set dataset property %q=%q for %q: "
 msgstr ""
 
@@ -1043,11 +1048,11 @@ msgstr ""
 msgid "can't use empty string for new home directory"
 msgstr ""
 
-#: internal/zfs/zfs.go:770
+#: internal/zfs/zfs.go:780
 msgid "cannot destroy dataset %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:569
+#: internal/zfs/helpers.go:582
 msgid "cannot find %q as child of parent %q"
 msgstr ""
 
@@ -1056,20 +1061,20 @@ msgstr ""
 msgid "cannot find %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:493
+#: internal/zfs/helpers.go:506
 msgid "cannot find base snapshot %q: %v"
 msgstr ""
 
 #: internal/zfs/zfs.go:349 internal/zfs/zfs.go:486 internal/zfs/zfs.go:516
-#: internal/zfs/zfs.go:587 internal/zfs/zfs.go:726
+#: internal/zfs/zfs.go:587 internal/zfs/zfs.go:727
 msgid "cannot find parent for %q: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:781
+#: internal/zfs/zfs.go:791
 msgid "cannot find parent for %s: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:521
+#: internal/zfs/helpers.go:534
 msgid "cannot remove snapshot %q on old dataset %q: %v"
 msgstr ""
 
@@ -1117,7 +1122,7 @@ msgstr ""
 msgid "couldn't connect to zsys daemon: %v"
 msgstr ""
 
-#: internal/daemon/service.go:50 internal/machines/machines.go:337
+#: internal/daemon/service.go:50 internal/machines/machines.go:370
 msgid "couldn't convert internal state to json: %v"
 msgstr ""
 
@@ -1145,16 +1150,20 @@ msgstr ""
 msgid "couldn't create userdataset for %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:730
+#: internal/zfs/zfs.go:735
 msgid "couldn't destroy %q and its children: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:717
+#: internal/zfs/zfs.go:718
 msgid "couldn't destroy %q due to clones: %v"
 msgstr ""
 
 #: internal/zfs/zfs.go:338 internal/zfs/zfs.go:415 internal/zfs/zfs.go:579
 msgid "couldn't destroy %q for cleanup: %v"
+msgstr ""
+
+#: internal/zfs/zfs.go:732
+msgid "couldn't destroy %q: it's a filesystem dataset which has snapshots"
 msgstr ""
 
 #: internal/daemon/service.go:58
@@ -1193,7 +1202,7 @@ msgstr ""
 msgid "couldn't generate request id, setting to %q: %v"
 msgstr ""
 
-#: internal/machines/machines.go:107 internal/machines/machines.go:815
+#: internal/machines/machines.go:134 internal/machines/machines.go:849
 msgid "couldn't load zsys configuration"
 msgstr ""
 
@@ -1229,7 +1238,7 @@ msgstr ""
 msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
-#: internal/machines/boot.go:290 internal/machines/state.go:262
+#: internal/machines/boot.go:290 internal/machines/state.go:304
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -1251,11 +1260,11 @@ msgstr ""
 msgid "couldn't save system state: "
 msgstr ""
 
-#: internal/zfs/helpers.go:281
+#: internal/zfs/helpers.go:294
 msgid "couldn't scan %q for clones"
 msgstr ""
 
-#: internal/machines/machines.go:102
+#: internal/machines/machines.go:129
 msgid "couldn't scan zfs filesystem"
 msgstr ""
 
@@ -1287,18 +1296,18 @@ msgstr ""
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
-#: internal/machines/machines.go:742 internal/machines/machines.go:799
+#: internal/machines/machines.go:776 internal/machines/machines.go:833
 msgid "current"
 msgstr ""
 
-#: internal/machines/machines.go:340
+#: internal/machines/machines.go:373
 #, c-format
 msgid ""
 "current machines scanning layout:\n"
 "%s\n"
 msgstr ""
 
-#: internal/machines/gc.go:99 internal/machines/gc.go:246
+#: internal/machines/gc.go:107 internal/machines/gc.go:263
 #, c-format
 msgid "current state: %s"
 msgstr ""
@@ -1336,11 +1345,11 @@ msgstr ""
 msgid "failed to unmarshal yaml: %v"
 msgstr ""
 
-#: internal/machines/machines.go:425 internal/machines/machines.go:451
+#: internal/machines/machines.go:457 internal/machines/machines.go:482
 msgid "ignoring %q as couldn't assert if it's a child: "
 msgstr ""
 
-#: internal/machines/machines.go:381
+#: internal/machines/machines.go:414
 msgid ""
 "ignoring %q: either an orphan clone or not a boot, user or system datasets "
 "and canmount isn't on"
@@ -1383,14 +1392,14 @@ msgstr ""
 msgid "missing RequesterIDKey for incoming request"
 msgstr ""
 
-#: internal/machines/machines.go:609
+#: internal/machines/machines.go:643
 #, c-format
 msgid ""
 "multiple machines match %s:\n"
 "%s"
 msgstr ""
 
-#: internal/machines/state.go:393
+#: internal/machines/state.go:446
 #, c-format
 msgid ""
 "multiple states are matching %s:\n"
@@ -1401,11 +1410,11 @@ msgstr ""
 msgid "new incoming request %s() for %q"
 msgstr ""
 
-#: internal/machines/machines.go:573
+#: internal/machines/machines.go:607
 msgid "no ID given and cannot retrieve current machine. Please specify one ID."
 msgstr ""
 
-#: internal/zfs/zfs.go:751
+#: internal/zfs/zfs.go:761
 msgid "no existing snapshot %q: "
 msgstr ""
 
@@ -1413,12 +1422,12 @@ msgstr ""
 msgid "no logger attached to this context"
 msgstr ""
 
-#: internal/machines/machines.go:603
+#: internal/machines/machines.go:637
 #, c-format
 msgid "no machine matches %s"
 msgstr ""
 
-#: internal/machines/state.go:386
+#: internal/machines/state.go:439
 #, c-format
 msgid "no matching state for %s"
 msgstr ""
@@ -1467,16 +1476,16 @@ msgstr ""
 msgid "set current time to %q"
 msgstr ""
 
-#: internal/machines/state.go:359
+#: internal/machines/state.go:412
 msgid "state id is mandatory"
 msgstr ""
 
-#: internal/machines/gc.go:103 internal/machines/gc.go:250
+#: internal/machines/gc.go:111 internal/machines/gc.go:267
 #, c-format
 msgid "state.LastUsed (%s) before bucket.start (%s). Continuing"
 msgstr ""
 
-#: internal/zfs/zfs.go:743
+#: internal/zfs/zfs.go:753
 msgid "stop destroying dataset on %q, cannot destroy child: %v"
 msgstr ""
 
@@ -1490,6 +1499,16 @@ msgstr ""
 
 #: internal/streamlogger/server.go:52
 msgid "this request isn't associate with a valid id: reject"
+msgstr ""
+
+#: internal/machines/state.go:204
+#, c-format
+msgid "to remove. Currently linked to %s"
+msgstr ""
+
+#: internal/machines/state.go:189
+#, c-format
+msgid "to unlink from %s"
 msgstr ""
 
 #: internal/machines/helpers.go:48
