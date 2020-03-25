@@ -1,0 +1,9 @@
+[Unit]
+Description=Clean up old snapshots to free space
+
+# We can't run it in a container
+ConditionVirtualization=!container
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/zsysctl service gc

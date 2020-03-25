@@ -1,0 +1,9 @@
+[Unit]
+Description=Clean up old snapshots to free space
+
+[Timer]
+OnStartupSec=10min
+OnUnitActiveSec=24h
+
+[Install]
+WantedBy=timers.target
