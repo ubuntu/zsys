@@ -372,12 +372,10 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		}
 
 		// Remove the given states.
-		// Should call remove() TO REWORK
-		nt := ms.z.NewNoTransaction(ctx)
 		for _, s := range statesToRemove {
 			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
-			if err := nt.Destroy(s.Datasets[s.ID][0].Name); err != nil {
-				log.Errorf(ctx, i18n.G("Couldn't destroy user state %s: %v"), s, err)
+			if err := s.remove(ctx, ms, ""); err != nil {
+				log.Errorf(ctx, i18n.G("Couldn't fully destroy user state %s: %v."), s.ID, err)
 			}
 		}
 
