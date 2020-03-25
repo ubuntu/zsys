@@ -73,6 +73,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	}
 
 	var statesToRemove []*State
+	keepDueToErrorOnDelete := make(map[string]bool)
 
 	// 1. System GC
 	log.Debug(ctx, i18n.G("GC System"))
@@ -141,6 +142,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					} else if keep == keepUnknown && i < keepLast {
 						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
 						keep = keepYes
+					} else if keepDueToErrorOnDelete[s.ID] {
+						keep = keepYes
 					} else {
 						// We only collect systems because users will be untagged if they have any dependency
 					analyzeSystemDataset:
@@ -205,7 +208,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		for _, s := range statesToRemove {
 			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
 			if err := s.remove(ctx, ms, ""); err != nil {
-				log.Errorf(ctx, i18n.G("Couldn't fully destroy state %s: %v"), s.ID, err)
+				log.Errorf(ctx, i18n.G("Couldn't fully destroy state %s: %v\nPutting it in keep list."), s.ID, err)
+				keepDueToErrorOnDelete[s.ID] = true
 			}
 		}
 		statesToRemove = nil
@@ -219,6 +223,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	log.Debug(ctx, i18n.G("GC User"))
 	// TODO: this is a copy of above, but we keep any states associated with user states, we really need to merge State and UserStates
 	statesToRemove = nil
+	keepDueToErrorOnDelete = make(map[string]bool)
 	gcPassNum = 0
 	for {
 		gcPassNum++
@@ -294,6 +299,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 							keep = keepYes
 						} else if keep == keepUnknown && i < keepLast {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
+							keep = keepYes
+						} else if keepDueToErrorOnDelete[s.ID] {
 							keep = keepYes
 						} else if keep == keepUnknown {
 							_, snapshotName := splitSnapshotName(s.ID)
@@ -375,7 +382,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		for _, s := range statesToRemove {
 			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
 			if err := s.remove(ctx, ms, ""); err != nil {
-				log.Errorf(ctx, i18n.G("Couldn't fully destroy user state %s: %v."), s.ID, err)
+				log.Errorf(ctx, i18n.G("Couldn't fully destroy user state %s: %v.\nPutting it in keep list."), s.ID, err)
+				keepDueToErrorOnDelete[s.ID] = true
 			}
 		}
 
