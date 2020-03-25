@@ -222,6 +222,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	// 2. GC user datasets. Note that we will only collect user states that are independent of system states.
 	log.Debug(ctx, i18n.G("GC User"))
 	// TODO: this is a copy of above, but we keep any states associated with user states, we really need to merge State and UserStates
+	// FIXME: user states attached to multiple datasets are counted individually when removing user states, and so, we can think
+	// we keep more history than we will have in the end. We should only count them as a single one
 	statesToRemove = nil
 	keepDueToErrorOnDelete = make(map[string]bool)
 	gcPassNum = 0
@@ -255,7 +257,6 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					// End of the array, nothing else to do.
 					if newestStateIndex >= len(sortedStates) {
 						log.Debugf(ctx, "No more user states left for pass #%d. Go to next pass", gcPassNum)
-
 						break
 					}
 
@@ -286,13 +287,13 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					states := make([]stateWithKeep, 0, oldestStateIndex-newestStateIndex+1)
 					log.Debug(ctx, i18n.G("Collecting all states for current bucket"))
 					for i := newestStateIndex; i <= oldestStateIndex; i++ {
-						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), sortedStates[i].ID, sortedStates[i].LastUsed.Format(timeFormat))
 						s := sortedStates[i]
+						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), s.ID, s.LastUsed.Format(timeFormat))
 
 						keep := keepUnknown
 						// We can only collect snapshots here for user datasets, or they are unassociated clones that we will clean up later
 						if !s.isSnapshot() {
-							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot, and necessarily associated to a system state"), s.ID)
+							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot and associated to a system state"), s.ID)
 							keep = keepYes
 						} else if !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
