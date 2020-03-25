@@ -84,6 +84,7 @@ func TestNew(t *testing.T) {
 		// FIXME: see comment in machines.go. we should have user1_clone attached to the machine
 		// consider other cases with it having snapshots, being attached as well and clone on this clone
 		"User clone without bootfs dataset is still attached to the right machine via its snapshot": {def: "gc_system_with_users_clone.yaml"},
+		"User clone without bootfs dataset is saved by its snapshot linked to a system state":       {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml"},
 
 		// Userdata user snapshots
 		"Userdata has a user snapshot":              {def: "m_with_userdata_user_snapshot.yaml"},
