@@ -1,5 +1,6 @@
 systemd/*.service lib/systemd/system/
 systemd/*.socket lib/systemd/system/
+systemd/*.timer lib/systemd/system/
 systemd/user/* usr/lib/systemd/user/
 debian/zsys-system-autosnapshot usr/libexec/
 debian/90_zsys_system_autosnapshot etc/apt/apt.conf.d/
