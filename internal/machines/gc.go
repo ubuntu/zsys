@@ -294,15 +294,15 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						if !s.isSnapshot() {
 							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot, and necessarily associated to a system state"), s.ID)
 							keep = keepYes
-						} else if keep == keepUnknown && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						} else if !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 							keep = keepYes
-						} else if keep == keepUnknown && i < keepLast {
+						} else if i < keepLast {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
 							keep = keepYes
 						} else if keepDueToErrorOnDelete[s.ID] {
 							keep = keepYes
-						} else if keep == keepUnknown {
+						} else {
 							_, snapshotName := splitSnapshotName(s.ID)
 							// Do we have a state associated with us?
 							for k, state := range m.History {
@@ -317,19 +317,20 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 									break
 								}
 							}
-						} else if keep == keepUnknown {
-							// check if any dataset has a automated or manual clone
-						analyzeUserDataset:
-							for _, ds := range s.Datasets {
-								for _, d := range ds {
-									// We only treat snapshots as clones are necessarily associated with one system state or
-									// has already been destroyed and not associated.
-									// do we have clones of us?
-									if byOrigin[d.Name] != nil {
-										log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
-										keep = keepYes
-										break analyzeUserDataset
 
+							if keep == keepUnknown {
+								// check if any dataset has a automated or manual clone
+							analyzeUserDataset:
+								for _, ds := range s.Datasets {
+									for _, d := range ds {
+										// We only treat snapshots as clones are necessarily associated with one system state or
+										// has already been destroyed and not associated.
+										// do we have clones of us?
+										if byOrigin[d.Name] != nil {
+											log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
+											keep = keepYes
+											break analyzeUserDataset
+										}
 									}
 								}
 							}
