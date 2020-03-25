@@ -1,0 +1,116 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+      snapshots:
+      - name: autozsys_20200101-1100
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+      - name: autozsys_20200101-1000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: autozsys_20200101-0900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
+      - name: manual_20191230-2200
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T22:00:00+00:00
+      - name: manual_20191230-2000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:00:00+00:00
+      - name: manual_20191230-1900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T19:00:00+00:00
+      - name: manual_20191230-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T18:00:00+00:00
+      - name: autozsys_20191230-1700
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:00:00+00:00
+
+    - name: ROOT/ubuntu_2345
+      zsys_bootfs: yes
+      last_used: 2019-12-30T17:15:00+00:00
+      mountpoint: /
+      origin: rpool/ROOT/ubuntu_1234@autozsys_20191230-1700
+
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      snapshots:
+      - name: autozsys_20200101-1100
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+      - name: autozsys_20200101-1000
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: autozsys_20200101-0900
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
+      - name: manual_20191230-2200
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T22:00:00+00:00
+      - name: manual_20191230-2000
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:00:00+00:00
+      - name: manual_20191230-1900
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T19:00:00+00:00
+      - name: manual_20191230-1800
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T18:00:00+00:00
+      - name: autozsys_20191230-1700
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:00:00+00:00
+
+    - name: USERDATA/user1_efgh
+      mountpoint: /home/user1
+      last_used: 2019-12-30T17:25:00+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_2345
+      origin: rpool/USERDATA/user1_abcd@autozsys_20191230-1700
+      snapshots:
+      - name: manual-user1-keep-clone-but-not-state-link
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_2345:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:16:00+00:00

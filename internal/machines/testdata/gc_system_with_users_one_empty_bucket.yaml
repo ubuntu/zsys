@@ -1,0 +1,277 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+      snapshots:
+      - name: autozsys_20200101-1100
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+      - name: autozsys_20200101-1000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: autozsys_20200101-0900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
+      - name: autozsys_20200101-0800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T08:00:00+00:00
+      - name: autozsys_20191231-2000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T20:00:00+00:00
+      - name: autozsys_20191231-1500
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T15:00:00+00:00
+      - name: autozsys_20191231-1300
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T13:00:00+00:00
+      - name: autozsys_20191231-1000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T10:00:00+00:00
+      - name: autozsys_20191231-0900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T09:00:00+00:00
+      - name: autozsys_20191231-0700
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T07:00:00+00:00
+      - name: autozsys_20191230-2200
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T22:00:00+00:00
+      - name: autozsys_20191230-2000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:00:00+00:00
+      - name: autozsys_20191230-1900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T19:00:00+00:00
+      - name: autozsys_20191230-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T18:00:00+00:00
+      - name: autozsys_20191230-1700
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:00:00+00:00
+
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      snapshots:
+      - name: autozsys_20200101-1100
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+      - name: autozsys_20200101-1000
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: autozsys_20200101-0900
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
+      - name: autozsys_20200101-0800
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T08:00:00+00:00
+      - name: autozsys_20191231-2000
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T20:00:00+00:00
+      - name: autozsys_20191231-1500
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T15:00:00+00:00
+      - name: autozsys_20191231-1300
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T13:00:00+00:00
+      - name: autozsys_20191231-1000
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T10:00:00+00:00
+      - name: autozsys_20191231-0900
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T09:00:00+00:00
+      - name: autozsys_20191231-0700
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T07:00:00+00:00
+      - name: autozsys_20191230-2200
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T22:00:00+00:00
+      - name: autozsys_users-20191230-2030
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:30:00+00:00
+      - name: autozsys_20191230-2000
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:00:00+00:00
+      - name: autozsys_20191230-1900
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T19:00:00+00:00
+      - name: autozsys_20191230-1800
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T18:00:00+00:00
+      - name: autozsys_20191230-1700
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:00:00+00:00
+      - name: autozsys_user1-20191230-1530
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T15:30:00+00:00
+
+
+    - name: USERDATA/user2_bcde
+      mountpoint: /home/user2
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      snapshots:
+      - name: autozsys_20200101-1100
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/u/home/user2untu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+      - name: autozsys_20200101-1000
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: autozsys_20200101-0900
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
+      - name: autozsys_20200101-0800
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T08:00:00+00:00
+      - name: autozsys_20191231-2000
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T20:00:00+00:00
+      - name: autozsys_20191231-1500
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T15:00:00+00:00
+      - name: autozsys_20191231-1300
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T13:00:00+00:00
+      - name: autozsys_20191231-1000
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T10:00:00+00:00
+      - name: autozsys_20191231-0900
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T09:00:00+00:00
+      - name: autozsys_20191231-0700
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-31T07:00:00+00:00
+
+      - name: autozsys_20191230-2200
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T22:00:00+00:00
+      - name: autozsys_users-20191230-2030
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:30:00+00:00
+      - name: autozsys_20191230-2000
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:00:00+00:00
+      - name: autozsys_user2-20191230-1930
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T19:30:00+00:00
+      - name: autozsys_20191230-1800
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T18:00:00+00:00
+      - name: autozsys_20191230-1700
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:00:00+00:00
+
+      - name: autozsys_20191227-1700
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-27T17:00:00+00:00
+      - name: autozsys_20191225-1700
+        mountpoint: /home/user2:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-25T17:00:00+00:00

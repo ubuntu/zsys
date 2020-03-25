@@ -1,0 +1,174 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+      snapshots:
+      - name: manual_20200101-1100
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+      - name: manual_20200101-1000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: manual_20200101-0900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
+      - name: manual_20200101-0800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T08:00:00+00:00
+      - name: manual_20191231-2000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T20:00:00+00:00
+      - name: manual_20191231-1500
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T15:00:00+00:00
+      - name: manual_20191231-1300
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T13:00:00+00:00
+      - name: manual_20191231-1000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T10:00:00+00:00
+      - name: manual_20191231-0900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T09:00:00+00:00
+      - name: manual_20191231-0700
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-31T07:00:00+00:00
+      - name: manual_20191230-2200
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T22:00:00+00:00
+      - name: manual_20191230-2000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T20:00:00+00:00
+      - name: manual_20191230-1900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T19:00:00+00:00
+      - name: manual_20191230-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T18:00:00+00:00
+
+      - name: manual_20191229-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-29T18:00:00+00:00
+      - name: autozsys_20191228-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-28T18:00:00+00:00
+      - name: autozsys_20191227-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-27T18:00:00+00:00
+      - name: manual_20191225-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-25T18:00:00+00:00
+      - name: manual_20191223-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-23T18:00:00+00:00
+
+      - name: manual_20191222-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-22T18:00:00+00:00
+      - name: autozsys_20191220-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-20T18:00:00+00:00
+      - name: manual_20191218-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-18T18:00:00+00:00
+      - name: manual_20191216-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-16T18:00:00+00:00
+
+      - name: manual_20191215-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-15T18:00:00+00:00
+      - name: autozsys_20191213-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-13T18:00:00+00:00
+      - name: autozsys_20191113-1800
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-11-13T18:00:00+00:00
+
+    - name: ROOT/ubuntu_1234/opt
+      mountpoint: /
+      snapshots:
+      - name: autozsys_20191213-1800
+        mountpoint: /opt:inherited
+        zsys_bootfs: yes:inherited
+        canmount: on:local
+        creation_time: 2019-12-13T18:00:00+00:00
+
+    - name: ROOT/clone_20191214-1800
+      mountpoint: /
+      zsys_bootfs: yes
+      canmount: noauto
+      last_used: 2019-12-14T18:00:00+00:00
+      origin: "rpool/ROOT/ubuntu_1234@autozsys_20191213-1800"
+      snapshots:
+      - name: autozsys_20191214-1900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: noauto:local
+        creation_time: 2019-11-14T19:00:00+00:00
+    - name: ROOT/clone_20191214-1800/opt
+      canmount: noauto
+      origin: "rpool/ROOT/ubuntu_1234/opt@autozsys_20191213-1800"
+      snapshots:
+      - name: autozsys_20191214-1900
+        mountpoint: /opt:inherited
+        zsys_bootfs: yes:inherited
+        canmount: noauto:local
+        creation_time: 2019-11-14T19:00:00+00:00

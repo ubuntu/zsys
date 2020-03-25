@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"os"
 	"path/filepath"
 
@@ -43,6 +45,9 @@ func main() {
 	}
 	err := errFunc()
 	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) {
+			err = errors.New(i18n.G("Service took too long to respond. Disconnecting client."))
+		}
 		log.Error(err)
 		os.Exit(1)
 	}

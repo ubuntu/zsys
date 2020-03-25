@@ -41,7 +41,7 @@
          },
          "AllUsersStates": {
             "user1": {
-               "rpool/USERDATA/user1_abcd": {
+               "rpool/USERDATA/user1_abcd-rpool.ROOT.ubuntu-1234": {
                   "ID": "rpool/USERDATA/user1_abcd",
                   "LastUsed": "2019-04-18T04:45:55+02:00",
                   "Datasets": {
@@ -100,7 +100,7 @@
          },
          "AllUsersStates": {
             "user1": {
-               "rpool/USERDATA/user1_abcd": {
+               "rpool/USERDATA/user1_abcd-rpool.ROOT.ubuntu-9999": {
                   "ID": "rpool/USERDATA/user1_abcd",
                   "LastUsed": "2019-04-18T04:45:55+02:00",
                   "Datasets": {

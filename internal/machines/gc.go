@@ -27,7 +27,7 @@ type sortedReverseByTimeStates []*State
 
 func (s sortedReverseByTimeStates) Len() int { return len(s) }
 func (s sortedReverseByTimeStates) Less(i, j int) bool {
-	return s[i].LastUsed.After(*s[j].LastUsed)
+	return s[i].LastUsed.After(s[j].LastUsed)
 }
 func (s sortedReverseByTimeStates) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
@@ -45,10 +45,11 @@ type stateWithKeep struct {
 }
 
 // GC starts garbage collection for system and users
+// If all is set manual snapshots are considered too
 func (ms *Machines) GC(ctx context.Context, all bool) error {
-	now := time.Now()
+	now := ms.time.Now()
 
-	buckets := computeBuckets(now, ms.conf.History)
+	buckets := computeBuckets(ctx, now, ms.conf.History)
 	keepLast := ms.conf.History.KeepLast
 
 	allDatasets := make([]*zfs.Dataset, 0, len(ms.allSystemDatasets)+len(ms.allPersistentDatasets)+len(ms.allUsersDatasets)+len(ms.unmanagedDatasets))
@@ -72,14 +73,21 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	}
 
 	var statesToRemove []*State
+	keepDueToErrorOnDelete := make(map[string]bool)
 
 	// 1. System GC
-	log.Debug(ctx, i18n.G("System GC"))
-
+	log.Debug(ctx, i18n.G("GC System"))
+	var gcPassNum int
 	for {
+		gcPassNum++
+		log.Debugf(ctx, "GC System Pass #%d", gcPassNum)
 		statesChanges := false
 
 		for _, m := range ms.all {
+			if !m.isZsys() {
+				continue
+			}
+
 			var newestStateIndex int
 			var sortedStates sortedReverseByTimeStates
 			for _, s := range m.History {
@@ -92,7 +100,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 				// End of the array, nothing else to do.
 				if newestStateIndex >= len(sortedStates) {
-					log.Debug(ctx, i18n.G("No more system states left. Stopping analyzing buckets"))
+					log.Debugf(ctx, "No more system states left for pass #%d. Go to next pass", gcPassNum)
 					break
 				}
 
@@ -133,6 +141,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						keep = keepYes
 					} else if keep == keepUnknown && i < keepLast {
 						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
+						keep = keepYes
+					} else if keepDueToErrorOnDelete[s.ID] {
 						keep = keepYes
 					} else {
 						// We only collect systems because users will be untagged if they have any dependency
@@ -196,9 +206,10 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 		// Remove the given states.
 		for _, s := range statesToRemove {
-			log.Infof(ctx, i18n.G("Removing state: %s"), s.ID)
-			if err := s.remove(ctx, ms.z, s.ID, false); err != nil {
-				log.Errorf(ctx, i18n.G("Couldn't fully destroy state %s: %v"), s.ID, err)
+			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
+			if err := s.remove(ctx, ms, ""); err != nil {
+				log.Errorf(ctx, i18n.G("Couldn't fully destroy state %s: %v\nPutting it in keep list."), s.ID, err)
+				keepDueToErrorOnDelete[s.ID] = true
 			}
 		}
 		statesToRemove = nil
@@ -208,15 +219,21 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		log.Debug(ctx, i18n.G("System have changes, rerun system GC"))
 	}
 
-	// 2. GC user datasets
-	log.Debug(ctx, i18n.G("User GC"))
+	// 2. GC user datasets. Note that we will only collect user states that are independent of system states.
+	log.Debug(ctx, i18n.G("GC User"))
 	// TODO: this is a copy of above, but we keep any states associated with user states, we really need to merge State and UserStates
-	var UserStatesToRemove []*State
-
+	// FIXME: user states attached to multiple datasets are counted individually when removing user states, and so, we can think
+	// we keep more history than we will have in the end. We should only count them as a single one
+	statesToRemove = nil
+	keepDueToErrorOnDelete = make(map[string]bool)
+	gcPassNum = 0
 	for {
+		gcPassNum++
+		log.Debugf(ctx, "GC User Pass #%d", gcPassNum)
 		statesChanges := false
 
 		for _, m := range ms.all {
+			// FIXME: we count same user state multiple times if linked to multiple bootfs systems
 			for _, us := range m.AllUsersStates {
 				var newestStateIndex int
 				var sortedStates sortedReverseByTimeStates
@@ -239,7 +256,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 					// End of the array, nothing else to do.
 					if newestStateIndex >= len(sortedStates) {
-						log.Debug(ctx, i18n.G("No more user states left. Stopping analyzing buckets"))
+						log.Debugf(ctx, "No more user states left for pass #%d. Go to next pass", gcPassNum)
 						break
 					}
 
@@ -270,21 +287,23 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					states := make([]stateWithKeep, 0, oldestStateIndex-newestStateIndex+1)
 					log.Debug(ctx, i18n.G("Collecting all states for current bucket"))
 					for i := newestStateIndex; i <= oldestStateIndex; i++ {
-						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), sortedStates[i].ID, sortedStates[i].LastUsed.Format(timeFormat))
 						s := sortedStates[i]
+						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), s.ID, s.LastUsed.Format(timeFormat))
 
 						keep := keepUnknown
 						// We can only collect snapshots here for user datasets, or they are unassociated clones that we will clean up later
 						if !s.isSnapshot() {
-							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot, and necessarily associated to a system state"), s.ID)
+							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot and associated to a system state"), s.ID)
 							keep = keepYes
-						} else if keep == keepUnknown && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						} else if !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 							keep = keepYes
-						} else if keep == keepUnknown && i < keepLast {
+						} else if i < keepLast {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
 							keep = keepYes
-						} else if keep == keepUnknown {
+						} else if keepDueToErrorOnDelete[s.ID] {
+							keep = keepYes
+						} else {
 							_, snapshotName := splitSnapshotName(s.ID)
 							// Do we have a state associated with us?
 							for k, state := range m.History {
@@ -299,19 +318,20 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 									break
 								}
 							}
-						} else if keep == keepUnknown {
-							// check if any dataset has a automated or manual clone
-						analyzeUserDataset:
-							for _, ds := range s.Datasets {
-								for _, d := range ds {
-									// We only treat snapshots as clones are necessarily associated with one system state or
-									// has already been destroyed and not associated.
-									// do we have clones of us?
-									if byOrigin[d.Name] != nil {
-										log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
-										keep = keepYes
-										break analyzeUserDataset
 
+							if keep == keepUnknown {
+								// check if any dataset has a automated or manual clone
+							analyzeUserDataset:
+								for _, ds := range s.Datasets {
+									for _, d := range ds {
+										// We only treat snapshots as clones are necessarily associated with one system state or
+										// has already been destroyed and not associated.
+										// do we have clones of us?
+										if byOrigin[d.Name] != nil {
+											log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
+											keep = keepYes
+											break analyzeUserDataset
+										}
 									}
 								}
 							}
@@ -361,33 +381,36 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		}
 
 		// Remove the given states.
-		nt := ms.z.NewNoTransaction(ctx)
-		for _, s := range UserStatesToRemove {
-			log.Infof(ctx, i18n.G("Removing state: %s"), s.ID)
-			if err := nt.Destroy(s.Datasets[s.ID][0].Name); err != nil {
-				log.Errorf(ctx, i18n.G("Couldn't destroy user state %s: %v"), s, err)
+		for _, s := range statesToRemove {
+			log.Infof(ctx, i18n.G("Selecting state to remove: %s"), s.ID)
+			if err := s.remove(ctx, ms, ""); err != nil {
+				log.Errorf(ctx, i18n.G("Couldn't fully destroy user state %s: %v.\nPutting it in keep list."), s.ID, err)
+				keepDueToErrorOnDelete[s.ID] = true
 			}
 		}
 
-		UserStatesToRemove = nil
-		// TODO: only if changes
+		statesToRemove = nil
 		if err := ms.Refresh(ctx); err != nil {
 			return fmt.Errorf("Couldn't refresh machine list: %v", err)
 		}
 		log.Debug(ctx, i18n.G("Users states have changes, rerun user GC"))
 	}
 
-	// 3. Clean up user unmanaged datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
+	// 3. Clean up user user datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
 	// (they, and all snapshots on them will end up in unmanaged datasets)
 	log.Debug(ctx, i18n.G("Unassociated user datasets GC"))
 	var alreadyDestroyedRoot []string
+	var hasChanges bool
 	nt := ms.z.NewNoTransaction(ctx)
 nextDataset:
-	for _, d := range ms.unmanagedDatasets {
-		if d.IsSnapshot || !isUserDataset(d.Name) {
+	for _, d := range ms.allUsersDatasets {
+		if d.IsSnapshot {
 			continue
 		}
 		if d.BootfsDatasets != "" {
+			continue
+		}
+		if d.HasSnapshotInHierarchy() {
 			continue
 		}
 		for _, n := range alreadyDestroyedRoot {
@@ -396,6 +419,7 @@ nextDataset:
 			}
 		}
 
+		hasChanges = true
 		// We destroy here all snapshots and leaf attached. Snapshots won’t be taken into account, however, we don’t want
 		// to try destroying leaves again, keep a list.
 		if err := nt.Destroy(d.Name); err != nil {
@@ -403,6 +427,12 @@ nextDataset:
 		}
 
 		alreadyDestroyedRoot = append(alreadyDestroyedRoot, d.Name)
+	}
+
+	if hasChanges {
+		if err := ms.Refresh(ctx); err != nil {
+			return fmt.Errorf("Couldn't refresh machine list: %v", err)
+		}
 	}
 
 	return nil
@@ -433,7 +463,8 @@ func removeFromSlice(s []string, name string) (r []string) {
 
 // computeBuckets initializes the list of buckets in which the dataset will be sorted.
 // Buckets are defined from the main configuration file.
-func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket) {
+func computeBuckets(ctx context.Context, now time.Time, rules config.HistoryRules) (buckets []bucket) {
+	log.Debugf(ctx, "calculating buckets")
 	nowDay := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	end := nowDay.Add(time.Duration(-rules.GCStartAfter * timeDay))
 
@@ -443,8 +474,10 @@ func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket)
 		end:     now,
 		samples: -1,
 	})
+	log.Debugf(ctx, "bucket keep all: start:%s, end:%s, samples:%d", buckets[len(buckets)-1].start, buckets[len(buckets)-1].end, buckets[len(buckets)-1].samples)
 
 	for _, rule := range rules.GCRules {
+		log.Debugf(ctx, "Rule %s, buckets: %d, length, %d", rule.Name, rule.Buckets, rule.BucketLength)
 		buckerDuration := time.Duration(timeDay * rule.BucketLength)
 
 		startPeriod := end.Add(-time.Duration(int(buckerDuration) * rule.Buckets))
@@ -455,6 +488,7 @@ func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket)
 				end:     d.Add(buckerDuration),
 				samples: rule.SamplesPerBucket,
 			})
+			log.Debugf(ctx, "  -  start:%s end:%s samples:%d", buckets[len(buckets)-1].start, buckets[len(buckets)-1].end, buckets[len(buckets)-1].samples)
 		}
 		end = startPeriod
 	}
@@ -465,6 +499,7 @@ func computeBuckets(now time.Time, rules config.HistoryRules) (buckets []bucket)
 		end:     end,
 		samples: 0,
 	})
+	log.Debugf(ctx, "bucket oldest: start:%s end:%s samples:%d", buckets[len(buckets)-1].start, buckets[len(buckets)-1].end, buckets[len(buckets)-1].samples)
 
 	return buckets
 }

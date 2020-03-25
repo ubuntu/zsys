@@ -24,6 +24,14 @@ func (s SortedDatasets) Less(i, j int) bool {
 }
 func (s SortedDatasets) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
+// WithTime allows overriding default time implementations with a mock
+func WithTime(time Nower) func(o *options) error {
+	return func(o *options) error {
+		o.time = time
+		return nil
+	}
+}
+
 // Import from json to export the private fields
 func (ms *Machines) UnmarshalJSON(b []byte) error {
 	mt := Machinesdump{}
@@ -61,6 +69,7 @@ func (ms *Machines) MakeComparable() {
 	ms.allSystemDatasets = ds
 
 	ms.z = nil
+	ms.time = nil
 	ms.conf = config.ZConfig{}
 }
 

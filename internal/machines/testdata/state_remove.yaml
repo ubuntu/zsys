@@ -114,19 +114,19 @@ pools:
       mountpoint: /home/user3
       bootfs_datasets: rpool/ROOT/ubuntu_1234
       last_used: 2018-12-10T12:20:44+00:00
-    - name: USERDATA/user4_for_state_clone
+    - name: USERDATA/user4_for-state-clone
       mountpoint: /home/user4
       bootfs_datasets: rpool/ROOT/ubuntu_1234
       last_used: 2018-12-10T12:20:44+00:00
       snapshots:
-        - name: snap_state_clone
+        - name: snap-state-clone
           mountpoint: /home/user4:local
           canmount: on:local
           creation_time: 2018-03-28T07:30:22+00:00
     - name: USERDATA/user4_clone
       mountpoint: /home/user4
-      origin: rpool/USERDATA/user4_for_state_clone@snap_state_clone
-    - name: USERDATA/user5_for_manual_clone
+      origin: rpool/USERDATA/user4_for-state-clone@snap-state-clone
+    - name: USERDATA/user5_for-manual-clone
       mountpoint: /home/user5
       last_used: 2018-12-10T12:20:44+00:00
       bootfs_datasets: rpool/ROOT/ubuntu_1234
@@ -167,7 +167,7 @@ pools:
           creation_time: 2018-12-10T12:20:44+00:00
     - name: clone
       mountpoint: /clone
-      origin: rpool/USERDATA/user5_for_manual_clone@snapuser5
+      origin: rpool/USERDATA/user5_for-manual-clone@snapuser5
   - name: bpool
     datasets:
     - name: BOOT

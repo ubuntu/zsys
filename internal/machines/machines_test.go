@@ -18,10 +18,6 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs/mock"
 )
 
-func init() {
-	config.SetVerboseMode(1)
-}
-
 func TestNew(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
@@ -37,6 +33,8 @@ func TestNew(t *testing.T) {
 		"One machine, attach user datasets to machine": {def: "m_with_userdata.yaml"},
 		"One machine, attach boot to machine":          {def: "m_with_separate_boot.yaml"},
 		"One machine, with persistent datasets":        {def: "m_with_persistent.yaml"},
+
+		"One machine with children, snapshot on subdataset": {def: "d_one_machine_with_children_snapshot_on_subdataset.yaml"},
 
 		// Machine <-> snapshot interactions
 		"One machine with one snapshot":                              {def: "d_one_machine_with_one_snapshot.yaml"},
@@ -83,6 +81,10 @@ func TestNew(t *testing.T) {
 		"Clone with user dataset with children manually created":         {def: "m_clone_with_userdata_with_children_manually_created.yaml"},
 		"Userdata with children associated only to one state":            {def: "m_with_userdata_child_associated_one_state.yaml"},
 		"Userdata is linked to no machines":                              {def: "m_with_userdata_linked_to_no_machines.yaml"},
+		// FIXME: see comment in machines.go. we should have user1_clone attached to the machine
+		// consider other cases with it having snapshots, being attached as well and clone on this clone
+		"User clone without bootfs dataset is still attached to the right machine via its snapshot": {def: "gc_system_with_users_clone.yaml"},
+		"User clone without bootfs dataset is saved by its snapshot linked to a system state":       {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml"},
 
 		// Userdata user snapshots
 		"Userdata has a user snapshot":              {def: "m_with_userdata_user_snapshot.yaml"},
@@ -916,11 +918,12 @@ func TestRemoveState(t *testing.T) {
 		// FIXME: miss bpool and bpool/BOOT from golden file
 		"Remove system state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", state: "rpool/ROOT/ubuntu_1234"},
 		"Remove one system snapshot only":                                    {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_1234@snap3"},
-		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", force: true},
 		"Removing system state try to delete its snapshots":                  {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true, wantDepErr: true},
+		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", force: true},
 
 		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove system state, with system and users snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
+		"Remove system state when user datasets are linked to 2 states":           {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_5678"},
 		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantDepErr: true, wantErr: true, isNoOp: true},
 		"Remove system state, with datasets, forced":                              {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
 
@@ -929,16 +932,20 @@ func TestRemoveState(t *testing.T) {
 		"Remove user state, one dataset, wrong user":           {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "root", wantErr: true, isNoOp: true},
 		"Remove user state, with snapshots and clones":         {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", wantErr: true, wantDepErr: true, isNoOp: true},
 		"Remove user state, with snapshots and clones, forced": {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", force: true},
-		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", wantErr: true, wantDepErr: true, isNoOp: true},
-		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone@snapuser5", user: "user5_for_manual", force: true},
+		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone@snapuser5", user: "user5", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone@snapuser5", user: "user5", force: true},
 		"Remove user snapshot state":                           {def: "state_remove.yaml", state: "rpool/USERDATA/user1_efgh@snapuser2", user: "user1"},
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
-		"Error on trying to remove current state":                 {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
-		"Error on destroy state, one dataset":                     {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
-		"Error on destroy user state, with datasets":              {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for_manual_clone", user: "user5_for_manual", force: true, destroyErr: true, wantErr: true},
-		"Can’t remove user leaf snapshot linked to system state":  {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true, wantErr: true, isNoOp: true},
-		"Can’t remove user snapshot state linked to system state": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true, wantErr: true, isNoOp: true},
+		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
+		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone", user: "user5", force: true, destroyErr: true, wantErr: true},
+
+		// TODO: check if we want to relax those
+		"Can’t remove user leaf snapshot linked to system state":                 {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", wantErr: true, isNoOp: true},
+		"Can’t remove user leaf snapshot linked to system state, even forced":    {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true, wantErr: true, isNoOp: true},
+		"Can’t remove user filesystem state linked to system state":              {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Can’t remove user filesystem state linked to system state, even forced": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -994,6 +1001,7 @@ func TestRemoveState(t *testing.T) {
 		})
 	}
 }
+
 func TestIDToState(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
@@ -1011,6 +1019,10 @@ func TestIDToState(t *testing.T) {
 		"Match unique system snapshot": {name: "snap1", wantState: "rpool/ROOT/ubuntu_1234@snap1"},
 
 		"Limit search on duplicated snapshot name to a single user": {name: "snap1", user: "user1", wantState: "rpool/USERDATA/user1_abcd@snap1"},
+
+		// User datasets shared between machines
+		"Match on user generated ID":                 {name: "jklm-rpool.ROOT.ubuntu-1234", user: "user2", wantState: "rpool/USERDATA/user2_jklm"},
+		"Doesn’t match on user dataset regular name": {name: "rpool/USERDATA/user2_jklm", user: "user2", wantErr: true},
 
 		// Multiple matches
 		"Multiple states match system suffix ID": {name: "1234", wantErr: true},
@@ -1056,6 +1068,126 @@ func TestIDToState(t *testing.T) {
 			}
 
 			assert.Equal(t, tc.wantState, got.ID, "didn't get expected state")
+		})
+	}
+}
+
+func TestGC(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def        string
+		all        bool
+		configPath string
+
+		destroyErr bool
+
+		isNoOp  bool
+		wantErr bool
+	}{
+		/***** System states only tests *****/
+		"Follow bucket policy":                       {def: "gc_system_only.yaml"},
+		"Follow bucket policy with one empty bucket": {def: "gc_system_only.yaml", configPath: "one_empty_bucket.conf"},
+		"Existing buckets have enough capacity":      {def: "gc_system_only.yaml", configPath: "not_enough_snapshots.conf"},
+
+		"No snapshot, keep everything":                         {def: "m_with_userdata.yaml", isNoOp: true},
+		"Keep previous and current day, purge everything else": {def: "gc_system_only.yaml", configPath: "purge_all_zsys.conf"},
+		"Keep current day, purge everything else":              {def: "gc_system_only.yaml", configPath: "purge_but_previous_zsys.conf"},
+		"Non zsys systems are ignored":                         {def: "gc_system_only_non_zsys.yaml", isNoOp: true},
+		"Keep more snapshots than simply last day has":         {def: "gc_system_only.yaml", configPath: "keep_many_snapshots.conf"},
+
+		"Manual snapshot which should be deleted is kept":     {def: "gc_system_only_with_manual_snapshot.yaml"},
+		"Manual snapshot which should be deleted isnt't kept": {def: "gc_system_only_with_manual_snapshot.yaml", all: true},
+
+		"Clone and dependencies are collected within the same bucket":                  {def: "gc_system_only_with_clone_same_bucket.yaml"},
+		"Manual clone without last used is collected":                                  {def: "gc_system_only_with_manual_clone.yaml"},
+		"Clone having snapshots and dependencies are collected within the same bucket": {def: "gc_system_only_with_clone_same_bucket_with_dep.yaml"},
+		"Keep clone and dependencies having manual snapshots":                          {def: "gc_system_only_with_clone_same_bucket_with_manual_dep.yaml"},
+		"Clone cloned and all dependencies are collected within the same bucket":       {def: "gc_system_only_with_clone_same_bucket_with_clone.yaml"},
+		"Clone and dependencies are collected trans bucket (clone after snapshot)":     {def: "gc_system_only_with_clone_different_buckets.yaml"},
+		"Clone with dependencies in bucket before, same and after":                     {def: "gc_system_only_with_clone_and_snapshots_different_buckets.yaml"},
+
+		"Subdataset with some snapshots shared with it":              {def: "gc_system_only_with_children.yaml"},
+		"Subdataset with some snapshots only it are kept":            {def: "gc_system_only_with_children_snapshots_only_on_subdataset.yaml"},
+		"Subdataset with snapshot keeps clone":                       {def: "gc_system_only_with_clone_same_bucket_with_snapshot_on_subdataset.yaml"},
+		"Subdataset and clone are collected":                         {def: "gc_system_only_with_clone_same_bucket_with_snapshot_on_subdataset_and_main_state.yaml"},
+		"Subdataset with manual clone on subdataset isn’t collected": {def: "gc_system_only_with_clone_same_bucket_with_snapshot_on_subdataset_and_main_state_with_manual_clone_on_subdataset.yaml"},
+
+		/***** User states tests *****/
+		"Follow bucket policy with users":                      {def: "gc_system_with_users.yaml"},
+		"Follow bucket policy with users and one empty bucket": {def: "gc_system_with_users_one_empty_bucket.yaml", configPath: "one_empty_bucket.conf", isNoOp: true},
+		"Keep more user snapshots than simply last day has":    {def: "gc_system_with_users.yaml", configPath: "keep_many_snapshots.conf"},
+
+		// User clones
+		"Remove user clone state":                                   {def: "gc_system_with_users_clone.yaml"},
+		"Remove user clone state with subdataset":                   {def: "gc_system_with_users_clone_subdataset.yaml"},
+		"Don't remove user clone state with snapshot on it kept":    {def: "gc_system_with_users_clone_with_manual_snapshot.yaml", isNoOp: true},
+		"Don't remove user clone state with snapshot on subdataset": {def: "gc_system_with_users_clone_subdataset_with_manual_snapshot.yaml", isNoOp: true},
+		// FIXME: user1_clone should be removed once TestNew is fixed (attaching the clone, and so its snapshots to the system state indirectly)
+		//"Remove unassociated user clone after deleting its snapshot": {def: "gc_system_with_users_clone_with_auto_snapshot.yaml"},
+		"Remove unassociated user clone after deleting its snapshot which was linked to system state": {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml"},
+
+		// User clone attached to multiple states/machines
+		"Users and clones on shared system state":                     {def: "gc_system_with_users_and_clones_shared_system_state.yaml"},
+		"Users and clones on different machines history":              {def: "gc_system_with_users_and_clones_different_machines_history_only.yaml"},
+		"Users and clones on different machines, one is active state": {def: "gc_system_with_users_and_clones_different_machines.yaml"},
+
+		// Deletion prevented
+		"Manual user snapshot which should be deleted is kept": {def: "gc_system_with_users_manual_snapshots.yaml", isNoOp: true},
+		"Users and clones with undeletable snapshot":           {def: "gc_system_with_users_and_clones_undeletable_snapshot.yaml"},
+
+		// Error cases
+		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			if tc.configPath == "" {
+				tc.configPath = "default.conf"
+			}
+			tc.configPath = filepath.Join("testdata", "confs", tc.configPath)
+
+			ms, err := machines.New(context.Background(), "", machines.WithLibZFS(libzfs),
+				machines.WithTime(testutils.FixedTime{}), machines.WithConfig(tc.configPath))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			initMachines := ms.CopyForTests(t)
+			lzfs := libzfs.(*mock.LibZFS)
+			lzfs.ErrOnDestroy(tc.destroyErr)
+
+			err = ms.GC(context.Background(), tc.all)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			machinesAfterRescan, err := machines.New(context.Background(), "", machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
 		})
 	}
 }
