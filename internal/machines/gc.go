@@ -395,21 +395,21 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		log.Debug(ctx, i18n.G("Users states have changes, rerun user GC"))
 	}
 
-	// 3. Clean up user unmanaged datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
+	// 3. Clean up user user datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
 	// (they, and all snapshots on them will end up in unmanaged datasets)
 	log.Debug(ctx, i18n.G("Unassociated user datasets GC"))
-	// TODO: in alluserDatasets, we have potentially some unlinked users (this was the only filesystem dataset, no clone attached and having snapshots)
-	// that we should GC by checking for deps first
-	// we have done them in the end
-	// test: USERDATA/user5_for_manual_clone is in alluserdatasets only after removing ubuntu_5678 in state_removal_internal.yaml
 	var alreadyDestroyedRoot []string
+	var hasChanges bool
 	nt := ms.z.NewNoTransaction(ctx)
 nextDataset:
-	for _, d := range ms.unmanagedDatasets {
-		if d.IsSnapshot || !isUserDataset(d.Name) {
+	for _, d := range ms.allUsersDatasets {
+		if d.IsSnapshot {
 			continue
 		}
 		if d.BootfsDatasets != "" {
+			continue
+		}
+		if d.HasSnapshotInHierarchy() {
 			continue
 		}
 		for _, n := range alreadyDestroyedRoot {
@@ -418,6 +418,7 @@ nextDataset:
 			}
 		}
 
+		hasChanges = true
 		// We destroy here all snapshots and leaf attached. Snapshots won’t be taken into account, however, we don’t want
 		// to try destroying leaves again, keep a list.
 		if err := nt.Destroy(d.Name); err != nil {
@@ -425,6 +426,12 @@ nextDataset:
 		}
 
 		alreadyDestroyedRoot = append(alreadyDestroyedRoot, d.Name)
+	}
+
+	if hasChanges {
+		if err := ms.Refresh(ctx); err != nil {
+			return fmt.Errorf("Couldn't refresh machine list: %v", err)
+		}
 	}
 
 	return nil
