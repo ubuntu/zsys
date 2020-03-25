@@ -651,7 +651,7 @@ func (m Machine) Info(full bool) (string, error) {
 	var out bytes.Buffer
 	w := tabwriter.NewWriter(&out, 0, 0, 1, ' ', 0)
 	fmt.Fprintf(w, i18n.G("Name:\t%s\n"), m.ID)
-	fmt.Fprintf(w, i18n.G("ZSys:\t%t\n"), m.isZsys)
+	fmt.Fprintf(w, i18n.G("ZSys:\t%t\n"), m.isZsys())
 
 	// Main machine state
 	m.toWriter(w, false, full)
