@@ -1071,6 +1071,126 @@ func TestIDToState(t *testing.T) {
 	}
 }
 
+func TestGC(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def        string
+		all        bool
+		configPath string
+
+		destroyErr bool
+
+		isNoOp  bool
+		wantErr bool
+	}{
+		/***** System states only tests *****/
+		"Follow bucket policy":                       {def: "gc_system_only.yaml"},
+		"Follow bucket policy with one empty bucket": {def: "gc_system_only.yaml", configPath: "one_empty_bucket.conf"},
+		"Existing buckets have enough capacity":      {def: "gc_system_only.yaml", configPath: "not_enough_snapshots.conf"},
+
+		"No snapshot, keep everything":                         {def: "m_with_userdata.yaml", isNoOp: true},
+		"Keep previous and current day, purge everything else": {def: "gc_system_only.yaml", configPath: "purge_all_zsys.conf"},
+		"Keep current day, purge everything else":              {def: "gc_system_only.yaml", configPath: "purge_but_previous_zsys.conf"},
+		"Non zsys systems are ignored":                         {def: "gc_system_only_non_zsys.yaml", isNoOp: true},
+		"Keep more snapshots than simply last day has":         {def: "gc_system_only.yaml", configPath: "keep_many_snapshots.conf"},
+
+		"Manual snapshot which should be deleted is kept":     {def: "gc_system_only_with_manual_snapshot.yaml"},
+		"Manual snapshot which should be deleted isnt't kept": {def: "gc_system_only_with_manual_snapshot.yaml", all: true},
+
+		"Clone and dependencies are collected within the same bucket":                  {def: "gc_system_only_with_clone_same_bucket.yaml"},
+		"Manual clone without last used is collected":                                  {def: "gc_system_only_with_manual_clone.yaml"},
+		"Clone having snapshots and dependencies are collected within the same bucket": {def: "gc_system_only_with_clone_same_bucket_with_dep.yaml"},
+		"Keep clone and dependencies having manual snapshots":                          {def: "gc_system_only_with_clone_same_bucket_with_manual_dep.yaml"},
+		"Clone cloned and all dependencies are collected within the same bucket":       {def: "gc_system_only_with_clone_same_bucket_with_clone.yaml"},
+		"Clone and dependencies are collected trans bucket (clone after snapshot)":     {def: "gc_system_only_with_clone_different_buckets.yaml"},
+		"Clone with dependencies in bucket before, same and after":                     {def: "gc_system_only_with_clone_and_snapshots_different_buckets.yaml"},
+
+		"Subdataset with some snapshots shared with it":              {def: "gc_system_only_with_children.yaml"},
+		"Subdataset with some snapshots only it are kept":            {def: "gc_system_only_with_children_snapshots_only_on_subdataset.yaml"},
+		"Subdataset with snapshot keeps clone":                       {def: "gc_system_only_with_clone_same_bucket_with_snapshot_on_subdataset.yaml"},
+		"Subdataset and clone are collected":                         {def: "gc_system_only_with_clone_same_bucket_with_snapshot_on_subdataset_and_main_state.yaml"},
+		"Subdataset with manual clone on subdataset isn’t collected": {def: "gc_system_only_with_clone_same_bucket_with_snapshot_on_subdataset_and_main_state_with_manual_clone_on_subdataset.yaml"},
+
+		/***** User states tests *****/
+		"Follow bucket policy with users":                      {def: "gc_system_with_users.yaml"},
+		"Follow bucket policy with users and one empty bucket": {def: "gc_system_with_users_one_empty_bucket.yaml", configPath: "one_empty_bucket.conf", isNoOp: true},
+		"Keep more user snapshots than simply last day has":    {def: "gc_system_with_users.yaml", configPath: "keep_many_snapshots.conf"},
+
+		// User clones
+		"Remove user clone state":                                   {def: "gc_system_with_users_clone.yaml"},
+		"Remove user clone state with subdataset":                   {def: "gc_system_with_users_clone_subdataset.yaml"},
+		"Don't remove user clone state with snapshot on it kept":    {def: "gc_system_with_users_clone_with_manual_snapshot.yaml", isNoOp: true},
+		"Don't remove user clone state with snapshot on subdataset": {def: "gc_system_with_users_clone_subdataset_with_manual_snapshot.yaml", isNoOp: true},
+		// FIXME: user1_clone should be removed once TestNew is fixed (attaching the clone, and so its snapshots to the system state indirectly)
+		//"Remove unassociated user clone after deleting its snapshot": {def: "gc_system_with_users_clone_with_auto_snapshot.yaml"},
+		"Remove unassociated user clone after deleting its snapshot which was linked to system state": {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml"},
+
+		// User clone attached to multiple states/machines
+		"Users and clones on shared system state":                     {def: "gc_system_with_users_and_clones_shared_system_state.yaml"},
+		"Users and clones on different machines history":              {def: "gc_system_with_users_and_clones_different_machines_history_only.yaml"},
+		"Users and clones on different machines, one is active state": {def: "gc_system_with_users_and_clones_different_machines.yaml"},
+
+		// Deletion prevented
+		"Manual user snapshot which should be deleted is kept": {def: "gc_system_with_users_manual_snapshots.yaml", isNoOp: true},
+		"Users and clones with undeletable snapshot":           {def: "gc_system_with_users_and_clones_undeletable_snapshot.yaml"},
+
+		// Error cases
+		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			if tc.configPath == "" {
+				tc.configPath = "default.conf"
+			}
+			tc.configPath = filepath.Join("testdata", "confs", tc.configPath)
+
+			ms, err := machines.New(context.Background(), "", machines.WithLibZFS(libzfs),
+				machines.WithTime(testutils.FixedTime{}), machines.WithConfig(tc.configPath))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			initMachines := ms.CopyForTests(t)
+			lzfs := libzfs.(*mock.LibZFS)
+			lzfs.ErrOnDestroy(tc.destroyErr)
+
+			err = ms.GC(context.Background(), tc.all)
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			machinesAfterRescan, err := machines.New(context.Background(), "", machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func BenchmarkNewDesktop(b *testing.B) {
 	config.SetVerboseMode(0)
 	defer func() { config.SetVerboseMode(1) }()

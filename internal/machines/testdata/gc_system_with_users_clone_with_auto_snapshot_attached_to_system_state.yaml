@@ -78,6 +78,11 @@ pools:
         zsys_bootfs: yes:local
         canmount: on:local
         creation_time: 2019-12-30T18:00:00+00:00
+      - name: autozsys_20191230-1710
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:10:00+00:00
       - name: manual_20191230-1700
         mountpoint: /:local
         zsys_bootfs: yes:local
@@ -180,6 +185,12 @@ pools:
       mountpoint: /home/user1
       last_used: 2019-12-30T17:05:00+00:00
       origin: rpool/USERDATA/user1_abcd@manual_20191230-1700
+      snapshots:
+      - name: autozsys_20191230-1710
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2019-12-30T17:10:00+00:00
 
     - name: USERDATA/user2_bcde
       mountpoint: /home/user2
