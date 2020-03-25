@@ -740,7 +740,12 @@ func (nt *NoTransaction) Destroy(name string) error {
 
 // destroyRecursive destroys and unreference dataset objects, starting with children.
 func (nt *NoTransaction) destroyRecursive(d *Dataset, snapName string) error {
-	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy recursively %q @ %q"), d.Name, snapName)
+	// Only try to find snapshot to destroy on filesystem datasets (snapshots can’t have snapshot as child)
+	if d.IsSnapshot && snapName != "" {
+		return nil
+	}
+
+	log.Debugf(nt.ctx, i18n.G("ZFS: trying to destroy recursively %s@%s"), d.Name, snapName)
 	copied := make([]*Dataset, len(d.children))
 	copy(copied, d.children)
 	for _, dc := range copied {
