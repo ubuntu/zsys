@@ -76,7 +76,6 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	keepDueToErrorOnDelete := make(map[string]bool)
 
 	// 1. System GC
-	log.Debug(ctx, i18n.G("GC System"))
 	var gcPassNum int
 	for {
 		gcPassNum++
@@ -100,7 +99,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 				// End of the array, nothing else to do.
 				if newestStateIndex >= len(sortedStates) {
-					log.Debugf(ctx, "No more system states left for pass #%d. Go to next pass", gcPassNum)
+					log.Debugf(ctx, "No more system states left for pass #%d.", gcPassNum)
 					break
 				}
 
@@ -220,7 +219,6 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	}
 
 	// 2. GC user datasets. Note that we will only collect user states that are independent of system states.
-	log.Debug(ctx, i18n.G("GC User"))
 	// TODO: this is a copy of above, but we keep any states associated with user states, we really need to merge State and UserStates
 	// FIXME: user states attached to multiple datasets are counted individually when removing user states, and so, we can think
 	// we keep more history than we will have in the end. We should only count them as a single one
@@ -256,7 +254,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 					// End of the array, nothing else to do.
 					if newestStateIndex >= len(sortedStates) {
-						log.Debugf(ctx, "No more user states left for pass #%d. Go to next pass", gcPassNum)
+						log.Debugf(ctx, "No more user states left for pass #%d.", gcPassNum)
 						break
 					}
 
