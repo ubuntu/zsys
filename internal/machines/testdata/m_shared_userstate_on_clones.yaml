@@ -1,0 +1,66 @@
+pools:
+  - name: rpool
+    datasets:
+      - name: ROOT
+        canmount: off
+      - name: ROOT/ubuntu_1234
+        zsys_bootfs: yes
+        last_used: 2019-04-18T02:45:55+00:00
+        last_booted_kernel: vmlinuz-5.2.0-8-generic
+        mountpoint: /
+        snapshots:
+          - name: snap1
+            zsys_bootfs: yes:local
+            last_booted_kernel: vmlinuz-5.0.0-0-generic:local
+            mountpoint: /:local
+            canmount: on:local
+            creation_time: 2018-12-10T12:20:44+00:00
+      - name: ROOT/ubuntu_5678
+        zsys_bootfs: yes
+        last_used: 2019-12-31T07:36:17+00:00
+        last_booted_kernel: vmlinuz-5.1.1-1-generic
+        mountpoint: /
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_1234@snap1
+        snapshots:
+          - name: snap2
+            zsys_bootfs: yes:local
+            last_booted_kernel: vmlinuz-5.0.0-0-generic:local
+            mountpoint: /:local
+            canmount: on:local
+            creation_time: 2018-12-10T12:20:44+00:00
+      - name: ROOT/ubuntu_9999
+        zsys_bootfs: yes
+        last_used: 2019-12-31T07:36:17+00:00
+        last_booted_kernel: vmlinuz-5.1.1-1-generic
+        mountpoint: /
+        canmount: noauto
+        origin: rpool/ROOT/ubuntu_5678@snap2
+      - name: USERDATA
+        canmount: off
+      - name: USERDATA/user_abcd
+        mountpoint: /home/user
+        last_used: 2018-12-10T12:20:44+00:00
+        bootfs_datasets: rpool/ROOT/ubuntu_1234
+        snapshots:
+        - name: snap1
+          zsys_bootfs: yes:local
+          mountpoint: /home/user:local
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00
+      - name: USERDATA/user_clone
+        mountpoint: /home/user
+        bootfs_datasets: rpool/ROOT/ubuntu_5678,rpool/ROOT/ubuntu_9999
+        last_used: 2018-12-10T12:20:44+00:00
+        origin: rpool/USERDATA/user_abcd@snap1
+        snapshots:
+        - name: snap2
+          zsys_bootfs: yes:local
+          mountpoint: /home/user:local
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00
+        - name: snapuser
+          zsys_bootfs: yes:local
+          mountpoint: /home/user:local
+          canmount: on:local
+          creation_time: 2018-12-10T12:20:44+00:00

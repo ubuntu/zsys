@@ -172,26 +172,22 @@ func TestGetDependencies(t *testing.T) {
 				stateWithLinkedState{state: "rpool/USERDATA/user_machine2"},
 				stateWithLinkedState{state: "rpool/USERDATA/user_machine1@snapshot"},
 				stateWithLinkedState{state: "rpool/USERDATA/user_machine1"}}},
-		"User clone attached to two machines. Request suppression on origin triggers unconditional suppression on clone": {def: "state_user_clone_linked_to_two_machines.yaml", stateName: "rpool/USERDATA/user_first",
+		"User clone attached to two machines. Request suppression on origin triggers unconditional suppression on clone (all multi-states on clone will be destroyed)": {def: "state_user_clone_linked_to_two_machines.yaml", stateName: "rpool/USERDATA/user_first",
 			wantStates: []stateWithLinkedState{
 				stateWithLinkedState{state: "rpool/USERDATA/user_clone"},
 				stateWithLinkedState{state: "rpool/USERDATA/user_first@snapshot"},
 				stateWithLinkedState{state: "rpool/USERDATA/user_first"}}},
-		"User clone attached to two machines. Request suppression on machine with user origin only untag them and doesn’t affect clone": {def: "state_user_clone_linked_to_two_machines.yaml", stateName: "rpool/ROOT/ubuntu_first",
-			wantStates: []stateWithLinkedState{
-				stateWithLinkedState{state: "rpool/USERDATA/user_first", reason: "rpool/ROOT/ubuntu_first"},
-				stateWithLinkedState{state: "rpool/USERDATA/root_first", reason: "rpool/ROOT/ubuntu_first"},
-				stateWithLinkedState{state: "rpool/ROOT/ubuntu_first"}}},
 		"User attached to two machines. Request suppression on machine with user origin only untag them and doesn’t affect clone": {def: "state_user_clone_linked_to_two_machines.yaml", stateName: "rpool/ROOT/ubuntu_first",
 			wantStates: []stateWithLinkedState{
 				stateWithLinkedState{state: "rpool/USERDATA/user_first", reason: "rpool/ROOT/ubuntu_first"},
 				stateWithLinkedState{state: "rpool/USERDATA/root_first", reason: "rpool/ROOT/ubuntu_first"},
 				stateWithLinkedState{state: "rpool/ROOT/ubuntu_first"}}},
-		"User attached to two machines and clone to a third. Request suppression on user": {def: "state_user_clone_linked_to_third_machine.yaml", stateName: "rpool/USERDATA/user_linked-rpool.ROOT.ubuntu-machine2",
+		"User attached to two machines and clone to a third. Request suppression on user won’t delete its dep but only detach from one machine": {def: "state_user_clone_linked_to_third_machine.yaml", stateName: "rpool/USERDATA/user_linked-rpool.ROOT.ubuntu-machine2",
 			wantStates: []stateWithLinkedState{
-				stateWithLinkedState{state: "rpool/USERDATA/user_clone"},
-				stateWithLinkedState{state: "rpool/USERDATA/user_linked@snapshot"},
-				stateWithLinkedState{state: "rpool/USERDATA/user_linked"}}},
+				stateWithLinkedState{state: "rpool/USERDATA/user_linked", reason: "rpool/ROOT/ubuntu_machine2"}}},
+		"User attached to two states from the same machine and clone to a third. Request suppression on user history state won’t delete its dep but only detach from this state": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/USERDATA/user1_machine2-rpool.ROOT.ubuntu-machine2clone",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user1_machine2", reason: "rpool/ROOT/ubuntu_machine2clone"}}},
 		"User attached to two machines and clone to a third. Request suppression on one machine don’t list clone": {def: "state_user_clone_linked_to_third_machine.yaml", stateName: "rpool/ROOT/ubuntu_machine1",
 			wantStates: []stateWithLinkedState{
 				stateWithLinkedState{state: "rpool/USERDATA/root_linked", reason: "rpool/ROOT/ubuntu_machine1"},
@@ -200,6 +196,20 @@ func TestGetDependencies(t *testing.T) {
 		"Leaf user state doesn’t list its system state": {def: "m_clone_with_userdata.yaml", stateName: "rpool/USERDATA/user1_efgh",
 			wantStates: []stateWithLinkedState{
 				stateWithLinkedState{state: "rpool/USERDATA/user1_efgh"}}},
+		"User attached to two states. Request dep on origin will list deps as user_clone origin doesn’t exist anymore": {def: "m_shared_userstate_on_clones.yaml", stateName: "rpool/USERDATA/user_abcd",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone@snapuser"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone@snap2"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_abcd@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_abcd"}}},
+		"User attached to two machines. Request dep on origin of one will list dep as user_clone origin doesn’t exist anymore": {def: "m_shared_userstate_on_two_machines.yaml", stateName: "rpool/USERDATA/user_abcd",
+			wantStates: []stateWithLinkedState{
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone@snapuser"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone@snap2"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_clone"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_abcd@snap1"},
+				stateWithLinkedState{state: "rpool/USERDATA/user_abcd"}}},
 
 		// User state linked to 2 state of a machine has the user state object (different object) listed twice
 		"User state linked via 2 states": {def: "state_snapshot_with_userdata_n_clones.yaml", stateName: "rpool/ROOT/ubuntu_machine2clone",
