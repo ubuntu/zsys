@@ -175,6 +175,15 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 
 	if !force {
 		var errmsg string
+		// Check that current state is not linked to a system state.
+		// Dependencies will trigger a message and list themselves if linked or not to system state
+		if user != "" {
+			ps := s.parentSystemState(ms)
+			if ps != nil {
+				errmsg += fmt.Sprintf(i18n.G("%s will be detached from system state %s\n"), s.ID, ps.ID)
+			}
+		}
+
 		// we always added us as a system state
 		if len(states) > len(s.Users)+1 {
 			errmsg += fmt.Sprintf(i18n.G("%s has a dependency linked to some states:\n"), s.ID)
@@ -215,20 +224,6 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 		}
 		if errmsg != "" {
 			return &ErrStateRemovalNeedsConfirmation{s: errmsg}
-		}
-	}
-
-	// Check all dep datasets to not be linked to any system state
-	if user != "" {
-		var errmsg string
-		for _, s := range states {
-			ss := s.parentSystemState(ms)
-			if ss != nil {
-				errmsg += fmt.Sprintf(i18n.G("%s is linked to a system state: %s\n"), s.ID, ss.ID)
-			}
-		}
-		if errmsg != "" {
-			return fmt.Errorf(i18n.G("%s can't be removed as linked some system states:\n%s"), s.ID, errmsg)
 		}
 	}
 
