@@ -943,6 +943,12 @@ func TestRemoveState(t *testing.T) {
 		"Can’t remove user filesystem linked to system state with deps linked to system state":   {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", wantErr: true, wantConfirmationErr: true, isNoOp: true},
 		"Remove user filesystem linked to system state with deps linked to system state, forced": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true},
 
+		// Shared user state handling
+		"Remove shared user state linked to a history state. Deps are not removed":                         {def: "state_remove.yaml", state: "rpool/USERDATA/root_bcde-rpool.ROOT.ubuntu-5678", user: "root", force: true},
+		"Remove shared user state linked to current machine state. Deps are not removed":                   {def: "state_remove.yaml", state: "rpool/USERDATA/root_bcde-rpool.ROOT.ubuntu-1234", user: "root", force: true},
+		"Remove shared user state as a dependency of other state. Deps are removed":                        {def: "m_shared_userstate_on_clones.yaml", state: "rpool/USERDATA/user_abcd", user: "user", force: true},
+		"Remove shared user state on different matchines as a dependency of other state. Deps are removed": {def: "m_shared_userstate_on_two_machines.yaml", state: "rpool/USERDATA/user_abcd", user: "user", force: true},
+
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
 		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
 		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
