@@ -106,7 +106,7 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 
 	err = s.Machines.RemoveState(stream.Context(), stateName, "", req.GetForce(), req.GetDryrun())
 	if err != nil {
-		var e *machines.ErrStateHasDependencies
+		var e *machines.ErrStateRemovalNeedsConfirmation
 		if errors.As(err, &e) {
 			st := status.New(codes.FailedPrecondition, config.UserConfirmationNeeded)
 			stdetails, err := st.WithDetails(&errdetails.ErrorInfo{
@@ -153,7 +153,7 @@ func (s *Server) RemoveUserState(req *zsys.RemoveUserStateRequest, stream zsys.Z
 
 	err := s.Machines.RemoveState(stream.Context(), stateName, userName, req.GetForce(), req.GetDryrun())
 	if err != nil {
-		var e *machines.ErrStateHasDependencies
+		var e *machines.ErrStateRemovalNeedsConfirmation
 		if errors.As(err, &e) {
 			st := status.New(codes.FailedPrecondition, config.UserConfirmationNeeded)
 			stdetails, err := st.WithDetails(&errdetails.ErrorInfo{

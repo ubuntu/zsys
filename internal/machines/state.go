@@ -15,12 +15,12 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
-// ErrStateHasDependencies is returned when a state operation cannot be performed because a state has dependencies
-type ErrStateHasDependencies struct {
+// ErrStateRemovalNeedsConfirmation is returned when a state operation cannot be performed because a state has dependencies
+type ErrStateRemovalNeedsConfirmation struct {
 	s string
 }
 
-func (e *ErrStateHasDependencies) Error() string {
+func (e *ErrStateRemovalNeedsConfirmation) Error() string {
 	return e.s
 }
 
@@ -214,7 +214,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 			}
 		}
 		if errmsg != "" {
-			return &ErrStateHasDependencies{s: errmsg}
+			return &ErrStateRemovalNeedsConfirmation{s: errmsg}
 		}
 	}
 
