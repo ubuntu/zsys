@@ -26,12 +26,12 @@ msgstr ""
 msgid "\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:738
+#: internal/machines/machines.go:741
 #, c-format
 msgid "     - %s (%s)\n"
 msgstr ""
 
-#: internal/machines/machines.go:735
+#: internal/machines/machines.go:738
 #, c-format
 msgid "     - %s (%s): %s\n"
 msgstr ""
@@ -44,22 +44,22 @@ msgstr ""
 msgid "    History:\tEmpty\n"
 msgstr ""
 
-#: internal/machines/machines.go:641 internal/machines/state.go:213
+#: internal/machines/machines.go:641 internal/machines/state.go:262
 #, c-format
 msgid "  - %s\n"
 msgstr ""
 
-#: internal/machines/state.go:444
+#: internal/machines/state.go:479
 #, c-format
 msgid "  - %s (%s)\n"
 msgstr ""
 
-#: internal/machines/state.go:207
+#: internal/machines/state.go:256
 #, c-format
 msgid "  - %s (%s)%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:697 internal/machines/machines.go:767
+#: internal/machines/machines.go:697 internal/machines/machines.go:770
 #, c-format
 msgid "  - Name:\t%s\n"
 msgstr ""
@@ -90,20 +90,20 @@ msgstr ""
 msgid "%q property isn't an int: "
 msgstr ""
 
-#: internal/daemon/bootmenu.go:23
+#: internal/daemon/bootmenu.go:24
 msgid "%q returned an error: "
 msgstr ""
 
-#: internal/machines/machines.go:835
+#: internal/machines/machines.go:838
 msgid "%s\t%t\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:788 internal/machines/machines.go:796
+#: internal/machines/machines.go:791 internal/machines/machines.go:799
 #, c-format
 msgid "%s\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:794
+#: internal/machines/machines.go:797
 #, c-format
 msgid "%s\tUser: %s\n"
 msgstr ""
@@ -115,31 +115,24 @@ msgid ""
 "Would you like to proceed [y/N]? "
 msgstr ""
 
-#: internal/machines/state.go:231
-#, c-format
-msgid ""
-"%s can't be removed as linked some system states:\n"
-"%s"
-msgstr ""
-
-#: internal/machines/state.go:180
+#: internal/machines/state.go:229
 #, c-format
 msgid "%s has a dependency linked to some states:\n"
 msgstr ""
 
-#: internal/machines/state.go:211
+#: internal/machines/state.go:260
 #, c-format
 msgid "%s has a dependency on some datasets:\n"
-msgstr ""
-
-#: internal/machines/state.go:227
-#, c-format
-msgid "%s is linked to a system state: %s\n"
 msgstr ""
 
 #: cmd/zsysd/cmdhandler/suggest.go:14
 #, c-format
 msgid "%s requires a valid subcommand"
+msgstr ""
+
+#: internal/machines/state.go:223
+#, c-format
+msgid "%s will be detached from system state %s\n"
 msgstr ""
 
 #: internal/streamlogger/client.go:79
@@ -152,32 +145,32 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/machines/machines.go:780
+#: internal/machines/machines.go:783
 #, c-format
 msgid "%sCreated on:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:784
+#: internal/machines/machines.go:787
 #, c-format
 msgid "%sLast Booted Kernel:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:778
+#: internal/machines/machines.go:781
 #, c-format
 msgid "%sLast Used:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:785
+#: internal/machines/machines.go:788
 #, c-format
 msgid "%sSystem Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:792
+#: internal/machines/machines.go:795
 #, c-format
 msgid "%sUser Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:809
+#: internal/machines/machines.go:812
 msgid "--\t----\t---------\n"
 msgstr ""
 
@@ -284,7 +277,7 @@ msgid ""
 "created successfully: %v"
 msgstr ""
 
-#: internal/machines/state.go:335
+#: internal/machines/state.go:370
 msgid "Couldn't destroy %s: %v"
 msgstr ""
 
@@ -302,7 +295,7 @@ msgstr ""
 msgid "Couldn't find any association for user dataset %s"
 msgstr ""
 
-#: internal/machines/state.go:158
+#: internal/machines/state.go:198
 msgid "Couldn't find state: %v"
 msgstr ""
 
@@ -330,11 +323,11 @@ msgstr ""
 msgid "Couldn't register grpc server: %v"
 msgstr ""
 
-#: internal/machines/state.go:243
+#: internal/machines/state.go:278
 msgid "Couldn't remove dataset %s: %v"
 msgstr ""
 
-#: internal/machines/state.go:254
+#: internal/machines/state.go:289
 msgid "Couldn't remove state %s: %v"
 msgstr ""
 
@@ -376,12 +369,12 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to modify"
 msgstr ""
 
-#: internal/machines/state.go:239
+#: internal/machines/state.go:274
 #, c-format
 msgid "Deleting dataset %s\n"
 msgstr ""
 
-#: internal/machines/state.go:250
+#: internal/machines/state.go:285
 #, c-format
 msgid "Deleting state %s\n"
 msgstr ""
@@ -446,7 +439,7 @@ msgstr ""
 msgid "GetsockoptUcred() error: %s"
 msgstr ""
 
-#: internal/machines/state.go:99 internal/machines/state.go:118
+#: internal/machines/state.go:139 internal/machines/state.go:158
 #, c-format
 msgid "Getting dependencies for user state %s"
 msgstr ""
@@ -460,7 +453,7 @@ msgstr ""
 msgid "History:\n"
 msgstr ""
 
-#: internal/machines/machines.go:808
+#: internal/machines/machines.go:811
 msgid "ID\tZSys\tLast Used\n"
 msgstr ""
 
@@ -540,7 +533,7 @@ msgstr ""
 msgid "No response within few seconds"
 msgstr ""
 
-#: internal/machines/state.go:183
+#: internal/machines/state.go:232
 msgid "No timestamp"
 msgstr ""
 
@@ -624,11 +617,11 @@ msgstr ""
 msgid "Remove the state for a given user or current user if empty"
 msgstr ""
 
-#: internal/machines/state.go:162
+#: internal/machines/state.go:202
 msgid "Removing current system state isn't allowed"
 msgstr ""
 
-#: internal/machines/state.go:272
+#: internal/machines/state.go:307
 #, c-format
 msgid "Removing state %s. linkedStateID: %s\n"
 msgstr ""
@@ -777,7 +770,7 @@ msgstr ""
 msgid "Setting logging level to %d"
 msgstr ""
 
-#: internal/machines/state.go:300
+#: internal/machines/state.go:335
 #, c-format
 msgid "Setting new bootfs tag %s on %s\n"
 msgstr ""
@@ -872,7 +865,7 @@ msgstr ""
 msgid "Unsupported trace type: %s"
 msgstr ""
 
-#: internal/machines/state.go:282
+#: internal/machines/state.go:317
 msgid "Untagging all datasets\n"
 msgstr ""
 
@@ -882,6 +875,10 @@ msgstr ""
 
 #: cmd/zsysd/client/boot.go:40
 msgid "Update system boot menu"
+msgstr ""
+
+#: internal/daemon/bootmenu.go:18
+msgid "Updating GRUB menu"
 msgstr ""
 
 #: internal/daemon/boot.go:74
@@ -1192,7 +1189,7 @@ msgstr ""
 msgid "couldn't generate request id, setting to %q: %v"
 msgstr ""
 
-#: internal/machines/machines.go:134 internal/machines/machines.go:849
+#: internal/machines/machines.go:134 internal/machines/machines.go:852
 msgid "couldn't load zsys configuration"
 msgstr ""
 
@@ -1228,7 +1225,7 @@ msgstr ""
 msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
-#: internal/machines/boot.go:290 internal/machines/state.go:304
+#: internal/machines/boot.go:290 internal/machines/state.go:339
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -1286,7 +1283,7 @@ msgstr ""
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
-#: internal/machines/machines.go:776 internal/machines/machines.go:833
+#: internal/machines/machines.go:779 internal/machines/machines.go:836
 msgid "current"
 msgstr ""
 
@@ -1389,7 +1386,7 @@ msgid ""
 "%s"
 msgstr ""
 
-#: internal/machines/state.go:446
+#: internal/machines/state.go:481
 #, c-format
 msgid ""
 "multiple states are matching %s:\n"
@@ -1417,7 +1414,7 @@ msgstr ""
 msgid "no machine matches %s"
 msgstr ""
 
-#: internal/machines/state.go:439
+#: internal/machines/state.go:474
 #, c-format
 msgid "no matching state for %s"
 msgstr ""
@@ -1466,7 +1463,7 @@ msgstr ""
 msgid "set current time to %q"
 msgstr ""
 
-#: internal/machines/state.go:412
+#: internal/machines/state.go:447
 msgid "state id is mandatory"
 msgstr ""
 
@@ -1491,12 +1488,12 @@ msgstr ""
 msgid "this request isn't associate with a valid id: reject"
 msgstr ""
 
-#: internal/machines/state.go:204
+#: internal/machines/state.go:253
 #, c-format
 msgid "to remove. Currently linked to %s"
 msgstr ""
 
-#: internal/machines/state.go:189
+#: internal/machines/state.go:238
 #, c-format
 msgid "to unlink from %s"
 msgstr ""
