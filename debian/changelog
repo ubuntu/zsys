@@ -1,3 +1,40 @@
+zsys (0.4.2) UNRELEASED; urgency=medium
+
+  [ Jean-Baptiste Lallement ]
+  [ Didier Roche ]
+  * Split the system snapshots in 2 phases for apt hook up:
+    - take the snapshot
+    - do the apt operation
+    - rebuild grub menu
+    This has the advantage of not blocking the apt operation for too long, but
+    we may not be able to rebuild always the grub menu in case of a failing
+    operation. Take this approach for now.
+  * Increase the timeout for building grub menu until we optimize it
+    (LP: #1867067)
+  * Fix in go-libzfs some perf issues and switch to our vendored version.
+  * Fix and simplify removals:
+    - Dataset dependencies calculation is faster and more reliable.
+    - Merge system and user States to remove code similarity copy and
+      factorizing tests. No more intermediate cache needed and only one copy
+      of each object is kept.
+    - Make GC smarter by evenly distributing GC state keep events. Put the
+      logic under tests.
+    - Enable GC by default.
+    - Simplify snapshot routine thanks to the system/user States merge.
+      Increase tests on that part, including error cases.
+    - Add dedicated error to allow user confirmation only when error is due to
+      state dependencies.
+  * Ensure we set all user properties at snapshot dataset creation.
+  * Add more test coverage and fix test utilities.
+  * Some misc refactoring covered by existing or new tests.
+  * Add --type=trace to the profiler.
+  * CI enhancements for quicker upstream roundtrips.
+  * Swith to compat 12 to have the user systemd timer unit enabled by default
+    for user snapshot creation.
+  * Fix unclear context timeout error message (LP: #1867067)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 26 Mar 2020 16:24:12 +0100
+
 zsys (0.4.1) focal; urgency=medium
 
   * Fix build on armhf
