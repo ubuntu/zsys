@@ -909,43 +909,50 @@ func TestRemoveState(t *testing.T) {
 
 		destroyErr bool
 
-		isNoOp     bool
-		wantErr    bool
-		wantDepErr bool
+		isNoOp              bool
+		wantErr             bool
+		wantConfirmationErr bool
 	}{
 		"Remove system state, one dataset": {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234"},
 
 		// FIXME: miss bpool and bpool/BOOT from golden file
 		"Remove system state, complex with boot, children and user datasets": {def: "m_layout1_one_machine.yaml", state: "rpool/ROOT/ubuntu_1234"},
 		"Remove one system snapshot only":                                    {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_1234@snap3"},
-		"Removing system state try to delete its snapshots":                  {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true, wantDepErr: true},
+		"Removing system state try to delete its snapshots":                  {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", wantErr: true, wantConfirmationErr: true},
 		"Removing system state deletes its snapshots":                        {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_6789", force: true},
 
-		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove system state, with system and users snapshots and clones":         {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", wantErr: true, wantConfirmationErr: true, isNoOp: true},
 		"Remove system state, with system and users snapshots and clones, forced": {def: "m_layout1_machines_with_snapshots_clones.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
 		"Remove system state when user datasets are linked to 2 states":           {def: "state_remove_internal.yaml", state: "rpool/ROOT/ubuntu_5678"},
-		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantDepErr: true, wantErr: true, isNoOp: true},
+		"Remove system state, with datasets":                                      {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", wantConfirmationErr: true, wantErr: true, isNoOp: true},
 		"Remove system state, with datasets, forced":                              {def: "state_remove.yaml", state: "rpool/ROOT/ubuntu_1234", force: true},
 
 		"Remove user state, one dataset":                       {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "user4"},
 		"Remove user state, one dataset, no user":              {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", wantErr: true, isNoOp: true},
 		"Remove user state, one dataset, wrong user":           {def: "state_remove.yaml", state: "rpool/USERDATA/user4_clone", user: "root", wantErr: true, isNoOp: true},
-		"Remove user state, with snapshots and clones":         {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with snapshots and clones":         {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", wantErr: true, wantConfirmationErr: true, isNoOp: true},
 		"Remove user state, with snapshots and clones, forced": {def: "state_remove.yaml", user: "user6", state: "rpool/USERDATA/user6_clone1", force: true},
-		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone@snapuser5", user: "user5", wantErr: true, wantDepErr: true, isNoOp: true},
+		"Remove user state, with datasets":                     {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone@snapuser5", user: "user5", wantErr: true, wantConfirmationErr: true, isNoOp: true},
 		"Remove user state, with datasets, forced":             {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone@snapuser5", user: "user5", force: true},
 		"Remove user snapshot state":                           {def: "state_remove.yaml", state: "rpool/USERDATA/user1_efgh@snapuser2", user: "user1"},
+
+		"Can’t remove user leaf snapshot linked to system state":                                 {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", wantErr: true, wantConfirmationErr: true, isNoOp: true},
+		"Remove user leaf snapshot linked to system state, forced":                               {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true},
+		"Can’t remove user leaf filesystem state linked to system state":                         {def: "state_remove.yaml", state: "rpool/USERDATA/user3_3333", user: "user3", wantErr: true, wantConfirmationErr: true, isNoOp: true},
+		"Remove user leaf filesystem state linked to system state, forced":                       {def: "state_remove.yaml", state: "rpool/USERDATA/user3_3333", user: "user3", force: true},
+		"Can’t remove user filesystem linked to system state with deps linked to system state":   {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", wantErr: true, wantConfirmationErr: true, isNoOp: true},
+		"Remove user filesystem linked to system state with deps linked to system state, forced": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true},
+
+		// Shared user state handling
+		"Remove shared user state linked to a history state. Deps are not removed":                         {def: "state_remove.yaml", state: "rpool/USERDATA/root_bcde-rpool.ROOT.ubuntu-5678", user: "root", force: true},
+		"Remove shared user state linked to current machine state. Deps are not removed":                   {def: "state_remove.yaml", state: "rpool/USERDATA/root_bcde-rpool.ROOT.ubuntu-1234", user: "root", force: true},
+		"Remove shared user state as a dependency of other state. Deps are removed":                        {def: "m_shared_userstate_on_clones.yaml", state: "rpool/USERDATA/user_abcd", user: "user", force: true},
+		"Remove shared user state on different matchines as a dependency of other state. Deps are removed": {def: "m_shared_userstate_on_two_machines.yaml", state: "rpool/USERDATA/user_abcd", user: "user", force: true},
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
 		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
 		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
 		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone", user: "user5", force: true, destroyErr: true, wantErr: true},
-
-		// TODO: check if we want to relax those
-		"Can’t remove user leaf snapshot linked to system state":                 {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", wantErr: true, isNoOp: true},
-		"Can’t remove user leaf snapshot linked to system state, even forced":    {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd@snap1", user: "user1", force: true, wantErr: true, isNoOp: true},
-		"Can’t remove user filesystem state linked to system state":              {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", wantErr: true, wantDepErr: true, isNoOp: true},
-		"Can’t remove user filesystem state linked to system state, even forced": {def: "state_remove.yaml", state: "rpool/USERDATA/user1_abcd", user: "user1", force: true, wantErr: true, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -973,12 +980,12 @@ func TestRemoveState(t *testing.T) {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
 				}
-				var e *machines.ErrStateHasDependencies
+				var e *machines.ErrStateRemovalNeedsConfirmation
 
-				if tc.wantDepErr {
-					assert.True(t, errors.As(err, &e), "expected ErrStateHasDependencies error type")
+				if tc.wantConfirmationErr {
+					assert.True(t, errors.As(err, &e), "expected ErrStateRemovalNeedsConfirmation error type")
 				} else {
-					assert.False(t, errors.As(err, &e), "don't expect ErrStateHasDependencies error type")
+					assert.False(t, errors.As(err, &e), "don't expect ErrStateRemovalNeedsConfirmation error type")
 				}
 				return
 			}
@@ -1137,6 +1144,9 @@ func TestGC(t *testing.T) {
 
 		// Error cases
 		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErr: true, isNoOp: true},
+
+		// TODO
+		// Check that users subdatasets completely detached is always collected
 	}
 
 	for name, tc := range tests {

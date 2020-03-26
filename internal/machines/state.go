@@ -15,12 +15,12 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
-// ErrStateHasDependencies is returned when a state operation cannot be performed because a state has dependencies
-type ErrStateHasDependencies struct {
+// ErrStateRemovalNeedsConfirmation is returned when a state operation cannot be performed because a state has dependencies
+type ErrStateRemovalNeedsConfirmation struct {
 	s string
 }
 
-func (e *ErrStateHasDependencies) Error() string {
+func (e *ErrStateRemovalNeedsConfirmation) Error() string {
 	return e.s
 }
 
@@ -60,7 +60,47 @@ func (s *State) getDependencies(ctx context.Context, ms *Machines) (stateDeps []
 		}
 	}
 
-	return s.getDependenciesWithCache(nt, ms, "", allStates, datasetToState, make(map[stateWithLinkedState]stateToDeps))
+	var reason string
+	// Direct call on user datasets linked to multiple states: only unlink from attached states and don’t list any dep
+	// Count of unique bootfsdatasets must be > 1
+	var linkedToMultipleStates bool
+	if s.Users == nil {
+		for _, d := range s.Datasets {
+			bfsds := strings.Split(d[0].BootfsDatasets, bootfsdatasetsSeparator)
+			bfsdsUnique := make(map[string]bool)
+			for _, v := range bfsds {
+				v = strings.TrimSpace(v)
+				if v != "" {
+					bfsdsUnique[v] = true
+				}
+			}
+			if len(bfsdsUnique) > 1 {
+				linkedToMultipleStates = true
+			}
+		}
+	}
+	if linkedToMultipleStates {
+	findState:
+		for _, m := range ms.all {
+			for _, us := range m.Users {
+				if us == s {
+					reason = m.ID
+					break findState
+				}
+			}
+			for _, h := range m.History {
+				for _, us := range h.Users {
+					if us == s {
+						reason = h.ID
+						break findState
+					}
+				}
+			}
+		}
+
+	}
+
+	return s.getDependenciesWithCache(nt, ms, reason, allStates, datasetToState, make(map[stateWithLinkedState]stateToDeps))
 }
 
 type stateToDeps struct {
@@ -175,6 +215,15 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 
 	if !force {
 		var errmsg string
+		// Check that current state is not linked to a system state.
+		// Dependencies will trigger a message and list themselves if linked or not to system state
+		if user != "" {
+			ps := s.parentSystemState(ms)
+			if ps != nil {
+				errmsg += fmt.Sprintf(i18n.G("%s will be detached from system state %s\n"), s.ID, ps.ID)
+			}
+		}
+
 		// we always added us as a system state
 		if len(states) > len(s.Users)+1 {
 			errmsg += fmt.Sprintf(i18n.G("%s has a dependency linked to some states:\n"), s.ID)
@@ -214,21 +263,7 @@ func (ms *Machines) RemoveState(ctx context.Context, name, user string, force, d
 			}
 		}
 		if errmsg != "" {
-			return &ErrStateHasDependencies{s: errmsg}
-		}
-	}
-
-	// Check all dep datasets to not be linked to any system state
-	if user != "" {
-		var errmsg string
-		for _, s := range states {
-			ss := s.parentSystemState(ms)
-			if ss != nil {
-				errmsg += fmt.Sprintf(i18n.G("%s is linked to a system state: %s\n"), s.ID, ss.ID)
-			}
-		}
-		if errmsg != "" {
-			return fmt.Errorf(i18n.G("%s can't be removed as linked some system states:\n%s"), s.ID, errmsg)
+			return &ErrStateRemovalNeedsConfirmation{s: errmsg}
 		}
 	}
 

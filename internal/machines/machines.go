@@ -725,6 +725,9 @@ func (m Machine) Info(full bool) (string, error) {
 		for _, k := range keys {
 			s := timeToState[k]
 
+			// We can’t use s.ID here because some user states can be duplicated (user state attached to 2 system states)
+			// and we want to display the unique generated id to the user as it’s what should be used in RemoveState()
+			uid := strings.SplitN(k, "_", 2)[1]
 			if full {
 				var ud []string
 				for _, ds := range s.Datasets {
@@ -732,10 +735,10 @@ func (m Machine) Info(full bool) (string, error) {
 						ud = append(ud, d.Name)
 					}
 				}
-				fmt.Fprintf(w, i18n.G("     - %s (%s): %s\n"), k, s.LastUsed.Format("2006-01-02 15:04:05"), strings.Join(ud, ", "))
+				fmt.Fprintf(w, i18n.G("     - %s (%s): %s\n"), uid, s.LastUsed.Format("2006-01-02 15:04:05"), strings.Join(ud, ", "))
 				continue
 			}
-			fmt.Fprintf(w, i18n.G("     - %s (%s)\n"), k, s.LastUsed.Format("2006-01-02 15:04:05"))
+			fmt.Fprintf(w, i18n.G("     - %s (%s)\n"), uid, s.LastUsed.Format("2006-01-02 15:04:05"))
 		}
 	}
 	if err := w.Flush(); err != nil {
