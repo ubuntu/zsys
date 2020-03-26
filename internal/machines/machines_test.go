@@ -1144,6 +1144,9 @@ func TestGC(t *testing.T) {
 
 		// Error cases
 		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErr: true, isNoOp: true},
+
+		// TODO
+		// Check that users subdatasets completely detached is always collected
 	}
 
 	for name, tc := range tests {
