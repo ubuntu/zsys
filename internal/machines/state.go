@@ -60,7 +60,47 @@ func (s *State) getDependencies(ctx context.Context, ms *Machines) (stateDeps []
 		}
 	}
 
-	return s.getDependenciesWithCache(nt, ms, "", allStates, datasetToState, make(map[stateWithLinkedState]stateToDeps))
+	var reason string
+	// Direct call on user datasets linked to multiple states: only unlink from attached states and don’t list any dep
+	// Count of unique bootfsdatasets must be > 1
+	var linkedToMultipleStates bool
+	if s.Users == nil {
+		for _, d := range s.Datasets {
+			bfsds := strings.Split(d[0].BootfsDatasets, bootfsdatasetsSeparator)
+			bfsdsUnique := make(map[string]bool)
+			for _, v := range bfsds {
+				v = strings.TrimSpace(v)
+				if v != "" {
+					bfsdsUnique[v] = true
+				}
+			}
+			if len(bfsdsUnique) > 1 {
+				linkedToMultipleStates = true
+			}
+		}
+	}
+	if linkedToMultipleStates {
+	findState:
+		for _, m := range ms.all {
+			for _, us := range m.Users {
+				if us == s {
+					reason = m.ID
+					break findState
+				}
+			}
+			for _, h := range m.History {
+				for _, us := range h.Users {
+					if us == s {
+						reason = h.ID
+						break findState
+					}
+				}
+			}
+		}
+
+	}
+
+	return s.getDependenciesWithCache(nt, ms, reason, allStates, datasetToState, make(map[stateWithLinkedState]stateToDeps))
 }
 
 type stateToDeps struct {
