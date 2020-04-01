@@ -59,7 +59,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt update
-          apt install -y ca-certificates gcc libzfslinux-dev protobuf-compiler golang-goprotobuf-dev gettext git
+          DEBIAN_FRONTEND=noninteractive apt install -y ca-certificates gcc libzfslinux-dev protobuf-compiler golang-goprotobuf-dev gettext git
       # Checkout code (using git that we just installed)
       - uses: actions/checkout@v2
       # Install go
