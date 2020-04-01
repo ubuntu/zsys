@@ -37,7 +37,13 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 	if stateName != "" {
 		log.Infof(stream.Context(), i18n.G("Requesting saving current system state %q"), stateName)
 	} else {
-		log.Info(stream.Context(), i18n.G("Requesting saving current system state"))
+		msg := i18n.G("Requesting saving current system state")
+		// Always print the message as it was automatically requested
+		if req.GetAutosave() {
+			log.RemotePrint(stream.Context(), msg)
+		} else {
+			log.Info(stream.Context(), msg)
+		}
 	}
 
 	if stateName, err = s.Machines.CreateSystemSnapshot(stream.Context(), stateName); err != nil {
