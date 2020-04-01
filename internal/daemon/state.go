@@ -29,6 +29,11 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
+	// autosave triggered by apt or other system on non zsys system. Do nothing
+	if !s.Machines.CurrentIsZsys() && req.GetAutosave() {
+		return nil
+	}
+
 	if stateName != "" {
 		log.Infof(stream.Context(), i18n.G("Requesting saving current system state %q"), stateName)
 	} else {

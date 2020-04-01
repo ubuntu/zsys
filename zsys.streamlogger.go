@@ -225,7 +225,7 @@ func (s *zsysUpdateBootMenuLogStream) Context() context.Context {
 }
 
 // UpdateBootMenu overrides ZsysServer UpdateBootMenu, installing a logger first
-func (z *ZsysLogServer) UpdateBootMenu(req *Empty, stream Zsys_UpdateBootMenuServer) error {
+func (z *ZsysLogServer) UpdateBootMenu(req *UpdateBootMenuRequest, stream Zsys_UpdateBootMenuServer) error {
 	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
 	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "UpdateBootMenu")
 	if err != nil {
