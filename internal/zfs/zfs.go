@@ -296,12 +296,12 @@ func (t *Transaction) newNestedTransaction() *nestedTransaction {
 	}
 }
 
-// Done either commit a nested transaction or cancel it if an error occured
+// Done either commit a nested transaction or cancel it if an error occurred
 func (t *nestedTransaction) Done(err *error) {
 	defer t.Transaction.Done()
 	if *err != nil {
 		// revert all in progress transactions
-		log.Debugf(t.ctx, i18n.G("ZFS: an error occured: %v"), *err)
+		log.Debugf(t.ctx, i18n.G("ZFS: an error occurred: %v"), *err)
 		log.Debugf(t.ctx, i18n.G("ZFS: Cancelling nested transaction"))
 		t.cancel()
 		return
@@ -546,7 +546,7 @@ func (t *nestedTransaction) cloneDataset(d Dataset, target string, ignoreErrorOn
 	}
 
 	// We want CanMount on -> noauto (don't mount new cloned dataset on top of parent)
-	// Otherwise, only set explicitely local property
+	// Otherwise, only set explicitly local property
 	if d.sources.CanMount == "local" || d.CanMount == "on" {
 		value := d.CanMount
 		if value == "on" {

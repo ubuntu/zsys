@@ -185,7 +185,7 @@ func (l *LibZFS) DatasetCreate(path string, dtype libzfs.DatasetType, props map[
 		// ZFS Properties
 		pprops := parent.Dataset.Properties
 		for k, pp := range pprops {
-			// Overriden local property
+			// Overridden local property
 			if _, ok := props[k]; ok {
 				p := props[k]
 				if p.Source == "" {
@@ -583,7 +583,7 @@ func (d *dZFS) Promote() (err error) {
 		oldDatasetName := snap.Dataset.Properties[libzfs.DatasetPropName].Value
 		newName := datasetName + "@" + strings.Split(oldDatasetName, "@")[1]
 
-		// Pass a copy of properties to not alter - soon deleted - old snapshot on previoulsy promoted dataset
+		// Pass a copy of properties to not alter - soon deleted - old snapshot on previously promoted dataset
 		newDProps := make(map[libzfs.Prop]libzfs.Property)
 		for k, v := range snap.Dataset.Properties {
 			newDProps[k] = v

@@ -434,10 +434,10 @@ func TestRemoveInternal(t *testing.T) {
 		"Remove user snapshot state (linked to system state: no check)": {stateName: "rpool/USERDATA/root_bcde@snap2"},
 		"Remove user snapshot clone state":                              {stateName: "rpool/USERDATA/user4_clone"},
 
-		"Remove user state unconditionnally":                    {stateName: "rpool/USERDATA/user2_2222"},
+		"Remove user state unconditionally":                     {stateName: "rpool/USERDATA/user2_2222"},
 		"Remove user state only untag even if last association": {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "rpool/ROOT/ubuntu_5678"},
 		"Don't remove user state on bad state id match":         {stateName: "rpool/USERDATA/user2_2222", linkedStateID: "doesnt match"},
-		"Remove user state unconditionnally linked to 2 states": {stateName: "rpool/USERDATA/user8_gggg-rpool.ROOT.ubuntu-1234"},
+		"Remove user state unconditionally linked to 2 states":  {stateName: "rpool/USERDATA/user8_gggg-rpool.ROOT.ubuntu-1234"},
 		"Unassociate user state linked to one state":            {stateName: "rpool/USERDATA/user8_gggg-rpool.ROOT.ubuntu-1234", linkedStateID: "rpool/ROOT/ubuntu_1234"},
 
 		"Remove system state without user datasets":                                 {stateName: "rpool/ROOT/ubuntu_6789"},

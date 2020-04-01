@@ -158,7 +158,7 @@ func getUserPropertyFromSys(ctx context.Context, prop string, dZFS libzfs.DZFSIn
 	if p.Value == "-" && (p.Source == "-" || p.Source == "none") {
 		return "", "", nil
 	}
-	// The user property isn't set explicitely on the snapshot (inherited from non snapshot parent): ignore it.
+	// The user property isn't set explicitly on the snapshot (inherited from non snapshot parent): ignore it.
 	if dZFS.IsSnapshot() && p.Source != "local" {
 		return "", "", nil
 	}
