@@ -636,8 +636,8 @@ const (
 //
 // This is copied from gonumonum
 func combinations(n, k int) [][]int {
-	combins := binomial(n, k)
-	data := make([][]int, combins)
+	combinations := binomial(n, k)
+	data := make([][]int, combinations)
 	if len(data) == 0 {
 		return data
 	}
@@ -645,7 +645,7 @@ func combinations(n, k int) [][]int {
 	for i := range data[0] {
 		data[0][i] = i
 	}
-	for i := 1; i < combins; i++ {
+	for i := 1; i < combinations; i++ {
 		next := make([]int, k)
 		copy(next, data[i-1])
 		nextCombination(next, n, k)

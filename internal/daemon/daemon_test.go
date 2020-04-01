@@ -86,7 +86,7 @@ func TestServerDontTimeoutOnRequest(t *testing.T) {
 	select {
 	case <-time.After(1000 * time.Millisecond):
 	case <-errs:
-		t.Fatalf("server exited prematurily: we had a request in flight. Exited with %v", errs)
+		t.Fatalf("server exited prematurely: we had a request in flight. Exited with %v", errs)
 	}
 	reqDone()
 
@@ -109,7 +109,7 @@ func TestServerDontTimeoutWithMultipleRequests(t *testing.T) {
 	select {
 	case <-time.After(1000 * time.Millisecond):
 	case <-errs:
-		t.Fatalf("server exited prematurily: we had a request in flight. Exited with %v", errs)
+		t.Fatalf("server exited prematurely: we had a request in flight. Exited with %v", errs)
 	}
 	req2Done()
 
