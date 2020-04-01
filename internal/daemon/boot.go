@@ -63,13 +63,18 @@ func (s *Server) CommitBoot(req *zsys.Empty, stream zsys.Zsys_CommitBootServer) 
 }
 
 // UpdateBootMenu updates machine bootmenu.
-func (s *Server) UpdateBootMenu(req *zsys.Empty, stream zsys.Zsys_UpdateBootMenuServer) (err error) {
+func (s *Server) UpdateBootMenu(req *zsys.UpdateBootMenuRequest, stream zsys.Zsys_UpdateBootMenuServer) (err error) {
 	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
 		return err
 	}
 
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
+
+	// update triggered by apt or other system on non zsys system. Do nothing
+	if !s.Machines.CurrentIsZsys() && req.GetAuto() {
+		return nil
+	}
 
 	log.Infof(stream.Context(), i18n.G("Updating system boot menu"))
 
