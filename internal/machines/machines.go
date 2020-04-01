@@ -591,7 +591,12 @@ func (s *State) attachRemainingDatasetsForHistory(boots []*zfs.Dataset) {
 	}
 }
 
-// isZsys returns if there is a current machine, and if it's the case, if it's zsys.
+// CurrentIsZsys returns if there is a current machine, and if it's the case, if it's zsys.
+func (ms *Machines) CurrentIsZsys() bool {
+	return ms.current.isZsys()
+}
+
+// isZsys returns if the machine is a zsys one.
 func (m *Machine) isZsys() bool {
 	if m == nil {
 		return false
