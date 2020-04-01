@@ -580,7 +580,6 @@ func selectStatesToRemove(ctx context.Context, samples int, states []stateWithKe
 	var bestCombination []int
 	var bestIndex int
 	minDistance := end - start
-	curDistance := minDistance
 	log.Debugf(ctx, "Existing n: %d, minDist: %.3f, barycenter: %.3f", len(toKeep), minDistance, start+minDistance/2)
 
 	var dbgMsg string
@@ -594,7 +593,7 @@ func selectStatesToRemove(ctx context.Context, samples int, states []stateWithKe
 		}
 
 		avg := float64(sumKeep+sumToPlace) / float64(samples)
-		curDistance = math.Abs(avg - (start + (end-start)/2))
+		curDistance := math.Abs(avg - (start + (end-start)/2))
 		if curDistance < minDistance {
 			minDistance = curDistance
 			bestCombination = c
