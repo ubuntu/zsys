@@ -117,7 +117,7 @@ func (s *State) getDependenciesWithCache(nt *zfs.NoTransaction, ms *Machines, re
 
 	// We will only untag the datasets and not remove them, only return ourself
 	if reason != "" {
-		return []stateWithLinkedState{stateWithLinkedState{State: s, linkedStateID: reason}}, nil
+		return []stateWithLinkedState{{State: s, linkedStateID: reason}}, nil
 	}
 
 	for _, ds := range s.Datasets {
