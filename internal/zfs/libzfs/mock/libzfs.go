@@ -225,6 +225,13 @@ func (l *LibZFS) DatasetCreate(path string, dtype libzfs.DatasetType, props map[
 				userProperties[k] = p
 			}
 		}
+	} else {
+		if _, ok := props[libzfs.DatasetPropMountpoint]; !ok {
+			props[libzfs.DatasetPropMountpoint] = libzfs.Property{
+				Value:  "/" + path,
+				Source: "default",
+			}
+		}
 	}
 
 	d := dZFS{

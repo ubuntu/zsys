@@ -31,8 +31,9 @@ type FakePools struct {
 }
 
 type fakePool struct {
-	Name     string
-	Datasets []struct {
+	Name       string
+	NoDefaults bool
+	Datasets   []struct {
 		Name             string
 		IsVolume         bool
 		Mountpoint       string
@@ -189,8 +190,10 @@ func (fpools FakePools) Create(path string) func() {
 			props[libzfs.PoolPropAltroot] = poolMountpath
 			fsprops := make(map[libzfs.Prop]string)
 			// Could be overridden with the "." dataset
-			fsprops[libzfs.DatasetPropMountpoint] = "/"
-			fsprops[libzfs.DatasetPropCanmount] = "off"
+			if !fpool.NoDefaults {
+				fsprops[libzfs.DatasetPropMountpoint] = "/"
+				fsprops[libzfs.DatasetPropCanmount] = "off"
+			}
 
 			pool, err := fpools.libzfs.PoolCreate(fpool.Name, vdev, features, props, fsprops)
 			if err != nil {
