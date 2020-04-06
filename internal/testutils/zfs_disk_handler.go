@@ -34,6 +34,7 @@ type fakePool struct {
 	Name     string
 	Datasets []struct {
 		Name             string
+		IsVolume         bool
 		Mountpoint       string
 		CanMount         string
 		ZsysBootfs       string    `yaml:"zsys_bootfs"`
@@ -196,6 +197,7 @@ func (fpools FakePools) Create(path string) func() {
 			fpools.tempPools = append(fpools.tempPools, fpool.Name)
 			defer pool.Close()
 
+			dType := libzfs.DatasetTypeFilesystem
 			for _, dataset := range fpool.Datasets {
 				datasetName := fpool.Name + "/" + dataset.Name
 				var d libzfs.DZFSInterface
@@ -207,11 +209,22 @@ func (fpools FakePools) Create(path string) func() {
 					}
 				} else {
 					props := make(map[libzfs.Prop]libzfs.Property)
-					d, err = fpools.libzfs.DatasetCreate(datasetName, libzfs.DatasetTypeFilesystem, props)
+					if dataset.IsVolume {
+						dType = libzfs.DatasetTypeVolume
+						strSize := "819200"
+						props[libzfs.DatasetPropVolsize] = libzfs.Property{Value: strSize}
+					}
+
+					d, err = fpools.libzfs.DatasetCreate(datasetName, dType, props)
 					if err != nil {
 						fpools.Fatalf("couldn't create dataset %q: %v", datasetName, err)
 					}
 				}
+
+				if dType != libzfs.DatasetTypeFilesystem {
+					continue
+				}
+
 				if dataset.Mountpoint != "" {
 					d.SetProperty(libzfs.DatasetPropMountpoint, dataset.Mountpoint)
 				}
