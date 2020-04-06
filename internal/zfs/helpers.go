@@ -62,8 +62,7 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 	case "local":
 		sources.Mountpoint = "local"
 	case "default":
-		log.Warningf(ctx, i18n.G("MountPoint property for %q has an unexpected source: %q"), name, sourceMountPoint)
-		fallthrough
+		sources.Mountpoint = "inherited"
 	default:
 		if mountpoint != "" {
 			sources.Mountpoint = "inherited"
@@ -186,6 +185,7 @@ func getUserPropertyFromSys(ctx context.Context, prop string, dZFS libzfs.DZFSIn
 }
 
 // newDatasetTree returns a Dataset and a populated tree of all its children
+// It returns a nil Dataset with a nil error for unsupported dataset type (DatasetTypeVolume or DatasetTypeBookmark)
 func newDatasetTree(ctx context.Context, dZFS libzfs.DZFSInterface, allDatasets *map[string]*Dataset) (*Dataset, error) {
 	// Skip non file system or snapshot datasets
 	if dZFS.Type() == libzfs.DatasetTypeVolume || dZFS.Type() == libzfs.DatasetTypeBookmark {
@@ -216,6 +216,10 @@ func newDatasetTree(ctx context.Context, dZFS libzfs.DZFSInterface, allDatasets 
 		c, err := newDatasetTree(ctx, dZFS.Children()[i], allDatasets)
 		if err != nil {
 			return nil, fmt.Errorf("couldn't scan dataset: %v", err)
+		}
+		// Not a filesystem or snapshot dataset: skipping
+		if c == nil {
+			continue
 		}
 		children = append(children, c)
 	}

@@ -43,6 +43,7 @@ func TestNew(t *testing.T) {
 		"One pool, N datasets, N children, N snapshots, intermediate canmount=off": {def: "one_pool_n_datasets_n_children_n_snapshots_canmount_off.yaml"},
 		"One pool, one dataset":                                                    {def: "one_pool_one_dataset.yaml"},
 		"One pool, one dataset, different mountpoints":                             {def: "one_pool_one_dataset_different_mountpoints.yaml"},
+		"One pool, one dataset, mountpoint default":                                {def: "one_pool_one_dataset_no_mountpoint.yaml"},
 		"One pool, one dataset, no property":                                       {def: "one_pool_one_dataset_no_property.yaml"},
 		"One pool, one dataset, with bootfsdatasets property":                      {def: "one_pool_one_dataset_with_bootfsdatasets.yaml"},
 		"One pool, one dataset, with bootfsdatasets property, multiple elems":      {def: "one_pool_one_dataset_with_bootfsdatasets_multiple.yaml"},
@@ -50,6 +51,7 @@ func TestNew(t *testing.T) {
 		"One pool, one dataset, with lastbootedkernel property":                    {def: "one_pool_one_dataset_with_lastbootedkernel.yaml"},
 		"One pool, with canmount as default":                                       {def: "one_pool_dataset_with_canmount_default.yaml"},
 		"One pool, N datasets":                                                     {def: "one_pool_n_datasets.yaml"},
+		"One pool, N datasets, mountpoint default":                                 {def: "one_pool_n_datasets_no_mountpoint.yaml"},
 		"One pool, one dataset, one snapshot":                                      {def: "one_pool_one_dataset_one_snapshot.yaml"},
 		"One pool, one dataset, canmount=noauto":                                   {def: "one_pool_one_dataset_canmount_noauto.yaml"},
 		"One pool, N datasets, one snapshot":                                       {def: "one_pool_n_datasets_one_snapshot.yaml"},
@@ -64,6 +66,10 @@ func TestNew(t *testing.T) {
 		"Layout with none, default properties and snapshot":                        {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml"},
 		"One pool, one dataset with invalid lastUsed":                              {def: "one_pool_one_dataset.yaml", setInvalidLastUsed: "rpool"},
 		"One pool, one dataset, one snapshot no source on user property":           {def: "one_pool_one_dataset_one_snapshot_no_source_on_userproperty.yaml"},
+
+		"One pool, N datasets, ignore volume": {def: "one_pool_n_datasets_with_volume.yaml"},
+		// TODO: add bookmark creation support to go-libzfs
+		//"One pool, one dataset, one snapshot, ignore bookmark": {def: "one_pool_one_dataset_one_snapshot_with_bookmark.yaml"},
 	}
 
 	for name, tc := range tests {

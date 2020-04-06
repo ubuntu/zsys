@@ -51,6 +51,8 @@ const (
 	DatasetPropMounted = golibzfs.DatasetPropMounted
 	// DatasetPropCreation is the creation time property for the dataset
 	DatasetPropCreation = golibzfs.DatasetPropCreation
+	// DatasetPropVolsize is the volume size property for the dataset
+	DatasetPropVolsize = golibzfs.DatasetPropVolsize
 )
 
 const (

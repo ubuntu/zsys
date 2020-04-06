@@ -31,9 +31,11 @@ type FakePools struct {
 }
 
 type fakePool struct {
-	Name     string
-	Datasets []struct {
+	Name       string
+	NoDefaults bool
+	Datasets   []struct {
 		Name             string
+		IsVolume         bool
 		Mountpoint       string
 		CanMount         string
 		ZsysBootfs       string    `yaml:"zsys_bootfs"`
@@ -53,6 +55,8 @@ type orderedSnapshots []struct {
 	LastBootedKernel string     `yaml:"last_booted_kernel"`
 	BootfsDatasets   string     `yaml:"bootfs_datasets"`
 	CreationTime     *time.Time `yaml:"creation_time"` // Snapshot creation time, only work for mock usage.
+	//TODO: one libzfs support bookmarks
+	//BookMarks        []string
 }
 
 func (s orderedSnapshots) Len() int           { return len(s) }
@@ -186,8 +190,10 @@ func (fpools FakePools) Create(path string) func() {
 			props[libzfs.PoolPropAltroot] = poolMountpath
 			fsprops := make(map[libzfs.Prop]string)
 			// Could be overridden with the "." dataset
-			fsprops[libzfs.DatasetPropMountpoint] = "/"
-			fsprops[libzfs.DatasetPropCanmount] = "off"
+			if !fpool.NoDefaults {
+				fsprops[libzfs.DatasetPropMountpoint] = "/"
+				fsprops[libzfs.DatasetPropCanmount] = "off"
+			}
 
 			pool, err := fpools.libzfs.PoolCreate(fpool.Name, vdev, features, props, fsprops)
 			if err != nil {
@@ -196,6 +202,7 @@ func (fpools FakePools) Create(path string) func() {
 			fpools.tempPools = append(fpools.tempPools, fpool.Name)
 			defer pool.Close()
 
+			dType := libzfs.DatasetTypeFilesystem
 			for _, dataset := range fpool.Datasets {
 				datasetName := fpool.Name + "/" + dataset.Name
 				var d libzfs.DZFSInterface
@@ -207,11 +214,22 @@ func (fpools FakePools) Create(path string) func() {
 					}
 				} else {
 					props := make(map[libzfs.Prop]libzfs.Property)
-					d, err = fpools.libzfs.DatasetCreate(datasetName, libzfs.DatasetTypeFilesystem, props)
+					if dataset.IsVolume {
+						dType = libzfs.DatasetTypeVolume
+						strSize := "819200"
+						props[libzfs.DatasetPropVolsize] = libzfs.Property{Value: strSize}
+					}
+
+					d, err = fpools.libzfs.DatasetCreate(datasetName, dType, props)
 					if err != nil {
 						fpools.Fatalf("couldn't create dataset %q: %v", datasetName, err)
 					}
 				}
+
+				if dType != libzfs.DatasetTypeFilesystem {
+					continue
+				}
+
 				if dataset.Mountpoint != "" {
 					d.SetProperty(libzfs.DatasetPropMountpoint, dataset.Mountpoint)
 				}

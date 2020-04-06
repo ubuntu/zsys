@@ -165,9 +165,15 @@ func (l *LibZFS) DatasetCreate(path string, dtype libzfs.DatasetType, props map[
 	if ok {
 		cm.Source = "local"
 	} else {
+		var v, s string
+		if dtype == libzfs.DatasetTypeFilesystem {
+			v = "on"
+			s = "default"
+		}
+
 		cm = libzfs.Property{
-			Value:  "on",
-			Source: "default",
+			Value:  v,
+			Source: s,
 		}
 	}
 	props[libzfs.DatasetPropCanmount] = cm
@@ -217,6 +223,13 @@ func (l *LibZFS) DatasetCreate(path string, dtype libzfs.DatasetType, props map[
 					p.Source = "inherited"
 				}
 				userProperties[k] = p
+			}
+		}
+	} else {
+		if _, ok := props[libzfs.DatasetPropMountpoint]; !ok {
+			props[libzfs.DatasetPropMountpoint] = libzfs.Property{
+				Value:  "/" + path,
+				Source: "default",
 			}
 		}
 	}
