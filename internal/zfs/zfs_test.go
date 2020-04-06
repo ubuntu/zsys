@@ -64,6 +64,8 @@ func TestNew(t *testing.T) {
 		"Layout with none, default properties and snapshot":                        {def: "layout1__one_pool_n_datasets_one_main_snapshots_inherited.yaml"},
 		"One pool, one dataset with invalid lastUsed":                              {def: "one_pool_one_dataset.yaml", setInvalidLastUsed: "rpool"},
 		"One pool, one dataset, one snapshot no source on user property":           {def: "one_pool_one_dataset_one_snapshot_no_source_on_userproperty.yaml"},
+
+		"One pool, N datasets, ignore volume": {def: "one_pool_n_datasets_with_volume.yaml"},
 	}
 
 	for name, tc := range tests {
