@@ -580,7 +580,6 @@ func selectStatesToRemove(ctx context.Context, samples int, states []stateWithKe
 	var bestCombination []int
 	var bestIndex int
 	minDistance := end - start
-	curDistance := minDistance
 	log.Debugf(ctx, "Existing n: %d, minDist: %.3f, barycenter: %.3f", len(toKeep), minDistance, start+minDistance/2)
 
 	var dbgMsg string
@@ -594,7 +593,7 @@ func selectStatesToRemove(ctx context.Context, samples int, states []stateWithKe
 		}
 
 		avg := float64(sumKeep+sumToPlace) / float64(samples)
-		curDistance = math.Abs(avg - (start + (end-start)/2))
+		curDistance := math.Abs(avg - (start + (end-start)/2))
 		if curDistance < minDistance {
 			minDistance = curDistance
 			bestCombination = c
@@ -636,8 +635,8 @@ const (
 //
 // This is copied from gonumonum
 func combinations(n, k int) [][]int {
-	combins := binomial(n, k)
-	data := make([][]int, combins)
+	combinations := binomial(n, k)
+	data := make([][]int, combinations)
 	if len(data) == 0 {
 		return data
 	}
@@ -645,7 +644,7 @@ func combinations(n, k int) [][]int {
 	for i := range data[0] {
 		data[0][i] = i
 	}
-	for i := 1; i < combins; i++ {
+	for i := 1; i < combinations; i++ {
 		next := make([]int, k)
 		copy(next, data[i-1])
 		nextCombination(next, n, k)

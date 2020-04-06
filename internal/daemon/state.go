@@ -29,10 +29,21 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
+	// autosave triggered by apt or other system on non zsys system. Do nothing
+	if !s.Machines.CurrentIsZsys() && req.GetAutosave() {
+		return nil
+	}
+
 	if stateName != "" {
-		log.Infof(stream.Context(), i18n.G("Requesting saving current system state %q"), stateName)
+		log.Infof(stream.Context(), i18n.G("Requesting to save current system state %q"), stateName)
 	} else {
-		log.Info(stream.Context(), i18n.G("Requesting saving current system state"))
+		msg := i18n.G("Requesting to save current system state")
+		// Always print the message as it was automatically requested
+		if req.GetAutosave() {
+			log.RemotePrint(stream.Context(), msg)
+		} else {
+			log.Info(stream.Context(), msg)
+		}
 	}
 
 	if stateName, err = s.Machines.CreateSystemSnapshot(stream.Context(), stateName); err != nil {
@@ -71,9 +82,9 @@ func (s *Server) SaveUserState(req *zsys.SaveUserStateRequest, stream zsys.Zsys_
 	defer s.RWRequest.Unlock()
 
 	if stateName != "" {
-		log.Infof(stream.Context(), i18n.G("Requesting saving state %q for user %q"), stateName, userName)
+		log.Infof(stream.Context(), i18n.G("Requesting to save state %q for user %q"), stateName, userName)
 	} else {
-		log.Infof(stream.Context(), i18n.G("Requesting saving state for user %q"), userName)
+		log.Infof(stream.Context(), i18n.G("Requesting to save state for user %q"), userName)
 	}
 
 	if stateName, err = s.Machines.CreateUserSnapshot(stream.Context(), userName, stateName); err != nil {
@@ -102,7 +113,7 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 		return fmt.Errorf(i18n.G("System state name is required"))
 	}
 
-	log.Infof(stream.Context(), i18n.G("Requesting removing system state %q"), stateName)
+	log.Infof(stream.Context(), i18n.G("Requesting to remove system state %q"), stateName)
 
 	err = s.Machines.RemoveState(stream.Context(), stateName, "", req.GetForce(), req.GetDryrun())
 	if err != nil {
@@ -149,7 +160,7 @@ func (s *Server) RemoveUserState(req *zsys.RemoveUserStateRequest, stream zsys.Z
 		return fmt.Errorf(i18n.G("State name is required"))
 	}
 
-	log.Infof(stream.Context(), i18n.G("Requesting removing user state %q for user %s"), stateName, userName)
+	log.Infof(stream.Context(), i18n.G("Requesting to remove user state %q for user %s"), stateName, userName)
 
 	err := s.Machines.RemoveState(stream.Context(), stateName, userName, req.GetForce(), req.GetDryrun())
 	if err != nil {

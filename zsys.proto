@@ -8,7 +8,7 @@ service Zsys {
   rpc ChangeHomeOnUserData(ChangeHomeOnUserDataRequest) returns (stream LogResponse);
   rpc PrepareBoot(Empty) returns (stream PrepareBootResponse);
   rpc CommitBoot(Empty) returns (stream CommitBootResponse);
-  rpc UpdateBootMenu(Empty) returns (stream LogResponse);
+  rpc UpdateBootMenu(UpdateBootMenuRequest) returns (stream LogResponse);
 
   rpc SaveSystemState(SaveSystemStateRequest) returns (stream CreateSaveStateResponse);
   rpc SaveUserState(SaveUserStateRequest) returns (stream CreateSaveStateResponse);
@@ -66,9 +66,14 @@ message CommitBootResponse {
   }
 }
 
+message UpdateBootMenuRequest {
+  bool auto = 1;
+}
+
 message SaveSystemStateRequest {
   string stateName = 1;
   bool updateBootMenu = 2;
+  bool autosave = 3;
 }
 
 message SaveUserStateRequest {

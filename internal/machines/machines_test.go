@@ -634,6 +634,44 @@ func TestCreateUserData(t *testing.T) {
 	}
 }
 
+func TestCurrentIsZsys(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		cmdline string
+
+		wantIsZsys bool
+	}{
+		"Zsys machine is current":         {cmdline: generateCmdLine("rpool"), wantIsZsys: true},
+		"Zfs non zsys machine is current": {cmdline: generateCmdLine("rpool2"), wantIsZsys: false},
+		"No current machine":              {cmdline: generateCmdLine("something that doesn’t match"), wantIsZsys: false},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "d_two_machines_one_zsys_one_non_zsys.yaml"), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			/*if tc.mountedDataset != "" {
+				lzfs := libzfs.(*mock.LibZFS)
+				lzfs.SetDatasetAsMounted(tc.mountedDataset, true)
+			}*/
+
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			assert.Equal(t, tc.wantIsZsys, ms.CurrentIsZsys(), "Expected current is zsys returned value")
+		})
+	}
+}
+
 func TestChangeHomeOnUserData(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {

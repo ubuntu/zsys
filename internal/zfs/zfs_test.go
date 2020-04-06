@@ -992,8 +992,6 @@ func TestTransactionsWithZFS(t *testing.T) {
 					assertDatasetsNotEquals(t, ta, state, z.Datasets())
 					haveChanges = true
 				}
-
-				state = copyState(z)
 			}
 
 			// Final transaction states

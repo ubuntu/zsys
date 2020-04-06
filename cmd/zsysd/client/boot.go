@@ -15,6 +15,7 @@ import (
 
 var (
 	printModifiedBoot bool
+	updateMenuAuto    bool
 
 	bootCmd = &cobra.Command{
 		Use:    "boot COMMAND",
@@ -39,7 +40,7 @@ var (
 		Use:   "update-menu",
 		Short: i18n.G("Update system boot menu"),
 		Args:  cobra.NoArgs,
-		Run:   func(cmd *cobra.Command, args []string) { cmdErr = updateBootMenu() },
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = updateBootMenu(updateMenuAuto) },
 	}
 )
 
@@ -49,6 +50,7 @@ func init() {
 	bootCmd.AddCommand(bootPrepareCmd)
 	bootCmd.AddCommand(bootCommitCmd)
 	bootCmd.AddCommand(updateMenuCmd)
+	updateMenuCmd.Flags().BoolVarP(&updateMenuAuto, "auto", "", false, i18n.G("Signal this is an automated request triggered by script"))
 }
 
 func bootPrepare(printModifiedBoot bool) (err error) {
@@ -131,7 +133,7 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	return nil
 }
 
-func updateBootMenu() error {
+func updateBootMenu(auto bool) error {
 	client, err := newClient()
 	if err != nil {
 		return err
@@ -141,7 +143,7 @@ func updateBootMenu() error {
 	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
-	stream, err := client.UpdateBootMenu(ctx, &zsys.Empty{})
+	stream, err := client.UpdateBootMenu(ctx, &zsys.UpdateBootMenuRequest{Auto: auto})
 	if err = checkConn(err); err != nil {
 		return err
 	}
