@@ -1,0 +1,10 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/rpool",
+      "CanMount": "on",
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   }
+]

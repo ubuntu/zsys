@@ -1,0 +1,28 @@
+[
+   {
+      "Name": "rpool",
+      "Mountpoint": "/rpool",
+      "CanMount": "on",
+      "Sources": {
+         "Mountpoint": "inherited"
+      }
+   },
+   {
+      "Name": "rpool/ROOT",
+      "Mountpoint": "/rpool/ROOT",
+      "CanMount": "on",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local"
+      }
+   },
+   {
+      "Name": "rpool/ROOT/ubuntu",
+      "Mountpoint": "/rpool/ROOT/ubuntu",
+      "CanMount": "on",
+      "Sources": {
+         "Mountpoint": "inherited",
+         "CanMount": "local"
+      }
+   }
+]

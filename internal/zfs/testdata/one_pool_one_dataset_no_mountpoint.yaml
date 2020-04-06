@@ -1,0 +1,3 @@
+pools:
+  - name: rpool
+    nodefaults: true

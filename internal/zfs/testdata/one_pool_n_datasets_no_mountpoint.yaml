@@ -1,0 +1,6 @@
+pools:
+  - name: rpool
+    nodefaults: true
+    datasets:
+      - name: ROOT
+      - name: ROOT/ubuntu
