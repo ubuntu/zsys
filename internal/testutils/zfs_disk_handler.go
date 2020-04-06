@@ -54,6 +54,8 @@ type orderedSnapshots []struct {
 	LastBootedKernel string     `yaml:"last_booted_kernel"`
 	BootfsDatasets   string     `yaml:"bootfs_datasets"`
 	CreationTime     *time.Time `yaml:"creation_time"` // Snapshot creation time, only work for mock usage.
+	//TODO: one libzfs support bookmarks
+	//BookMarks        []string
 }
 
 func (s orderedSnapshots) Len() int           { return len(s) }

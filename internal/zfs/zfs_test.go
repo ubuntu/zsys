@@ -66,6 +66,8 @@ func TestNew(t *testing.T) {
 		"One pool, one dataset, one snapshot no source on user property":           {def: "one_pool_one_dataset_one_snapshot_no_source_on_userproperty.yaml"},
 
 		"One pool, N datasets, ignore volume": {def: "one_pool_n_datasets_with_volume.yaml"},
+		// TODO: add bookmark creation support to go-libzfs
+		//"One pool, one dataset, one snapshot, ignore bookmark": {def: "one_pool_one_dataset_one_snapshot_with_bookmark.yaml"},
 	}
 
 	for name, tc := range tests {
