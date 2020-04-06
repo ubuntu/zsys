@@ -179,6 +179,7 @@ zsysctl save [state id] [flags]
 ##### Options
 
 ```
+      --auto                 Signal this is an automated request triggered by script
   -h, --help                 help for save
       --no-update-bootmenu   Do not update bootmenu on system state save
   -s, --system               Save complete system state (users and system)
@@ -503,6 +504,7 @@ zsysctl state save [state id] [flags]
 ##### Options
 
 ```
+      --auto                 Signal this is an automated request triggered by script
   -h, --help                 help for save
       --no-update-bootmenu   Do not update bootmenu on system state save
   -s, --system               Save complete system state (users and system)
@@ -686,6 +688,7 @@ zsysctl boot update-menu [flags]
 ##### Options
 
 ```
+      --auto   Signal this is an automated request triggered by script
   -h, --help   help for update-menu
 ```
 
