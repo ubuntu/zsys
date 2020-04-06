@@ -64,7 +64,7 @@ msgstr ""
 msgid "  - Name:\t%s\n"
 msgstr ""
 
-#: internal/zfs/helpers.go:297
+#: internal/zfs/helpers.go:301
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
@@ -74,7 +74,7 @@ msgid ""
 "%q"
 msgstr ""
 
-#: internal/zfs/helpers.go:170
+#: internal/zfs/helpers.go:169
 msgid "%q isn't a 'value:source' format type for %q"
 msgstr ""
 
@@ -86,7 +86,7 @@ msgstr ""
 msgid "%q isn't a zsys snapshot with a valid %q property: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:112 internal/zfs/helpers.go:344
+#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:348
 msgid "%q property isn't an int: "
 msgstr ""
 
@@ -216,7 +216,7 @@ msgstr ""
 msgid "Call to polkit failed: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:81
+#: internal/zfs/helpers.go:80
 msgid "CanMount property for %q has an unexpected source: %q"
 msgstr ""
 
@@ -495,10 +495,6 @@ msgstr ""
 
 #: cmd/zsysd/client/state.go:26
 msgid "Machine state management"
-msgstr ""
-
-#: internal/zfs/helpers.go:65
-msgid "MountPoint property for %q has an unexpected source: %q"
 msgstr ""
 
 #: internal/machines/boot.go:209
@@ -987,7 +983,7 @@ msgstr ""
 msgid "can't create %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:153
+#: internal/zfs/helpers.go:152
 msgid "can't get %q property: "
 msgstr ""
 
@@ -1011,19 +1007,19 @@ msgstr ""
 msgid "can't promote %q: it's a snapshot"
 msgstr ""
 
-#: internal/zfs/helpers.go:90
+#: internal/zfs/helpers.go:89
 msgid "can't read bootfs property, ignoring: "
 msgstr ""
 
-#: internal/zfs/helpers.go:126
+#: internal/zfs/helpers.go:125
 msgid "can't read bootfsdataset property, ignoring: "
 msgstr ""
 
-#: internal/zfs/helpers.go:119
+#: internal/zfs/helpers.go:118
 msgid "can't read lastBootedKernel property, ignoring: "
 msgstr ""
 
-#: internal/zfs/helpers.go:102
+#: internal/zfs/helpers.go:101
 msgid "can't read source of LastUsed property, ignoring:"
 msgstr ""
 
@@ -1043,7 +1039,7 @@ msgstr ""
 msgid "cannot destroy dataset %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:582
+#: internal/zfs/helpers.go:586
 msgid "cannot find %q as child of parent %q"
 msgstr ""
 
@@ -1052,7 +1048,7 @@ msgstr ""
 msgid "cannot find %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:506
+#: internal/zfs/helpers.go:510
 msgid "cannot find base snapshot %q: %v"
 msgstr ""
 
@@ -1065,7 +1061,7 @@ msgstr ""
 msgid "cannot find parent for %s: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:534
+#: internal/zfs/helpers.go:538
 msgid "cannot remove snapshot %q on old dataset %q: %v"
 msgstr ""
 
@@ -1251,7 +1247,7 @@ msgstr ""
 msgid "couldn't save system state: "
 msgstr ""
 
-#: internal/zfs/helpers.go:294
+#: internal/zfs/helpers.go:298
 msgid "couldn't scan %q for clones"
 msgstr ""
 
@@ -1439,7 +1435,7 @@ msgstr ""
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
-#: internal/zfs/helpers.go:261
+#: internal/zfs/helpers.go:265
 msgid ""
 "parent of %q doesn't have a snapshot named %q. Every of its children "
 "shouldn't have a snapshot. However %q exists"
