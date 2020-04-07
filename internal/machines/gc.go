@@ -114,9 +114,11 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 				// Advance to first state matching this bucket.
 				var i int
-				for i = newestStateIndex; i < len(sortedStates) && sortedStates[i].LastUsed.After(bucket.start); i++ {
+				for i = newestStateIndex; i < len(sortedStates) && !sortedStates[i].LastUsed.Before(bucket.start); i++ {
 				}
+				// The condition became false on i (sortedStates[i].LastUsed is Before bucket.start), this the first one "oldest" matching this bucket is the previous one: i-1
 				oldestStateIndex := i - 1
+
 				log.Debugf(ctx, i18n.G("First state matching for this bucket: %s (%s)"), sortedStates[oldestStateIndex].ID, sortedStates[oldestStateIndex].LastUsed.Format(timeFormat))
 
 				// Don't touch anything for this bucket, skip all states in here and advance to next one.
