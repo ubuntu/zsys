@@ -223,6 +223,8 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 	// FIXME: user states attached to multiple datasets are counted individually when removing user states, and so, we can think
 	// we keep more history than we will have in the end. We should only count them as a single one
 	statesToRemove = nil
+	// this is the map to preserve unassociated clones because they are filling the bucket policy
+	userDatasetsToKeep := make(map[string]bool)
 	keepDueToErrorOnDelete = make(map[string]bool)
 	gcPassNum = 0
 	for {
@@ -289,15 +291,21 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), s.ID, s.LastUsed.Format(timeFormat))
 
 						keep := keepUnknown
-						// We can only collect snapshots here for user datasets, or they are unassociated clones that we will clean up later
-						if !s.isSnapshot() {
+						if !s.isSnapshot() && s.linkedToSystemState() {
 							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot and associated to a system state"), s.ID)
 							keep = keepYes
-						} else if !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						} else if !s.isSnapshot() {
+							for _, ds := range s.Datasets {
+								if ds[0].HasSnapshotInHierarchy() {
+									log.Debugf(ctx, i18n.G("Keeping %v as it has a snapshot in its child hierarchy"), s.ID)
+									keep = keepYes
+								}
+							}
+						} else if !all && s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 							keep = keepYes
 						} else if i < keepLast {
-							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
+							log.Debugf(ctx, i18n.G("Keeping %v as it's in the last %d snapshots"), s.ID, keepLast)
 							keep = keepYes
 						} else if keepDueToErrorOnDelete[s.ID] {
 							keep = keepYes
@@ -339,6 +347,9 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 							State: s,
 							keep:  keep,
 						})
+						for route := range s.Datasets {
+							userDatasetsToKeep[route] = true
+						}
 					}
 					// next bucket start point
 					newestStateIndex = oldestStateIndex + 1
@@ -384,6 +395,10 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 			if err := s.remove(ctx, ms, ""); err != nil {
 				log.Errorf(ctx, i18n.G("Couldn't fully destroy user state %s: %v.\nPutting it in keep list."), s.ID, err)
 				keepDueToErrorOnDelete[s.ID] = true
+				continue
+			}
+			for route := range s.Datasets {
+				delete(userDatasetsToKeep, route)
 			}
 		}
 
@@ -408,8 +423,10 @@ nextDataset:
 		if d.BootfsDatasets != "" {
 			continue
 		}
-		if d.HasSnapshotInHierarchy() {
-			continue
+		for rootDataset := range userDatasetsToKeep {
+			if d.Name == rootDataset || strings.HasPrefix(d.Name, rootDataset+"/") {
+				continue nextDataset
+			}
 		}
 		for _, n := range alreadyDestroyedRoot {
 			if strings.HasPrefix(d.Name, n+"/") {
@@ -620,6 +637,17 @@ func selectStatesToRemove(ctx context.Context, samples int, states []stateWithKe
 		statesToRemove = append(statesToRemove, s.State)
 	}
 	return statesToRemove
+}
+
+// linkedToSystemState returns if a datasets is potentially linked to a system state.
+// Note that it doesn’t check if the system state is currently accessible.
+func (s *State) linkedToSystemState() bool {
+	for _, ds := range s.Datasets {
+		if ds[0].BootfsDatasets != "" {
+			return true
+		}
+	}
+	return false
 }
 
 const (
