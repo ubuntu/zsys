@@ -1,0 +1,46 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+      snapshots:
+      - name: autozsys_20200101-1100
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+      - name: autozsys_20200101-1000
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: autozsys_20200101-0900
+        mountpoint: /:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
+    - name: ROOT/ubuntu_failedboot
+      zsys_bootfs: yes
+      mountpoint: /
+      origin: rpool/ROOT/ubuntu_1234@autozsys_20200101-1100
+
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+      snapshots:
+      - name: autozsys_20200101-1100
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T11:00:00+00:00
+    - name: USERDATA/user1_failedboot
+      mountpoint: /home/user1
+      bootfs_datasets: rpool/ROOT/ubuntu_failedboot
+      origin: rpool/USERDATA/user1_abcd@autozsys_20200101-1100

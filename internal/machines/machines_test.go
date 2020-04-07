@@ -1177,6 +1177,10 @@ func TestGC(t *testing.T) {
 		"Users and clones on different machines history":              {def: "gc_system_with_users_and_clones_different_machines_history_only.yaml"},
 		"Users and clones on different machines, one is active state": {def: "gc_system_with_users_and_clones_different_machines.yaml"},
 
+		// Failed revert
+		"Failed revert - no lastused on system":        {def: "gc_system_failed_revert.yaml"},
+		"Failed boot - no lastused on user and system": {def: "gc_system_with_users_failed_boot.yaml"},
+
 		// Deletion prevented
 		"Manual user snapshot which should be deleted is kept": {def: "gc_system_with_users_manual_snapshots.yaml", isNoOp: true},
 		"Users and clones with undeletable snapshot":           {def: "gc_system_with_users_and_clones_undeletable_snapshot.yaml"},
