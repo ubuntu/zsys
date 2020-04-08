@@ -63,4 +63,4 @@ def collect_generated_mount_units():
     gen_dir = "/run/systemd/generator/"
     for f in glob(os.path.join(gen_dir, "*.mount")):
         r.append(f[len(gen_dir):])
-    return ", ".join(r)
+    return "\n".join(r)
