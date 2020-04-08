@@ -64,7 +64,7 @@ msgstr ""
 msgid "  - Name:\t%s\n"
 msgstr ""
 
-#: internal/zfs/helpers.go:301
+#: internal/zfs/helpers.go:310
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
@@ -74,7 +74,7 @@ msgid ""
 "%q"
 msgstr ""
 
-#: internal/zfs/helpers.go:169
+#: internal/zfs/helpers.go:178
 msgid "%q isn't a 'value:source' format type for %q"
 msgstr ""
 
@@ -86,7 +86,7 @@ msgstr ""
 msgid "%q isn't a zsys snapshot with a valid %q property: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:348
+#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:357
 msgid "%q property isn't an int: "
 msgstr ""
 
@@ -524,7 +524,7 @@ msgstr ""
 msgid "Needs a valid user name, got nothing"
 msgstr ""
 
-#: internal/zfs/helpers.go:196
+#: internal/zfs/helpers.go:205
 msgid "New dataNew dataset found: %q"
 msgstr ""
 
@@ -991,7 +991,7 @@ msgstr ""
 msgid "can't create %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:152
+#: internal/zfs/helpers.go:161
 msgid "can't get %q property: "
 msgstr ""
 
@@ -1035,6 +1035,10 @@ msgstr ""
 msgid "can't set dataset property %q=%q for %q: "
 msgstr ""
 
+#: internal/zfs/helpers.go:132
+msgid "can't transition bootfsdataset property, ignoring: "
+msgstr ""
+
 #: internal/machines/userdata.go:113
 msgid "can't use empty string for existing home directory"
 msgstr ""
@@ -1047,7 +1051,7 @@ msgstr ""
 msgid "cannot destroy dataset %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:586
+#: internal/zfs/helpers.go:595
 msgid "cannot find %q as child of parent %q"
 msgstr ""
 
@@ -1056,7 +1060,7 @@ msgstr ""
 msgid "cannot find %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:510
+#: internal/zfs/helpers.go:519
 msgid "cannot find base snapshot %q: %v"
 msgstr ""
 
@@ -1069,7 +1073,7 @@ msgstr ""
 msgid "cannot find parent for %s: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:538
+#: internal/zfs/helpers.go:547
 msgid "cannot remove snapshot %q on old dataset %q: %v"
 msgstr ""
 
@@ -1229,7 +1233,7 @@ msgstr ""
 msgid "couldn't refresh properties for %q: "
 msgstr ""
 
-#: internal/zfs/helpers.go:203
+#: internal/zfs/helpers.go:212
 msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
@@ -1255,7 +1259,7 @@ msgstr ""
 msgid "couldn't save system state: "
 msgstr ""
 
-#: internal/zfs/helpers.go:298
+#: internal/zfs/helpers.go:307
 msgid "couldn't scan %q for clones"
 msgstr ""
 
@@ -1443,7 +1447,7 @@ msgstr ""
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
-#: internal/zfs/helpers.go:265
+#: internal/zfs/helpers.go:274
 msgid ""
 "parent of %q doesn't have a snapshot named %q. Every of its children "
 "shouldn't have a snapshot. However %q exists"
