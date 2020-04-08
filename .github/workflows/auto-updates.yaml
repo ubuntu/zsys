@@ -19,7 +19,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.13.x'
+          go-version: '1.14.x'
       - name: Install required dependencies
         run: sudo apt install -y gettext
       # Update po if needed
@@ -62,7 +62,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.13.x'
+          go-version: '1.14.x'
       # Add dependencies
       - name: Install dependencies
         run: |
