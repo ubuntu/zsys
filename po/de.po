@@ -192,7 +192,7 @@ msgstr ""
 msgid "An error occurred when reverting a Zfs transaction: "
 msgstr ""
 
-#: internal/machines/gc.go:133 internal/machines/gc.go:289
+#: internal/machines/gc.go:135 internal/machines/gc.go:293
 msgid "Analyzing state %v: %v"
 msgstr ""
 
@@ -230,7 +230,7 @@ msgstr ""
 msgid "Collect datasets"
 msgstr ""
 
-#: internal/machines/gc.go:131 internal/machines/gc.go:286
+#: internal/machines/gc.go:133 internal/machines/gc.go:290
 msgid "Collecting all states for current bucket"
 msgstr ""
 
@@ -281,7 +281,7 @@ msgstr ""
 msgid "Couldn't destroy %s: %v"
 msgstr ""
 
-#: internal/machines/gc.go:424
+#: internal/machines/gc.go:443
 msgid "Couldn't destroy unmanaged user dataset %s: %v"
 msgstr ""
 
@@ -299,13 +299,13 @@ msgstr ""
 msgid "Couldn't find state: %v"
 msgstr ""
 
-#: internal/machines/gc.go:210
+#: internal/machines/gc.go:212
 msgid ""
 "Couldn't fully destroy state %s: %v\n"
 "Putting it in keep list."
 msgstr ""
 
-#: internal/machines/gc.go:385
+#: internal/machines/gc.go:398
 msgid ""
 "Couldn't fully destroy user state %s: %v.\n"
 "Putting it in keep list."
@@ -421,7 +421,7 @@ msgid ""
 "early boot"
 msgstr ""
 
-#: internal/machines/gc.go:120 internal/machines/gc.go:275
+#: internal/machines/gc.go:122 internal/machines/gc.go:279
 #, c-format
 msgid "First state matching for this bucket: %s (%s)"
 msgstr ""
@@ -461,27 +461,35 @@ msgstr ""
 msgid "Idle timeout expired"
 msgstr ""
 
-#: internal/machines/gc.go:294
+#: internal/machines/gc.go:302
+msgid "Keeping %v as it has a snapshot in its child hierarchy"
+msgstr ""
+
+#: internal/machines/gc.go:310
+msgid "Keeping %v as it's in the last %d snapshots"
+msgstr ""
+
+#: internal/machines/gc.go:297
 msgid "Keeping %v as it's not a snapshot and associated to a system state"
 msgstr ""
 
-#: internal/machines/gc.go:124 internal/machines/gc.go:279
+#: internal/machines/gc.go:126 internal/machines/gc.go:283
 msgid "Keeping all snapshots for this bucket"
 msgstr ""
 
-#: internal/machines/gc.go:314
+#: internal/machines/gc.go:324
 msgid "Keeping as snapshot %v is associated to a system snapshot"
 msgstr ""
 
-#: internal/machines/gc.go:153 internal/machines/gc.go:329
+#: internal/machines/gc.go:155 internal/machines/gc.go:339
 msgid "Keeping snapshot %v as at least %s dataset has dependencies"
 msgstr ""
 
-#: internal/machines/gc.go:142 internal/machines/gc.go:300
+#: internal/machines/gc.go:144
 msgid "Keeping snapshot %v as it's in the last %d snapshots"
 msgstr ""
 
-#: internal/machines/gc.go:139 internal/machines/gc.go:297
+#: internal/machines/gc.go:141 internal/machines/gc.go:307
 msgid "Keeping snapshot %v as it's not a zsys one"
 msgstr ""
 
@@ -520,7 +528,7 @@ msgstr ""
 msgid "New dataNew dataset found: %q"
 msgstr ""
 
-#: internal/machines/gc.go:172 internal/machines/gc.go:349
+#: internal/machines/gc.go:174 internal/machines/gc.go:362
 #, c-format
 msgid "No exceeding states for this bucket (delta: %d). Moving on."
 msgstr ""
@@ -735,7 +743,7 @@ msgid ""
 "state. state_id is generated if not provided."
 msgstr ""
 
-#: internal/machines/gc.go:208 internal/machines/gc.go:383
+#: internal/machines/gc.go:210 internal/machines/gc.go:396
 #, c-format
 msgid "Selecting state to remove: %s"
 msgstr ""
@@ -809,7 +817,7 @@ msgstr ""
 msgid "Switch dataset %q to mount %q"
 msgstr ""
 
-#: internal/machines/gc.go:218
+#: internal/machines/gc.go:220
 msgid "System have changes, rerun system GC"
 msgstr ""
 
@@ -827,7 +835,7 @@ msgid ""
 "can't be reused"
 msgstr ""
 
-#: internal/machines/gc.go:175 internal/machines/gc.go:352
+#: internal/machines/gc.go:177 internal/machines/gc.go:365
 #, c-format
 msgid "There are %d exceeding states to potentially remove"
 msgstr ""
@@ -856,7 +864,7 @@ msgstr ""
 
 #. 3. Clean up user user datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
 #. (they, and all snapshots on them will end up in unmanaged datasets)
-#: internal/machines/gc.go:399
+#: internal/machines/gc.go:416
 msgid "Unassociated user datasets GC"
 msgstr ""
 
@@ -889,7 +897,7 @@ msgstr ""
 msgid "User datasets creation and rename"
 msgstr ""
 
-#: internal/machines/gc.go:394
+#: internal/machines/gc.go:411
 msgid "Users states have changes, rerun user GC"
 msgstr ""
 
@@ -975,7 +983,7 @@ msgstr ""
 msgid "ZSys:\t%t\n"
 msgstr ""
 
-#: internal/machines/gc.go:98 internal/machines/gc.go:253
+#: internal/machines/gc.go:98 internal/machines/gc.go:257
 msgid "bucket %+v"
 msgstr ""
 
@@ -1294,7 +1302,7 @@ msgid ""
 "%s\n"
 msgstr ""
 
-#: internal/machines/gc.go:106 internal/machines/gc.go:261
+#: internal/machines/gc.go:106 internal/machines/gc.go:265
 #, c-format
 msgid "current state: %s"
 msgstr ""
@@ -1467,7 +1475,7 @@ msgstr ""
 msgid "state id is mandatory"
 msgstr ""
 
-#: internal/machines/gc.go:110 internal/machines/gc.go:265
+#: internal/machines/gc.go:110 internal/machines/gc.go:269
 #, c-format
 msgid "state.LastUsed (%s) before bucket.start (%s). Continuing"
 msgstr ""
