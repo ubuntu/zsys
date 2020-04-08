@@ -1,0 +1,115 @@
+{
+   "All": {
+      "rpool/ROOT/ubuntu_1234": {
+         "IsZsys": true,
+         "ID": "rpool/ROOT/ubuntu_1234",
+         "LastUsed": "2019-04-18T04:45:55+02:00",
+         "Datasets": {
+            "rpool/ROOT/ubuntu_1234": [
+               {
+                  "Name": "rpool/ROOT/ubuntu_1234",
+                  "Mountpoint": "/",
+                  "CanMount": "on",
+                  "BootFS": true,
+                  "LastUsed": 1555555555
+               }
+            ]
+         },
+         "History": {
+            "rpool/ROOT/ubuntu_1234@autozsys_20200101-0900": {
+               "ID": "rpool/ROOT/ubuntu_1234@autozsys_20200101-0900",
+               "LastUsed": "2020-01-01T10:00:00+01:00",
+               "Datasets": {
+                  "rpool/ROOT/ubuntu_1234@autozsys_20200101-0900": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234@autozsys_20200101-0900",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1577869200
+                     }
+                  ]
+               }
+            },
+            "rpool/ROOT/ubuntu_1234@autozsys_20200101-1000": {
+               "ID": "rpool/ROOT/ubuntu_1234@autozsys_20200101-1000",
+               "LastUsed": "2020-01-01T11:00:00+01:00",
+               "Datasets": {
+                  "rpool/ROOT/ubuntu_1234@autozsys_20200101-1000": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234@autozsys_20200101-1000",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1577872800
+                     }
+                  ]
+               }
+            },
+            "rpool/ROOT/ubuntu_1234@autozsys_20200101-1100": {
+               "ID": "rpool/ROOT/ubuntu_1234@autozsys_20200101-1100",
+               "LastUsed": "2020-01-01T12:00:00+01:00",
+               "Datasets": {
+                  "rpool/ROOT/ubuntu_1234@autozsys_20200101-1100": [
+                     {
+                        "Name": "rpool/ROOT/ubuntu_1234@autozsys_20200101-1100",
+                        "IsSnapshot": true,
+                        "Mountpoint": "/",
+                        "CanMount": "on",
+                        "BootFS": true,
+                        "LastUsed": 1577876400
+                     }
+                  ]
+               }
+            }
+         }
+      }
+   },
+   "AllSystemDatasets": [
+      {
+         "Name": "rpool/ROOT/ubuntu_1234",
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1555555555
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234@autozsys_20200101-0900",
+         "IsSnapshot": true,
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1577869200
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234@autozsys_20200101-1000",
+         "IsSnapshot": true,
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1577872800
+      },
+      {
+         "Name": "rpool/ROOT/ubuntu_1234@autozsys_20200101-1100",
+         "IsSnapshot": true,
+         "Mountpoint": "/",
+         "CanMount": "on",
+         "BootFS": true,
+         "LastUsed": 1577876400
+      }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      }
+   ]
+}

@@ -18,7 +18,7 @@ jobs:
         buildenv: [
           { distro: devel, go: golang-go },
           { distro: rolling, go: golang-go },
-          { distro: rolling, go: golang-1.13-go },
+          { distro: rolling, go: golang-1.14-go },
       ]
     steps:
     - uses: actions/checkout@v2

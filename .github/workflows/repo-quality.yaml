@@ -23,7 +23,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.13.x'
+          go-version: '1.14.x'
       - name: Code formatting
         run: |
           FMT=`go fmt ./...`
@@ -46,7 +46,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.13.x'
+          go-version: '1.14.x'
       - name: Building
         run: go build ./...
 
@@ -65,7 +65,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.13.x'
+          go-version: '1.14.x'
       - name: Check generated files
         run: ./.github/ci/check-generate
 
@@ -84,7 +84,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.13.x'
+          go-version: '1.14.x'
       - name: Report suspicious constructs
         run: go vet ./...
       # TODO: add statichecks and others?
@@ -98,7 +98,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.13.x'
+          go-version: '1.14.x'
       # Add dependencies
       - name: Install dependencies
         run: |

@@ -8,7 +8,7 @@ export GOFLAGS=-ldflags=-X=github.com/ubuntu/zsys/internal/config.Version=$(shel
 export ZSYS_GENERATE_ONLY_INSTALL_SHARE_PREFIX=$(CURDIR)/debian/zsys/usr/share
 
 %:
-	dh $@ --buildsystem=golang --with=golang
+	dh $@ --buildsystem=golang --with=golang,apport
 
 override_dh_auto_clean:
 	dh_auto_clean
