@@ -2,14 +2,52 @@
 
 set -eu
 
-STAMPFILE=/var/run/zsys.system-autosnapshots
-DELAY=1200    # time in second after which this script can be reexecuted
-LASTRUN=0
-RUNAFTER=$(date -d "${DELAY} seconds ago" "+%s")
+ZSYS_SNAPSHOT_UUFILE="/var/run/zsys-snapshot.unattended-upgrades"
+ZSYS_UPDATEOOTMENU_UUFILE="/var/run/zsys-bootmenu.unattended-upgrades"
+UUPIDFILE="/var/run/unattended-upgrades.pid"
 
-[ -f "${STAMPFILE}" ] && LASTRUN=$(stat --format "+%Z" "${STAMPFILE}")
+# Return 0 unattended-upgrade isn’t running or if we didn’t proceeded the action for it yet.
+can_run() {
+    local zsys_uufile="$1"
+    local uupid=""
 
-[ ${RUNAFTER} -lt ${LASTRUN} ] && exit 0
+    # Not running under unattended-upgraded (no pid file)
+    if [ ! -f "${UUPIDFILE}" ]; then
+        rm -f "${zsys_uufile}"
+        return 0
+    fi
 
-touch "${STAMPFILE}"
-zsysctl state save --system --no-update-bootmenu --auto
+    # Not running under unattended-upgraded (unattended upgrade has a leftover pid file)
+    uupid="$(cat $UUPIDFILE)"
+    if ! kill -0 $uupid 2>/dev/null; then
+        rm -f "${zsys_uufile}"
+        return 0
+    fi
+
+    # unattended-upgraded is running, do we have a matching pid file stored?
+    if [ -f "${zsys_uufile}" ]; then
+        zuupid="$(cat ${zsys_uufile})"
+        # We took a snapshot on that unattended-upgrades run. Nothing to do
+        if [ "$uupid" = "$zuupid" ]; then
+            return 1
+        fi
+    fi
+
+    cp "${UUPIDFILE}" "${zsys_uufile}"
+    return 0
+}
+
+zsys_uufile="${ZSYS_SNAPSHOT_UUFILE}"
+if [ "$1" = "update-menu" ]; then
+    zsys_uufile="${ZSYS_UPDATEOOTMENU_UUFILE}"
+fi
+
+if ! can_run "${zsys_uufile}"; then
+    exit 0
+fi
+
+if [ "$1" = "update-menu" ]; then
+    zsysctl boot update-menu --auto
+else
+    zsysctl state save --system --no-update-bootmenu --auto
+fi
