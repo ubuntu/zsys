@@ -3,6 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: debhelper (>= 12),
+               dh-apport,
                dh-golang,
                golang-go,
                libzfslinux-dev,
