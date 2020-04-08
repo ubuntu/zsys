@@ -1,0 +1,2 @@
+# Disallow direct creation of blank issues
+blank_issues_enabled: false
