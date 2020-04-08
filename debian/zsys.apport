@@ -1,0 +1,66 @@
+'''apport package hook for zsys
+
+(c) 2020 Canonical Ltd.
+'''
+
+from contextlib import suppress
+from glob import glob
+import os
+
+import apport.hookutils
+
+def add_info(report):
+    apport.hookutils.attach_related_packages(report, ["zfs-initramfs", "zfsutils-linux"])
+    report['ZFSModules'] = get_zfs_kernel_modules()
+
+    apport.hookutils.attach_file(report, '/proc/cmdline', 'ProcKernelCmdLine')
+    apport.hookutils.attach_file(report, '/boot/grub/grub.cfg', "Grub.cfg")
+    apport.hookutils.attach_file_if_exists(report, '/boot/grub/grub.cfg.new', "Grub.cfgFailed")
+
+    report['MountsGenerated'] = collect_generated_mount_units()
+    apport.hookutils.attach_file(report, '/proc/mounts', 'Mounts')
+
+    report['ZFSDatasets'] = apport.hookutils.command_output(['zfs', 'list', '-t', 'all'])
+    report['ZFSImportedPools'] = apport.hookutils.command_output(['zpool', 'list'])
+    report['ZFSMounts'] = apport.hookutils.command_output(['zfs', 'mount'])
+    report['ZSYSDump'] = apport.hookutils.command_output(['zsysctl', 'service', 'dump'])
+
+    apport.hookutils.attach_file_if_exists(report, '/etc/zfs/zpool.cache', "ZFSPoolCache")
+    with suppress(FileNotFoundError):
+        zfs_listdir = '/etc/zfs/zfs-list.cache'
+        for f in os.listdir(zfs_listdir):
+            apport.hookutils.attach_file(report, os.path.join(zfs_listdir, f), "ZFSListcache-"+f)
+
+    report['ZSYSJournal'] = apport.hookutils.command_output(['journalctl', '/sbin/zsysd',
+                                                             '-b', '-o', 'short-monotonic', '--lines', '3000'])
+
+    report['SystemdDefaultUnitsState'] = apport.hookutils.command_output(['systemctl', 'status', 'default.target']).strip()
+    # Add details about all failed units, if any
+    failed = []
+    out = apport.hookutils.command_output(['systemctl', '--state=failed', '--full', '--no-legend']).strip()
+    for line in out.splitlines():
+        unit = line.split()[0]
+        failed.append(apport.hookutils.command_output(['systemctl', 'status', '--full', unit]))
+    report['SystemdFailedUnits'] = '------\n'.join(failed)
+
+
+def get_zfs_kernel_modules(module_list='/proc/modules'):
+    '''Get kernel loaded zfs modules and dependencies.'''
+
+    mods = []
+    with suppress(IOError):
+        with open(module_list) as f:
+            for l in f:
+                if "zfs" not in l:
+                    continue
+                mods.append(l.strip())
+    return "\n".join(mods)
+
+def collect_generated_mount_units():
+    '''Get mount units available through generators'''
+
+    r = []
+    gen_dir = "/run/systemd/generator/"
+    for f in glob(os.path.join(gen_dir, "*.mount")):
+        r.append(f[len(gen_dir):])
+    return ", ".join(r)
