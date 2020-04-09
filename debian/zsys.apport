@@ -22,6 +22,7 @@ def add_info(report):
 
     report['ZFSDatasets'] = apport.hookutils.command_output(['zfs', 'list', '-t', 'all'])
     report['ZFSImportedPools'] = apport.hookutils.command_output(['zpool', 'list'])
+    report['ZFSPoolsStatus'] = apport.hookutils.command_output(['zpool', 'status'])
     report['ZFSMounts'] = apport.hookutils.command_output(['zfs', 'mount'])
     report['ZSYSDump'] = apport.hookutils.command_output(['zsysctl', 'service', 'dump'])
 
