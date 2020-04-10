@@ -1,3 +1,33 @@
+zsys (0.4.3) UNRELEASED; urgency=medium
+
+  [ Jean-Baptiste Lallement ]
+  [ Didier Roche ]
+  * Fix GC collection of failed revert or incomplete boots and add tests for
+    them (LP: #1870057, #1870054)
+  * Account filesystem datasets in GC bucket policy budget, as it was leading
+    to under budget results once cleaned up.
+  * Fix warning when mounting source is set to default (LP: #1870052)
+  * Fix some issues in go-libzfs:
+    - it was not assigning the correct dataset type, leading to a segfault
+      if the user has a zfs volume in a pool.
+    - Perf enhancements by only loading our needed properties to reduce the
+      amount of C performed calls.
+  * Enhance apt hook:
+    - Only display output and errors if running on ZFS systems
+      (LP: #1868523, #1870304).
+    - Suppress the 20 minutes grace period and only prevent multiple snapshots
+      when unattended-upgrades is running.
+  * Transition from 19.10: change the userdata user properties on first boot
+    for machines installed from 19.10 without zsys installed.
+  * Add apport hook.
+  * Fix various mispells, simplify some code and remove some ineffective
+    assignements.
+  * Fix error message typos.
+  * Fix generator check on CI, update bug template and update CI to use Go 1.14
+    in preparation of focal switch to 1.14.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 08 Apr 2020 14:42:21 +0200
+
 zsys (0.4.2) focal; urgency=medium
 
   [ Jean-Baptiste Lallement ]
