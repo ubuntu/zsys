@@ -26,4 +26,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.2
 )
 
-replace github.com/bicomsystems/go-libzfs => github.com/ubuntu/go-libzfs v0.2.2-0.20200406140429-cf1f9329bf7e
+replace github.com/bicomsystems/go-libzfs => github.com/ubuntu/go-libzfs v0.2.2-0.20200410091938-105a6f043895
