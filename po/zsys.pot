@@ -525,7 +525,7 @@ msgid "Needs a valid user name, got nothing"
 msgstr ""
 
 #: internal/zfs/helpers.go:205
-msgid "New dataNew dataset found: %q"
+msgid "New dataset found: %q"
 msgstr ""
 
 #: internal/machines/gc.go:174 internal/machines/gc.go:362
