@@ -202,7 +202,7 @@ func newDatasetTree(ctx context.Context, dZFS libzfs.DZFSInterface, allDatasets 
 	}
 
 	name := (*dZFS.Properties())[libzfs.DatasetPropName].Value
-	log.Debugf(ctx, i18n.G("New dataNew dataset found: %q"), name)
+	log.Debugf(ctx, i18n.G("New dataset found: %q"), name)
 	node := Dataset{
 		Name:       name,
 		IsSnapshot: dZFS.IsSnapshot(),
