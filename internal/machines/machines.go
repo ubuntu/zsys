@@ -673,7 +673,9 @@ func (m Machine) Info(full bool) (string, error) {
 	}
 
 	// History
-	fmt.Fprintf(w, i18n.G("History:\n"))
+	if len(m.History) > 0 {
+		fmt.Fprintf(w, i18n.G("History:\t\n"))
+	}
 	timeToState := make(map[string]*State)
 	for id, s := range m.History {
 		k := fmt.Sprintf("%010d_%s", s.LastUsed.Unix(), id)
@@ -701,12 +703,9 @@ func (m Machine) Info(full bool) (string, error) {
 	for _, user := range keys {
 		fmt.Fprintf(w, i18n.G("  - Name:\t%s\n"), user)
 
-		if len(m.AllUsersStates[user]) == 0 {
-			fmt.Fprintf(w, i18n.G("    History:\tEmpty\n"))
-			continue
+		if len(m.AllUsersStates[user]) > 1 {
+			fmt.Fprintf(w, i18n.G("    History:\t\n"))
 		}
-
-		fmt.Fprintf(w, i18n.G("    History:\t\n"))
 
 		timeToState := make(map[string]*State)
 	nextUserState:
