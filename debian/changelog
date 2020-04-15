@@ -1,4 +1,4 @@
-zsys (0.4.4) UNRELEASED; urgency=medium
+zsys (0.4.4) focal; urgency=medium
 
   Some polish before the focal release:
   * Only print generated names on state save when generated:
@@ -8,7 +8,7 @@ zsys (0.4.4) UNRELEASED; urgency=medium
     Use the same format for both: "History:\t\n" by reusing the string.
     Fix off by one error.
 
- -- Didier Roche <didrocks@ubuntu.com>  Wed, 15 Apr 2020 16:47:41 +0200
+ -- Didier Roche <didrocks@ubuntu.com>  Wed, 15 Apr 2020 16:52:35 +0200
 
 zsys (0.4.3) focal; urgency=medium
 
