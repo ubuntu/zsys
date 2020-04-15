@@ -150,6 +150,11 @@ func saveState(args []string, system bool, userName string, noUpdateBootMenu, sa
 		}
 	}
 
+	// Non zsys system: exit
+	if stateName == "" {
+		return nil
+	}
+
 	fmt.Printf(i18n.G("Successfully saved as %q\n"), stateName)
 
 	return nil
