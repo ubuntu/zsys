@@ -26,22 +26,18 @@ msgstr ""
 msgid "\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:746
+#: internal/machines/machines.go:745
 #, c-format
 msgid "     - %s (%s)\n"
 msgstr ""
 
-#: internal/machines/machines.go:743
+#: internal/machines/machines.go:742
 #, c-format
 msgid "     - %s (%s): %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:709
+#: internal/machines/machines.go:707
 msgid "    History:\t\n"
-msgstr ""
-
-#: internal/machines/machines.go:705
-msgid "    History:\tEmpty\n"
 msgstr ""
 
 #: internal/machines/machines.go:646 internal/machines/state.go:262
@@ -59,7 +55,7 @@ msgstr ""
 msgid "  - %s (%s)%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:702 internal/machines/machines.go:775
+#: internal/machines/machines.go:704 internal/machines/machines.go:774
 #, c-format
 msgid "  - Name:\t%s\n"
 msgstr ""
@@ -94,21 +90,21 @@ msgstr ""
 msgid "%q returned an error: "
 msgstr ""
 
-#: internal/machines/machines.go:843
+#: internal/machines/machines.go:842
 msgid "%s\t%t\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:796 internal/machines/machines.go:804
+#: internal/machines/machines.go:795 internal/machines/machines.go:803
 #, c-format
 msgid "%s\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:802
+#: internal/machines/machines.go:801
 #, c-format
 msgid "%s\tUser: %s\n"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:206
+#: cmd/zsysd/client/state.go:211
 #, c-format
 msgid ""
 "%s\n"
@@ -145,32 +141,32 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/machines/machines.go:788
+#: internal/machines/machines.go:787
 #, c-format
 msgid "%sCreated on:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:792
+#: internal/machines/machines.go:791
 #, c-format
 msgid "%sLast Booted Kernel:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:786
+#: internal/machines/machines.go:785
 #, c-format
 msgid "%sLast Used:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:793
+#: internal/machines/machines.go:792
 #, c-format
 msgid "%sSystem Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:800
+#: internal/machines/machines.go:799
 #, c-format
 msgid "%sUser Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:817
+#: internal/machines/machines.go:816
 msgid "--\t----\t---------\n"
 msgstr ""
 
@@ -448,12 +444,11 @@ msgstr ""
 msgid "Give more detail informations on each machine."
 msgstr ""
 
-#. History
-#: internal/machines/machines.go:676
-msgid "History:\n"
+#: internal/machines/machines.go:677
+msgid "History:\t\n"
 msgstr ""
 
-#: internal/machines/machines.go:816
+#: internal/machines/machines.go:815
 msgid "ID\tZSys\tLast Used\n"
 msgstr ""
 
@@ -809,7 +804,7 @@ msgstr ""
 msgid "Stops zsys daemon."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:153
+#: cmd/zsysd/client/state.go:158
 msgid "Successfully saved as %q\n"
 msgstr ""
 
@@ -901,7 +896,7 @@ msgstr ""
 msgid "Users states have changes, rerun user GC"
 msgstr ""
 
-#: internal/machines/machines.go:699
+#: internal/machines/machines.go:701
 msgid "Users:\n"
 msgstr ""
 
@@ -1201,7 +1196,7 @@ msgstr ""
 msgid "couldn't generate request id, setting to %q: %v"
 msgstr ""
 
-#: internal/machines/machines.go:134 internal/machines/machines.go:857
+#: internal/machines/machines.go:134 internal/machines/machines.go:856
 msgid "couldn't load zsys configuration"
 msgstr ""
 
@@ -1295,7 +1290,7 @@ msgstr ""
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
-#: internal/machines/machines.go:784 internal/machines/machines.go:841
+#: internal/machines/machines.go:783 internal/machines/machines.go:840
 msgid "current"
 msgstr ""
 
@@ -1443,7 +1438,7 @@ msgstr ""
 msgid "no suffix was provided for cloning"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:164
+#: cmd/zsysd/client/state.go:169
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
@@ -1531,11 +1526,11 @@ msgstr ""
 msgid "user %q doesn't exist"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:214
+#: cmd/zsysd/client/state.go:219
 msgid "y"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:214
+#: cmd/zsysd/client/state.go:219
 msgid "yes"
 msgstr ""
 
@@ -1543,7 +1538,7 @@ msgstr ""
 msgid "you can't provide no-update-bootmenu option on user state save"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:77 cmd/zsysd/client/state.go:160
+#: cmd/zsysd/client/state.go:77 cmd/zsysd/client/state.go:165
 msgid "you can't provide system and user flags at the same time"
 msgstr ""
 
