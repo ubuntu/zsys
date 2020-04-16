@@ -1,4 +1,4 @@
-zsys (0.4.5) UNRELEASED; urgency=medium
+zsys (0.4.5) focal; urgency=medium
 
   * Fix user creation and rename integration (LP: #1873263)
   * Close socket when the service stops (thanks blkeller)
