@@ -4,9 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/ubuntu/zsys/internal/config"
@@ -87,6 +89,10 @@ selectUserDataset:
 	if err := t.Create(userdataset, homepath, "on"); err != nil {
 		cancel()
 		return err
+	}
+	// FIXME: mount the dataset here, we should have that in Create() but mitigate the impact for focal release
+	if err := syscall.Mount(userdataset, homepath, "zfs", 0, "zfsutil"); err != nil {
+		log.Warningf(ctx, i18n.G("Couldn't mount %s: %v"), homepath, err)
 	}
 
 	// Tag to associate with current system and lastUsed
@@ -170,8 +176,33 @@ func (ms *Machines) tryReuseUserDataSet(t *zfs.Transaction, user string, oldhome
 				// We'll reuse that dataset
 				if match {
 					log.Infof(t.Context(), i18n.G("Reusing %q as matching user name or old mountpoint"), d.Name)
+					var uid, gid int
+					if oldhome != "" {
+						if info, err := os.Stat(oldhome); err == nil {
+							if stat, ok := info.Sys().(*syscall.Stat_t); ok {
+								uid = int(stat.Uid)
+								gid = int(stat.Gid)
+							}
+						}
+
+					}
 					if err := t.SetProperty(libzfs.MountPointProp, newhome, d.Name, false); err != nil {
 						return false, fmt.Errorf(i18n.G("couldn't set new home %q to %q: ")+config.ErrorFormat, newhome, d.Name, err)
+					}
+					// Reset owner on newly created mountpoint
+					// FIXME: this should be in zfs itself when changing mount property and restore all properties on mountpoint itself
+					if uid != 0 {
+						if err := syscall.Unmount(newhome, 0); err == nil {
+							if err := os.Chown(newhome, uid, gid); err != nil {
+								log.Warningf(t.Context(), i18n.G("Couldn't restore permission on new home directory %s: %v"), newhome, err)
+							}
+							if err := syscall.Mount(d.Name, newhome, "zfs", 0, "zfsutil"); err != nil {
+								log.Warningf(t.Context(), i18n.G("Couldn't mount %s: %v"), newhome, err)
+							}
+						}
+					}
+					if err := os.Remove(oldhome); err != nil {
+						log.Warningf(t.Context(), i18n.G("couldn't cleanup %s directory: %v"), oldhome, err)
 					}
 					return true, nil
 				}
