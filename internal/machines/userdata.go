@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/ubuntu/zsys/internal/config"
@@ -87,6 +88,10 @@ selectUserDataset:
 	if err := t.Create(userdataset, homepath, "on"); err != nil {
 		cancel()
 		return err
+	}
+	// FIXME: mount the dataset here, we should have that in Create() but mitigate the impact for focal release
+	if err := syscall.Mount(userdataset, homepath, "zfs", 0, "zfsutil"); err != nil {
+		log.Warningf(ctx, i18n.G("Couldn't mount %s: %v"), homepath, err)
 	}
 
 	// Tag to associate with current system and lastUsed
