@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -177,6 +178,9 @@ func (ms *Machines) tryReuseUserDataSet(t *zfs.Transaction, user string, oldhome
 					log.Infof(t.Context(), i18n.G("Reusing %q as matching user name or old mountpoint"), d.Name)
 					if err := t.SetProperty(libzfs.MountPointProp, newhome, d.Name, false); err != nil {
 						return false, fmt.Errorf(i18n.G("couldn't set new home %q to %q: ")+config.ErrorFormat, newhome, d.Name, err)
+					}
+					if err := os.Remove(oldhome); err != nil {
+						log.Warningf(t.Context(), i18n.G("couldn't cleanup %s directory: %v"), oldhome, err)
 					}
 					return true, nil
 				}
