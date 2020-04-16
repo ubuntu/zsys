@@ -1,3 +1,10 @@
+zsys (0.4.5) UNRELEASED; urgency=medium
+
+  * Fix user creation and rename integration (LP: #1873263)
+  * Close socket when the service stops (thanks blkeller)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Thu, 16 Apr 2020 15:54:23 +0200
+
 zsys (0.4.4) focal; urgency=medium
 
   Some polish before the focal release:
