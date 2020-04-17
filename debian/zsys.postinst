@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+# The zsysd service fails to start if the zfs kernel module is not loaded,
+# so we make sure it's loaded here first.
+modprobe -v zfs || true
+
+#DEBHELPER#
