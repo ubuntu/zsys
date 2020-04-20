@@ -20,7 +20,7 @@ Built-Using: ${misc:Built-Using},
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          grub2-common,
-Recommends: zfsutils-linux
+Recommends: zfsutils-linux,
 Description: ZFS SYStem integration
  ZSYS is a Zfs SYStem tool targetting an enhanced ZOL experience.
  It allows running multiple ZFS system in parallels on the same machine,
