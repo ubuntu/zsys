@@ -15,7 +15,7 @@ const (
 )
 
 func updateBootMenu(ctx context.Context) error {
-	log.RemotePrint(ctx, i18n.G("Updating GRUB menu"))
+	log.RemotePrint(ctx, i18n.G("Adding new system snapshot to GRUB menu"))
 	cmd := exec.Command(updateGrubCmd)
 	logger := &logWriter{ctx: ctx}
 	cmd.Stdout = logger
