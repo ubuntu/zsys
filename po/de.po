@@ -175,10 +175,6 @@ msgid ""
 "A snapshot %q already exists on system and can create an incoherent state"
 msgstr ""
 
-#: internal/daemon/bootmenu.go:18
-msgid "Adding new system snapshot to GRUB menu"
-msgstr ""
-
 #: cmd/zsysd/cmdhandler/common.go:18
 #, c-format
 msgid "Alias of %s"
@@ -980,6 +976,10 @@ msgstr ""
 
 #: internal/zfs/zfs.go:360
 msgid "ZFS: trying to snapshot %q, recursive: %v"
+msgstr ""
+
+#: internal/daemon/bootmenu.go:18
+msgid "ZSys is adding automatic system snapshot to GRUB menu"
 msgstr ""
 
 #: internal/machines/machines.go:659
