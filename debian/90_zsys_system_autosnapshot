@@ -1,4 +1,4 @@
 // Takes a snapshot of the system before package changes.
-DPkg::Pre-Invoke {"/usr/libexec/zsys-system-autosnapshot snapshot || true";};
+DPkg::Pre-Invoke {"[ -x /usr/libexec/zsys-system-autosnapshot ] && /usr/libexec/zsys-system-autosnapshot snapshot || true";};
 // Update our bootloader to list the new snapshot after the update is done to not block the critical path
-DPkg::Post-Invoke {"/usr/libexec/zsys-system-autosnapshot update-menu || true";};
+DPkg::Post-Invoke {"[ -x /usr/libexec/zsys-system-autosnapshot ] && /usr/libexec/zsys-system-autosnapshot update-menu || true";};
