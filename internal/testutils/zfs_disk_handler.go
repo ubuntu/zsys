@@ -76,7 +76,6 @@ func WithWaitBetweenSnapshots() func(*FakePools) {
 
 // LibZFSInterface is the interface used to create zfs pools on disk or in memory
 type LibZFSInterface interface {
-	PoolOpen(name string) (pool libzfs.Pool, err error)
 	PoolCreate(name string, vdev libzfs.VDevTree, features map[string]string,
 		props libzfs.PoolProperties, fsprops libzfs.DatasetProperties) (pool libzfs.Pool, err error)
 	libzfs.Interface
