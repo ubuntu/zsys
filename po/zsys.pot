@@ -278,7 +278,7 @@ msgid "Couldn't destroy %s: %v"
 msgstr ""
 
 #: internal/machines/gc.go:443
-msgid "Couldn't destroy unmanaged user dataset %s: %v"
+msgid "Couldn't destroy user dataset %s: %v"
 msgstr ""
 
 #: internal/authorizer/authorizer.go:187
