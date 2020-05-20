@@ -88,7 +88,7 @@ func (s *Server) SaveUserState(req *zsys.SaveUserStateRequest, stream zsys.Zsys_
 	}
 
 	if stateName, err = s.Machines.CreateUserSnapshot(stream.Context(), userName, stateName); err != nil {
-		return fmt.Errorf(i18n.G("couldn't save state for user %q:")+config.ErrorFormat, userName, err)
+		return fmt.Errorf(i18n.G("couldn't save state for user %q: ")+config.ErrorFormat, userName, err)
 	}
 
 	stream.Send(&zsys.CreateSaveStateResponse{
