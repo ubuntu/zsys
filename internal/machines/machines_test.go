@@ -756,6 +756,9 @@ func TestCreateSystemSnapshot(t *testing.T) {
 		cmdline      string
 		snapshotName string
 
+		setCapOnPool string
+		capValue     string
+
 		wantErr bool
 		isNoOp  bool
 	}{
@@ -767,6 +770,12 @@ func TestCreateSystemSnapshot(t *testing.T) {
 		"Children on user datasets with one child non associated with current machine": {def: "m_with_userdata_child_associated_one_state.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9999")},
 
 		"No associated userdata": {def: "d_one_machine_with_children.yaml", cmdline: generateCmdLine("rpool")},
+
+		// Free space handling
+		"Not enough free space on system pool":                {def: "m_with_userdata_on_other_pool.yaml", setCapOnPool: "rpool", capValue: "99", wantErr: true},
+		"Not enough free space on user pool":                  {def: "m_with_userdata_on_other_pool.yaml", setCapOnPool: "rpool2", capValue: "99", wantErr: true},
+		"Capacity is invalid":                                 {def: "m_with_userdata_on_other_pool.yaml", setCapOnPool: "rpool", capValue: "NaN", wantErr: true},
+		"Take snapshot, not enough free space on other pools": {def: "m_without_userdata_prefer_system_pool.yaml", setCapOnPool: "rpool2", capValue: "99"},
 
 		// error cases with snapshot exists on root. on userdataset. on system child. on user child
 		"Error on existing snapshot on system root":  {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "system_root_snapshot", wantErr: true, isNoOp: true},
@@ -799,6 +808,10 @@ func TestCreateSystemSnapshot(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 
 			lzfs.ForceLastUsedTime(true)
+			if tc.setCapOnPool != "" {
+				lzfs.SetPoolCapacity(tc.setCapOnPool, tc.capValue)
+			}
+
 			initMachines := ms.CopyForTests(t)
 
 			snapshotName, err := ms.CreateSystemSnapshot(context.Background(), tc.snapshotName)
@@ -847,6 +860,9 @@ func TestCreateUserSnapshot(t *testing.T) {
 		snapshotName string
 		userName     string
 
+		setCapOnPool string
+		capValue     string
+
 		wantErr bool
 		isNoOp  bool
 	}{
@@ -856,6 +872,11 @@ func TestCreateUserSnapshot(t *testing.T) {
 
 		"Children on user datasets": {def: "m_with_userdata_children_on_user.yaml"},
 		"Children on user datasets with one child non associated with current machine": {def: "m_with_userdata_child_associated_one_state.yaml", cmdline: generateCmdLine("rpool/ROOT/ubuntu_9999")},
+
+		// Space handling
+		"Not enough free space on user pool":                       {def: "m_with_userdata_on_other_pool.yaml", setCapOnPool: "rpool2", capValue: "99", wantErr: true},
+		"Take user snapshot, not enough free space on other pools": {def: "m_with_userdata_on_other_pool.yaml", setCapOnPool: "rpool", capValue: "99"},
+		"Capacity is invalid":                                      {def: "m_with_userdata_on_other_pool.yaml", setCapOnPool: "rpool2", capValue: "NaN", wantErr: true},
 
 		// Error cases with non-existent user, snapshot exists on root, on userdataset, on system child, on user child
 		"Error on empty user":                       {def: "m_with_userdata.yaml", userName: "-", wantErr: true, isNoOp: true},
@@ -896,6 +917,10 @@ func TestCreateUserSnapshot(t *testing.T) {
 			lzfs := libzfs.(*mock.LibZFS)
 
 			lzfs.ForceLastUsedTime(true)
+			if tc.setCapOnPool != "" {
+				lzfs.SetPoolCapacity(tc.setCapOnPool, tc.capValue)
+			}
+
 			initMachines := ms.CopyForTests(t)
 
 			snapshotName, err := ms.CreateUserSnapshot(context.Background(), tc.userName, tc.snapshotName)
