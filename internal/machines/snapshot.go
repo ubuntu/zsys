@@ -64,6 +64,26 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 	} else {
 		toSnapshot = append(m.State.getDatasets(), m.State.getUsersDatasets()...)
 	}
+
+	// check pool capacity before saving state
+	pools := make(map[string]bool)
+	for _, d := range toSnapshot {
+		pools[strings.Split(d.Name, "/")[0]] = true
+	}
+
+	for p := range pools {
+		free, err := ms.z.GetPoolFreeSpace(p)
+		if err != nil {
+			return "", err
+		}
+
+		if free <= ms.conf.General.MinFreePoolSpace {
+			return "", fmt.Errorf(i18n.G(`Minimum free space to take a snapshot and preserve ZFS performance is %d%%.
+Free space on pool %q is %d%%.
+Please remove some states manually to free up space.`), ms.conf.General.MinFreePoolSpace, p, free)
+		}
+	}
+
 	for _, d := range toSnapshot {
 		if err := t.Snapshot(name, d.Name, false); err != nil {
 			cancel()

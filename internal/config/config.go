@@ -26,7 +26,8 @@ var ErrorFormat = "%v"
 type ZConfig struct {
 	History HistoryRules
 	General struct {
-		Timeout int
+		Timeout          int
+		MinFreePoolSpace int
 	}
 	Path string
 }
