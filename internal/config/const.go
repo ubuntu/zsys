@@ -8,8 +8,10 @@ const (
 	// NoModifiedBoot is the message to print when the current boot has no dataset modifications
 	NoModifiedBoot = "zsys-meta:no-modified-boot"
 
-	// DefaultSocket path.
-	DefaultSocket = "/run/zsysd.sock"
+	// defaultSocket path.
+	defaultSocket = "/run/zsysd.sock"
+	// socketEnv overrides default socket via environment variable
+	socketEnv = "ZSYSD_SOCKET"
 
 	// DefaultClientTimeout for client requests
 	DefaultClientTimeout = 120 * time.Second

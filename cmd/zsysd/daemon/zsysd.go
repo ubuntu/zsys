@@ -27,7 +27,7 @@ var (
 			config.SetVerboseMode(flagVerbosity)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			s, err := daemon.New(config.DefaultSocket)
+			s, err := daemon.New(config.SocketPath())
 			if err != nil {
 				cmdErr = fmt.Errorf(i18n.G("Couldn't register grpc server: %v"), err)
 				return
