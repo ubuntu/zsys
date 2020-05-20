@@ -440,7 +440,7 @@ nextDataset:
 		// We destroy here all snapshots and leaf attached. Snapshots won’t be taken into account, however, we don’t want
 		// to try destroying leaves again, keep a list.
 		if err := nt.Destroy(d.Name); err != nil {
-			log.Warningf(ctx, i18n.G("Couldn't destroy unmanaged user dataset %s: %v"), d.Name, err)
+			log.Warningf(ctx, i18n.G("Couldn't destroy user dataset %s: %v"), d.Name, err)
 		}
 
 		alreadyDestroyedRoot = append(alreadyDestroyedRoot, d.Name)
