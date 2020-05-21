@@ -94,10 +94,7 @@ func RemotePrint(ctx context.Context, args ...interface{}) {
 // client end stream referenced by ctx.
 func RemotePrintf(ctx context.Context, format string, args ...interface{}) {
 	if info, ok := ctx.Value(requestInfoKey).(*requestInfo); ok {
-		l := info.logger.GetLevel()
-		info.logger.SetLevel(InfoLevel)
-		info.logger.Printf(format, args...)
-		info.logger.SetLevel(l)
+		info.logger.Out.Write([]byte(fmt.Sprintf(format, args...)))
 	}
 }
 
