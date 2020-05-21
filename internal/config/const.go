@@ -11,8 +11,8 @@ const (
 	// DefaultSocket path.
 	DefaultSocket = "/run/zsysd.sock"
 
-	// DefaultClientTimeout for client requests
-	DefaultClientTimeout = 120 * time.Second
+	// DefaultClientTimeout for client requests between 2 pings
+	DefaultClientTimeout = 30 * time.Second
 
 	// DefaultServerIdleTimeout is the default time without a request before the server exits
 	DefaultServerIdleTimeout = time.Minute
