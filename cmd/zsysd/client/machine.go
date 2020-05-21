@@ -66,7 +66,7 @@ func show(args []string) error {
 
 	stream, err := client.MachineShow(ctx, &zsys.MachineShowRequest{MachineId: machineID, Full: fullInfo})
 
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
@@ -99,7 +99,7 @@ func list(args []string) error {
 
 	stream, err := client.MachineList(ctx, &zsys.Empty{})
 
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 

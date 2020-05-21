@@ -52,7 +52,7 @@ func createUserData(user, homepath string) (err error) {
 	defer cancel()
 
 	stream, err := client.CreateUserData(ctx, &zsys.CreateUserDataRequest{User: user, Homepath: homepath})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
@@ -85,7 +85,7 @@ func changeHomeOnUserData(home, newHome string) (err error) {
 	defer cancel()
 
 	stream, err := client.ChangeHomeOnUserData(ctx, &zsys.ChangeHomeOnUserDataRequest{Home: home, NewHome: newHome})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 

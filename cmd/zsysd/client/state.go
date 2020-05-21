@@ -100,7 +100,7 @@ func saveState(args []string, system bool, userName string, noUpdateBootMenu, sa
 			Autosave:       saveAuto,
 		})
 
-		if err = checkConn(err); err != nil {
+		if err = checkConn(err, reset); err != nil {
 			return err
 		}
 
@@ -130,7 +130,7 @@ func saveState(args []string, system bool, userName string, noUpdateBootMenu, sa
 
 		stream, err := client.SaveUserState(ctx, &zsys.SaveUserStateRequest{UserName: userName, StateName: stateName})
 
-		if err = checkConn(err); err != nil {
+		if err = checkConn(err, reset); err != nil {
 			return err
 		}
 
@@ -239,7 +239,7 @@ func removeStateGRPC(client *zsys.ZsysLogClient, force, dryrun, system bool, use
 			Dryrun:    dryrun,
 		})
 
-		if err = checkConn(err); err != nil {
+		if err = checkConn(err, reset); err != nil {
 			return err
 		}
 
@@ -265,7 +265,7 @@ func removeStateGRPC(client *zsys.ZsysLogClient, force, dryrun, system bool, use
 			Dryrun:    dryrun,
 		})
 
-		if err = checkConn(err); err != nil {
+		if err = checkConn(err, reset); err != nil {
 			return err
 		}
 

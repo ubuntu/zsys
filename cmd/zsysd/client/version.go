@@ -38,7 +38,7 @@ func getVersion() (err error) {
 	defer cancel()
 
 	stream, err := client.Version(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 

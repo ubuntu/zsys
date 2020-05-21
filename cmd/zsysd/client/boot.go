@@ -63,7 +63,7 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 	defer cancel()
 
 	stream, err := client.PrepareBoot(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
@@ -104,7 +104,7 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	defer cancel()
 
 	stream, err := client.CommitBoot(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
@@ -145,7 +145,7 @@ func updateBootMenu(auto bool) error {
 	defer cancel()
 
 	stream, err := client.UpdateBootMenu(ctx, &zsys.UpdateBootMenuRequest{Auto: auto})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
