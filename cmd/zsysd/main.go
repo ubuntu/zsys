@@ -45,7 +45,7 @@ func main() {
 	}
 	err := errFunc()
 	if err != nil {
-		if errors.Is(err, context.DeadlineExceeded) {
+		if errors.Is(err, context.Canceled) {
 			err = errors.New(i18n.G("Service took too long to respond. Disconnecting client."))
 		}
 		log.Error(err)

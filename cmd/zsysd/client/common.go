@@ -1,8 +1,10 @@
 package client
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/ubuntu/zsys"
 	"github.com/ubuntu/zsys/internal/config"
@@ -33,4 +35,24 @@ func checkConn(err error) error {
 	}
 
 	return nil
+}
+
+// contextWithResettableTimeout returns a context that can be cancelled manually reset to timeout value sending an element to the returned channel
+func contextWithResettableTimeout(ctx context.Context, timeout time.Duration) (context.Context, context.CancelFunc, chan<- struct{}) {
+	ctx, cancel := context.WithCancel(ctx)
+	reset := make(chan struct{})
+
+	go func() {
+		for {
+			select {
+			case <-time.After(timeout):
+				log.Debugf(ctx, i18n.G("Didn't receive any information from service in %s"), timeout)
+				cancel()
+				break
+			case <-reset:
+			}
+		}
+	}()
+
+	return ctx, cancel, reset
 }

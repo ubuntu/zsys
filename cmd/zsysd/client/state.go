@@ -2,7 +2,6 @@ package client
 
 import (
 	"bufio"
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -91,7 +90,7 @@ func saveState(args []string, system bool, userName string, noUpdateBootMenu, sa
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	if system {
@@ -108,6 +107,7 @@ func saveState(args []string, system bool, userName string, noUpdateBootMenu, sa
 		for {
 			r, err := stream.Recv()
 			if err == streamlogger.ErrLogMsg {
+				reset <- struct{}{}
 				continue
 			}
 			if err == io.EOF {
@@ -137,6 +137,7 @@ func saveState(args []string, system bool, userName string, noUpdateBootMenu, sa
 		for {
 			r, err := stream.Recv()
 			if err == streamlogger.ErrLogMsg {
+				reset <- struct{}{}
 				continue
 			}
 			if err == io.EOF {
@@ -226,7 +227,7 @@ func removeState(args []string) (err error) {
 }
 
 func removeStateGRPC(client *zsys.ZsysLogClient, force, dryrun, system bool, userName, stateName string) error {
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	var err error
@@ -245,6 +246,7 @@ func removeStateGRPC(client *zsys.ZsysLogClient, force, dryrun, system bool, use
 		for {
 			_, err = stream.Recv()
 			if err == streamlogger.ErrLogMsg {
+				reset <- struct{}{}
 				continue
 			}
 			if err != nil {
@@ -270,6 +272,7 @@ func removeStateGRPC(client *zsys.ZsysLogClient, force, dryrun, system bool, use
 		for {
 			_, err = stream.Recv()
 			if err == streamlogger.ErrLogMsg {
+				reset <- struct{}{}
 				continue
 			}
 			if err != nil {

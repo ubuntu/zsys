@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -60,7 +59,7 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.PrepareBoot(ctx, &zsys.Empty{})
@@ -72,6 +71,7 @@ func bootPrepare(printModifiedBoot bool) (err error) {
 	for {
 		r, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -100,7 +100,7 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.CommitBoot(ctx, &zsys.Empty{})
@@ -112,6 +112,7 @@ func bootCommit(printModifiedBoot bool) (err error) {
 	for {
 		r, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -140,7 +141,7 @@ func updateBootMenu(auto bool) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.UpdateBootMenu(ctx, &zsys.UpdateBootMenuRequest{Auto: auto})
@@ -151,6 +152,7 @@ func updateBootMenu(auto bool) error {
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {

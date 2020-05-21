@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"io"
 
 	"github.com/spf13/cobra"
@@ -49,7 +48,7 @@ func createUserData(user, homepath string) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.CreateUserData(ctx, &zsys.CreateUserDataRequest{User: user, Homepath: homepath})
@@ -60,6 +59,7 @@ func createUserData(user, homepath string) (err error) {
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -81,7 +81,7 @@ func changeHomeOnUserData(home, newHome string) (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.ChangeHomeOnUserData(ctx, &zsys.ChangeHomeOnUserDataRequest{Home: home, NewHome: newHome})
@@ -92,6 +92,7 @@ func changeHomeOnUserData(home, newHome string) (err error) {
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
