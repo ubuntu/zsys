@@ -53,7 +53,7 @@ jobs:
   generators:
     name: Generated files are up to date
     runs-on: ubuntu-latest
-    container: ubuntu:devel
+    container: ubuntu:latest
     steps:
       # Add dependencies
       - name: Install dependencies
