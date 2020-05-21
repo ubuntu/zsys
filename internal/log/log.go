@@ -60,7 +60,11 @@ func Debug(ctx context.Context, args ...interface{}) {
 // and may push to the stream may push to the stream referenced by ctx.
 func Debugf(ctx context.Context, format string, args ...interface{}) {
 	if info, ok := ctx.Value(requestInfoKey).(*requestInfo); ok {
-		info.logger.Debugf(format, args...)
+		if info.logger.Level >= DebugLevel {
+			info.logger.Debugf(format, args...)
+		} else {
+			info.logger.Out.Write(bytePingLogMessage)
+		}
 		// for standard logger, save the id
 		format = fmt.Sprintf(reqIDFormat, info.id, format)
 	}
@@ -77,7 +81,11 @@ func Info(ctx context.Context, args ...interface{}) {
 // and may push to the stream may push to the stream referenced by ctx.
 func Infof(ctx context.Context, format string, args ...interface{}) {
 	if info, ok := ctx.Value(requestInfoKey).(*requestInfo); ok {
-		info.logger.Infof(format, args...)
+		if info.logger.Level >= InfoLevel {
+			info.logger.Infof(format, args...)
+		} else {
+			info.logger.Out.Write(bytePingLogMessage)
+		}
 		// for standard logger, save the id
 		format = fmt.Sprintf(reqIDFormat, info.id, format)
 	}
@@ -108,7 +116,11 @@ func Warning(ctx context.Context, args ...interface{}) {
 // and may push to the stream may push to the stream referenced by ctx.
 func Warningf(ctx context.Context, format string, args ...interface{}) {
 	if info, ok := ctx.Value(requestInfoKey).(*requestInfo); ok {
-		info.logger.Warningf(format, args...)
+		if info.logger.Level >= DefaultLevel {
+			info.logger.Warningf(format, args...)
+		} else {
+			info.logger.Out.Write(bytePingLogMessage)
+		}
 		// for standard logger, save the id
 		format = fmt.Sprintf(reqIDFormat, info.id, format)
 	}

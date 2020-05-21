@@ -112,6 +112,8 @@ func (w *clientRequestLogStream) RecvMsg(m interface{}) (errFn error) {
 		return nil
 	}
 
-	fmt.Fprint(os.Stderr, l)
+	if l != log.PingLogMessage {
+		fmt.Fprint(os.Stderr, l)
+	}
 	return ErrLogMsg
 }
