@@ -67,7 +67,7 @@ jobs:
         with:
           go-version: '1.14.x'
       - name: Check generated files
-        run: ./.github/ci/check-generate
+        run: go mod download && ./.github/ci/check-generate
 
   extended-quality:
     name: Extended quality checks
