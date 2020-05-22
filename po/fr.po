@@ -311,6 +311,10 @@ msgstr ""
 msgid "Couldn't mount %s: %v"
 msgstr ""
 
+#: internal/zfs/pool.go:15
+msgid "Couldn't open pool %s: %v"
+msgstr ""
+
 #: internal/authorizer/authorizer.go:181
 msgid "Couldn't open stat file for process: %v"
 msgstr ""
@@ -467,6 +471,10 @@ msgstr ""
 
 #: internal/daemon/timeout.go:43
 msgid "Idle timeout expired"
+msgstr ""
+
+#: internal/zfs/pool.go:21
+msgid "Invalid capacity %q on pool %q: %v"
 msgstr ""
 
 #: internal/machines/gc.go:302
@@ -1205,7 +1213,7 @@ msgstr ""
 msgid "couldn't find dataset %q in cache"
 msgstr ""
 
-#: internal/config/config.go:73
+#: internal/config/config.go:75
 msgid "couldn't find default configuration path, fallback to internal default"
 msgstr ""
 
@@ -1233,7 +1241,7 @@ msgstr ""
 msgid "couldn't promote dataset %q: "
 msgstr ""
 
-#: internal/config/config.go:75
+#: internal/config/config.go:77
 msgid "couldn't read our internal configuration: %v "
 msgstr ""
 
@@ -1264,7 +1272,7 @@ msgid "couldn't remove user state %s: "
 msgstr ""
 
 #: internal/daemon/state.go:91
-msgid "couldn't save state for user %q:"
+msgid "couldn't save state for user %q: "
 msgstr ""
 
 #: internal/daemon/state.go:50
@@ -1344,15 +1352,15 @@ msgstr ""
 msgid "failed to listen on %q: %w"
 msgstr ""
 
-#: internal/config/config.go:71
+#: internal/config/config.go:73
 msgid "failed to load configuration file %s: %v "
 msgstr ""
 
-#: internal/config/config.go:82
+#: internal/config/config.go:84
 msgid "failed to read configuration file %s: %v "
 msgstr ""
 
-#: internal/config/config.go:87
+#: internal/config/config.go:89
 msgid "failed to unmarshal yaml: %v"
 msgstr ""
 
