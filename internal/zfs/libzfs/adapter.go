@@ -27,6 +27,8 @@ type (
 const (
 	// PoolPropAltroot ZFS Pool property
 	PoolPropAltroot = golibzfs.PoolPropAltroot
+	// PoolPropCapacity ZFS Pool property
+	PoolPropCapacity = golibzfs.PoolPropCapacity
 	// PoolNumProps is the end pool number property
 	PoolNumProps = golibzfs.PoolNumProps
 	// VDevTypeFile is the vdevtype on file
@@ -77,6 +79,7 @@ const (
 
 // Interface is the interface to use real libzfs or our in memory mock.
 type Interface interface {
+	PoolOpen(name string) (pool Pool, err error)
 	DatasetOpenAll() (datasets []DZFSInterface, err error)
 	DatasetOpen(name string) (d DZFSInterface, err error)
 	DatasetCreate(path string, dtype DatasetType, props map[Prop]Property) (d DZFSInterface, err error)

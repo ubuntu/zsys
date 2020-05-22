@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/ubuntu/zsys/internal/i18n"
@@ -25,7 +26,8 @@ var ErrorFormat = "%v"
 type ZConfig struct {
 	History HistoryRules
 	General struct {
-		Timeout int
+		Timeout          int
+		MinFreePoolSpace int
 	}
 	Path string
 }
@@ -90,4 +92,14 @@ func Load(ctx context.Context, path string) (ZConfig, error) {
 	c.Path = path
 
 	return c, nil
+}
+
+// SocketPath returns the unix path which can be overridden by environment variable
+func SocketPath() string {
+	s := defaultSocket
+	overriddenS := os.Getenv(socketEnv)
+	if overriddenS != "" {
+		s = overriddenS
+	}
+	return s
 }

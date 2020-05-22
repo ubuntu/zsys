@@ -17,7 +17,7 @@ import (
 // newClient returns a new zsys client object
 func newClient() (*zsys.ZsysLogClient, error) {
 	// TODO: allow change socket address
-	c, err := zsys.NewZsysUnixSocketClient(config.DefaultSocket, log.GetLevel())
+	c, err := zsys.NewZsysUnixSocketClient(config.SocketPath(), log.GetLevel())
 	if err != nil {
 		return nil, fmt.Errorf(i18n.G("couldn't connect to zsys daemon: %v"), err)
 	}

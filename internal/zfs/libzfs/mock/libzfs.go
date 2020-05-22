@@ -43,6 +43,7 @@ func (l *LibZFS) PoolCreate(name string, vdev libzfs.VDevTree, features map[stri
 	p := libzfs.Pool{
 		Properties: make([]libzfs.Property, libzfs.PoolNumProps+1),
 	}
+	p.Properties[libzfs.PoolPropCapacity] = libzfs.Property{Value: "30"}
 	for i, prop := range props {
 		p.Properties[i] = libzfs.Property{Value: prop}
 	}
@@ -319,6 +320,13 @@ func (l *LibZFS) SetDatasetAsMounted(name string, mounted bool) {
 		m = "yes"
 	}
 	d.setPropertyWithSource(libzfs.DatasetPropMounted, m, "")
+}
+
+// SetPoolCapacity allows forcing a capabity value on a pool
+func (l *LibZFS) SetPoolCapacity(name, cap string) {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.pools[name].Properties[libzfs.PoolPropCapacity] = libzfs.Property{Value: cap}
 }
 
 // ErrOnPromote forces a failure of the mock on clone operation
