@@ -104,7 +104,7 @@ msgstr ""
 msgid "%s\tUser: %s\n"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:211
+#: cmd/zsysd/client/state.go:212
 #, c-format
 msgid ""
 "%s\n"
@@ -230,7 +230,7 @@ msgstr ""
 msgid "Collecting all states for current bucket"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:101
+#: cmd/zsysd/client/service.go:100
 msgid "Collects all the datasets including manual snapshots and clones."
 msgstr ""
 
@@ -238,7 +238,7 @@ msgstr ""
 msgid "Commit current boot state"
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:35
+#: cmd/zsysd/client/boot.go:34
 msgid "Commit system and user datasets states as a successful boot"
 msgstr ""
 
@@ -315,7 +315,7 @@ msgstr ""
 msgid "Couldn't open stat file for process: %v"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:254
+#: cmd/zsysd/client/service.go:257
 msgid "Couldn't open trace file %s: %v"
 msgstr ""
 
@@ -339,11 +339,11 @@ msgstr ""
 msgid "Couldn't retrieve user for %q: %v"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:304
+#: cmd/zsysd/client/service.go:307
 msgid "Couldn't write to file: %v"
 msgstr ""
 
-#: cmd/zsysd/client/userdata.go:25
+#: cmd/zsysd/client/userdata.go:24
 msgid ""
 "Create a new home user dataset via an user dataset (if doesn't exist) "
 "creation"
@@ -391,27 +391,32 @@ msgstr ""
 msgid "Didn't find origin %q for %q matching any dataset"
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:48
+#: cmd/zsysd/client/common.go:58
+#, c-format
+msgid "Didn't receive any information from service in %s"
+msgstr ""
+
+#: cmd/zsysd/client/boot.go:47
 msgid "Display if any zfs datasets have been modified to boot"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:62
+#: cmd/zsysd/client/state.go:61
 msgid "Do not update bootmenu on system state save"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:69
+#: cmd/zsysd/client/state.go:68
 msgid "Dry run, will not remove anything"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:95
+#: cmd/zsysd/client/service.go:94
 msgid "Dump the trace to a file. Default is ./zsys.<trace-type>.pprof"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:36
+#: cmd/zsysd/client/service.go:35
 msgid "Dumps the current state of zsys."
 msgstr ""
 
-#: cmd/zsysd/client/service.go:97
+#: cmd/zsysd/client/service.go:96
 msgid "Duration of the capture. Default is 30 seconds."
 msgstr ""
 
@@ -419,7 +424,7 @@ msgstr ""
 msgid "Ensure boot on %q"
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:22
+#: cmd/zsysd/client/boot.go:21
 msgid ""
 "Ensure that the right datasets are ready to be mounted and committed during "
 "early boot"
@@ -430,7 +435,7 @@ msgstr ""
 msgid "First state matching for this bucket: %s (%s)"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:68
+#: cmd/zsysd/client/state.go:67
 msgid "Force removing, even if dependencies are found"
 msgstr ""
 
@@ -448,7 +453,7 @@ msgstr ""
 msgid "Getting dependencies for user state %s"
 msgstr ""
 
-#: cmd/zsysd/client/machine.go:48
+#: cmd/zsysd/client/machine.go:47
 msgid "Give more detail informations on each machine."
 msgstr ""
 
@@ -496,15 +501,15 @@ msgstr ""
 msgid "Keeping snapshot %v as it's not a zsys one"
 msgstr ""
 
-#: cmd/zsysd/client/machine.go:33
+#: cmd/zsysd/client/machine.go:32
 msgid "List all the machines and basic information."
 msgstr ""
 
-#: cmd/zsysd/client/machine.go:19
+#: cmd/zsysd/client/machine.go:18
 msgid "Machine management"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:26
+#: cmd/zsysd/client/state.go:25
 msgid "Machine state management"
 msgstr ""
 
@@ -564,7 +569,7 @@ msgstr ""
 msgid "Polkit denied access"
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:29
+#: cmd/zsysd/client/boot.go:28
 msgid ""
 "Prepare boot by ensuring correct system and user datasets are switched on "
 "and off"
@@ -597,7 +602,7 @@ msgstr ""
 msgid "Ready state sent to systemd"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:48
+#: cmd/zsysd/client/service.go:47
 msgid "Refreshes machines states."
 msgstr ""
 
@@ -605,22 +610,22 @@ msgstr ""
 msgid "Reloading daemon configuration"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:66
+#: cmd/zsysd/client/service.go:65
 msgid "Reloads daemon configuration."
 msgstr ""
 
 #. user name and system or exclusive: TODO
-#: cmd/zsysd/client/state.go:66
+#: cmd/zsysd/client/state.go:65
 msgid "Remove system state (system and users linked to it)"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:40
+#: cmd/zsysd/client/state.go:39
 msgid ""
 "Remove the current state of the machine. By default it removes only the user "
 "state if not linked to any system state."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:67
+#: cmd/zsysd/client/state.go:66
 msgid "Remove the state for a given user or current user if empty"
 msgstr ""
 
@@ -633,7 +638,7 @@ msgstr ""
 msgid "Removing state %s. linkedStateID: %s\n"
 msgstr ""
 
-#: cmd/zsysd/client/userdata.go:31
+#: cmd/zsysd/client/userdata.go:30
 msgid "Rename a user's home directory via renaming corresponding user dataset"
 msgstr ""
 
@@ -716,7 +721,7 @@ msgstr ""
 msgid "Retrieving version of daemon"
 msgstr ""
 
-#: cmd/zsysd/client/version.go:18
+#: cmd/zsysd/client/version.go:17
 msgid "Returns version of client and server"
 msgstr ""
 
@@ -728,19 +733,19 @@ msgstr ""
 msgid "Reverting user data"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:72
+#: cmd/zsysd/client/service.go:71
 msgid "Run daemon state saves garbage collection."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:60
+#: cmd/zsysd/client/state.go:59
 msgid "Save complete system state (users and system)"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:61
+#: cmd/zsysd/client/state.go:60
 msgid "Save the state for a given user or current user if empty"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:32
+#: cmd/zsysd/client/state.go:31
 msgid ""
 "Saves the current state of the machine. By default it saves only the user "
 "state. state_id is generated if not provided."
@@ -751,7 +756,7 @@ msgstr ""
 msgid "Selecting state to remove: %s"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:24
+#: cmd/zsysd/client/service.go:23
 msgid "Service management"
 msgstr ""
 
@@ -768,7 +773,7 @@ msgstr ""
 msgid "Set latest booted kernel to %q\n"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:42
+#: cmd/zsysd/client/service.go:41
 msgid "Sets the logging level of the daemon."
 msgstr ""
 
@@ -782,19 +787,19 @@ msgstr ""
 msgid "Setting new bootfs tag %s on %s\n"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:60
+#: cmd/zsysd/client/service.go:59
 msgid "Shows the status of the daemon."
 msgstr ""
 
-#: cmd/zsysd/client/machine.go:26
+#: cmd/zsysd/client/machine.go:25
 msgid "Shows the status of the machine."
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:53 cmd/zsysd/client/state.go:63
+#: cmd/zsysd/client/boot.go:52 cmd/zsysd/client/state.go:62
 msgid "Signal this is an automated request triggered by script"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:54
+#: cmd/zsysd/client/service.go:53
 msgid ""
 "Start profiling until you exit this command yourself or when duration is "
 "done. Default is CPU profiling with a 30s timeout."
@@ -808,11 +813,11 @@ msgstr ""
 msgid "Stopping daemon requested. Wait for active requests to close"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:30
+#: cmd/zsysd/client/service.go:29
 msgid "Stops zsys daemon."
 msgstr ""
 
-#: cmd/zsysd/client/state.go:158
+#: cmd/zsysd/client/state.go:159
 msgid "Successfully saved as %q\n"
 msgstr ""
 
@@ -861,7 +866,7 @@ msgstr ""
 msgid "Trying to snapshot %q"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:96
+#: cmd/zsysd/client/service.go:95
 msgid "Type of profiling cpu or mem. Default is cpu."
 msgstr ""
 
@@ -871,7 +876,7 @@ msgstr ""
 msgid "Unassociated user datasets GC"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:242
+#: cmd/zsysd/client/service.go:245
 #, c-format
 msgid "Unsupported trace type: %s"
 msgstr ""
@@ -884,7 +889,7 @@ msgstr ""
 msgid "Untagging user dataset: %q"
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:41
+#: cmd/zsysd/client/boot.go:40
 msgid "Update system boot menu"
 msgstr ""
 
@@ -892,7 +897,7 @@ msgstr ""
 msgid "Updating system boot menu"
 msgstr ""
 
-#: cmd/zsysd/client/userdata.go:18
+#: cmd/zsysd/client/userdata.go:17
 msgid "User datasets creation and rename"
 msgstr ""
 
@@ -1124,7 +1129,7 @@ msgstr ""
 msgid "couldn't connect to unix socket %q: %w"
 msgstr ""
 
-#: cmd/zsysd/client/common.go:20 cmd/zsysd/client/common.go:30
+#: cmd/zsysd/client/common.go:22 cmd/zsysd/client/common.go:32
 msgid "couldn't connect to zsys daemon: %v"
 msgstr ""
 
@@ -1204,7 +1209,7 @@ msgstr ""
 msgid "couldn't find default configuration path, fallback to internal default"
 msgstr ""
 
-#: internal/log/create.go:35 internal/streamlogger/client.go:29
+#: internal/log/create.go:41 internal/streamlogger/client.go:29
 msgid "couldn't generate request id, setting to %q: %v"
 msgstr ""
 
@@ -1322,7 +1327,7 @@ msgstr ""
 msgid "didn't find any existing dataset matching %q"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:259
+#: cmd/zsysd/client/service.go:262
 msgid "duration must be a positive integer"
 msgstr ""
 
@@ -1369,7 +1374,7 @@ msgstr ""
 msgid "invalid RequesterIDKey for incoming request: %q"
 msgstr ""
 
-#: internal/log/create.go:44
+#: internal/log/create.go:50
 msgid "invalid log level requested. Using default: %v"
 msgstr ""
 
@@ -1385,7 +1390,7 @@ msgstr ""
 msgid "issue INFO (-v) and DEBUG (-vv) output"
 msgstr ""
 
-#: cmd/zsysd/client/service.go:170
+#: cmd/zsysd/client/service.go:171
 msgid "logging level must be an integer: %v"
 msgstr ""
 
@@ -1424,7 +1429,7 @@ msgstr ""
 msgid "no existing snapshot %q: "
 msgstr ""
 
-#: internal/log/create.go:73
+#: internal/log/create.go:79
 msgid "no logger attached to this context"
 msgstr ""
 
@@ -1438,7 +1443,7 @@ msgstr ""
 msgid "no matching state for %s"
 msgstr ""
 
-#: internal/log/create.go:63
+#: internal/log/create.go:69
 msgid "no request ID attached to this context"
 msgstr ""
 
@@ -1450,7 +1455,7 @@ msgstr ""
 msgid "no suffix was provided for cloning"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:169
+#: cmd/zsysd/client/state.go:170
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
@@ -1538,23 +1543,23 @@ msgstr ""
 msgid "user %q doesn't exist"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:219
+#: cmd/zsysd/client/state.go:220
 msgid "y"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:219
+#: cmd/zsysd/client/state.go:220
 msgid "yes"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:80
+#: cmd/zsysd/client/state.go:79
 msgid "you can't provide no-update-bootmenu option on user state save"
 msgstr ""
 
-#: cmd/zsysd/client/state.go:77 cmd/zsysd/client/state.go:165
+#: cmd/zsysd/client/state.go:76 cmd/zsysd/client/state.go:166
 msgid "you can't provide system and user flags at the same time"
 msgstr ""
 
-#: cmd/zsysd/client/version.go:30
+#: cmd/zsysd/client/version.go:29
 #, c-format
 msgid "zsysctl\t%s"
 msgstr ""
