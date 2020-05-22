@@ -143,13 +143,13 @@
          "CanMount": "off"
       },
       {
-         "Name": "rpool2",
-         "Mountpoint": "/",
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
          "CanMount": "off"
       },
       {
-         "Name": "rpool/ROOT",
-         "Mountpoint": "/ROOT",
+         "Name": "rpool2",
+         "Mountpoint": "/",
          "CanMount": "off"
       },
       {

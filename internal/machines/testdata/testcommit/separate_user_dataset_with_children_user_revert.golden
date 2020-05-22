@@ -500,6 +500,14 @@
          "Origin": "rpool/USERDATA/user1_efgh@snap1"
       },
       {
+         "Name": "rpool/USERDATA/user1_abcd/tools",
+         "Mountpoint": "/home/user1/tools",
+         "CanMount": "noauto",
+         "LastUsed": 1544444444,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
+         "Origin": "rpool/USERDATA/user1_efgh/tools@snap1"
+      },
+      {
          "Name": "rpool/USERDATA/user1_efgh",
          "Mountpoint": "/home/user1",
          "CanMount": "on",
@@ -512,14 +520,6 @@
          "Mountpoint": "/home/user1",
          "CanMount": "on",
          "LastUsed": 1522222222
-      },
-      {
-         "Name": "rpool/USERDATA/user1_abcd/tools",
-         "Mountpoint": "/home/user1/tools",
-         "CanMount": "noauto",
-         "LastUsed": 1544444444,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_1234",
-         "Origin": "rpool/USERDATA/user1_efgh/tools@snap1"
       },
       {
          "Name": "rpool/USERDATA/user1_efgh/tools",
