@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -108,17 +107,18 @@ func daemonStop() error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.DaemonStop(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -139,17 +139,18 @@ func dumpService() error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.DumpStates(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		r, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -176,17 +177,18 @@ func loggingLevel(args []string) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.LoggingLevel(ctx, &zsys.LoggingLevelRequest{Logginglevel: int32(level)})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -207,17 +209,18 @@ func refresh() error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.Refresh(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -283,7 +286,7 @@ func trace() error {
 		Duration: int32(traceDuration),
 	})
 
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, nil); err != nil {
 		return err
 	}
 
@@ -315,17 +318,18 @@ func daemonStatus() error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.Status(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -346,17 +350,18 @@ func reloadConfig() error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.Reload(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -377,17 +382,18 @@ func gc(gcAll bool) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.GC(ctx, &zsys.GCRequest{All: gcAll})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		_, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {

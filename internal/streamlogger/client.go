@@ -94,7 +94,10 @@ func (w *clientRequestLogStream) RecvMsg(m interface{}) (errFn error) {
 		return err
 	}
 	if err != nil {
-		if st := status.Convert(err); st.Code() == codes.Unknown {
+		switch st := status.Convert(err); st.Code() {
+		case codes.Canceled:
+			return context.Canceled
+		case codes.Unknown:
 			return errors.New(st.Message())
 		}
 		return err
@@ -112,6 +115,8 @@ func (w *clientRequestLogStream) RecvMsg(m interface{}) (errFn error) {
 		return nil
 	}
 
-	fmt.Fprint(os.Stderr, l)
+	if l != log.PingLogMessage {
+		fmt.Fprint(os.Stderr, l)
+	}
 	return ErrLogMsg
 }

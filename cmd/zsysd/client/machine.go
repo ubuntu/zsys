@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -62,18 +61,19 @@ func show(args []string) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.MachineShow(ctx, &zsys.MachineShowRequest{MachineId: machineID, Full: fullInfo})
 
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		r, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
@@ -94,18 +94,19 @@ func list(args []string) error {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.MachineList(ctx, &zsys.Empty{})
 
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		r, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {

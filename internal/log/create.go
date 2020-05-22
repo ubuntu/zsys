@@ -24,6 +24,12 @@ const (
 	defaultRequestID = "unknown"
 )
 
+var (
+	// PingLogMessage is when we need to only transmit a ping to the client telling we are still alive
+	PingLogMessage     = "."
+	bytePingLogMessage = []byte(PingLogMessage)
+)
+
 // ContextWithLogger returns a context which will log to the writer.
 // Level is based on metadata information from the ctx request.
 // A generated request ID is added to a requester ID and attached to the context

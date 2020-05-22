@@ -1,7 +1,6 @@
 package client
 
 import (
-	"context"
 	"fmt"
 	"io"
 
@@ -35,17 +34,18 @@ func getVersion() (err error) {
 	}
 	defer client.Close()
 
-	ctx, cancel := context.WithTimeout(client.Ctx, config.DefaultClientTimeout)
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
 	stream, err := client.Version(ctx, &zsys.Empty{})
-	if err = checkConn(err); err != nil {
+	if err = checkConn(err, reset); err != nil {
 		return err
 	}
 
 	for {
 		r, err := stream.Recv()
 		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
 			continue
 		}
 		if err == io.EOF {
