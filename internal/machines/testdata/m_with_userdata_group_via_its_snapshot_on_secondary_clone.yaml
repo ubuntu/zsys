@@ -1,0 +1,81 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+      snapshots:
+        - name: system-snapshot
+          mountpoint: /:local
+          creation_time: 2018-12-10T12:20:44+00:00
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      canmount: noauto
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      snapshots:
+        - name: user-snapshot1
+          canmount: noauto:local
+          mountpoint: /home/user1:local
+          creation_time: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user1_abcd/tools
+      canmount: noauto
+      mountpoint: /home/user1/tools
+      last_used: 2018-12-10T12:20:44+00:00
+      snapshots:
+        - name: user-snapshot1
+          canmount: noauto:local
+          mountpoint: /home/user1/tools:inherited
+          creation_time: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user1_clone1
+      canmount: noauto
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      origin: rpool/USERDATA/user1_abcd@user-snapshot1
+      snapshots:
+        - name: user-snapshot2
+          canmount: noauto:local
+          mountpoint: /home/user1:local
+          creation_time: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user1_clone1/tools
+      canmount: noauto
+      mountpoint: /home/user1/tools:local
+      last_used: 2018-12-10T12:20:44+00:00
+      origin: rpool/USERDATA/user1_abcd/tools@user-snapshot1
+      snapshots:
+        - name: user-snapshot2
+          canmount: noauto:local
+          mountpoint: /home/user1/tools:inherited
+          creation_time: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user1_clone2
+      canmount: noauto
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      origin: rpool/USERDATA/user1_clone1@user-snapshot2
+      snapshots:
+        - name: user-snapshot3
+          canmount: noauto:local
+          mountpoint: /home/user1:local
+          creation_time: 2018-12-10T12:20:44+00:00
+        - name: system-snapshot
+          canmount: noauto:local
+          mountpoint: /home/user1:local
+          creation_time: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user1_clone2/tools
+      canmount: noauto
+      mountpoint: /home/user1/tools:local
+      last_used: 2018-12-10T12:20:44+00:00
+      origin: rpool/USERDATA/user1_clone1/tools@user-snapshot2
+      snapshots:
+        - name: user-snapshot3
+          canmount: noauto:local
+          mountpoint: /home/user1/tools:inherited
+          creation_time: 2018-12-10T12:20:44+00:00
+        - name: system-snapshot
+          canmount: noauto:local
+          mountpoint: /home/user1/tools:inherited
+          creation_time: 2018-12-10T12:20:44+00:00
