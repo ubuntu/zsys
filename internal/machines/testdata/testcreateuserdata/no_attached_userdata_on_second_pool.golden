@@ -117,18 +117,6 @@
    ],
    "AllUsersDatasets": [
       {
-         "Name": "rpool2/USERDATA/root_bcde",
-         "Mountpoint": "/root",
-         "CanMount": "on",
-         "LastUsed": 1533333333
-      },
-      {
-         "Name": "rpool2/USERDATA/user1_abcd",
-         "Mountpoint": "/home/user1",
-         "CanMount": "on",
-         "LastUsed": 1544444444
-      },
-      {
          "Name": "rpool2/USERDATA/userfoo_xxxxxx",
          "Mountpoint": "/home/foo",
          "CanMount": "on",
@@ -156,6 +144,18 @@
          "Name": "rpool2/USERDATA",
          "Mountpoint": "/USERDATA",
          "CanMount": "off"
+      },
+      {
+         "Name": "rpool2/USERDATA/root_bcde",
+         "Mountpoint": "/root",
+         "CanMount": "on",
+         "LastUsed": 1533333333
+      },
+      {
+         "Name": "rpool2/USERDATA/user1_abcd",
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1544444444
       }
    ]
 }

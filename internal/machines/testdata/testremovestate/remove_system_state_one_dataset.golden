@@ -1,19 +1,5 @@
 {
    "Cmdline": "aaaaa bbbbb root=ZFS= ccccc",
-   "AllUsersDatasets": [
-      {
-         "Name": "rpool/USERDATA/root_bcde",
-         "Mountpoint": "/root",
-         "CanMount": "on",
-         "LastUsed": 1533333333
-      },
-      {
-         "Name": "rpool/USERDATA/user1_abcd",
-         "Mountpoint": "/home/user1",
-         "CanMount": "on",
-         "LastUsed": 1544444444
-      }
-   ],
    "UnmanagedDatasets": [
       {
          "Name": "rpool",
@@ -29,6 +15,18 @@
          "Name": "rpool/USERDATA",
          "Mountpoint": "/USERDATA",
          "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA/root_bcde",
+         "Mountpoint": "/root",
+         "CanMount": "on",
+         "LastUsed": 1533333333
+      },
+      {
+         "Name": "rpool/USERDATA/user1_abcd",
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1544444444
       }
    ]
 }

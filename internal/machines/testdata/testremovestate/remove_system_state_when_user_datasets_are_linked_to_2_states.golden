@@ -998,12 +998,6 @@
          "Origin": "rpool/USERDATA/user1_abcd@snap2"
       },
       {
-         "Name": "rpool/USERDATA/user2_2222",
-         "Mountpoint": "/home/user2",
-         "CanMount": "on",
-         "LastUsed": 1544444444
-      },
-      {
          "Name": "rpool/USERDATA/user3_3333",
          "Mountpoint": "/home/user3",
          "CanMount": "on",
@@ -1027,19 +1021,6 @@
          "Name": "rpool/USERDATA/user4_for_state_clone@snap_state_clone",
          "IsSnapshot": true,
          "Mountpoint": "/home/user4",
-         "CanMount": "on",
-         "LastUsed": 1522222222
-      },
-      {
-         "Name": "rpool/USERDATA/user5_for_manual_clone",
-         "Mountpoint": "/home/user5",
-         "CanMount": "on",
-         "LastUsed": 1544444444
-      },
-      {
-         "Name": "rpool/USERDATA/user5_for_manual_clone@snapuser5",
-         "IsSnapshot": true,
-         "Mountpoint": "/home/user5",
          "CanMount": "on",
          "LastUsed": 1522222222
       },
@@ -1098,6 +1079,25 @@
          "Name": "rpool/USERDATA",
          "Mountpoint": "/USERDATA",
          "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA/user2_2222",
+         "Mountpoint": "/home/user2",
+         "CanMount": "on",
+         "LastUsed": 1544444444
+      },
+      {
+         "Name": "rpool/USERDATA/user5_for_manual_clone",
+         "Mountpoint": "/home/user5",
+         "CanMount": "on",
+         "LastUsed": 1544444444
+      },
+      {
+         "Name": "rpool/USERDATA/user5_for_manual_clone@snapuser5",
+         "IsSnapshot": true,
+         "Mountpoint": "/home/user5",
+         "CanMount": "on",
+         "LastUsed": 1522222222
       }
    ]
 }

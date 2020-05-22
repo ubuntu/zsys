@@ -26,15 +26,6 @@
          "LastUsed": 1555555555
       }
    ],
-   "AllUsersDatasets": [
-      {
-         "Name": "rpool/USERDATA/root_bcde",
-         "Mountpoint": "/root",
-         "CanMount": "on",
-         "LastUsed": 1533333333,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_none"
-      }
-   ],
    "UnmanagedDatasets": [
       {
          "Name": "rpool",
@@ -50,6 +41,13 @@
          "Name": "rpool/USERDATA",
          "Mountpoint": "/USERDATA",
          "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA/root_bcde",
+         "Mountpoint": "/root",
+         "CanMount": "on",
+         "LastUsed": 1533333333,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_none"
       }
    ]
 }

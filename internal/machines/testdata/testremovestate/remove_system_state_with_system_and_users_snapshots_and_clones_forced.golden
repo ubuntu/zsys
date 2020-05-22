@@ -291,6 +291,30 @@
    ],
    "AllUsersDatasets": [
       {
+         "Name": "rpool/USERDATA/user2_aaaa",
+         "Mountpoint": "/home/user2",
+         "CanMount": "noauto",
+         "LastUsed": 1544444444,
+         "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
+      }
+   ],
+   "UnmanagedDatasets": [
+      {
+         "Name": "rpool",
+         "Mountpoint": "/",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/ROOT",
+         "Mountpoint": "/ROOT",
+         "CanMount": "off"
+      },
+      {
+         "Name": "rpool/USERDATA",
+         "Mountpoint": "/USERDATA",
+         "CanMount": "off"
+      },
+      {
          "Name": "rpool/USERDATA/root_bcde",
          "Mountpoint": "/root",
          "CanMount": "on",
@@ -336,30 +360,6 @@
          "Mountpoint": "/home/user1",
          "CanMount": "on",
          "LastUsed": 1522222222
-      },
-      {
-         "Name": "rpool/USERDATA/user2_aaaa",
-         "Mountpoint": "/home/user2",
-         "CanMount": "noauto",
-         "LastUsed": 1544444444,
-         "BootfsDatasets": "rpool/ROOT/ubuntu_9999"
-      }
-   ],
-   "UnmanagedDatasets": [
-      {
-         "Name": "rpool",
-         "Mountpoint": "/",
-         "CanMount": "off"
-      },
-      {
-         "Name": "rpool/ROOT",
-         "Mountpoint": "/ROOT",
-         "CanMount": "off"
-      },
-      {
-         "Name": "rpool/USERDATA",
-         "Mountpoint": "/USERDATA",
-         "CanMount": "off"
       }
    ]
 }
