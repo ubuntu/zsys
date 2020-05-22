@@ -3,26 +3,16 @@ package machines
 import (
 	"encoding/json"
 	"sort"
-	"strings"
 	"testing"
 
 	"github.com/ubuntu/zsys/internal/config"
 	"github.com/ubuntu/zsys/internal/testutils"
-	"github.com/ubuntu/zsys/internal/zfs"
 )
 
 const (
 	RevertUserDataTag       = zfsRevertUserDataTag
 	AutomatedSnapshotPrefix = automatedSnapshotPrefix
 )
-
-type SortedDatasets []*zfs.Dataset
-
-func (s SortedDatasets) Len() int { return len(s) }
-func (s SortedDatasets) Less(i, j int) bool {
-	return strings.ReplaceAll(s[i].Name, "@", "#") < strings.ReplaceAll(s[j].Name, "@", "#")
-}
-func (s SortedDatasets) Swap(i, j int) { s[i], s[j] = s[j], s[i] }
 
 // WithTime allows overriding default time implementations with a mock
 func WithTime(time Nower) func(o *options) error {
@@ -64,9 +54,21 @@ func (ms *Machines) UnmarshalJSON(b []byte) error {
 
 // MakeComparable prepares Machines by resetting private fields that change at each invocation
 func (ms *Machines) MakeComparable() {
-	ds := SortedDatasets(ms.allSystemDatasets)
+	ds := sortedDatasets(ms.allSystemDatasets)
 	sort.Sort(ds)
 	ms.allSystemDatasets = ds
+
+	ds = sortedDatasets(ms.allUsersDatasets)
+	sort.Sort(ds)
+	ms.allUsersDatasets = ds
+
+	ds = sortedDatasets(ms.allPersistentDatasets)
+	sort.Sort(ds)
+	ms.allPersistentDatasets = ds
+
+	ds = sortedDatasets(ms.unmanagedDatasets)
+	sort.Sort(ds)
+	ms.unmanagedDatasets = ds
 
 	ms.z = nil
 	ms.time = nil
