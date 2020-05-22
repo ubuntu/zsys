@@ -602,13 +602,6 @@
          "LastUsed": 1522222222
       },
       {
-         "Name": "rpool/USERDATA/user1_efgh",
-         "Mountpoint": "/home/user1",
-         "CanMount": "noauto",
-         "LastUsed": 1511111111,
-         "Origin": "rpool/USERDATA/user1_abcd@snap1"
-      },
-      {
          "Name": "rpool/USERDATA/user1_abcd/tools",
          "Mountpoint": "/home/user1/tools",
          "CanMount": "on",
@@ -621,6 +614,13 @@
          "Mountpoint": "/home/user1/tools",
          "CanMount": "on",
          "LastUsed": 1522222222
+      },
+      {
+         "Name": "rpool/USERDATA/user1_efgh",
+         "Mountpoint": "/home/user1",
+         "CanMount": "noauto",
+         "LastUsed": 1511111111,
+         "Origin": "rpool/USERDATA/user1_abcd@snap1"
       },
       {
          "Name": "rpool/USERDATA/user1_efgh/tools",

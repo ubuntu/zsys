@@ -451,7 +451,7 @@ func (ms *Machines) IDToState(ctx context.Context, name, user string) (*State, e
 		if user != "" {
 			for id, us := range m.AllUsersStates[user] {
 				if idMatches(id, name) {
-					matchingStates = append(matchingStates, us)
+					matchingStates = appendStateIfNotPresent(matchingStates, us)
 				}
 			}
 			continue
@@ -459,13 +459,13 @@ func (ms *Machines) IDToState(ctx context.Context, name, user string) (*State, e
 
 		// Active for machine
 		if idMatches(m.ID, name) {
-			matchingStates = append(matchingStates, &m.State)
+			matchingStates = appendStateIfNotPresent(matchingStates, &m.State)
 		}
 
 		// History
 		for _, h := range m.History {
 			if idMatches(h.ID, name) {
-				matchingStates = append(matchingStates, h)
+				matchingStates = appendStateIfNotPresent(matchingStates, h)
 			}
 		}
 	}

@@ -125,7 +125,7 @@ func resolveOrigin(ctx context.Context, datasets []*zfs.Dataset, onlyOnMountpoin
 
 // appendDatasetIfNotPresent will check that the dataset wasn't already added and will append it
 // excludeCanMountOff restricts (for unlinked datasets) the check on datasets that are canMount noauto or on
-func appendIfNotPresent(mainDatasets, newDatasets []*zfs.Dataset, excludeCanMountOff bool) []*zfs.Dataset {
+func appendDatasetIfNotPresent(mainDatasets, newDatasets []*zfs.Dataset, excludeCanMountOff bool) []*zfs.Dataset {
 	for _, d := range newDatasets {
 		if excludeCanMountOff && d.CanMount == "off" {
 			continue
@@ -144,6 +144,16 @@ func appendIfNotPresent(mainDatasets, newDatasets []*zfs.Dataset, excludeCanMoun
 		mainDatasets = append(mainDatasets, d)
 	}
 	return mainDatasets
+}
+
+// appendStateIfNotPresent will check that the state wasn't already added and will append it
+func appendStateIfNotPresent(states []*State, state *State) []*State {
+	for _, s := range states {
+		if s.ID == state.ID {
+			return states
+		}
+	}
+	return append(states, state)
 }
 
 func sortedMachineKeys(m map[string]*Machine) []string {

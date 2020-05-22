@@ -70,21 +70,25 @@ func TestNew(t *testing.T) {
 		"Clone with boot dataset with children manually created":         {def: "m_clone_with_separate_boot_with_children_manually_created.yaml"},
 
 		// Userdata special cases
-		"Two machines maps with different user datasets":                 {def: "m_two_machines_with_different_userdata.yaml"},
-		"Two machines maps with same user datasets":                      {def: "m_two_machines_with_same_userdata.yaml"},
-		"User dataset attached to nothing":                               {def: "m_with_unlinked_userdata.yaml"}, // Userdata are still listed in the "all" list for switch to noauto.
-		"User dataset attached to nothing but ignored with canmount off": {def: "m_with_unlinked_userdata_canmount_off.yaml"},
-		"Snapshot with user dataset":                                     {def: "m_snapshot_with_userdata.yaml"},
-		"Clone with user dataset":                                        {def: "m_clone_with_userdata.yaml"},
-		"Snapshot with user dataset with children":                       {def: "m_snapshot_with_userdata_with_children.yaml"},
-		"Clone with user dataset with children":                          {def: "m_clone_with_userdata_with_children.yaml"},
-		"Clone with user dataset with children manually created":         {def: "m_clone_with_userdata_with_children_manually_created.yaml"},
-		"Userdata with children associated only to one state":            {def: "m_with_userdata_child_associated_one_state.yaml"},
-		"Userdata is linked to no machines":                              {def: "m_with_userdata_linked_to_no_machines.yaml"},
-		// FIXME: see comment in machines.go. we should have user1_clone attached to the machine
-		// consider other cases with it having snapshots, being attached as well and clone on this clone
-		"User clone without bootfs dataset is still attached to the right machine via its snapshot": {def: "gc_system_with_users_clone.yaml"},
-		"User clone without bootfs dataset is saved by its snapshot linked to a system state":       {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml"},
+		"Two machines maps with different user datasets":                         {def: "m_two_machines_with_different_userdata.yaml"},
+		"Two machines maps with same user datasets":                              {def: "m_two_machines_with_same_userdata.yaml"},
+		"User dataset attached to nothing":                                       {def: "m_with_unlinked_userdata.yaml"},
+		"User dataset attached to nothing but ignored with canmount off":         {def: "m_with_unlinked_userdata_canmount_off.yaml"},
+		"Snapshot with user dataset":                                             {def: "m_snapshot_with_userdata.yaml"},
+		"Clone with user dataset":                                                {def: "m_clone_with_userdata.yaml"},
+		"Snapshot with user dataset with children":                               {def: "m_snapshot_with_userdata_with_children.yaml"},
+		"Clone with user dataset with children":                                  {def: "m_clone_with_userdata_with_children.yaml"},
+		"Clone with user dataset with children manually created":                 {def: "m_clone_with_userdata_with_children_manually_created.yaml"},
+		"Userdata with children associated only to one state":                    {def: "m_with_userdata_child_associated_one_state.yaml"},
+		"Userdata is linked to no machines":                                      {def: "m_with_userdata_linked_to_no_machines.yaml"},
+		"Userdata is grouped via its snapshot":                                   {def: "m_with_userdata_snapshot_attached.yaml"},
+		"Userdata is grouped via its snapshot which has a clone":                 {def: "m_with_userdata_snapshot_attached_with_clone.yaml"},
+		"Userdata is grouped via its clone":                                      {def: "m_with_userdata_clone_attached.yaml"},
+		"Userdata is grouped via its snapshot on clone":                          {def: "m_with_userdata_group_via_snapshot_on_clone.yaml"},
+		"Userdata is grouped via its clone even with children clone":             {def: "m_with_userdata_group_via_its_clone_with_child_clone.yaml"},
+		"Userdata is grouped via its snapshot on clone even with children clone": {def: "m_with_userdata_group_via_its_snapshot_on_clone_with_child_clone.yaml"},
+		"Userdata is grouped via its secondary clone":                            {def: "m_with_userdata_group_via_its_secondary_clone.yaml"},
+		"Userdata is grouped via its snapshot on secondary clone":                {def: "m_with_userdata_group_via_its_snapshot_on_secondary_clone.yaml"},
 
 		// Userdata user snapshots
 		"Userdata has a user snapshot":              {def: "m_with_userdata_user_snapshot.yaml"},
@@ -1091,8 +1095,9 @@ func TestIDToState(t *testing.T) {
 		"Limit search on duplicated snapshot name to a single user": {name: "snap1", user: "user1", wantState: "rpool/USERDATA/user1_abcd@snap1"},
 
 		// User datasets shared between machines
-		"Match on user generated ID":                 {name: "jklm-rpool.ROOT.ubuntu-1234", user: "user2", wantState: "rpool/USERDATA/user2_jklm"},
-		"Doesn’t match on user dataset regular name": {name: "rpool/USERDATA/user2_jklm", user: "user2", wantErr: true},
+		"Match on user generated ID":                                                         {name: "jklm-rpool.ROOT.ubuntu-1234", user: "user2", wantState: "rpool/USERDATA/user2_jklm"},
+		"Doesn’t match on user dataset regular name":                                         {name: "rpool/USERDATA/user2_jklm", user: "user2", wantErr: true},
+		"User data attached to 2 machines but only linked to one system state isn’t renamed": {name: "rpool/USERDATA/user3_mnop", user: "user3", wantState: "rpool/USERDATA/user3_mnop"},
 
 		// Multiple matches
 		"Multiple states match system suffix ID": {name: "1234", wantErr: true},

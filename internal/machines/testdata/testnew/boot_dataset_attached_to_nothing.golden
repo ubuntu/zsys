@@ -38,13 +38,13 @@
          "CanMount": "off"
       },
       {
-         "Name": "rpool",
-         "Mountpoint": "/",
+         "Name": "bpool/BOOT",
+         "Mountpoint": "/BOOT",
          "CanMount": "off"
       },
       {
-         "Name": "bpool/BOOT",
-         "Mountpoint": "/BOOT",
+         "Name": "rpool",
+         "Mountpoint": "/",
          "CanMount": "off"
       },
       {

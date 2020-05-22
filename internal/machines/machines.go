@@ -204,11 +204,18 @@ func (ms *Machines) refresh(ctx context.Context) {
 
 	statesAndMachines := machines.getAllStatesOnMachines()
 	unattachedSnapshotsUserDatasets, unattachedClonesUserDatasets := make(map[*zfs.Dataset][]*zfs.Dataset), make(map[*zfs.Dataset][]*zfs.Dataset) // user only snapshots or clone (not linked to a system state)
+
+	attachedOrigins := make(map[*Machine]map[string]bool)
+	originToAttach := make(map[*Machine]map[string]bool)
+	for _, m := range statesAndMachines {
+		attachedOrigins[m] = make(map[string]bool)
+		originToAttach[m] = make(map[string]bool)
+	}
+
 	for r, children := range rootUserDatasets {
 		// Handle snapshots userdatasets
+		var associateWithAtLeastOne bool
 		if r.IsSnapshot {
-			var associateWithAtLeastOne bool
-
 			_, snapshot := splitSnapshotName(r.Name)
 			for s, m := range statesAndMachines {
 				// Snapshots are not necessarily with a dataset ID matching its parent of dataset promotions, just match
@@ -216,19 +223,16 @@ func (ms *Machines) refresh(ctx context.Context) {
 				if strings.HasSuffix(s.ID, "@"+snapshot) {
 					user, us := m.addUserState(ctx, s.ID, r, children)
 					s.Users[user] = us
+					origin := *originsUserDatasets[r.Name]
+					if _, ok := attachedOrigins[m][origin]; !ok {
+						originToAttach[m][origin] = true
+					}
 					associateWithAtLeastOne = true
 					continue
 				}
 			}
-			if associateWithAtLeastOne {
-				continue
-			}
-			unattachedSnapshotsUserDatasets[r] = children
-			continue
 		} else {
 			// Handle regular userdatasets (main or clone), associated to a system state
-
-			var associateWithAtLeastOne bool
 			for s, m := range statesAndMachines {
 				if !nameInBootfsDatasets(s.ID, *r) {
 					continue
@@ -247,21 +251,47 @@ func (ms *Machines) refresh(ctx context.Context) {
 				}
 				user, us := m.addUserState(ctx, s.ID, r, associatedChildren)
 				s.Users[user] = us
+				origin := *originsUserDatasets[r.Name]
+				// main dataset itself
+				if origin == "" {
+					attachedOrigins[m][r.Name] = true
+					delete(originToAttach[m], r.Name)
+				} else {
+					// clone: act like a snapshot, get origin attached
+					if _, ok := attachedOrigins[m][origin]; !ok {
+						originToAttach[m][origin] = true
+					}
+				}
 			}
+		}
 
-			if associateWithAtLeastOne {
-				continue
-			}
+		if associateWithAtLeastOne {
+			machines.allUsersDatasets = append(machines.allUsersDatasets, r)
+			machines.allUsersDatasets = append(machines.allUsersDatasets, children...)
+			continue
+		}
+		if r.IsSnapshot {
+			unattachedSnapshotsUserDatasets[r] = children
+
+		} else {
 			unattachedClonesUserDatasets[r] = children
-
 		}
 	}
 
-	// Handle regular userdatasets (main or clone), not associated to a system state.
+	// Attach any origin to user states if main state was not attached, but a snapshot or a clone was attached to a system state
+	for m, origins := range originToAttach {
+		for origin := range origins {
+			for r, children := range rootUserDatasets {
+				if r.Name != origin {
+					continue
+				}
+				m.addUserState(ctx, "", r, children)
+				delete(unattachedClonesUserDatasets, r)
+			}
+		}
+	}
 
-	// FIXME: here, we have clone user datasets from a snapshot attached to a user datasets that should be attached to the machine state
-	// gc_system_with_users_clone.yaml with user1_clone for instance
-	// We should also consider its snapshots, clones of those snapshots and so on
+	// Handle now regular userdatasets (filesystem or snapshots), not associated to a system state.
 
 	// This is a userdataset "snapshot" clone dataset.
 	for r, children := range unattachedClonesUserDatasets {
@@ -273,12 +303,15 @@ func (ms *Machines) refresh(ctx context.Context) {
 			origin = *v
 		}
 
-		// This is manual promotion from the user on a user dataset without promoting the whole state:
-		// ignore the dataset and issue a warning.
+		// This is manual creation of filesystem dataset or
+		// a promotion from the user on a user dataset without promoting the whole state:
+		// ignore the dataset and put on unmanaged list.
 		// If we iterated over all the user datasets from all machines and states, we may find a match, but ignore
 		// for now as this is already a manual user interaction.
 		if origin == "" {
-			log.Warningf(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
+			log.Infof(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
+			unmanagedDatasets = append(unmanagedDatasets, r)
+			unmanagedDatasets = append(unmanagedDatasets, children...)
 			continue
 		}
 
@@ -301,9 +334,14 @@ func (ms *Machines) refresh(ctx context.Context) {
 			}
 		}
 
-		if !associateWithAtLeastOne {
-			log.Warningf(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
+		if associateWithAtLeastOne {
+			machines.allUsersDatasets = append(machines.allUsersDatasets, r)
+			machines.allUsersDatasets = append(machines.allUsersDatasets, children...)
+			continue
 		}
+		log.Infof(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
+		unmanagedDatasets = append(unmanagedDatasets, r)
+		unmanagedDatasets = append(unmanagedDatasets, children...)
 	}
 
 	// This is a userdataset "snapshot" snapshot dataset.
@@ -321,16 +359,15 @@ func (ms *Machines) refresh(ctx context.Context) {
 			}
 			// we don’t break here, as a userdata only snapshot can be associated with multiple machines
 		}
-		if !associated {
-			log.Warningf(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
-		}
-	}
 
-	for _, d := range flattenedUserDatas {
-		if d.CanMount == "off" {
+		if associated {
+			machines.allUsersDatasets = append(machines.allUsersDatasets, r)
+			machines.allUsersDatasets = append(machines.allUsersDatasets, children...)
 			continue
 		}
-		machines.allUsersDatasets = append(machines.allUsersDatasets, d)
+		log.Infof(ctx, i18n.G("Couldn't find any association for user dataset %s"), r.Name)
+		unmanagedDatasets = append(unmanagedDatasets, r)
+		unmanagedDatasets = append(unmanagedDatasets, children...)
 	}
 
 	// Attach to machine zsys boots and userdata non persisent datasets per machines before attaching persistents.
@@ -353,7 +390,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 	}
 
 	// Append unlinked boot datasets to ensure we will switch to noauto everything
-	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
+	machines.allSystemDatasets = appendDatasetIfNotPresent(machines.allSystemDatasets, boots, true)
 	machines.allPersistentDatasets = persistents
 	machines.unmanagedDatasets = unmanagedDatasets
 
@@ -858,34 +895,6 @@ func (ms *Machines) Reload(ctx context.Context) error {
 
 	ms.conf = conf
 	return nil
-}
-
-// Machinesdump represents the structure of a machine to be exported
-type Machinesdump struct {
-	All                   map[string]*Machine `json:",omitempty"`
-	Cmdline               string              `json:",omitempty"`
-	Current               *Machine            `json:",omitempty"`
-	NextState             *State              `json:",omitempty"`
-	AllSystemDatasets     []*zfs.Dataset      `json:",omitempty"`
-	AllUsersDatasets      []*zfs.Dataset      `json:",omitempty"`
-	AllPersistentDatasets []*zfs.Dataset      `json:",omitempty"`
-	UnmanagedDatasets     []*zfs.Dataset      `json:",omitempty"`
-}
-
-// MarshalJSON exports for json Marshmalling all private fields
-func (ms Machines) MarshalJSON() ([]byte, error) {
-	mt := Machinesdump{}
-
-	mt.All = ms.all
-	mt.Cmdline = ms.cmdline
-	mt.Current = ms.current
-	mt.NextState = ms.nextState
-	mt.AllSystemDatasets = ms.allSystemDatasets
-	mt.AllUsersDatasets = ms.allUsersDatasets
-	mt.AllPersistentDatasets = ms.allPersistentDatasets
-	mt.UnmanagedDatasets = ms.unmanagedDatasets
-
-	return json.Marshal(mt)
 }
 
 // getAllStatesOnMachines returns the association of all states to their corresponding machine
