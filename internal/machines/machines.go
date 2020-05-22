@@ -353,7 +353,7 @@ func (ms *Machines) refresh(ctx context.Context) {
 	}
 
 	// Append unlinked boot datasets to ensure we will switch to noauto everything
-	machines.allSystemDatasets = appendIfNotPresent(machines.allSystemDatasets, boots, true)
+	machines.allSystemDatasets = appendDatasetIfNotPresent(machines.allSystemDatasets, boots, true)
 	machines.allPersistentDatasets = persistents
 	machines.unmanagedDatasets = unmanagedDatasets
 
