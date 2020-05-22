@@ -146,6 +146,16 @@ func appendDatasetIfNotPresent(mainDatasets, newDatasets []*zfs.Dataset, exclude
 	return mainDatasets
 }
 
+// appendStateIfNotPresent will check that the state wasn't already added and will append it
+func appendStateIfNotPresent(states []*State, state *State) []*State {
+	for _, s := range states {
+		if s.ID == state.ID {
+			return states
+		}
+	}
+	return append(states, state)
+}
+
 func sortedMachineKeys(m map[string]*Machine) []string {
 	keys := make([]string, len(m))
 	i := 0
