@@ -31,6 +31,9 @@ pools:
     - name: USERDATA/user1_manual
       mountpoint: /home/user1
       last_used: 2018-12-10T12:20:44+00:00
+    - name: USERDATA/user1_manual/tools
+      mountpoint: /home/user1/tools
+      last_used: 2018-12-10T12:20:44+00:00
     - name: user1_other
       mountpoint: /home/user1
       last_used: 2018-12-10T12:20:44+00:00

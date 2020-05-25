@@ -860,6 +860,46 @@ func TestIsUserDataset(t *testing.T) {
 	}
 }
 
+func TestHasSnapshotInHierachy(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		dataset string
+
+		want bool
+	}{
+		"Has a snapshot directly as a child":              {dataset: "rpool/USERDATA/user1_abcd/tools", want: true},
+		"Has a snapshot on a children filesystem dataset": {dataset: "rpool/USERDATA", want: true},
+		"No snapshot in hierarchy":                        {dataset: "rpool/USERDATA/user1_manual", want: false},
+		"Not snapshot has child of a snapshot":            {dataset: "rpool/USERDATA/user1_abcd@snapshot", want: false},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_with_userdata_linked_and_unlinked_and_snapshot.yaml"), testutils.WithLibZFS(adapter))
+			defer fPools.Create(dir)()
+
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
+			if err != nil {
+				t.Fatalf("expected no error but got: %v", err)
+			}
+
+			d := z.DatasetByID(tc.dataset)
+
+			if d.BootfsDatasets == "-" {
+				d.BootfsDatasets = ""
+			}
+
+			got := d.HasSnapshotInHierarchy()
+			assert.Equal(t, tc.want, got, "Returns HasSnapshotInHierarchy")
+		})
+	}
+}
+
 func TestTransactionsWithZFS(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
