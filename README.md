@@ -747,6 +747,30 @@ zsysctl userdata create USER HOME_DIRECTORY [flags]
   -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
 ```
 
+#### zsysctl userdata dissociate
+
+dissociate current user data from current system but preserve history
+
+##### Synopsis
+
+dissociate current user data from current system but preserve history
+
+```
+zsysctl userdata dissociate USER [flags]
+```
+
+##### Options
+
+```
+  -h, --help   help for dissociate
+```
+
+##### Options inherited from parent commands
+
+```
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
 #### zsysctl userdata set-home
 
 Rename a user's home directory via renaming corresponding user dataset
