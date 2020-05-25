@@ -299,6 +299,20 @@ func (d Dataset) HasSnapshotInHierarchy() bool {
 	return false
 }
 
+// IsUserDataset returns if this filesystem dataset is or has been a userdataset, even if unlinked to any filesystem dataset
+// Note that it doesn’t take into account if the dataset is a clone of a userdataset.
+// Snapshots will always return an error, check the filesystem dataset first.
+func (d Dataset) IsUserDataset() (bool, error) {
+	if !strings.Contains(d.Name, "/"+UserdataPrefix+"/") {
+		return false, nil
+	}
+
+	if d.IsSnapshot {
+		return false, fmt.Errorf(i18n.G("IsUserDataset called on snapshot %q."), d.Name)
+	}
+	return d.sources.BootfsDatasets != "", nil
+}
+
 // checkNoClone checks that the hierarchy has no clone.
 func (d *Dataset) checkNoClone() error {
 	// TODO: this reopens the pool entirely, so can be a little bit slow. Could be reimplemented ourselves.
