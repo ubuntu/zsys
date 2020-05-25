@@ -12,6 +12,11 @@ import (
 	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 )
 
+const (
+	// UserdataPrefix is the part of the path of the dataset that contains user data
+	UserdataPrefix = "USERDATA"
+)
+
 // Dataset is the abstraction of a physical dataset and exposes only properties that must are accessible by the user.
 type Dataset struct {
 	// Name of the dataset.

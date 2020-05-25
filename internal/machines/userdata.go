@@ -76,7 +76,7 @@ selectUserDataset:
 		if i != -1 {
 			p = p[:i]
 		}
-		userdatasetRoot = filepath.Join(p, "USERDATA")
+		userdatasetRoot = filepath.Join(p, zfs.UserdataPrefix)
 
 		// Create parent USERDATA
 		if err := t.Create(userdatasetRoot, "/", "off"); err != nil {
