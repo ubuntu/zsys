@@ -49,3 +49,22 @@ func (s *Server) ChangeHomeOnUserData(req *zsys.ChangeHomeOnUserDataRequest, str
 	}
 	return nil
 }
+
+// DissociateUser removes user associated dataset association with current system.
+// All history is kept though and the dataset are just unlinked, not removed.
+func (s *Server) DissociateUser(req *zsys.DissociateUserRequest, stream zsys.Zsys_DissociateUserServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionSystemWrite); err != nil {
+		return err
+	}
+
+	user := req.GetUser()
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
+	log.Infof(stream.Context(), i18n.G("Dissociate user %q"), user)
+
+	if err := s.Machines.DissociateUser(stream.Context(), user); err != nil {
+		return fmt.Errorf(i18n.G("couldn't dissociate user %q: ")+config.ErrorFormat, user, err)
+	}
+	return nil
+}

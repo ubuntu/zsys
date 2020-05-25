@@ -139,6 +139,53 @@ func (ms *Machines) ChangeHomeOnUserData(ctx context.Context, home, newHome stri
 	return ms.Refresh(ctx)
 }
 
+// DissociateUser tries to unattach current user dataset to current system state
+func (ms *Machines) DissociateUser(ctx context.Context, username string) error {
+	if !ms.current.isZsys() {
+		return errors.New(i18n.G("Current machine isn't Zsys, nothing to modify"))
+	}
+	if username == "" {
+		return fmt.Errorf(i18n.G("need an user name"))
+	}
+
+	log.Infof(ctx, i18n.G("Dissociate user %q from current state"), username)
+
+	// If there this user or home already attached to this machine: retarget home
+	us, ok := ms.current.Users[username]
+	if !ok {
+		return fmt.Errorf(i18n.G("user %q not found on current state"), username)
+	}
+
+	t, cancel := ms.z.NewTransaction(ctx)
+	defer t.Done()
+
+	for _, ds := range us.Datasets {
+		for _, d := range ds {
+			var newTags []string
+			for _, n := range strings.Split(d.BootfsDatasets, bootfsdatasetsSeparator) {
+				if n != ms.current.ID {
+					newTags = append(newTags, n)
+					break
+				}
+			}
+
+			newTag := strings.Join(newTags, bootfsdatasetsSeparator)
+
+			if newTag == d.BootfsDatasets {
+				continue
+			}
+
+			log.Debugf(ctx, i18n.G("Setting new bootfs tag %s on %s\n"), newTag, d.Name)
+			if err := t.SetProperty(libzfs.BootfsDatasetsProp, newTag, d.Name, false); err != nil {
+				cancel()
+				return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, ms.current.ID, d.Name, err)
+			}
+		}
+	}
+
+	return ms.Refresh(ctx)
+}
+
 func getUserDatasetRoot(path string) string {
 	lpath := strings.ToLower(path)
 	i := strings.Index(lpath, userdatasetsContainerName)

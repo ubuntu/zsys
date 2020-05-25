@@ -638,6 +638,85 @@ func TestCreateUserData(t *testing.T) {
 	}
 }
 
+func TestDissociateUser(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def     string
+		user    string
+		cmdline string
+
+		setPropertyErr bool
+		scanErr        bool
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Dissociate user": {def: "m_with_userdata.yaml"},
+
+		"Dissociate user but keep snapshot attached":         {def: "m_with_userdata_dataset_and_snapshot_attached.yaml"},
+		"Dissociate user with no associated snapshot":        {def: "m_with_userdata_user_snapshot.yaml"},
+		"Dissociate user with children datasets (inherited)": {def: "m_with_userdata_children_on_user.yaml"},
+		"Dissociate user with children datasets (local)":     {def: "m_with_userdata_clone_attached.yaml"},
+		"Dissociate user having shared states":               {def: "m_two_machines_with_same_userdata.yaml"},
+
+		"User has no state associated with current machine": {def: "m_with_userdata.yaml", user: "doesntexist", wantErr: true},
+		"SetProperty fails":          {def: "m_with_userdata.yaml", setPropertyErr: true, wantErr: true},
+		"Scanning fails":             {def: "m_with_userdata.yaml", scanErr: true, wantErr: true},
+		"Current machine isn’t zsys": {def: "m_with_userdata.yaml", cmdline: "foo", wantErr: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			tc.cmdline = getDefaultValue(tc.cmdline, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			lzfs := libzfs.(*mock.LibZFS)
+			lzfs.ForceLastUsedTime(true)
+
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			initMachines := ms.CopyForTests(t)
+
+			lzfs.ErrOnScan(tc.scanErr)
+			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+
+			err = ms.DissociateUser(context.Background(), getDefaultValue(tc.user, "user1"))
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			machinesAfterRescan, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func TestCurrentIsZsys(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {

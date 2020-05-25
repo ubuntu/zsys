@@ -150,6 +150,36 @@ func (z *ZsysLogServer) ChangeHomeOnUserData(req *ChangeHomeOnUserDataRequest, s
 }
 
 /*
+ * Zsys.DissociateUser()
+ */
+
+// zsysDissociateUserLogStream is a Zsys_DissociateUserServer augmented by its own Context containing the log streamer
+type zsysDissociateUserLogStream struct {
+	Zsys_DissociateUserServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysDissociateUserLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// DissociateUser overrides ZsysServer DissociateUser, installing a logger first
+func (z *ZsysLogServer) DissociateUser(req *DissociateUserRequest, stream Zsys_DissociateUserServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "DissociateUser")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.DissociateUser(req, &zsysDissociateUserLogStream{
+		Zsys_DissociateUserServer: stream,
+		ctx:                       ctx,
+	})
+}
+
+/*
  * Zsys.PrepareBoot()
  */
 
@@ -691,6 +721,19 @@ func (s *zsysCreateUserDataServer) Write(p []byte) (n int, err error) {
 
 // Write promote zsysChangeHomeOnUserDataServer to an io.Writer
 func (s *zsysChangeHomeOnUserDataServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysDissociateUserServer to an io.Writer
+func (s *zsysDissociateUserServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),

@@ -6,6 +6,7 @@ service Zsys {
   rpc Version(Empty) returns (stream VersionResponse);
   rpc CreateUserData(CreateUserDataRequest) returns (stream LogResponse);
   rpc ChangeHomeOnUserData(ChangeHomeOnUserDataRequest) returns (stream LogResponse);
+  rpc DissociateUser(DissociateUserRequest) returns (stream LogResponse);
   rpc PrepareBoot(Empty) returns (stream PrepareBootResponse);
   rpc CommitBoot(Empty) returns (stream CommitBootResponse);
   rpc UpdateBootMenu(UpdateBootMenuRequest) returns (stream LogResponse);
@@ -50,6 +51,10 @@ message CreateUserDataRequest {
 message ChangeHomeOnUserDataRequest {
   string home = 1;
   string newHome = 2;
+}
+
+message DissociateUserRequest {
+  string user = 1;
 }
 
 message PrepareBootResponse {
