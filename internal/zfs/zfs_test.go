@@ -807,9 +807,59 @@ func TestDependencies(t *testing.T) {
 			// rule 3: ensure that a clone comes before its origin
 			assertCloneComesBeforeItsOrigin(t, z, deps)
 		})
-
 	}
 }
+
+func TestIsUserDataset(t *testing.T) {
+	failOnZFSPermissionDenied(t)
+
+	tests := map[string]struct {
+		dataset string
+
+		want    bool
+		wantErr bool
+	}{
+		"User Dataset":                           {dataset: "rpool/USERDATA/user1_abcd", want: true},
+		"Inherited child of user dataset":        {dataset: "rpool/USERDATA/user1_abcd/tools", want: true},
+		"Snapshot returns an error user dataset": {dataset: "rpool/USERDATA/user1_abcd@snapshot", wantErr: true},
+		"Unlinked user dataset":                  {dataset: "rpool/USERDATA/user1_unlinked", want: true},
+
+		"Non user dataset":         {dataset: "rpool/USERDATA/user1_manual", want: false},
+		"Out of userdataset space": {dataset: "rpool/user1_other", want: false},
+	}
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+
+			adapter := testutils.GetLibZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", "m_with_userdata_linked_and_unlinked_and_snapshot.yaml"), testutils.WithLibZFS(adapter))
+			defer fPools.Create(dir)()
+
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(adapter))
+			if err != nil {
+				t.Fatalf("expected no error but got: %v", err)
+			}
+
+			d := z.DatasetByID(tc.dataset)
+
+			if d.BootfsDatasets == "-" {
+				d.BootfsDatasets = ""
+			}
+
+			got, err := d.IsUserDataset()
+			if err != nil && !tc.wantErr {
+				t.Fatalf("expected no error but got: %v", err)
+			} else if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			assert.Equal(t, tc.want, got, "Returns IsUserDataset")
+		})
+	}
+}
+
 func TestTransactionsWithZFS(t *testing.T) {
 	failOnZFSPermissionDenied(t)
 
