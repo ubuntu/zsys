@@ -21,26 +21,26 @@ msgstr ""
 msgid "\t%v\n"
 msgstr ""
 
-#: internal/machines/machines.go:670
+#: internal/machines/machines.go:707
 #, c-format
 msgid "\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:745
+#: internal/machines/machines.go:782
 #, c-format
 msgid "     - %s (%s)\n"
 msgstr ""
 
-#: internal/machines/machines.go:742
+#: internal/machines/machines.go:779
 #, c-format
 msgid "     - %s (%s): %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:707
+#: internal/machines/machines.go:744
 msgid "    History:\t\n"
 msgstr ""
 
-#: internal/machines/machines.go:646 internal/machines/state.go:262
+#: internal/machines/machines.go:683 internal/machines/state.go:262
 #, c-format
 msgid "  - %s\n"
 msgstr ""
@@ -55,7 +55,7 @@ msgstr ""
 msgid "  - %s (%s)%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:704 internal/machines/machines.go:774
+#: internal/machines/machines.go:741 internal/machines/machines.go:811
 #, c-format
 msgid "  - Name:\t%s\n"
 msgstr ""
@@ -64,7 +64,7 @@ msgstr ""
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
-#: internal/machines/userdata.go:165
+#: internal/machines/userdata.go:212
 msgid ""
 "%q is already associated to %q, which is for a different user name (%q) than "
 "%q"
@@ -90,16 +90,16 @@ msgstr ""
 msgid "%q returned an error: "
 msgstr ""
 
-#: internal/machines/machines.go:842
+#: internal/machines/machines.go:879
 msgid "%s\t%t\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:795 internal/machines/machines.go:803
+#: internal/machines/machines.go:832 internal/machines/machines.go:840
 #, c-format
 msgid "%s\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:801
+#: internal/machines/machines.go:838
 #, c-format
 msgid "%s\tUser: %s\n"
 msgstr ""
@@ -141,32 +141,32 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/machines/machines.go:787
+#: internal/machines/machines.go:824
 #, c-format
 msgid "%sCreated on:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:791
+#: internal/machines/machines.go:828
 #, c-format
 msgid "%sLast Booted Kernel:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:785
+#: internal/machines/machines.go:822
 #, c-format
 msgid "%sLast Used:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:792
+#: internal/machines/machines.go:829
 #, c-format
 msgid "%sSystem Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:799
+#: internal/machines/machines.go:836
 #, c-format
 msgid "%sUser Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:816
+#: internal/machines/machines.go:853
 msgid "--\t----\t---------\n"
 msgstr ""
 
@@ -285,8 +285,8 @@ msgstr ""
 msgid "Couldn't determine start time of client process: %v"
 msgstr ""
 
-#: internal/machines/machines.go:281 internal/machines/machines.go:305
-#: internal/machines/machines.go:325
+#: internal/machines/machines.go:312 internal/machines/machines.go:342
+#: internal/machines/machines.go:368
 #, c-format
 msgid "Couldn't find any association for user dataset %s"
 msgstr ""
@@ -307,7 +307,7 @@ msgid ""
 "Putting it in keep list."
 msgstr ""
 
-#: internal/machines/userdata.go:95 internal/machines/userdata.go:200
+#: internal/machines/userdata.go:95 internal/machines/userdata.go:247
 msgid "Couldn't mount %s: %v"
 msgstr ""
 
@@ -335,7 +335,7 @@ msgstr ""
 msgid "Couldn't remove state %s: %v"
 msgstr ""
 
-#: internal/machines/userdata.go:197
+#: internal/machines/userdata.go:244
 msgid "Couldn't restore permission on new home directory %s: %v"
 msgstr ""
 
@@ -373,7 +373,7 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to do on boot"
 msgstr ""
 
-#: internal/machines/userdata.go:116
+#: internal/machines/userdata.go:116 internal/machines/userdata.go:145
 msgid "Current machine isn't Zsys, nothing to modify"
 msgstr ""
 
@@ -402,6 +402,14 @@ msgstr ""
 
 #: cmd/zsysd/client/boot.go:47
 msgid "Display if any zfs datasets have been modified to boot"
+msgstr ""
+
+#: internal/daemon/userdata.go:64
+msgid "Dissociate user %q"
+msgstr ""
+
+#: internal/machines/userdata.go:151
+msgid "Dissociate user %q from current state"
 msgstr ""
 
 #: cmd/zsysd/client/state.go:61
@@ -461,11 +469,11 @@ msgstr ""
 msgid "Give more detail informations on each machine."
 msgstr ""
 
-#: internal/machines/machines.go:677
+#: internal/machines/machines.go:714
 msgid "History:\t\n"
 msgstr ""
 
-#: internal/machines/machines.go:815
+#: internal/machines/machines.go:852
 msgid "ID\tZSys\tLast Used\n"
 msgstr ""
 
@@ -527,7 +535,7 @@ msgid ""
 "_suffix (at least .*_<onechar>): %q"
 msgstr ""
 
-#: internal/machines/machines.go:658
+#: internal/machines/machines.go:695
 #, c-format
 msgid "Name:\t%s\n"
 msgstr ""
@@ -561,11 +569,11 @@ msgstr ""
 msgid "Permission denied: %w"
 msgstr ""
 
-#: internal/machines/machines.go:668
+#: internal/machines/machines.go:705
 msgid "Persistent Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:666
+#: internal/machines/machines.go:703
 msgid "Persistent Datasets: None\n"
 msgstr ""
 
@@ -733,7 +741,7 @@ msgstr ""
 msgid "Returns version of client and server"
 msgstr ""
 
-#: internal/machines/userdata.go:178
+#: internal/machines/userdata.go:225
 msgid "Reusing %q as matching user name or old mountpoint"
 msgstr ""
 
@@ -790,7 +798,7 @@ msgstr ""
 msgid "Setting logging level to %d"
 msgstr ""
 
-#: internal/machines/state.go:335
+#: internal/machines/state.go:335 internal/machines/userdata.go:178
 #, c-format
 msgid "Setting new bootfs tag %s on %s\n"
 msgstr ""
@@ -856,7 +864,7 @@ msgstr ""
 msgid "There are %d exceeding states to potentially remove"
 msgstr ""
 
-#: internal/machines/userdata.go:154
+#: internal/machines/userdata.go:201
 msgid ""
 "Trying to check if there is a user or home directory already attached to "
 "this machine"
@@ -913,7 +921,7 @@ msgstr ""
 msgid "Users states have changes, rerun user GC"
 msgstr ""
 
-#: internal/machines/machines.go:701
+#: internal/machines/machines.go:738
 msgid "Users:\n"
 msgstr ""
 
@@ -995,7 +1003,7 @@ msgstr ""
 msgid "ZSys is adding automatic system snapshot to GRUB menu"
 msgstr ""
 
-#: internal/machines/machines.go:659
+#: internal/machines/machines.go:696
 msgid "ZSys:\t%t\n"
 msgstr ""
 
@@ -1113,7 +1121,7 @@ msgstr ""
 #: zsys.streamlogger.go:382 zsys.streamlogger.go:412 zsys.streamlogger.go:442
 #: zsys.streamlogger.go:472 zsys.streamlogger.go:502 zsys.streamlogger.go:532
 #: zsys.streamlogger.go:562 zsys.streamlogger.go:592 zsys.streamlogger.go:622
-#: zsys.streamlogger.go:652
+#: zsys.streamlogger.go:652 zsys.streamlogger.go:682
 msgid "couldn't attach a logger to request: %w"
 msgstr ""
 
@@ -1121,7 +1129,7 @@ msgstr ""
 msgid "couldn't change home userdataset for %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:205
+#: internal/machines/userdata.go:252
 msgid "couldn't cleanup %s directory: %v"
 msgstr ""
 
@@ -1141,7 +1149,7 @@ msgstr ""
 msgid "couldn't connect to zsys daemon: %v"
 msgstr ""
 
-#: internal/daemon/service.go:50 internal/machines/machines.go:370
+#: internal/daemon/service.go:50 internal/machines/machines.go:407
 msgid "couldn't convert internal state to json: %v"
 msgstr ""
 
@@ -1185,6 +1193,10 @@ msgstr ""
 msgid "couldn't destroy %q: it's a filesystem dataset which has snapshots"
 msgstr ""
 
+#: internal/daemon/userdata.go:67
+msgid "couldn't dissociate user %q: "
+msgstr ""
+
 #: internal/daemon/service.go:58
 msgid "couldn't dump machine state"
 msgstr ""
@@ -1221,7 +1233,7 @@ msgstr ""
 msgid "couldn't generate request id, setting to %q: %v"
 msgstr ""
 
-#: internal/machines/machines.go:134 internal/machines/machines.go:856
+#: internal/machines/machines.go:134 internal/machines/machines.go:893
 msgid "couldn't load zsys configuration"
 msgstr ""
 
@@ -1258,6 +1270,7 @@ msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
 #: internal/machines/boot.go:290 internal/machines/state.go:339
+#: internal/machines/userdata.go:181
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -1303,7 +1316,7 @@ msgstr ""
 msgid "couldn't set last used time to %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:190
+#: internal/machines/userdata.go:237
 msgid "couldn't set new home %q to %q: "
 msgstr ""
 
@@ -1315,11 +1328,11 @@ msgstr ""
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
-#: internal/machines/machines.go:783 internal/machines/machines.go:840
+#: internal/machines/machines.go:820 internal/machines/machines.go:877
 msgid "current"
 msgstr ""
 
-#: internal/machines/machines.go:373
+#: internal/machines/machines.go:410
 #, c-format
 msgid ""
 "current machines scanning layout:\n"
@@ -1333,6 +1346,10 @@ msgstr ""
 
 #: internal/machines/userdata.go:137
 msgid "didn't find any existing dataset matching %q"
+msgstr ""
+
+#: cmd/zsysd/client/userdata.go:36
+msgid "dissociate current user data from current system but preserve history"
 msgstr ""
 
 #: cmd/zsysd/client/service.go:262
@@ -1364,11 +1381,11 @@ msgstr ""
 msgid "failed to unmarshal yaml: %v"
 msgstr ""
 
-#: internal/machines/machines.go:457 internal/machines/machines.go:482
+#: internal/machines/machines.go:494 internal/machines/machines.go:519
 msgid "ignoring %q as couldn't assert if it's a child: "
 msgstr ""
 
-#: internal/machines/machines.go:414
+#: internal/machines/machines.go:451
 msgid ""
 "ignoring %q: either an orphan clone or not a boot, user or system datasets "
 "and canmount isn't on"
@@ -1411,7 +1428,7 @@ msgstr ""
 msgid "missing RequesterIDKey for incoming request"
 msgstr ""
 
-#: internal/machines/machines.go:648
+#: internal/machines/machines.go:685
 #, c-format
 msgid ""
 "multiple machines match %s:\n"
@@ -1425,11 +1442,15 @@ msgid ""
 "%sPlease use full state path."
 msgstr ""
 
+#: internal/machines/userdata.go:148
+msgid "need an user name"
+msgstr ""
+
 #: internal/streamlogger/server.go:54
 msgid "new incoming request %s() for %q"
 msgstr ""
 
-#: internal/machines/machines.go:612
+#: internal/machines/machines.go:649
 msgid "no ID given and cannot retrieve current machine. Please specify one ID."
 msgstr ""
 
@@ -1441,7 +1462,7 @@ msgstr ""
 msgid "no logger attached to this context"
 msgstr ""
 
-#: internal/machines/machines.go:642
+#: internal/machines/machines.go:679
 #, c-format
 msgid "no machine matches %s"
 msgstr ""
@@ -1549,6 +1570,10 @@ msgstr ""
 
 #: internal/machines/snapshot.go:55
 msgid "user %q doesn't exist"
+msgstr ""
+
+#: internal/machines/userdata.go:156
+msgid "user %q not found on current state"
 msgstr ""
 
 #: cmd/zsysd/client/state.go:220
