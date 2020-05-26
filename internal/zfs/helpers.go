@@ -126,11 +126,14 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 		}
 		// TOREMOVE: transition from 19.10 installation without zsys to 20.04 after installing zsys
 		if strings.Contains(d.Name, "/"+UserdataPrefix+"/") && bootfsDatasets == "" {
-			bootfsDatasets, srcBootfsDatasets, _ = getUserPropertyFromSys(ctx, "org.zsys:bootfs-datasets", d.dZFS)
-			if bootfsDatasets != "" {
-				if err := d.dZFS.SetUserProperty(libzfs.BootfsDatasetsProp, bootfsDatasets); err != nil {
+			oldBootfsDatasets, oldSrcBootfsDatasets, _ := getUserPropertyFromSys(ctx, "org.zsys:bootfs-datasets", d.dZFS)
+			if oldBootfsDatasets != "" {
+				if err := d.dZFS.SetUserProperty(libzfs.BootfsDatasetsProp, oldBootfsDatasets); err != nil {
 					log.Warningf(ctx, i18n.G("can't transition bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
 				}
+			}
+			if oldSrcBootfsDatasets != "" {
+				srcBootfsDatasets = oldBootfsDatasets
 			}
 		}
 	}
