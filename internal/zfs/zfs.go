@@ -837,7 +837,7 @@ func (t *Transaction) SetProperty(name, value, datasetName string, force bool) e
 // A dataset has dependencies if:
 //   - it has a subdataset (has child)
 //   - it has a snapshot (so has child as well)
-//   - there is a clone depending on it (clone depending on snapshot on this dataset,
+//   - there is a clone depending on it or any of its child (clone depending on snapshot on this dataset,
 //     so meaning that this dataset has a snapshot, so has child as well)
 func (nt *NoTransaction) Dependencies(d Dataset) []*Dataset {
 	ctx := nt.ctx
