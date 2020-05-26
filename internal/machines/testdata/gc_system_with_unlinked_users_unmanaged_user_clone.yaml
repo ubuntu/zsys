@@ -1,0 +1,31 @@
+pools:
+  - name: rpool
+    datasets:
+    - name: ROOT
+      canmount: off
+    - name: ROOT/ubuntu_1234
+      zsys_bootfs: yes
+      last_used: 2019-04-18T02:45:55+00:00
+      mountpoint: /
+
+    - name: USERDATA
+      canmount: off
+    - name: USERDATA/user1_abcd
+      mountpoint: /home/user1
+      last_used: 2018-12-10T12:20:44+00:00
+      bootfs_datasets: rpool/ROOT/ubuntu_1234
+
+    - name: USERDATA/user2_unlinked
+      mountpoint: /home/unlinked
+      last_used: 2018-08-03T21:55:33+00:00
+      bootfs_datasets: "-"
+      snapshots:
+      - name: snapshot
+        mountpoint: /home/unlinked:local
+        zsys_bootfs: yes:local
+        canmount: on:local
+        creation_time: 2019-12-16T18:00:00+00:00
+    - name: user2_clone
+      mountpoint: /home/unlinked
+      last_used: 2018-08-03T21:55:33+00:00
+      origin: rpool/USERDATA/user2_unlinked@snapshot
