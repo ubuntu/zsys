@@ -125,12 +125,15 @@ func (d *Dataset) refreshProperties(ctx context.Context) error {
 			log.Warningf(ctx, i18n.G("can't read bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
 		}
 		// TOREMOVE: transition from 19.10 installation without zsys to 20.04 after installing zsys
-		if strings.Contains(d.Name, "/USERDATA/") && bootfsDatasets == "" {
-			bootfsDatasets, srcBootfsDatasets, _ = getUserPropertyFromSys(ctx, "org.zsys:bootfs-datasets", d.dZFS)
-			if bootfsDatasets != "" {
-				if err := d.dZFS.SetUserProperty(libzfs.BootfsDatasetsProp, bootfsDatasets); err != nil {
+		if strings.Contains(d.Name, "/"+UserdataPrefix+"/") && bootfsDatasets == "" {
+			oldBootfsDatasets, oldSrcBootfsDatasets, _ := getUserPropertyFromSys(ctx, "org.zsys:bootfs-datasets", d.dZFS)
+			if oldBootfsDatasets != "" {
+				if err := d.dZFS.SetUserProperty(libzfs.BootfsDatasetsProp, oldBootfsDatasets); err != nil {
 					log.Warningf(ctx, i18n.G("can't transition bootfsdataset property, ignoring: ")+config.ErrorFormat, err)
 				}
+			}
+			if oldSrcBootfsDatasets != "" {
+				srcBootfsDatasets = oldBootfsDatasets
 			}
 		}
 	}
@@ -297,6 +300,20 @@ func (d Dataset) HasSnapshotInHierarchy() bool {
 		}
 	}
 	return false
+}
+
+// IsUserDataset returns if this filesystem dataset is or has been a userdataset, even if unlinked to any filesystem dataset
+// Note that it doesn’t take into account if the dataset is a clone of a userdataset.
+// Snapshots will always return an error, check the filesystem dataset first.
+func (d Dataset) IsUserDataset() (bool, error) {
+	if !strings.Contains(d.Name, "/"+UserdataPrefix+"/") {
+		return false, nil
+	}
+
+	if d.IsSnapshot {
+		return false, fmt.Errorf(i18n.G("IsUserDataset called on snapshot %q."), d.Name)
+	}
+	return d.sources.BootfsDatasets != "", nil
 }
 
 // checkNoClone checks that the hierarchy has no clone.

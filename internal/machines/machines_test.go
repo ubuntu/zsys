@@ -15,6 +15,7 @@ import (
 	"github.com/ubuntu/zsys/internal/machines"
 	"github.com/ubuntu/zsys/internal/testutils"
 	"github.com/ubuntu/zsys/internal/zfs"
+	libzfsadapter "github.com/ubuntu/zsys/internal/zfs/libzfs"
 	"github.com/ubuntu/zsys/internal/zfs/libzfs/mock"
 )
 
@@ -1286,6 +1287,14 @@ func TestGC(t *testing.T) {
 		"Users and clones on different machines history":              {def: "gc_system_with_users_and_clones_different_machines_history_only.yaml"},
 		"Users and clones on different machines, one is active state": {def: "gc_system_with_users_and_clones_different_machines.yaml"},
 
+		// Unlinked user test cases
+		"Remove simple unlinked user dataset":                                             {def: "gc_system_with_unlinked_users.yaml"},
+		"Remove unlinked user dataset and any snapshot":                                   {def: "gc_system_with_unlinked_users_and_snapshot.yaml"},
+		"Remove unlinked user dataset and any unmanaged user clone":                       {def: "gc_system_with_unlinked_users_unmanaged_clone.yaml"},
+		"Can't remove unlinked user dataset if it has a manual clone in USERDATA":         {def: "gc_system_with_unlinked_users_unmanaged_clone_nobootfs_dataset.yaml", isNoOp: true},
+		"Can't remove unlinked user dataset if it has a manual clone outside of USERDATA": {def: "gc_system_with_unlinked_users_unmanaged_user_clone.yaml", isNoOp: true},
+		"Remove unlinked clone of a manual filesystem dataset":                            {def: "gc_system_with_unlinked_users_unmanaged_clone_bootfs_on_clone.yaml"},
+
 		// Failed revert
 		"Failed revert - no lastused on system":        {def: "gc_system_failed_revert.yaml"},
 		"Failed boot - no lastused on user and system": {def: "gc_system_with_users_failed_boot.yaml"},
@@ -1296,9 +1305,6 @@ func TestGC(t *testing.T) {
 
 		// Error cases
 		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErr: true, isNoOp: true},
-
-		// TODO
-		// Check that users subdatasets completely detached is always collected
 	}
 
 	for name, tc := range tests {
@@ -1317,6 +1323,20 @@ func TestGC(t *testing.T) {
 			}
 			tc.configPath = filepath.Join("testdata", "confs", tc.configPath)
 
+			z, err := zfs.New(context.Background(), zfs.WithLibZFS(libzfs))
+			if err != nil {
+				t.Fatalf("couldn’t create original zfs datasets state")
+			}
+			for _, d := range z.Datasets() {
+				if d.BootfsDatasets == "-" {
+					tz, _ := z.NewTransaction(context.Background())
+					defer tz.Done()
+					if err := tz.SetProperty(libzfsadapter.BootfsDatasetsProp, "", d.Name, false); err != nil {
+						t.Fatalf("couldn’t erase  BootfsDatasetsProp: %v", err)
+					}
+					tz.Done()
+				}
+			}
 			ms, err := machines.New(context.Background(), "", machines.WithLibZFS(libzfs),
 				machines.WithTime(testutils.FixedTime{}), machines.WithConfig(tc.configPath))
 			if err != nil {

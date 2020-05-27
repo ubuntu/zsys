@@ -452,6 +452,78 @@ nextDataset:
 		}
 	}
 
+	// 4. Clean up unmanaged datasets which were user datasets with empty tags.
+	log.Debug(ctx, i18n.G("Unmanaged past user datasets GC"))
+
+	keepDatasets := make(map[string]bool)
+	gcPassNum = 1
+nextUnmanagedUserPass:
+	for {
+		log.Debugf(ctx, "GC Unmanaged user Pass #%d", gcPassNum)
+
+		destroyCandidates := make(map[string]*zfs.Dataset)
+		for _, d := range ms.unmanagedDatasets {
+			// Ignore already treated datasets that we shouldn’t remove
+			if _, ok := keepDatasets[d.Name]; ok {
+				continue
+			}
+
+			if d.IsSnapshot {
+				continue
+			}
+			r, err := d.IsUserDataset()
+			if err != nil {
+				log.Warningf(ctx, i18n.G("Couldn't determine if %s was a user dataset %v"), d.Name, err)
+				continue
+			}
+			if !r {
+				continue
+			}
+			destroyCandidates[d.Name] = d
+			log.Debugf(ctx, "Adding %s to unmanaged user candidate list", d.Name)
+		}
+
+		if len(destroyCandidates) == 0 {
+			break
+		}
+
+		// pick one random element in the list
+		var candidate *zfs.Dataset
+		for _, c := range destroyCandidates {
+			candidate = c
+			break
+		}
+		log.Debugf(ctx, "Analyzing candidate %s", candidate.Name)
+		// Ensure all deps are in removable list
+		deps := nt.Dependencies(*candidate)
+		for _, d := range deps {
+			// Any snapshots has its parent listed in deps or is candidate, ignore it for the check as we didn’t add it to the destroyCandidates list.
+			// We only consider filesystem datasets here
+			if d.IsSnapshot {
+				continue
+			}
+			if _, ok := destroyCandidates[d.Name]; !ok {
+				log.Infof(ctx, "Won’t remove %s: %s is a dependency not listed for auto destruction", candidate.Name, d.Name)
+				keepDatasets[candidate.Name] = true
+				continue nextUnmanagedUserPass
+			}
+		}
+
+		log.Debugf(ctx, "Trying to destroy %s", candidate.Name)
+		for _, d := range append(deps, candidate) {
+			// We destroy here all snapshots and leaf attached. Snapshots won’t be taken into account, however, we don’t want
+			// to try destroying leaves again, keep a list.
+			if err := nt.Destroy(d.Name); err != nil {
+				log.Warningf(ctx, i18n.G("Couldn't destroy user dataset %s (due to %s): %v"), d.Name, candidate.Name, err)
+			}
+		}
+
+		if err := ms.Refresh(ctx); err != nil {
+			return fmt.Errorf("Couldn't refresh machine list: %v", err)
+		}
+		gcPassNum++
+	}
+
 	return nil
 }
 
