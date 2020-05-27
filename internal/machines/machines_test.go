@@ -541,6 +541,77 @@ func TestIdempotentCommit(t *testing.T) {
 	assertMachinesEquals(t, msAfterCommit, ms)
 }
 
+func TestUpdateLastUsed(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		def     string
+		cmdline string
+
+		setPropertyErr bool
+
+		wantErr bool
+		isNoOp  bool
+	}{
+		"Update on system and user datasets":        {def: "m_with_userdata.yaml"},
+		"Update on correct current machine":         {def: "m_two_machines_with_different_userdata.yaml"},
+		"Update only current user and system state": {def: "state_snapshot_with_userdata_01.yaml"},
+
+		"Doesn't update on non zsys machine":   {def: "m_with_userdata_no_zsys.yaml", isNoOp: true},
+		"No current machine":                   {def: "m_with_userdata.yaml", cmdline: "doesntexist", isNoOp: true},
+		"Error on setting property is a no op": {def: "m_with_userdata.yaml", setPropertyErr: true, wantErr: true, isNoOp: true},
+	}
+
+	for name, tc := range tests {
+		tc := tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			tc.cmdline = getDefaultValue(tc.cmdline, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+
+			dir, cleanup := testutils.TempDir(t)
+			defer cleanup()
+			libzfs := testutils.GetMockZFS(t)
+			fPools := testutils.NewFakePools(t, filepath.Join("testdata", tc.def), testutils.WithLibZFS(libzfs))
+			defer fPools.Create(dir)()
+
+			lzfs := libzfs.(*mock.LibZFS)
+			lzfs.ForceLastUsedTime(true)
+
+			ms, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+
+			initMachines := ms.CopyForTests(t)
+
+			lzfs.ErrOnSetProperty(tc.setPropertyErr)
+
+			err = ms.UpdateLastUsed(context.Background())
+			if err != nil {
+				if !tc.wantErr {
+					t.Fatalf("expected no error but got: %v", err)
+				}
+				return
+			}
+			if err == nil && tc.wantErr {
+				t.Fatal("expected an error but got none")
+			}
+
+			if tc.isNoOp {
+				assertMachinesEquals(t, initMachines, ms)
+			} else {
+				assertMachinesToGolden(t, ms)
+				assertMachinesNotEquals(t, initMachines, ms)
+			}
+
+			machinesAfterRescan, err := machines.New(context.Background(), tc.cmdline, machines.WithLibZFS(libzfs))
+			if err != nil {
+				t.Error("expected success but got an error scanning for machines", err)
+			}
+			assertMachinesEquals(t, machinesAfterRescan, ms)
+		})
+	}
+}
+
 func TestCreateUserData(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {

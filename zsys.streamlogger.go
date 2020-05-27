@@ -270,6 +270,36 @@ func (z *ZsysLogServer) UpdateBootMenu(req *UpdateBootMenuRequest, stream Zsys_U
 }
 
 /*
+ * Zsys.UpdateLastUsed()
+ */
+
+// zsysUpdateLastUsedLogStream is a Zsys_UpdateLastUsedServer augmented by its own Context containing the log streamer
+type zsysUpdateLastUsedLogStream struct {
+	Zsys_UpdateLastUsedServer
+	ctx context.Context
+}
+
+// Context access the log streamer context
+func (s *zsysUpdateLastUsedLogStream) Context() context.Context {
+	return s.ctx
+}
+
+// UpdateLastUsed overrides ZsysServer UpdateLastUsed, installing a logger first
+func (z *ZsysLogServer) UpdateLastUsed(req *Empty, stream Zsys_UpdateLastUsedServer) error {
+	// it's ok to panic in the assertion as we expect to have generated above the Write() function.
+	ctx, err := streamlogger.AddLogger(stream.(streamlogger.StreamLogger), "UpdateLastUsed")
+	if err != nil {
+		return fmt.Errorf(i18n.G("couldn't attach a logger to request: %w"), err)
+	}
+
+	// wrap the context to access the context with logger
+	return z.ZsysServerIdleTimeout.UpdateLastUsed(req, &zsysUpdateLastUsedLogStream{
+		Zsys_UpdateLastUsedServer: stream,
+		ctx:                       ctx,
+	})
+}
+
+/*
  * Zsys.SaveSystemState()
  */
 
@@ -773,6 +803,19 @@ func (s *zsysCommitBootServer) Write(p []byte) (n int, err error) {
 
 // Write promote zsysUpdateBootMenuServer to an io.Writer
 func (s *zsysUpdateBootMenuServer) Write(p []byte) (n int, err error) {
+	err = s.Send(
+		&LogResponse{
+			Log: string(p),
+		})
+	if err != nil {
+		return 0, err
+	}
+
+	return len(p), nil
+}
+
+// Write promote zsysUpdateLastUsedServer to an io.Writer
+func (s *zsysUpdateLastUsedServer) Write(p []byte) (n int, err error) {
 	err = s.Send(
 		&LogResponse{
 			Log: string(p),

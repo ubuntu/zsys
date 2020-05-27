@@ -80,3 +80,17 @@ func (s *Server) UpdateBootMenu(req *zsys.UpdateBootMenuRequest, stream zsys.Zsy
 
 	return updateBootMenu(stream.Context())
 }
+
+// UpdateLastUsed updates all active (system and user) datasets with current time
+func (s *Server) UpdateLastUsed(req *zsys.Empty, stream zsys.Zsys_UpdateLastUsedServer) (err error) {
+	if err := s.authorizer.IsAllowedFromContext(stream.Context(), authorizer.ActionAlwaysAllowed); err != nil {
+		return err
+	}
+
+	s.RWRequest.Lock()
+	defer s.RWRequest.Unlock()
+
+	log.Infof(stream.Context(), i18n.G("Updating last used timestamp"))
+
+	return s.Machines.UpdateLastUsed(stream.Context())
+}

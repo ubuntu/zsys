@@ -187,6 +187,44 @@ func (ms *Machines) Commit(ctx context.Context) (bool, error) {
 	return changed, nil
 }
 
+// UpdateLastUsed updates all active (system and user) datasets with current time
+func (ms *Machines) UpdateLastUsed(ctx context.Context) error {
+	if !ms.current.isZsys() {
+		log.Info(ctx, i18n.G("Current machine isn't Zsys, nothing to update"))
+		return nil
+	}
+
+	t, cancel := ms.z.NewTransaction(ctx)
+	defer t.Done()
+
+	// System and users datasets: set lastUsed
+	currentTime := strconv.Itoa(int(time.Now().Unix()))
+	log.Infof(ctx, i18n.G("Updating last used to %v"), currentTime)
+
+	var activeDatasets []*zfs.Dataset
+	for _, ds := range ms.current.Datasets {
+		activeDatasets = append(activeDatasets, ds...)
+	}
+	activeDatasets = append(activeDatasets, ms.current.getUsersDatasets()...)
+
+	for _, d := range activeDatasets {
+		if err := t.SetProperty(libzfs.LastUsedProp, currentTime, d.Name, false); err != nil {
+			cancel()
+			return fmt.Errorf(i18n.G("couldn't set last used time to %q: ")+config.ErrorFormat, currentTime, err)
+		}
+	}
+
+	// Reset last used on state: note we could use currentTime but for tests, we need magic time. We should rather
+	// mock time.Now()
+	cur := int64(activeDatasets[0].LastUsed)
+	ms.current.LastUsed = time.Unix(cur, 0)
+	for _, us := range ms.current.Users {
+		us.LastUsed = time.Unix(cur, 0)
+	}
+
+	return nil
+}
+
 // diffDatasets returns datasets in a that aren't in b
 func diffDatasets(a, b []*zfs.Dataset) []*zfs.Dataset {
 	mb := make(map[string]struct{}, len(b))

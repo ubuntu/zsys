@@ -376,6 +376,17 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 		}
 
 		err = d.dZFS.SetUserProperty(up, v)
+		if err != nil {
+			return err
+		}
+
+		// TODO: remove once we mock rather time.Now() for mock tests
+		// Reload last used property from backend (as we can have set it to magic time)
+		if name == libzfs.LastUsedProp {
+			if prop, errRead := d.dZFS.GetUserProperty(up); errRead == nil {
+				value = prop.Value
+			}
+		}
 	}
 
 	if err != nil {
