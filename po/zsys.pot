@@ -60,7 +60,7 @@ msgstr ""
 msgid "  - Name:\t%s\n"
 msgstr ""
 
-#: internal/zfs/helpers.go:310
+#: internal/zfs/helpers.go:327
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
@@ -70,11 +70,11 @@ msgid ""
 "%q"
 msgstr ""
 
-#: internal/zfs/helpers.go:178
+#: internal/zfs/helpers.go:181
 msgid "%q isn't a 'value:source' format type for %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:457
+#: internal/zfs/zfs.go:462
 msgid "%q isn't a snapshot"
 msgstr ""
 
@@ -82,7 +82,7 @@ msgstr ""
 msgid "%q isn't a zsys snapshot with a valid %q property: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:357
+#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:374
 msgid "%q property isn't an int: "
 msgstr ""
 
@@ -184,7 +184,7 @@ msgstr ""
 msgid "All connections closed"
 msgstr ""
 
-#: internal/zfs/zfs.go:214
+#: internal/zfs/zfs.go:219
 msgid "An error occurred when reverting a Zfs transaction: "
 msgstr ""
 
@@ -277,8 +277,16 @@ msgstr ""
 msgid "Couldn't destroy %s: %v"
 msgstr ""
 
+#: internal/machines/gc.go:517
+msgid "Couldn't destroy user dataset %s (due to %s): %v"
+msgstr ""
+
 #: internal/machines/gc.go:443
 msgid "Couldn't destroy user dataset %s: %v"
+msgstr ""
+
+#: internal/machines/gc.go:476
+msgid "Couldn't determine if %s was a user dataset %v"
 msgstr ""
 
 #: internal/authorizer/authorizer.go:187
@@ -485,6 +493,10 @@ msgstr ""
 msgid "Invalid capacity %q on pool %q: %v"
 msgstr ""
 
+#: internal/zfs/helpers.go:314
+msgid "IsUserDataset called on snapshot %q."
+msgstr ""
+
 #: internal/machines/gc.go:302
 msgid "Keeping %v as it has a snapshot in its child hierarchy"
 msgstr ""
@@ -548,7 +560,7 @@ msgstr ""
 msgid "Needs a valid user name, got nothing"
 msgstr ""
 
-#: internal/zfs/helpers.go:205
+#: internal/zfs/helpers.go:208
 msgid "New dataset found: %q"
 msgstr ""
 
@@ -853,7 +865,7 @@ msgstr ""
 msgid "Tag current user dataset: %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:281
+#: internal/zfs/zfs.go:286
 msgid ""
 "The ZFS transaction object has already been used and Done() was called. It "
 "can't be reused"
@@ -870,15 +882,15 @@ msgid ""
 "this machine"
 msgstr ""
 
-#: internal/zfs/zfs.go:537
+#: internal/zfs/zfs.go:542
 msgid "Trying to clone %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:671
+#: internal/zfs/zfs.go:676
 msgid "Trying to promote %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:378
+#: internal/zfs/zfs.go:383
 msgid "Trying to snapshot %q"
 msgstr ""
 
@@ -890,6 +902,11 @@ msgstr ""
 #. (they, and all snapshots on them will end up in unmanaged datasets)
 #: internal/machines/gc.go:416
 msgid "Unassociated user datasets GC"
+msgstr ""
+
+#. 4. Clean up unmanaged datasets which were user datasets with empty tags.
+#: internal/machines/gc.go:456
+msgid "Unmanaged past user datasets GC"
 msgstr ""
 
 #: cmd/zsysd/client/service.go:245
@@ -933,69 +950,69 @@ msgstr ""
 msgid "ZFS SYStem integration daemon"
 msgstr ""
 
-#: internal/zfs/zfs.go:305
+#: internal/zfs/zfs.go:310
 msgid "ZFS: Cancelling nested transaction"
 msgstr ""
 
 #. revert all in progress transactions
-#: internal/zfs/zfs.go:304
+#: internal/zfs/zfs.go:309
 msgid "ZFS: an error occurred: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:817
+#: internal/zfs/zfs.go:822
 msgid "ZFS: can't set property %q=%q for %q as not a local property (%q)"
 msgstr ""
 
-#: internal/zfs/zfs.go:256
+#: internal/zfs/zfs.go:261
 msgid "ZFS: ending transaction"
 msgstr ""
 
-#: internal/zfs/zfs.go:79
+#: internal/zfs/zfs.go:84
 msgid "ZFS: new scan"
 msgstr ""
 
-#: internal/zfs/zfs.go:97
+#: internal/zfs/zfs.go:102
 msgid "ZFS: refresh dataset list"
 msgstr ""
 
-#: internal/zfs/zfs.go:711
+#: internal/zfs/zfs.go:716
 msgid "ZFS: request destruction of %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:210
+#: internal/zfs/zfs.go:215
 msgid "ZFS: reverting all in progress zfs transactions"
 msgstr ""
 
-#: internal/zfs/zfs.go:257
+#: internal/zfs/zfs.go:262
 msgid "ZFS: transaction done"
 msgstr ""
 
-#: internal/zfs/zfs.go:317
+#: internal/zfs/zfs.go:322
 msgid "ZFS: trying to Create %q with mountpoint %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:446
+#: internal/zfs/zfs.go:451
 msgid "ZFS: trying to clone %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:771
+#: internal/zfs/zfs.go:776
 msgid "ZFS: trying to destroy %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:748
+#: internal/zfs/zfs.go:753
 #, c-format
 msgid "ZFS: trying to destroy recursively %s@%s"
 msgstr ""
 
-#: internal/zfs/zfs.go:628
+#: internal/zfs/zfs.go:633
 msgid "ZFS: trying to promote %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:808
+#: internal/zfs/zfs.go:813
 msgid "ZFS: trying to set %q=%q on %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:360
+#: internal/zfs/zfs.go:365
 msgid "ZFS: trying to snapshot %q, recursive: %v"
 msgstr ""
 
@@ -1011,11 +1028,11 @@ msgstr ""
 msgid "bucket %+v"
 msgstr ""
 
-#: internal/zfs/zfs.go:327
+#: internal/zfs/zfs.go:332
 msgid "can't create %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:161
+#: internal/zfs/helpers.go:164
 msgid "can't get %q property: "
 msgstr ""
 
@@ -1023,19 +1040,19 @@ msgstr ""
 msgid "can't get associated pool: "
 msgstr ""
 
-#: internal/zfs/zfs.go:811
+#: internal/zfs/zfs.go:816
 msgid "can't get dataset to change property on %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:714
+#: internal/zfs/zfs.go:719
 msgid "can't get dataset to destroy %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:108
+#: internal/zfs/zfs.go:113
 msgid "can't list datasets: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:636
+#: internal/zfs/zfs.go:641
 msgid "can't promote %q: it's a snapshot"
 msgstr ""
 
@@ -1055,7 +1072,7 @@ msgstr ""
 msgid "can't read source of LastUsed property, ignoring:"
 msgstr ""
 
-#: internal/zfs/zfs.go:822
+#: internal/zfs/zfs.go:827
 msgid "can't set dataset property %q=%q for %q: "
 msgstr ""
 
@@ -1071,33 +1088,33 @@ msgstr ""
 msgid "can't use empty string for new home directory"
 msgstr ""
 
-#: internal/zfs/zfs.go:780
+#: internal/zfs/zfs.go:785
 msgid "cannot destroy dataset %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:595
+#: internal/zfs/helpers.go:612
 msgid "cannot find %q as child of parent %q"
 msgstr ""
 
-#: internal/zfs/zfs.go:364 internal/zfs/zfs.go:453 internal/zfs/zfs.go:632
-#: internal/zfs/zfs.go:650 internal/zfs/zfs.go:678
+#: internal/zfs/zfs.go:369 internal/zfs/zfs.go:458 internal/zfs/zfs.go:637
+#: internal/zfs/zfs.go:655 internal/zfs/zfs.go:683
 msgid "cannot find %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:519
+#: internal/zfs/helpers.go:536
 msgid "cannot find base snapshot %q: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:349 internal/zfs/zfs.go:486 internal/zfs/zfs.go:516
-#: internal/zfs/zfs.go:587 internal/zfs/zfs.go:727
+#: internal/zfs/zfs.go:354 internal/zfs/zfs.go:491 internal/zfs/zfs.go:521
+#: internal/zfs/zfs.go:592 internal/zfs/zfs.go:732
 msgid "cannot find parent for %q: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:791
+#: internal/zfs/zfs.go:796
 msgid "cannot find parent for %s: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:547
+#: internal/zfs/helpers.go:564
 msgid "cannot remove snapshot %q on old dataset %q: %v"
 msgstr ""
 
@@ -1133,7 +1150,7 @@ msgstr ""
 msgid "couldn't cleanup %s directory: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:568
+#: internal/zfs/zfs.go:573
 msgid "couldn't clone %q to %q: "
 msgstr ""
 
@@ -1165,7 +1182,7 @@ msgstr ""
 msgid "couldn't create new user datasets from %q: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:404
+#: internal/zfs/zfs.go:409
 msgid "couldn't create snapshot %q: %v"
 msgstr ""
 
@@ -1177,19 +1194,19 @@ msgstr ""
 msgid "couldn't create userdataset for %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:735
+#: internal/zfs/zfs.go:740
 msgid "couldn't destroy %q and its children: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:718
+#: internal/zfs/zfs.go:723
 msgid "couldn't destroy %q due to clones: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:338 internal/zfs/zfs.go:415 internal/zfs/zfs.go:579
+#: internal/zfs/zfs.go:343 internal/zfs/zfs.go:420 internal/zfs/zfs.go:584
 msgid "couldn't destroy %q for cleanup: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:732
+#: internal/zfs/zfs.go:737
 msgid "couldn't destroy %q: it's a filesystem dataset which has snapshots"
 msgstr ""
 
@@ -1213,15 +1230,15 @@ msgstr ""
 msgid "couldn't fetch matching information: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:343 internal/zfs/zfs.go:617
+#: internal/zfs/zfs.go:348 internal/zfs/zfs.go:622
 msgid "couldn't fetch property of newly created dataset: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:421
+#: internal/zfs/zfs.go:426
 msgid "couldn't fetch property of newly created snapshot: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:240
+#: internal/zfs/zfs.go:245
 msgid "couldn't find dataset %q in cache"
 msgstr ""
 
@@ -1241,11 +1258,11 @@ msgstr ""
 msgid "couldn't parse kernel command line: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:662
+#: internal/zfs/zfs.go:667
 msgid "couldn't promote %q for cleanup: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:682
+#: internal/zfs/zfs.go:687
 msgid "couldn't promote %q: "
 msgstr ""
 
@@ -1257,15 +1274,15 @@ msgstr ""
 msgid "couldn't read our internal configuration: %v "
 msgstr ""
 
-#: internal/zfs/zfs.go:690
+#: internal/zfs/zfs.go:695
 msgid "couldn't refresh our internal origin and layout cache: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:686
+#: internal/zfs/zfs.go:691
 msgid "couldn't refresh properties for %q: "
 msgstr ""
 
-#: internal/zfs/helpers.go:212
+#: internal/zfs/helpers.go:215
 msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
@@ -1292,7 +1309,7 @@ msgstr ""
 msgid "couldn't save system state: "
 msgstr ""
 
-#: internal/zfs/helpers.go:307
+#: internal/zfs/helpers.go:324
 msgid "couldn't scan %q for clones"
 msgstr ""
 
@@ -1320,7 +1337,7 @@ msgstr ""
 msgid "couldn't set new home %q to %q: "
 msgstr ""
 
-#: internal/zfs/zfs.go:606 internal/zfs/zfs.go:612
+#: internal/zfs/zfs.go:611 internal/zfs/zfs.go:617
 msgid "couldn't set user property %q to %q for %v: "
 msgstr ""
 
@@ -1391,7 +1408,7 @@ msgid ""
 "and canmount isn't on"
 msgstr ""
 
-#: internal/zfs/zfs.go:491 internal/zfs/zfs.go:654
+#: internal/zfs/zfs.go:496 internal/zfs/zfs.go:659
 msgid "integrity check failed: %v"
 msgstr ""
 
@@ -1454,7 +1471,7 @@ msgstr ""
 msgid "no ID given and cannot retrieve current machine. Please specify one ID."
 msgstr ""
 
-#: internal/zfs/zfs.go:761
+#: internal/zfs/zfs.go:766
 msgid "no existing snapshot %q: "
 msgstr ""
 
@@ -1480,7 +1497,7 @@ msgstr ""
 msgid "no request ID found on server header"
 msgstr ""
 
-#: internal/zfs/zfs.go:448
+#: internal/zfs/zfs.go:453
 msgid "no suffix was provided for cloning"
 msgstr ""
 
@@ -1488,7 +1505,7 @@ msgstr ""
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
-#: internal/zfs/helpers.go:274
+#: internal/zfs/helpers.go:277
 msgid ""
 "parent of %q doesn't have a snapshot named %q. Every of its children "
 "shouldn't have a snapshot. However %q exists"
@@ -1525,11 +1542,11 @@ msgstr ""
 msgid "state.LastUsed (%s) before bucket.start (%s). Continuing"
 msgstr ""
 
-#: internal/zfs/zfs.go:753
+#: internal/zfs/zfs.go:758
 msgid "stop destroying dataset on %q, cannot destroy child: %v"
 msgstr ""
 
-#: internal/zfs/zfs.go:435
+#: internal/zfs/zfs.go:440
 msgid "stop snapshotting dataset for %q: %v"
 msgstr ""
 
