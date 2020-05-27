@@ -143,7 +143,7 @@
       {
          "Name": "rpool/USERDATA/user1_abcd",
          "Mountpoint": "/home/user1",
-         "CanMount": "on",
+         "CanMount": "noauto",
          "LastUsed": 1544444444
       },
       {
