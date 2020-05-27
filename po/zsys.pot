@@ -267,7 +267,7 @@ msgstr ""
 msgid "Couldn't convert %q to a valid uid for %q"
 msgstr ""
 
-#: internal/machines/boot.go:220
+#: internal/machines/boot.go:258
 msgid ""
 "Couldn't create new subdatasets from %q. Assuming it has already been "
 "created successfully: %v"
@@ -385,6 +385,10 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to modify"
 msgstr ""
 
+#: internal/machines/boot.go:193
+msgid "Current machine isn't Zsys, nothing to update"
+msgstr ""
+
 #: internal/machines/state.go:274
 #, c-format
 msgid "Deleting dataset %s\n"
@@ -408,7 +412,7 @@ msgstr ""
 msgid "Didn't receive any information from service in %s"
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:47
+#: cmd/zsysd/client/boot.go:53
 msgid "Display if any zfs datasets have been modified to boot"
 msgstr ""
 
@@ -541,7 +545,7 @@ msgstr ""
 msgid "Machine state management"
 msgstr ""
 
-#: internal/machines/boot.go:209
+#: internal/machines/boot.go:247
 msgid ""
 "Mounted clone bootFS dataset created by initramfs doesn't have a valid "
 "_suffix (at least .*_<onechar>): %q"
@@ -613,7 +617,7 @@ msgstr ""
 msgid "Prepare current boot state"
 msgstr ""
 
-#: internal/machines/boot.go:326
+#: internal/machines/boot.go:364
 msgid "Promoting dataset: %q"
 msgstr ""
 
@@ -757,7 +761,7 @@ msgstr ""
 msgid "Reusing %q as matching user name or old mountpoint"
 msgstr ""
 
-#: internal/machines/boot.go:229
+#: internal/machines/boot.go:267
 msgid "Reverting user data"
 msgstr ""
 
@@ -823,7 +827,7 @@ msgstr ""
 msgid "Shows the status of the machine."
 msgstr ""
 
-#: cmd/zsysd/client/boot.go:52 cmd/zsysd/client/state.go:62
+#: cmd/zsysd/client/boot.go:58 cmd/zsysd/client/state.go:62
 msgid "Signal this is an automated request triggered by script"
 msgstr ""
 
@@ -849,7 +853,7 @@ msgstr ""
 msgid "Successfully saved as %q\n"
 msgstr ""
 
-#: internal/machines/boot.go:262
+#: internal/machines/boot.go:300
 msgid "Switch dataset %q to mount %q"
 msgstr ""
 
@@ -861,7 +865,7 @@ msgstr ""
 msgid "System state name is required"
 msgstr ""
 
-#: internal/machines/boot.go:304
+#: internal/machines/boot.go:342
 msgid "Tag current user dataset: %q"
 msgstr ""
 
@@ -918,12 +922,24 @@ msgstr ""
 msgid "Untagging all datasets\n"
 msgstr ""
 
-#: internal/machines/boot.go:288
+#: internal/machines/boot.go:326
 msgid "Untagging user dataset: %q"
+msgstr ""
+
+#: cmd/zsysd/client/boot.go:46
+msgid "Update last used timestamp"
 msgstr ""
 
 #: cmd/zsysd/client/boot.go:40
 msgid "Update system boot menu"
+msgstr ""
+
+#: internal/daemon/boot.go:93
+msgid "Updating last used timestamp"
+msgstr ""
+
+#: internal/machines/boot.go:202
+msgid "Updating last used to %v"
 msgstr ""
 
 #: internal/daemon/boot.go:79
@@ -1092,7 +1108,7 @@ msgstr ""
 msgid "cannot destroy dataset %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:612
+#: internal/zfs/helpers.go:623
 msgid "cannot find %q as child of parent %q"
 msgstr ""
 
@@ -1101,7 +1117,7 @@ msgstr ""
 msgid "cannot find %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:536
+#: internal/zfs/helpers.go:547
 msgid "cannot find base snapshot %q: %v"
 msgstr ""
 
@@ -1114,7 +1130,7 @@ msgstr ""
 msgid "cannot find parent for %s: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:564
+#: internal/zfs/helpers.go:575
 msgid "cannot remove snapshot %q on old dataset %q: %v"
 msgstr ""
 
@@ -1122,11 +1138,11 @@ msgstr ""
 msgid "cannot retrieve systemd listeners: %v"
 msgstr ""
 
-#: internal/machines/boot.go:218
+#: internal/machines/boot.go:256
 msgid "cloning %q and children"
 msgstr ""
 
-#: internal/machines/boot.go:244 internal/machines/boot.go:311
+#: internal/machines/boot.go:282 internal/machines/boot.go:349
 #: internal/machines/userdata.go:101
 msgid "couldn't add %q to BootfsDatasets property of %q: "
 msgstr ""
@@ -1138,7 +1154,7 @@ msgstr ""
 #: zsys.streamlogger.go:382 zsys.streamlogger.go:412 zsys.streamlogger.go:442
 #: zsys.streamlogger.go:472 zsys.streamlogger.go:502 zsys.streamlogger.go:532
 #: zsys.streamlogger.go:562 zsys.streamlogger.go:592 zsys.streamlogger.go:622
-#: zsys.streamlogger.go:652 zsys.streamlogger.go:682
+#: zsys.streamlogger.go:652 zsys.streamlogger.go:682 zsys.streamlogger.go:712
 msgid "couldn't attach a logger to request: %w"
 msgstr ""
 
@@ -1178,7 +1194,7 @@ msgstr ""
 msgid "couldn't create new authorizer: %v"
 msgstr ""
 
-#: internal/machines/boot.go:236
+#: internal/machines/boot.go:274
 msgid "couldn't create new user datasets from %q: %v"
 msgstr ""
 
@@ -1266,7 +1282,7 @@ msgstr ""
 msgid "couldn't promote %q: "
 msgstr ""
 
-#: internal/machines/boot.go:328
+#: internal/machines/boot.go:366
 msgid "couldn't promote dataset %q: "
 msgstr ""
 
@@ -1286,7 +1302,7 @@ msgstr ""
 msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
-#: internal/machines/boot.go:290 internal/machines/state.go:339
+#: internal/machines/boot.go:328 internal/machines/state.go:339
 #: internal/machines/userdata.go:181
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
@@ -1329,7 +1345,8 @@ msgstr ""
 msgid "couldn't set last booted kernel to %q "
 msgstr ""
 
-#: internal/machines/boot.go:149 internal/machines/userdata.go:107
+#: internal/machines/boot.go:149 internal/machines/boot.go:213
+#: internal/machines/userdata.go:107
 msgid "couldn't set last used time to %q: "
 msgstr ""
 
@@ -1341,7 +1358,7 @@ msgstr ""
 msgid "couldn't set user property %q to %q for %v: "
 msgstr ""
 
-#: internal/machines/boot.go:264
+#: internal/machines/boot.go:302
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
