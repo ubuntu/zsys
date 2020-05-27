@@ -41,6 +41,12 @@ var (
 		Args:  cobra.NoArgs,
 		Run:   func(cmd *cobra.Command, args []string) { cmdErr = updateBootMenu(updateMenuAuto) },
 	}
+	updateLastUsedCmd = &cobra.Command{
+		Use:   "update-lastused",
+		Short: i18n.G("Update last used timestamp"),
+		Args:  cobra.NoArgs,
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = updateLastUsed() },
+	}
 )
 
 func init() {
@@ -50,6 +56,7 @@ func init() {
 	bootCmd.AddCommand(bootCommitCmd)
 	bootCmd.AddCommand(updateMenuCmd)
 	updateMenuCmd.Flags().BoolVarP(&updateMenuAuto, "auto", "", false, i18n.G("Signal this is an automated request triggered by script"))
+	bootCmd.AddCommand(updateLastUsedCmd)
 }
 
 func bootPrepare(printModifiedBoot bool) (err error) {
@@ -145,6 +152,38 @@ func updateBootMenu(auto bool) error {
 	defer cancel()
 
 	stream, err := client.UpdateBootMenu(ctx, &zsys.UpdateBootMenuRequest{Auto: auto})
+	if err = checkConn(err, reset); err != nil {
+		return err
+	}
+
+	for {
+		_, err := stream.Recv()
+		if err == streamlogger.ErrLogMsg {
+			reset <- struct{}{}
+			continue
+		}
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func updateLastUsed() error {
+	client, err := newClient()
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
+	defer cancel()
+
+	stream, err := client.UpdateLastUsed(ctx, &zsys.Empty{})
 	if err = checkConn(err, reset); err != nil {
 		return err
 	}
