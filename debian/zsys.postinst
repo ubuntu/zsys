@@ -5,4 +5,33 @@ set -e
 # so we make sure it's loaded here first.
 modprobe -v zfs || true
 
+is_zsys() {
+    dsname="$(findmnt -o SOURCE -n /)"
+    if [ -z "$dsname" ]; then
+        return 1
+    fi
+    if [ "$(zfs get com.ubuntu.zsys:bootfs -H -o value "$dsname")" != "yes" ]; then
+        return 1
+    fi
+    return 0
+}
+
+case "$1" in
+        configure)
+            # Enable autotrim for zsys pools
+            if dpkg --compare-versions "$2" le-nl '0.5.0'; then
+                if is_zsys; then
+                    for mountpoint in / /boot; do
+                        dsname="$(findmnt -o SOURCE -n ${mountpoint})"
+                        if [ -n "$dsname" ]; then
+                            zpool set autotrim=on ${dsname%%/*} || true
+                            zpool trim ${dsname%%/*} || true
+                        fi
+                    done
+                fi
+            fi
+            ;;
+esac
+
+
 #DEBHELPER#
