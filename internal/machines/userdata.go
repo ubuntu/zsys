@@ -180,6 +180,10 @@ func (ms *Machines) DissociateUser(ctx context.Context, username string) error {
 				cancel()
 				return fmt.Errorf(i18n.G("couldn't remove %q to BootfsDatasets property of %q: ")+config.ErrorFormat, ms.current.ID, d.Name, err)
 			}
+			if err := t.SetProperty(libzfs.CanmountProp, "noauto", d.Name, false); err != nil {
+				cancel()
+				return fmt.Errorf(i18n.G("couldn't set %q to canmount=noauto: ")+config.ErrorFormat, ms.current.ID, d.Name, err)
+			}
 		}
 	}
 

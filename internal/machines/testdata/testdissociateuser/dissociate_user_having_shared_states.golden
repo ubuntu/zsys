@@ -91,7 +91,7 @@
                      {
                         "Name": "rpool/USERDATA/user1_abcd",
                         "Mountpoint": "/home/user1",
-                        "CanMount": "on",
+                        "CanMount": "noauto",
                         "LastUsed": 1544444444,
                         "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
                      }
@@ -126,7 +126,7 @@
                         {
                            "Name": "rpool/USERDATA/user1_abcd",
                            "Mountpoint": "/home/user1",
-                           "CanMount": "on",
+                           "CanMount": "noauto",
                            "LastUsed": 1544444444,
                            "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
                         }
@@ -217,7 +217,7 @@
       {
          "Name": "rpool/USERDATA/user1_abcd",
          "Mountpoint": "/home/user1",
-         "CanMount": "on",
+         "CanMount": "noauto",
          "LastUsed": 1544444444,
          "BootfsDatasets": "rpool/ROOT/ubuntu_5678"
       }
