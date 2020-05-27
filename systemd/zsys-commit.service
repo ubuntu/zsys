@@ -1,7 +1,7 @@
 [Unit]
 Description=Mark current ZSYS boot as successful
-After=default.target
-Requires=default.target
+After=default.target zsysd.socket zsysd.service
+Requires=default.target zsysd.socket zsysd.service
 
 # We can't run it in a container
 ConditionVirtualization=!container
@@ -10,6 +10,7 @@ ConditionVirtualization=!container
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/sbin/zsysctl boot commit
+ExecStop=/sbin/zsysctl boot update-lastused
 
 # Some daemon restrictions
 NoNewPrivileges=true
