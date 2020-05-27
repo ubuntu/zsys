@@ -386,6 +386,12 @@ func (d *Dataset) setProperty(name, value, source string) (err error) {
 			if prop, errRead := d.dZFS.GetUserProperty(up); errRead == nil {
 				value = prop.Value
 			}
+			if value == "" {
+				value = "0"
+			}
+			if _, err := strconv.Atoi(value); err != nil {
+				return fmt.Errorf(i18n.G("%q property isn't an int: ")+config.ErrorFormat, libzfs.LastUsedProp, err)
+			}
 		}
 	}
 
