@@ -1,5 +1,6 @@
 [Unit]
 Description=Save current user state periodically
+ConditionUser=!@system
 
 [Timer]
 OnStartupSec=1min
