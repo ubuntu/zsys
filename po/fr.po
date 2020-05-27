@@ -64,7 +64,7 @@ msgstr ""
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
-#: internal/machines/userdata.go:212
+#: internal/machines/userdata.go:216
 msgid ""
 "%q is already associated to %q, which is for a different user name (%q) than "
 "%q"
@@ -315,7 +315,7 @@ msgid ""
 "Putting it in keep list."
 msgstr ""
 
-#: internal/machines/userdata.go:95 internal/machines/userdata.go:247
+#: internal/machines/userdata.go:95 internal/machines/userdata.go:251
 msgid "Couldn't mount %s: %v"
 msgstr ""
 
@@ -343,7 +343,7 @@ msgstr ""
 msgid "Couldn't remove state %s: %v"
 msgstr ""
 
-#: internal/machines/userdata.go:244
+#: internal/machines/userdata.go:248
 msgid "Couldn't restore permission on new home directory %s: %v"
 msgstr ""
 
@@ -757,7 +757,7 @@ msgstr ""
 msgid "Returns version of client and server"
 msgstr ""
 
-#: internal/machines/userdata.go:225
+#: internal/machines/userdata.go:229
 msgid "Reusing %q as matching user name or old mountpoint"
 msgstr ""
 
@@ -880,7 +880,7 @@ msgstr ""
 msgid "There are %d exceeding states to potentially remove"
 msgstr ""
 
-#: internal/machines/userdata.go:201
+#: internal/machines/userdata.go:205
 msgid ""
 "Trying to check if there is a user or home directory already attached to "
 "this machine"
@@ -1162,7 +1162,7 @@ msgstr ""
 msgid "couldn't change home userdataset for %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:252
+#: internal/machines/userdata.go:256
 msgid "couldn't cleanup %s directory: %v"
 msgstr ""
 
@@ -1341,6 +1341,10 @@ msgstr ""
 msgid "couldn't send ready notification to systemd while supported: %v"
 msgstr ""
 
+#: internal/machines/userdata.go:185
+msgid "couldn't set %q to canmount=noauto: "
+msgstr ""
+
 #: internal/machines/boot.go:163
 msgid "couldn't set last booted kernel to %q "
 msgstr ""
@@ -1350,7 +1354,7 @@ msgstr ""
 msgid "couldn't set last used time to %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:237
+#: internal/machines/userdata.go:241
 msgid "couldn't set new home %q to %q: "
 msgstr ""
 
