@@ -10,6 +10,7 @@ service Zsys {
   rpc PrepareBoot(Empty) returns (stream PrepareBootResponse);
   rpc CommitBoot(Empty) returns (stream CommitBootResponse);
   rpc UpdateBootMenu(UpdateBootMenuRequest) returns (stream LogResponse);
+  rpc UpdateLastUsed(Empty) returns (stream LogResponse);
 
   rpc SaveSystemState(SaveSystemStateRequest) returns (stream CreateSaveStateResponse);
   rpc SaveUserState(SaveUserStateRequest) returns (stream CreateSaveStateResponse);
