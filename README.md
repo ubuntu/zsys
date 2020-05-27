@@ -673,6 +673,31 @@ zsysctl boot prepare [flags]
   -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
 ```
 
+#### zsysctl boot update-lastused
+
+Update last used timestamp
+
+##### Synopsis
+
+Update last used timestamp
+
+```
+zsysctl boot update-lastused [flags]
+```
+
+##### Options
+
+```
+  -h, --help   help for update-lastused
+```
+
+##### Options inherited from parent commands
+
+```
+  -p, --print-changes   Display if any zfs datasets have been modified to boot
+  -v, --verbose count   issue INFO (-v) and DEBUG (-vv) output
+```
+
 #### zsysctl boot update-menu
 
 Update system boot menu
