@@ -49,6 +49,36 @@
                      ]
                   }
                },
+               "rpool/USERDATA/user1_abcd@autozsys_20200101-0900": {
+                  "ID": "rpool/USERDATA/user1_abcd@autozsys_20200101-0900",
+                  "LastUsed": "2020-01-01T10:00:00+01:00",
+                  "Datasets": {
+                     "rpool/USERDATA/user1_abcd@autozsys_20200101-0900": [
+                        {
+                           "Name": "rpool/USERDATA/user1_abcd@autozsys_20200101-0900",
+                           "IsSnapshot": true,
+                           "Mountpoint": "/home/user1",
+                           "CanMount": "on",
+                           "LastUsed": 1577869200
+                        }
+                     ]
+                  }
+               },
+               "rpool/USERDATA/user1_abcd@autozsys_20200101-1000": {
+                  "ID": "rpool/USERDATA/user1_abcd@autozsys_20200101-1000",
+                  "LastUsed": "2020-01-01T11:00:00+01:00",
+                  "Datasets": {
+                     "rpool/USERDATA/user1_abcd@autozsys_20200101-1000": [
+                        {
+                           "Name": "rpool/USERDATA/user1_abcd@autozsys_20200101-1000",
+                           "IsSnapshot": true,
+                           "Mountpoint": "/home/user1",
+                           "CanMount": "on",
+                           "LastUsed": 1577872800
+                        }
+                     ]
+                  }
+               },
                "rpool/USERDATA/user1_abcd@autozsys_20200101-1100": {
                   "ID": "rpool/USERDATA/user1_abcd@autozsys_20200101-1100",
                   "LastUsed": "2020-01-01T12:00:00+01:00",
@@ -81,6 +111,23 @@
                         "LastUsed": 1577869200
                      }
                   ]
+               },
+               "Users": {
+                  "user1": {
+                     "ID": "rpool/USERDATA/user1_abcd@autozsys_20200101-0900",
+                     "LastUsed": "2020-01-01T10:00:00+01:00",
+                     "Datasets": {
+                        "rpool/USERDATA/user1_abcd@autozsys_20200101-0900": [
+                           {
+                              "Name": "rpool/USERDATA/user1_abcd@autozsys_20200101-0900",
+                              "IsSnapshot": true,
+                              "Mountpoint": "/home/user1",
+                              "CanMount": "on",
+                              "LastUsed": 1577869200
+                           }
+                        ]
+                     }
+                  }
                }
             },
             "rpool/ROOT/ubuntu_1234@autozsys_20200101-1000": {
@@ -97,6 +144,23 @@
                         "LastUsed": 1577872800
                      }
                   ]
+               },
+               "Users": {
+                  "user1": {
+                     "ID": "rpool/USERDATA/user1_abcd@autozsys_20200101-1000",
+                     "LastUsed": "2020-01-01T11:00:00+01:00",
+                     "Datasets": {
+                        "rpool/USERDATA/user1_abcd@autozsys_20200101-1000": [
+                           {
+                              "Name": "rpool/USERDATA/user1_abcd@autozsys_20200101-1000",
+                              "IsSnapshot": true,
+                              "Mountpoint": "/home/user1",
+                              "CanMount": "on",
+                              "LastUsed": 1577872800
+                           }
+                        ]
+                     }
+                  }
                }
             },
             "rpool/ROOT/ubuntu_1234@autozsys_20200101-1100": {
@@ -175,6 +239,20 @@
          "CanMount": "on",
          "LastUsed": 1544444444,
          "BootfsDatasets": "rpool/ROOT/ubuntu_1234"
+      },
+      {
+         "Name": "rpool/USERDATA/user1_abcd@autozsys_20200101-0900",
+         "IsSnapshot": true,
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1577869200
+      },
+      {
+         "Name": "rpool/USERDATA/user1_abcd@autozsys_20200101-1000",
+         "IsSnapshot": true,
+         "Mountpoint": "/home/user1",
+         "CanMount": "on",
+         "LastUsed": 1577872800
       },
       {
          "Name": "rpool/USERDATA/user1_abcd@autozsys_20200101-1100",
