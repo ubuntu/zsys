@@ -40,6 +40,16 @@ pools:
         bootfs_datasets: rpool/ROOT/ubuntu_1234:local
         canmount: on:local
         creation_time: 2020-01-01T11:00:00+00:00
+      - name: autozsys_20200101-1000
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T10:00:00+00:00
+      - name: autozsys_20200101-0900
+        mountpoint: /home/user1:local
+        bootfs_datasets: rpool/ROOT/ubuntu_1234:local
+        canmount: on:local
+        creation_time: 2020-01-01T09:00:00+00:00
     - name: USERDATA/user1_failedboot
       mountpoint: /home/user1
       bootfs_datasets: rpool/ROOT/ubuntu_failedboot

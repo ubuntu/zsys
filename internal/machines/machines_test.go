@@ -1125,7 +1125,7 @@ func TestRemoveState(t *testing.T) {
 		user           string
 		force          bool
 
-		destroyErr bool
+		destroyErrDS []string
 
 		isNoOp              bool
 		wantErr             bool
@@ -1169,8 +1169,8 @@ func TestRemoveState(t *testing.T) {
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
 		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
-		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
-		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone", user: "user5", force: true, destroyErr: true, wantErr: true},
+		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErrDS: []string{}, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone", user: "user5", force: true, destroyErrDS: []string{}, wantErr: true},
 	}
 
 	for name, tc := range tests {
@@ -1191,7 +1191,7 @@ func TestRemoveState(t *testing.T) {
 
 			initMachines := ms.CopyForTests(t)
 			lzfs := libzfs.(*mock.LibZFS)
-			lzfs.ErrOnDestroy(tc.destroyErr)
+			lzfs.ErrOnDestroyDS(tc.destroyErrDS)
 
 			err = ms.RemoveState(context.Background(), tc.state, tc.user, tc.force, false)
 			if err != nil {
@@ -1305,7 +1305,7 @@ func TestGC(t *testing.T) {
 		all        bool
 		configPath string
 
-		destroyErr bool
+		destroyErrDS []string
 
 		isNoOp  bool
 		wantErr bool
@@ -1344,13 +1344,13 @@ func TestGC(t *testing.T) {
 		"Keep more user snapshots than simply last day has":    {def: "gc_system_with_users.yaml", configPath: "keep_many_snapshots.conf"},
 
 		// User clones
-		"Remove user clone state":                                   {def: "gc_system_with_users_clone.yaml"},
-		"Remove user clone state with subdataset":                   {def: "gc_system_with_users_clone_subdataset.yaml"},
-		"Don't remove user clone state with snapshot on it kept":    {def: "gc_system_with_users_clone_with_manual_snapshot.yaml", isNoOp: true},
-		"Don't remove user clone state with snapshot on subdataset": {def: "gc_system_with_users_clone_subdataset_with_manual_snapshot.yaml", isNoOp: true},
-		"Ensure user clones are accounted by policy":                {def: "gc_system_with_users_with_untagged_clones.yaml"},
-		// FIXME: user1_clone should be removed once TestNew is fixed (attaching the clone, and so its snapshots to the system state indirectly)
-		//"Remove unassociated user clone after deleting its snapshot": {def: "gc_system_with_users_clone_with_auto_snapshot.yaml"},
+		"Remove user clone state":                                                                     {def: "gc_system_with_users_clone.yaml"},
+		"Remove user clone state with subdataset":                                                     {def: "gc_system_with_users_clone_subdataset.yaml"},
+		"Don't remove user clone state with snapshot on it kept":                                      {def: "gc_system_with_users_clone_with_manual_snapshot.yaml", isNoOp: true},
+		"Don't remove user clone state with snapshot on subdataset":                                   {def: "gc_system_with_users_clone_subdataset_with_manual_snapshot.yaml", isNoOp: true},
+		"Don't remove user clone state linked to a system state":                                      {def: "gc_system_with_users_clone_linked_to_system_state.yaml", isNoOp: true},
+		"Ensure user clones are accounted by policy":                                                  {def: "gc_system_with_users_with_untagged_clones.yaml"},
+		"Remove unassociated user clone after deleting its snapshot":                                  {def: "gc_system_with_users_clone_with_auto_snapshot.yaml"},
 		"Remove unassociated user clone after deleting its snapshot which was linked to system state": {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml"},
 
 		// User clone attached to multiple states/machines
@@ -1370,12 +1370,15 @@ func TestGC(t *testing.T) {
 		"Failed revert - no lastused on system":        {def: "gc_system_failed_revert.yaml"},
 		"Failed boot - no lastused on user and system": {def: "gc_system_with_users_failed_boot.yaml"},
 
-		// Deletion prevented
+		// Deletion prevention (no infinite loop)
 		"Manual user snapshot which should be deleted is kept": {def: "gc_system_with_users_manual_snapshots.yaml", isNoOp: true},
 		"Users and clones with undeletable snapshot":           {def: "gc_system_with_users_and_clones_undeletable_snapshot.yaml"},
+		"Destroy failed on system dataset":                     {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml", destroyErrDS: []string{"rpool/ROOT/ubuntu_1234@autozsys_20191230-1710"}, isNoOp: true},
+		"Destroy failed on user dataset":                       {def: "gc_system_with_users_clone.yaml", destroyErrDS: []string{"rpool/USERDATA/user1_clone"}, isNoOp: true},
+		"Destroy failed on unlinked user dataset":              {def: "gc_system_with_unlinked_users_unmanaged_clone_bootfs_on_clone.yaml", destroyErrDS: []string{"rpool/USERDATA/user2_clone"}, isNoOp: true},
 
 		// Error cases
-		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErr: true, isNoOp: true},
+		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErrDS: []string{}, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -1416,7 +1419,7 @@ func TestGC(t *testing.T) {
 
 			initMachines := ms.CopyForTests(t)
 			lzfs := libzfs.(*mock.LibZFS)
-			lzfs.ErrOnDestroy(tc.destroyErr)
+			lzfs.ErrOnDestroyDS(tc.destroyErrDS)
 
 			err = ms.GC(context.Background(), tc.all)
 			if err != nil {

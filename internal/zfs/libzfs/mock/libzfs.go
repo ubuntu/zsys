@@ -22,7 +22,7 @@ type LibZFS struct {
 
 	errOnCreate       bool
 	errOnClone        bool
-	errOnDestroy      bool
+	errOnDestroyDS    []string
 	errOnPromote      bool
 	errOnScan         bool
 	errOnSetProperty  bool
@@ -354,9 +354,9 @@ func (l *LibZFS) ErrOnCreate(shouldErr bool) {
 	l.errOnCreate = shouldErr
 }
 
-// ErrOnDestroy forces a failure of the mock on destroy operation
-func (l *LibZFS) ErrOnDestroy(shouldErr bool) {
-	l.errOnDestroy = shouldErr
+// ErrOnDestroyDS forces a failure of the mock on destroy operation for the datasets passed in dsErr
+func (l *LibZFS) ErrOnDestroyDS(dsErr []string) {
+	l.errOnDestroyDS = dsErr
 }
 
 // ForceLastUsedTime ensures that any LastUsed property is set to the magic time for reproducibility
@@ -518,8 +518,16 @@ func (d *dZFS) Destroy(Defer bool) (err error) {
 	d.assertDatasetOpened()
 	n := d.Dataset.Properties[libzfs.DatasetPropName].Value
 
-	if d.libZFSMock.errOnDestroy {
-		return errors.New("Error on Destroy requested")
+	if d.libZFSMock.errOnDestroyDS != nil {
+		if len(d.libZFSMock.errOnDestroyDS) == 0 {
+
+			return errors.New("Error on Destroy requested on all datasets")
+		}
+		for _, errd := range d.libZFSMock.errOnDestroyDS {
+			if errd == n {
+				return fmt.Errorf("Error on Destroy requested on %s", n)
+			}
+		}
 	}
 
 	d.libZFSMock.mu.Lock()

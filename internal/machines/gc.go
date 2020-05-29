@@ -137,15 +137,31 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					s := sortedStates[i]
 
 					keep := keepUnknown
-					if !all && s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
-						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
+					// Previous deletion failed
+					if keepDueToErrorOnDelete[s.ID] {
 						keep = keepYes
-					} else if keep == keepUnknown && i < keepLast {
+					}
+					// In keep last list
+					if keep == keepUnknown && i < keepLast {
 						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
 						keep = keepYes
-					} else if keepDueToErrorOnDelete[s.ID] {
+					}
+					// Has snapshots as children
+					if keep == keepUnknown && !s.isSnapshot() {
+						for _, ds := range s.Datasets {
+							if ds[0].HasSnapshotInHierarchy() {
+								log.Debugf(ctx, i18n.G("Keeping %v as it has a snapshot in its child hierarchy"), s.ID)
+								keep = keepYes
+							}
+						}
+					}
+					// Non automated snapshots
+					if keep == keepUnknown && s.isSnapshot() && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 						keep = keepYes
-					} else {
+					}
+					// Has clones
+					if keep == keepUnknown && s.isSnapshot() {
 						// We only collect systems because users will be untagged if they have any dependency
 					analyzeSystemDataset:
 						for _, ds := range s.Datasets {
@@ -273,7 +289,7 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 
 					// Advance to first state matching this bucket.
 					var i int
-					for i = newestStateIndex; i < len(sortedStates) && sortedStates[i].LastUsed.After(bucket.start); i++ {
+					for i = newestStateIndex; i < len(sortedStates) && !sortedStates[i].LastUsed.Before(bucket.start); i++ {
 					}
 					oldestStateIndex := i - 1
 					log.Debugf(ctx, i18n.G("First state matching for this bucket: %s (%s)"), sortedStates[oldestStateIndex].ID, sortedStates[oldestStateIndex].LastUsed.Format(timeFormat))
@@ -293,32 +309,39 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), s.ID, s.LastUsed.Format(timeFormat))
 
 						keep := keepUnknown
-						if !s.isSnapshot() && s.linkedToSystemState() {
-							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot and associated to a system state"), s.ID)
+						// Previous deletion failed
+						if keepDueToErrorOnDelete[s.ID] {
 							keep = keepYes
-						} else if !s.isSnapshot() {
+						}
+						// In keep last list
+						if keep == keepUnknown && i < keepLast {
+							log.Debugf(ctx, i18n.G("Keeping %v as it's in the last %d snapshots"), s.ID, keepLast)
+							keep = keepYes
+						}
+						// Has snapshots as children
+						if keep == keepUnknown && !s.isSnapshot() {
 							for _, ds := range s.Datasets {
 								if ds[0].HasSnapshotInHierarchy() {
 									log.Debugf(ctx, i18n.G("Keeping %v as it has a snapshot in its child hierarchy"), s.ID)
 									keep = keepYes
 								}
 							}
-						} else if !all && s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						}
+						// Non automated snapshots
+						if keep == keepUnknown && s.isSnapshot() && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 							keep = keepYes
-						} else if i < keepLast {
-							log.Debugf(ctx, i18n.G("Keeping %v as it's in the last %d snapshots"), s.ID, keepLast)
+						}
+						// Filesystem linked to system state
+						if keep == keepUnknown && !s.isSnapshot() && s.linkedToSystemState() {
+							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot and associated to a system state"), s.ID)
 							keep = keepYes
-						} else if keepDueToErrorOnDelete[s.ID] {
-							keep = keepYes
-						} else {
+						}
+						// Snapshot linked to system state
+						if keep == keepUnknown && s.isSnapshot() {
 							_, snapshotName := splitSnapshotName(s.ID)
 							// Do we have a state associated with us?
-							for k, state := range m.History {
-								// TODO: if we associate a real userState to a State, we can compare them directly
-								if !state.isSnapshot() {
-									continue
-								}
+							for k := range m.History {
 								_, n := splitSnapshotName(k)
 								if n == snapshotName {
 									log.Debugf(ctx, i18n.G("Keeping as snapshot %v is associated to a system snapshot"), s.ID)
@@ -326,20 +349,20 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 									break
 								}
 							}
+						}
 
-							if keep == keepUnknown {
-								// check if any dataset has a automated or manual clone
-							analyzeUserDataset:
-								for _, ds := range s.Datasets {
-									for _, d := range ds {
-										// We only treat snapshots as clones are necessarily associated with one system state or
-										// has already been destroyed and not associated.
-										// do we have clones of us?
-										if byOrigin[d.Name] != nil {
-											log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
-											keep = keepYes
-											break analyzeUserDataset
-										}
+						// Has clones
+						if keep == keepUnknown && s.isSnapshot() {
+						analyzeUserDataset:
+							for _, ds := range s.Datasets {
+								for _, d := range ds {
+									// We only treat snapshots as clones are necessarily associated with one system state or
+									// has already been destroyed and not associated.
+									// do we have clones of us?
+									if byOrigin[d.Name] != nil {
+										log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
+										keep = keepYes
+										break analyzeUserDataset
 									}
 								}
 							}
@@ -411,52 +434,12 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		log.Debug(ctx, i18n.G("Users states have changes, rerun user GC"))
 	}
 
-	// 3. Clean up user user datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
-	// (they, and all snapshots on them will end up in unmanaged datasets)
-	log.Debug(ctx, i18n.G("Unassociated user datasets GC"))
-	var alreadyDestroyedRoot []string
-	var hasChanges bool
-	nt := ms.z.NewNoTransaction(ctx)
-nextDataset:
-	for _, d := range ms.allUsersDatasets {
-		if d.IsSnapshot {
-			continue
-		}
-		if d.BootfsDatasets != "" {
-			continue
-		}
-		for rootDataset := range userDatasetsToKeep {
-			if d.Name == rootDataset || strings.HasPrefix(d.Name, rootDataset+"/") {
-				continue nextDataset
-			}
-		}
-		for _, n := range alreadyDestroyedRoot {
-			if strings.HasPrefix(d.Name, n+"/") {
-				continue nextDataset
-			}
-		}
-
-		hasChanges = true
-		// We destroy here all snapshots and leaf attached. Snapshots won’t be taken into account, however, we don’t want
-		// to try destroying leaves again, keep a list.
-		if err := nt.Destroy(d.Name); err != nil {
-			log.Warningf(ctx, i18n.G("Couldn't destroy user dataset %s: %v"), d.Name, err)
-		}
-
-		alreadyDestroyedRoot = append(alreadyDestroyedRoot, d.Name)
-	}
-
-	if hasChanges {
-		if err := ms.Refresh(ctx); err != nil {
-			return fmt.Errorf("Couldn't refresh machine list: %v", err)
-		}
-	}
-
-	// 4. Clean up unmanaged datasets which were user datasets with empty tags.
+	// 3. Clean up unmanaged datasets which were user datasets with empty tags.
 	log.Debug(ctx, i18n.G("Unmanaged past user datasets GC"))
-
+	nt := ms.z.NewNoTransaction(ctx)
 	keepDatasets := make(map[string]bool)
-	gcPassNum = 1
+	keepDueToErrorOnDelete = make(map[string]bool)
+	gcPassNum = 0
 nextUnmanagedUserPass:
 	for {
 		log.Debugf(ctx, "GC Unmanaged user Pass #%d", gcPassNum)
@@ -465,6 +448,10 @@ nextUnmanagedUserPass:
 		for _, d := range ms.unmanagedDatasets {
 			// Ignore already treated datasets that we shouldn’t remove
 			if _, ok := keepDatasets[d.Name]; ok {
+				continue
+			}
+			// Ignore datasets we can’t destroy
+			if _, ok := keepDueToErrorOnDelete[d.Name]; ok {
 				continue
 			}
 
@@ -515,6 +502,7 @@ nextUnmanagedUserPass:
 			// to try destroying leaves again, keep a list.
 			if err := nt.Destroy(d.Name); err != nil {
 				log.Warningf(ctx, i18n.G("Couldn't destroy user dataset %s (due to %s): %v"), d.Name, candidate.Name, err)
+				keepDueToErrorOnDelete[d.Name] = true
 			}
 		}
 
@@ -591,27 +579,6 @@ func computeBuckets(ctx context.Context, now time.Time, rules config.HistoryRule
 	log.Debugf(ctx, "bucket oldest: start:%s end:%s samples:%d", buckets[len(buckets)-1].start, buckets[len(buckets)-1].end, buckets[len(buckets)-1].samples)
 
 	return buckets
-}
-
-// validate checks that we are still in a valid state for this bucket,
-// or that we didn’t degrade from an already invalid state
-func (b bucket) validate(oldState, newState []*stateWithKeep) bool {
-	if b.samples == -1 {
-		return len(oldState) == len(newState)
-	}
-
-	newDistance := len(newState) - b.samples
-	if newDistance >= 0 {
-		return true
-	}
-
-	oldDistance := len(oldState) - b.samples
-
-	// We degraded even more an already degraded state, return false.
-	if newDistance < oldDistance {
-		return false
-	}
-	return true
 }
 
 func (b bucket) String() string {
