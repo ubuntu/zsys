@@ -58,12 +58,13 @@ func (s *Server) DissociateUser(req *zsys.DissociateUserRequest, stream zsys.Zsy
 	}
 
 	user := req.GetUser()
+	removeHome := req.GetRemoveHome()
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
 	log.Infof(stream.Context(), i18n.G("Dissociate user %q"), user)
 
-	if err := s.Machines.DissociateUser(stream.Context(), user); err != nil {
+	if err := s.Machines.DissociateUser(stream.Context(), user, removeHome); err != nil {
 		return fmt.Errorf(i18n.G("couldn't dissociate user %q: ")+config.ErrorFormat, user, err)
 	}
 	return nil
