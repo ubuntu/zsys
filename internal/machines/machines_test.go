@@ -1125,7 +1125,7 @@ func TestRemoveState(t *testing.T) {
 		user           string
 		force          bool
 
-		destroyErr bool
+		destroyErrDS []string
 
 		isNoOp              bool
 		wantErr             bool
@@ -1169,8 +1169,8 @@ func TestRemoveState(t *testing.T) {
 
 		"No state given": {def: "m_with_userdata.yaml", wantErr: true, isNoOp: true},
 		"Error on trying to remove current state":    {def: "m_with_userdata.yaml", currentStateID: "rpool/ROOT/ubuntu_1234", state: "rpool/ROOT/ubuntu_1234", wantErr: true, isNoOp: true},
-		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErr: true, wantErr: true, isNoOp: true},
-		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone", user: "user5", force: true, destroyErr: true, wantErr: true},
+		"Error on destroy state, one dataset":        {def: "m_with_userdata.yaml", state: "rpool/ROOT/ubuntu_1234", destroyErrDS: []string{}, wantErr: true, isNoOp: true},
+		"Error on destroy user state, with datasets": {def: "state_remove.yaml", state: "rpool/USERDATA/user5_for-manual-clone", user: "user5", force: true, destroyErrDS: []string{}, wantErr: true},
 	}
 
 	for name, tc := range tests {
@@ -1191,7 +1191,7 @@ func TestRemoveState(t *testing.T) {
 
 			initMachines := ms.CopyForTests(t)
 			lzfs := libzfs.(*mock.LibZFS)
-			lzfs.ErrOnDestroy(tc.destroyErr)
+			lzfs.ErrOnDestroyDS(tc.destroyErrDS)
 
 			err = ms.RemoveState(context.Background(), tc.state, tc.user, tc.force, false)
 			if err != nil {
@@ -1305,7 +1305,7 @@ func TestGC(t *testing.T) {
 		all        bool
 		configPath string
 
-		destroyErr bool
+		destroyErrDS []string
 
 		isNoOp  bool
 		wantErr bool
@@ -1375,7 +1375,7 @@ func TestGC(t *testing.T) {
 		"Users and clones with undeletable snapshot":           {def: "gc_system_with_users_and_clones_undeletable_snapshot.yaml"},
 
 		// Error cases
-		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErr: true, isNoOp: true},
+		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErrDS: []string{}, isNoOp: true},
 	}
 
 	for name, tc := range tests {
@@ -1416,7 +1416,7 @@ func TestGC(t *testing.T) {
 
 			initMachines := ms.CopyForTests(t)
 			lzfs := libzfs.(*mock.LibZFS)
-			lzfs.ErrOnDestroy(tc.destroyErr)
+			lzfs.ErrOnDestroyDS(tc.destroyErrDS)
 
 			err = ms.GC(context.Background(), tc.all)
 			if err != nil {
