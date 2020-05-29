@@ -713,9 +713,10 @@ func TestCreateUserData(t *testing.T) {
 func TestDissociateUser(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def     string
-		user    string
-		cmdline string
+		def        string
+		user       string
+		cmdline    string
+		removehome bool
 
 		setPropertyErr bool
 		scanErr        bool
@@ -731,7 +732,16 @@ func TestDissociateUser(t *testing.T) {
 		"Dissociate user with children datasets (local)":     {def: "m_with_userdata_clone_attached.yaml"},
 		"Dissociate user having shared states":               {def: "m_two_machines_with_same_userdata.yaml"},
 
+		// TODO: really test directory cleanup? Same for set-user home
+		// check that unmounts are done in correct order (children first)
+		// Remove home use cases
+		// unmounted datasets
+		// mounted datasets without remove
+		// mounted datasets with remove
+		"Dissociate user removing home": {def: "m_with_userdata.yaml", removehome: true},
+
 		"User has no state associated with current machine": {def: "m_with_userdata.yaml", user: "doesntexist", wantErr: true},
+		"Empty user name":            {def: "m_with_userdata.yaml", user: "-", wantErr: true},
 		"SetProperty fails":          {def: "m_with_userdata.yaml", setPropertyErr: true, wantErr: true},
 		"Scanning fails":             {def: "m_with_userdata.yaml", scanErr: true, wantErr: true},
 		"Current machine isn’t zsys": {def: "m_with_userdata.yaml", cmdline: "foo", wantErr: true},
@@ -742,6 +752,11 @@ func TestDissociateUser(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 			tc.cmdline = getDefaultValue(tc.cmdline, generateCmdLine("rpool/ROOT/ubuntu_1234"))
+			if tc.user == "-" {
+				tc.user = ""
+			} else {
+				tc.user = getDefaultValue(tc.user, "user1")
+			}
 
 			dir, cleanup := testutils.TempDir(t)
 			defer cleanup()
@@ -762,7 +777,7 @@ func TestDissociateUser(t *testing.T) {
 			lzfs.ErrOnScan(tc.scanErr)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
-			err = ms.DissociateUser(context.Background(), getDefaultValue(tc.user, "user1"))
+			err = ms.DissociateUser(context.Background(), tc.user, tc.removehome)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)
