@@ -137,15 +137,31 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 					s := sortedStates[i]
 
 					keep := keepUnknown
-					if !all && s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
-						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
+					// Previous deletion failed
+					if keepDueToErrorOnDelete[s.ID] {
 						keep = keepYes
-					} else if keep == keepUnknown && i < keepLast {
+					}
+					// In keep last list
+					if keep == keepUnknown && i < keepLast {
 						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's in the last %d snapshots"), s.ID, keepLast)
 						keep = keepYes
-					} else if keepDueToErrorOnDelete[s.ID] {
+					}
+					// Has snapshots as children
+					if keep == keepUnknown && !s.isSnapshot() {
+						for _, ds := range s.Datasets {
+							if ds[0].HasSnapshotInHierarchy() {
+								log.Debugf(ctx, i18n.G("Keeping %v as it has a snapshot in its child hierarchy"), s.ID)
+								keep = keepYes
+							}
+						}
+					}
+					// Non automated snapshots
+					if keep == keepUnknown && s.isSnapshot() && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 						keep = keepYes
-					} else {
+					}
+					// Has clones
+					if keep == keepUnknown && s.isSnapshot() {
 						// We only collect systems because users will be untagged if they have any dependency
 					analyzeSystemDataset:
 						for _, ds := range s.Datasets {
@@ -293,32 +309,39 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 						log.Debugf(ctx, i18n.G("Analyzing state %v: %v"), s.ID, s.LastUsed.Format(timeFormat))
 
 						keep := keepUnknown
-						if !s.isSnapshot() && s.linkedToSystemState() {
-							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot and associated to a system state"), s.ID)
+						// Previous deletion failed
+						if keepDueToErrorOnDelete[s.ID] {
 							keep = keepYes
-						} else if !s.isSnapshot() {
+						}
+						// In keep last list
+						if keep == keepUnknown && i < keepLast {
+							log.Debugf(ctx, i18n.G("Keeping %v as it's in the last %d snapshots"), s.ID, keepLast)
+							keep = keepYes
+						}
+						// Has snapshots as children
+						if keep == keepUnknown && !s.isSnapshot() {
 							for _, ds := range s.Datasets {
 								if ds[0].HasSnapshotInHierarchy() {
 									log.Debugf(ctx, i18n.G("Keeping %v as it has a snapshot in its child hierarchy"), s.ID)
 									keep = keepYes
 								}
 							}
-						} else if !all && s.isSnapshot() && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
+						}
+						// Non automated snapshots
+						if keep == keepUnknown && s.isSnapshot() && !all && !strings.Contains(s.ID, "@"+automatedSnapshotPrefix) {
 							log.Debugf(ctx, i18n.G("Keeping snapshot %v as it's not a zsys one"), s.ID)
 							keep = keepYes
-						} else if i < keepLast {
-							log.Debugf(ctx, i18n.G("Keeping %v as it's in the last %d snapshots"), s.ID, keepLast)
+						}
+						// Filesystem linked to system state
+						if keep == keepUnknown && !s.isSnapshot() && s.linkedToSystemState() {
+							log.Debugf(ctx, i18n.G("Keeping %v as it's not a snapshot and associated to a system state"), s.ID)
 							keep = keepYes
-						} else if keepDueToErrorOnDelete[s.ID] {
-							keep = keepYes
-						} else {
+						}
+						// Snapshot linked to system state
+						if keep == keepUnknown && s.isSnapshot() {
 							_, snapshotName := splitSnapshotName(s.ID)
 							// Do we have a state associated with us?
-							for k, state := range m.History {
-								// TODO: if we associate a real userState to a State, we can compare them directly
-								if !state.isSnapshot() {
-									continue
-								}
+							for k := range m.History {
 								_, n := splitSnapshotName(k)
 								if n == snapshotName {
 									log.Debugf(ctx, i18n.G("Keeping as snapshot %v is associated to a system snapshot"), s.ID)
@@ -326,20 +349,20 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 									break
 								}
 							}
+						}
 
-							if keep == keepUnknown {
-								// check if any dataset has a automated or manual clone
-							analyzeUserDataset:
-								for _, ds := range s.Datasets {
-									for _, d := range ds {
-										// We only treat snapshots as clones are necessarily associated with one system state or
-										// has already been destroyed and not associated.
-										// do we have clones of us?
-										if byOrigin[d.Name] != nil {
-											log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
-											keep = keepYes
-											break analyzeUserDataset
-										}
+						// Has clones
+						if keep == keepUnknown && s.isSnapshot() {
+						analyzeUserDataset:
+							for _, ds := range s.Datasets {
+								for _, d := range ds {
+									// We only treat snapshots as clones are necessarily associated with one system state or
+									// has already been destroyed and not associated.
+									// do we have clones of us?
+									if byOrigin[d.Name] != nil {
+										log.Debugf(ctx, i18n.G("Keeping snapshot %v as at least %s dataset has dependencies"), s.ID, d.Name)
+										keep = keepYes
+										break analyzeUserDataset
 									}
 								}
 							}
