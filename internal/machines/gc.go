@@ -581,27 +581,6 @@ func computeBuckets(ctx context.Context, now time.Time, rules config.HistoryRule
 	return buckets
 }
 
-// validate checks that we are still in a valid state for this bucket,
-// or that we didn’t degrade from an already invalid state
-func (b bucket) validate(oldState, newState []*stateWithKeep) bool {
-	if b.samples == -1 {
-		return len(oldState) == len(newState)
-	}
-
-	newDistance := len(newState) - b.samples
-	if newDistance >= 0 {
-		return true
-	}
-
-	oldDistance := len(oldState) - b.samples
-
-	// We degraded even more an already degraded state, return false.
-	if newDistance < oldDistance {
-		return false
-	}
-	return true
-}
-
 func (b bucket) String() string {
 	return fmt.Sprintf("start: %s end:%s samples: %d", b.start.Format(timeFormat), b.end.Format(timeFormat), b.samples)
 }
