@@ -479,7 +479,8 @@ nextDataset:
 	log.Debug(ctx, i18n.G("Unmanaged past user datasets GC"))
 
 	keepDatasets := make(map[string]bool)
-	gcPassNum = 1
+	keepDueToErrorOnDelete = make(map[string]bool)
+	gcPassNum = 0
 nextUnmanagedUserPass:
 	for {
 		log.Debugf(ctx, "GC Unmanaged user Pass #%d", gcPassNum)
@@ -488,6 +489,10 @@ nextUnmanagedUserPass:
 		for _, d := range ms.unmanagedDatasets {
 			// Ignore already treated datasets that we shouldn’t remove
 			if _, ok := keepDatasets[d.Name]; ok {
+				continue
+			}
+			// Ignore datasets we can’t destroy
+			if _, ok := keepDueToErrorOnDelete[d.Name]; ok {
 				continue
 			}
 
@@ -538,6 +543,7 @@ nextUnmanagedUserPass:
 			// to try destroying leaves again, keep a list.
 			if err := nt.Destroy(d.Name); err != nil {
 				log.Warningf(ctx, i18n.G("Couldn't destroy user dataset %s (due to %s): %v"), d.Name, candidate.Name, err)
+				keepDueToErrorOnDelete[d.Name] = true
 			}
 		}
 
