@@ -64,7 +64,7 @@ msgstr ""
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
-#: internal/machines/userdata.go:216
+#: internal/machines/userdata.go:247
 msgid ""
 "%q is already associated to %q, which is for a different user name (%q) than "
 "%q"
@@ -312,7 +312,7 @@ msgid ""
 "Putting it in keep list."
 msgstr ""
 
-#: internal/machines/userdata.go:95 internal/machines/userdata.go:251
+#: internal/machines/userdata.go:97 internal/machines/userdata.go:282
 msgid "Couldn't mount %s: %v"
 msgstr ""
 
@@ -340,12 +340,16 @@ msgstr ""
 msgid "Couldn't remove state %s: %v"
 msgstr ""
 
-#: internal/machines/userdata.go:248
+#: internal/machines/userdata.go:279
 msgid "Couldn't restore permission on new home directory %s: %v"
 msgstr ""
 
 #: internal/authorizer/authorizer.go:150
 msgid "Couldn't retrieve user for %q: %v"
+msgstr ""
+
+#: internal/machines/userdata.go:216
+msgid "Couldn't unmount %s: %v"
 msgstr ""
 
 #: cmd/zsysd/client/service.go:307
@@ -358,7 +362,7 @@ msgid ""
 "creation"
 msgstr ""
 
-#: internal/machines/userdata.go:46
+#: internal/machines/userdata.go:48
 msgid "Create user dataset for %q"
 msgstr ""
 
@@ -370,7 +374,7 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to commit on boot"
 msgstr ""
 
-#: internal/machines/snapshot.go:41 internal/machines/userdata.go:25
+#: internal/machines/snapshot.go:41 internal/machines/userdata.go:27
 msgid "Current machine isn't Zsys, nothing to create"
 msgstr ""
 
@@ -378,7 +382,7 @@ msgstr ""
 msgid "Current machine isn't Zsys, nothing to do on boot"
 msgstr ""
 
-#: internal/machines/userdata.go:116 internal/machines/userdata.go:145
+#: internal/machines/userdata.go:118 internal/machines/userdata.go:148
 msgid "Current machine isn't Zsys, nothing to modify"
 msgstr ""
 
@@ -413,11 +417,11 @@ msgstr ""
 msgid "Display if any zfs datasets have been modified to boot"
 msgstr ""
 
-#: internal/daemon/userdata.go:64
+#: internal/daemon/userdata.go:65
 msgid "Dissociate user %q"
 msgstr ""
 
-#: internal/machines/userdata.go:151
+#: internal/machines/userdata.go:154
 msgid "Dissociate user %q from current state"
 msgstr ""
 
@@ -439,6 +443,10 @@ msgstr ""
 
 #: cmd/zsysd/client/service.go:96
 msgid "Duration of the capture. Default is 30 seconds."
+msgstr ""
+
+#: cmd/zsysd/client/userdata.go:51
+msgid "Empty home directory content if not associated to any machine state"
 msgstr ""
 
 #: internal/machines/boot.go:39
@@ -553,11 +561,11 @@ msgstr ""
 msgid "Name:\t%s\n"
 msgstr ""
 
-#: internal/machines/userdata.go:31
+#: internal/machines/userdata.go:33
 msgid "Needs a valid home path, got nothing"
 msgstr ""
 
-#: internal/machines/snapshot.go:28 internal/machines/userdata.go:28
+#: internal/machines/snapshot.go:28 internal/machines/userdata.go:30
 msgid "Needs a valid user name, got nothing"
 msgstr ""
 
@@ -733,7 +741,7 @@ msgstr ""
 msgid "Reset idle timeout to %s"
 msgstr ""
 
-#: internal/machines/userdata.go:128
+#: internal/machines/userdata.go:130
 msgid "Reset user dataset path from %q to %q"
 msgstr ""
 
@@ -754,7 +762,7 @@ msgstr ""
 msgid "Returns version of client and server"
 msgstr ""
 
-#: internal/machines/userdata.go:229
+#: internal/machines/userdata.go:260
 msgid "Reusing %q as matching user name or old mountpoint"
 msgstr ""
 
@@ -811,7 +819,7 @@ msgstr ""
 msgid "Setting logging level to %d"
 msgstr ""
 
-#: internal/machines/state.go:335 internal/machines/userdata.go:178
+#: internal/machines/state.go:335 internal/machines/userdata.go:182
 #, c-format
 msgid "Setting new bootfs tag %s on %s\n"
 msgstr ""
@@ -877,7 +885,7 @@ msgstr ""
 msgid "There are %d exceeding states to potentially remove"
 msgstr ""
 
-#: internal/machines/userdata.go:205
+#: internal/machines/userdata.go:236
 msgid ""
 "Trying to check if there is a user or home directory already attached to "
 "this machine"
@@ -1087,11 +1095,11 @@ msgstr ""
 msgid "can't transition bootfsdataset property, ignoring: "
 msgstr ""
 
-#: internal/machines/userdata.go:119
+#: internal/machines/userdata.go:121
 msgid "can't use empty string for existing home directory"
 msgstr ""
 
-#: internal/machines/userdata.go:122
+#: internal/machines/userdata.go:124
 msgid "can't use empty string for new home directory"
 msgstr ""
 
@@ -1134,7 +1142,7 @@ msgid "cloning %q and children"
 msgstr ""
 
 #: internal/machines/boot.go:282 internal/machines/boot.go:349
-#: internal/machines/userdata.go:101
+#: internal/machines/userdata.go:103
 msgid "couldn't add %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -1153,7 +1161,11 @@ msgstr ""
 msgid "couldn't change home userdataset for %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:256
+#: internal/machines/userdata.go:210
+msgid "couldn't cleanup %s directory content: %v"
+msgstr ""
+
+#: internal/machines/userdata.go:287
 msgid "couldn't cleanup %s directory: %v"
 msgstr ""
 
@@ -1193,7 +1205,7 @@ msgstr ""
 msgid "couldn't create snapshot %q: %v"
 msgstr ""
 
-#: internal/machines/userdata.go:84
+#: internal/machines/userdata.go:86
 msgid "couldn't create user data embedder dataset: "
 msgstr ""
 
@@ -1217,7 +1229,7 @@ msgstr ""
 msgid "couldn't destroy %q: it's a filesystem dataset which has snapshots"
 msgstr ""
 
-#: internal/daemon/userdata.go:67
+#: internal/daemon/userdata.go:68
 msgid "couldn't dissociate user %q: "
 msgstr ""
 
@@ -1257,6 +1269,10 @@ msgstr ""
 msgid "couldn't generate request id, setting to %q: %v"
 msgstr ""
 
+#: internal/machines/userdata.go:206
+msgid "couldn't list %s directory content: %v"
+msgstr ""
+
 #: internal/machines/machines.go:134 internal/machines/machines.go:893
 msgid "couldn't load zsys configuration"
 msgstr ""
@@ -1294,7 +1310,7 @@ msgid "couldn't refresh properties of %q: %v"
 msgstr ""
 
 #: internal/machines/boot.go:328 internal/machines/state.go:339
-#: internal/machines/userdata.go:181
+#: internal/machines/userdata.go:185
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
@@ -1332,7 +1348,7 @@ msgstr ""
 msgid "couldn't send ready notification to systemd while supported: %v"
 msgstr ""
 
-#: internal/machines/userdata.go:185
+#: internal/machines/userdata.go:189
 msgid "couldn't set %q to canmount=noauto: "
 msgstr ""
 
@@ -1341,11 +1357,11 @@ msgid "couldn't set last booted kernel to %q "
 msgstr ""
 
 #: internal/machines/boot.go:149 internal/machines/boot.go:213
-#: internal/machines/userdata.go:107
+#: internal/machines/userdata.go:109
 msgid "couldn't set last used time to %q: "
 msgstr ""
 
-#: internal/machines/userdata.go:241
+#: internal/machines/userdata.go:272
 msgid "couldn't set new home %q to %q: "
 msgstr ""
 
@@ -1373,7 +1389,7 @@ msgstr ""
 msgid "current state: %s"
 msgstr ""
 
-#: internal/machines/userdata.go:137
+#: internal/machines/userdata.go:139
 msgid "didn't find any existing dataset matching %q"
 msgstr ""
 
@@ -1471,7 +1487,7 @@ msgid ""
 "%sPlease use full state path."
 msgstr ""
 
-#: internal/machines/userdata.go:148
+#: internal/machines/userdata.go:151
 msgid "need an user name"
 msgstr ""
 
@@ -1601,7 +1617,7 @@ msgstr ""
 msgid "user %q doesn't exist"
 msgstr ""
 
-#: internal/machines/userdata.go:156
+#: internal/machines/userdata.go:159
 msgid "user %q not found on current state"
 msgstr ""
 
