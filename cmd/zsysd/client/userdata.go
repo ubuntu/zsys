@@ -35,8 +35,12 @@ var (
 		Use:   "dissociate USER",
 		Short: i18n.G("dissociate current user data from current system but preserve history"),
 		Args:  cobra.ExactArgs(1),
-		Run:   func(cmd *cobra.Command, args []string) { cmdErr = dissociateUser(args[0]) },
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = dissociateUser(args[0], removeHome) },
 	}
+)
+
+var (
+	removeHome bool
 )
 
 func init() {
@@ -44,6 +48,7 @@ func init() {
 	userdataCmd.AddCommand(userdataCreateCmd)
 	userdataCmd.AddCommand(userdataRenameCmd)
 	userdataCmd.AddCommand(userdataDissociateCmd)
+	userdataDissociateCmd.Flags().BoolVarP(&removeHome, "remove", "r", false, i18n.G("Empty home directory content if not associated to any machine state"))
 }
 
 // createUserData creates a new userdata for user and set it to homepath on current zsys system.
@@ -114,7 +119,7 @@ func changeHomeOnUserData(home, newHome string) (err error) {
 }
 
 // dissociateUser dissociates current user data from current system but preserve history.
-func dissociateUser(user string) (err error) {
+func dissociateUser(user string, removeHome bool) (err error) {
 	client, err := newClient()
 	if err != nil {
 		return err
@@ -124,7 +129,7 @@ func dissociateUser(user string) (err error) {
 	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
-	stream, err := client.DissociateUser(ctx, &zsys.DissociateUserRequest{User: user})
+	stream, err := client.DissociateUser(ctx, &zsys.DissociateUserRequest{User: user, RemoveHome: removeHome})
 	if err = checkConn(err, reset); err != nil {
 		return err
 	}
