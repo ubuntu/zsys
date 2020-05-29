@@ -1344,13 +1344,13 @@ func TestGC(t *testing.T) {
 		"Keep more user snapshots than simply last day has":    {def: "gc_system_with_users.yaml", configPath: "keep_many_snapshots.conf"},
 
 		// User clones
-		"Remove user clone state":                                   {def: "gc_system_with_users_clone.yaml"},
-		"Remove user clone state with subdataset":                   {def: "gc_system_with_users_clone_subdataset.yaml"},
-		"Don't remove user clone state with snapshot on it kept":    {def: "gc_system_with_users_clone_with_manual_snapshot.yaml", isNoOp: true},
-		"Don't remove user clone state with snapshot on subdataset": {def: "gc_system_with_users_clone_subdataset_with_manual_snapshot.yaml", isNoOp: true},
-		"Ensure user clones are accounted by policy":                {def: "gc_system_with_users_with_untagged_clones.yaml"},
-		// FIXME: user1_clone should be removed once TestNew is fixed (attaching the clone, and so its snapshots to the system state indirectly)
-		//"Remove unassociated user clone after deleting its snapshot": {def: "gc_system_with_users_clone_with_auto_snapshot.yaml"},
+		"Remove user clone state":                                                                     {def: "gc_system_with_users_clone.yaml"},
+		"Remove user clone state with subdataset":                                                     {def: "gc_system_with_users_clone_subdataset.yaml"},
+		"Don't remove user clone state with snapshot on it kept":                                      {def: "gc_system_with_users_clone_with_manual_snapshot.yaml", isNoOp: true},
+		"Don't remove user clone state with snapshot on subdataset":                                   {def: "gc_system_with_users_clone_subdataset_with_manual_snapshot.yaml", isNoOp: true},
+		"Don't remove user clone state linked to a system state":                                      {def: "gc_system_with_users_clone_linked_to_system_state.yaml", isNoOp: true},
+		"Ensure user clones are accounted by policy":                                                  {def: "gc_system_with_users_with_untagged_clones.yaml"},
+		"Remove unassociated user clone after deleting its snapshot":                                  {def: "gc_system_with_users_clone_with_auto_snapshot.yaml"},
 		"Remove unassociated user clone after deleting its snapshot which was linked to system state": {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml"},
 
 		// User clone attached to multiple states/machines
