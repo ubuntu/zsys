@@ -1370,9 +1370,12 @@ func TestGC(t *testing.T) {
 		"Failed revert - no lastused on system":        {def: "gc_system_failed_revert.yaml"},
 		"Failed boot - no lastused on user and system": {def: "gc_system_with_users_failed_boot.yaml"},
 
-		// Deletion prevented
+		// Deletion prevention (no infinite loop)
 		"Manual user snapshot which should be deleted is kept": {def: "gc_system_with_users_manual_snapshots.yaml", isNoOp: true},
 		"Users and clones with undeletable snapshot":           {def: "gc_system_with_users_and_clones_undeletable_snapshot.yaml"},
+		"Destroy failed on system dataset":                     {def: "gc_system_with_users_clone_with_auto_snapshot_attached_to_system_state.yaml", destroyErrDS: []string{"rpool/ROOT/ubuntu_1234@autozsys_20191230-1710"}, isNoOp: true},
+		"Destroy failed on user dataset":                       {def: "gc_system_with_users_clone.yaml", destroyErrDS: []string{"rpool/USERDATA/user1_clone"}, isNoOp: true},
+		"Destroy failed on unlinked user dataset":              {def: "gc_system_with_unlinked_users_unmanaged_clone_bootfs_on_clone.yaml", destroyErrDS: []string{"rpool/USERDATA/user2_clone"}, isNoOp: true},
 
 		// Error cases
 		"Error fails to destroy state are kept": {def: "gc_system_with_users.yaml", destroyErrDS: []string{}, isNoOp: true},
