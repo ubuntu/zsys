@@ -4,7 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -140,7 +142,8 @@ func (ms *Machines) ChangeHomeOnUserData(ctx context.Context, home, newHome stri
 }
 
 // DissociateUser tries to unattach current user dataset to current system state
-func (ms *Machines) DissociateUser(ctx context.Context, username string) error {
+// removeHome empties directory content if the user state is not associated to any other system state.
+func (ms *Machines) DissociateUser(ctx context.Context, username string, removeHome bool) error {
 	if !ms.current.isZsys() {
 		return errors.New(i18n.G("Current machine isn't Zsys, nothing to modify"))
 	}
@@ -159,6 +162,7 @@ func (ms *Machines) DissociateUser(ctx context.Context, username string) error {
 	t, cancel := ms.z.NewTransaction(ctx)
 	defer t.Done()
 
+	rootUserPaths := make(map[string][]string)
 	for _, ds := range us.Datasets {
 		for _, d := range ds {
 			var newTags []string
@@ -183,6 +187,33 @@ func (ms *Machines) DissociateUser(ctx context.Context, username string) error {
 			if err := t.SetProperty(libzfs.CanmountProp, "noauto", d.Name, false); err != nil {
 				cancel()
 				return fmt.Errorf(i18n.G("couldn't set %q to canmount=noauto: ")+config.ErrorFormat, ms.current.ID, d.Name, err)
+			}
+		}
+
+		if ds[0].BootfsDatasets == "" {
+			for _, d := range ds {
+				rootUserPaths[ds[0].Mountpoint] = append([]string{d.Mountpoint}, rootUserPaths[ds[0].Mountpoint]...)
+			}
+		}
+	}
+
+	// Clean content if there is no more state associated with it and it was requested before unmounting.
+	// This will let userdel then removing the parent directory
+	for root, dirs := range rootUserPaths {
+		if removeHome {
+			dir, err := ioutil.ReadDir(root)
+			if err != nil {
+				log.Warningf(t.Context(), i18n.G("couldn't list %s directory content: %v"), root, err)
+			}
+			for _, d := range dir {
+				if err := os.RemoveAll(path.Join([]string{root, d.Name()}...)); err != nil {
+					log.Warningf(t.Context(), i18n.G("couldn't cleanup %s directory content: %v"), root, err)
+				}
+			}
+		}
+		for _, p := range dirs {
+			if err := syscall.Unmount(p, 0); err != nil {
+				log.Warningf(t.Context(), i18n.G("Couldn't unmount %s: %v"), p, err)
 			}
 		}
 	}

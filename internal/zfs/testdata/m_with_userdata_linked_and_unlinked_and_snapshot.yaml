@@ -16,14 +16,12 @@ pools:
       snapshots:
         - name: snapshot
           mountpoint: /home/user1:local
-          creation_time: 2018-12-10T12:20:44+00:00
     - name: USERDATA/user1_abcd/tools
       mountpoint: /home/user1/tools
       last_used: 2018-12-10T12:20:44+00:00
       snapshots:
         - name: snapshot
           mountpoint: /home/user1/tools:inherited
-          creation_time: 2018-12-10T12:20:44+00:00
     - name: USERDATA/user1_unlinked
       mountpoint: /home/user1
       last_used: 2018-12-10T12:20:44+00:00
