@@ -434,50 +434,9 @@ func (ms *Machines) GC(ctx context.Context, all bool) error {
 		log.Debug(ctx, i18n.G("Users states have changes, rerun user GC"))
 	}
 
-	// 3. Clean up user user datasets with no tags. Take into account user datasets with a child not associated with anything but parent is
-	// (they, and all snapshots on them will end up in unmanaged datasets)
-	log.Debug(ctx, i18n.G("Unassociated user datasets GC"))
-	var alreadyDestroyedRoot []string
-	var hasChanges bool
-	nt := ms.z.NewNoTransaction(ctx)
-nextDataset:
-	for _, d := range ms.allUsersDatasets {
-		if d.IsSnapshot {
-			continue
-		}
-		if d.BootfsDatasets != "" {
-			continue
-		}
-		for rootDataset := range userDatasetsToKeep {
-			if d.Name == rootDataset || strings.HasPrefix(d.Name, rootDataset+"/") {
-				continue nextDataset
-			}
-		}
-		for _, n := range alreadyDestroyedRoot {
-			if strings.HasPrefix(d.Name, n+"/") {
-				continue nextDataset
-			}
-		}
-
-		hasChanges = true
-		// We destroy here all snapshots and leaf attached. Snapshots won’t be taken into account, however, we don’t want
-		// to try destroying leaves again, keep a list.
-		if err := nt.Destroy(d.Name); err != nil {
-			log.Warningf(ctx, i18n.G("Couldn't destroy user dataset %s: %v"), d.Name, err)
-		}
-
-		alreadyDestroyedRoot = append(alreadyDestroyedRoot, d.Name)
-	}
-
-	if hasChanges {
-		if err := ms.Refresh(ctx); err != nil {
-			return fmt.Errorf("Couldn't refresh machine list: %v", err)
-		}
-	}
-
-	// 4. Clean up unmanaged datasets which were user datasets with empty tags.
+	// 3. Clean up unmanaged datasets which were user datasets with empty tags.
 	log.Debug(ctx, i18n.G("Unmanaged past user datasets GC"))
-
+	nt := ms.z.NewNoTransaction(ctx)
 	keepDatasets := make(map[string]bool)
 	keepDueToErrorOnDelete = make(map[string]bool)
 	gcPassNum = 0
