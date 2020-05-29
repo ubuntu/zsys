@@ -787,7 +787,8 @@ zsysctl userdata dissociate USER [flags]
 ##### Options
 
 ```
-  -h, --help   help for dissociate
+  -h, --help     help for dissociate
+  -r, --remove   Empty home directory content if not associated to any machine state
 ```
 
 ##### Options inherited from parent commands
