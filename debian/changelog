@@ -1,3 +1,37 @@
+zsys (0.5.0) UNRELEASED; urgency=medium
+
+  [ Jean-Baptiste Lallement ]
+  [ Didier Roche ]
+  * Fix infinite GC loop (LP: #1870461)
+  * Enhance timeout handling to avoid error rpc error: code = DeadlineExceeded
+    desc = context deadline exceeded while the daemon is doing work
+    (LP: #1875564)
+  * Stop taking automated or manual snapshot when there is less than 20% of
+    free disk space (LP: #1876334)
+  * Enable trim support for upgrading users (LP: #1881540)
+  * Only clean up previously linked user datasets when unlinked under USERDATA
+    (LP: #1881538)
+  * Strategy for deleted user datasets via a new hidden command called by
+    userdel (LP: #1870058)
+  * Get better auto snapshots message when integrated to apt (LP: #1875420)
+  * Update LastUsed on shutdown via a new hidden command service call
+    (LP: #1881536)
+  * Prevent segfault immediately after install when zfs kernel module isn't
+    loaded (LP: #1881541)
+  * Don’t try to autosave gdm user (and in general non system user), even if
+    systemd --user is started for them. (LP: #1881539)
+  * Prevent apt printing errors when zsys is removed without purge
+    (LP: #1881535)
+  * Some tests enhancements:
+    - new tests for all the above
+    - allow setting a different local socket for debugging/tests purposes only
+    - ascii order datasets in golden files
+  * Typos and messages fixes. Direct prints are not prefixed with INFO
+    anymore.
+  * Refreshed po and readme with the above.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 01 Jun 2020 09:26:52 +0200
+
 zsys (0.4.5) focal; urgency=medium
 
   * Fix user creation and rename integration (LP: #1873263)
