@@ -40,7 +40,7 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 		msg := i18n.G("Requesting to save current system state")
 		// Always print the message as it was automatically requested
 		if req.GetAutosave() {
-			log.RemotePrint(stream.Context(), msg)
+			log.RemotePrintln(stream.Context(), msg)
 		} else {
 			log.Info(stream.Context(), msg)
 		}

@@ -92,10 +92,10 @@ func Infof(ctx context.Context, format string, args ...interface{}) {
 	logrus.Infof(format, args...)
 }
 
-// RemotePrint logs a message that is only written on the remote
+// RemotePrintln logs a message that is only written on the remote
 // client end stream referenced by ctx.
-func RemotePrint(ctx context.Context, args ...interface{}) {
-	RemotePrintf(ctx, "%s", args...)
+func RemotePrintln(ctx context.Context, args ...interface{}) {
+	RemotePrintf(ctx, "%s\n", args...)
 }
 
 // RemotePrintf logs a message that is only written on the remote

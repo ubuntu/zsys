@@ -15,7 +15,7 @@ const (
 )
 
 func updateBootMenu(ctx context.Context) error {
-	log.RemotePrint(ctx, i18n.G("ZSys is adding automatic system snapshot to GRUB menu"))
+	log.RemotePrintln(ctx, i18n.G("ZSys is adding automatic system snapshot to GRUB menu"))
 	cmd := exec.Command(updateGrubCmd)
 	logger := &logWriter{ctx: ctx}
 	cmd.Stdout = logger
