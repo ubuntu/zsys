@@ -22,7 +22,7 @@ case "$1" in
             if dpkg --compare-versions "$2" le-nl '0.5.0'; then
                 if is_zsys; then
                     for mountpoint in / /boot; do
-                        dsname="$(findmnt -o SOURCE -n ${mountpoint})"
+                        dsname="$(findmnt -o SOURCE -n ${mountpoint}||true)"
                         if [ -n "$dsname" ]; then
                             zpool set autotrim=on ${dsname%%/*} || true
                             zpool trim ${dsname%%/*} || true
