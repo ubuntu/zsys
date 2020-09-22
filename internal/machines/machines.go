@@ -69,6 +69,7 @@ type State struct {
 
 const (
 	userdatasetsContainerName = "/userdata/"
+	bootdatasetsContainerName = "/boot/"
 	bootfsdatasetsSeparator   = ","
 )
 
@@ -431,9 +432,9 @@ func (ms *Machines) populate(ctx context.Context, allDatasets []*zfs.Dataset, or
 
 		// Starting from now, there is no children of system datasets
 
-		// Extract boot datasets if any. We can't attach them directly with machines as if they are on another pool,
-		// the machine is not necessiraly loaded yet.
-		if strings.HasPrefix(d.Mountpoint, "/boot") {
+		// Extract boot datasets if any. We can't attach them directly with machines as if they are on another pool:
+		// the machine will not necessiraly loaded yet.
+		if strings.Contains(strings.ToLower(d.Name), bootdatasetsContainerName) && strings.HasPrefix(d.Mountpoint, "/boot") {
 			boots = append(boots, d)
 			continue
 		}

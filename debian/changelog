@@ -1,4 +1,4 @@
-zsys (0.5.1) groovy; urgency=medium
+zsys (0.4.7) focal; urgency=medium
 
   * Fix ZSys package post-installation failed when boot pool is not imported
     (LP: #1886214)
@@ -6,7 +6,7 @@ zsys (0.5.1) groovy; urgency=medium
 
  -- Didier Roche <didrocks@ubuntu.com>  Wed, 29 Jul 2020 11:32:33 +0200
 
-zsys (0.5.0) groovy; urgency=medium
+zsys (0.4.6) focal; urgency=medium
 
   [ Jean-Baptiste Lallement ]
   [ Didier Roche ]
