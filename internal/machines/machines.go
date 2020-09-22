@@ -705,7 +705,7 @@ func (m Machine) Info(full bool) (string, error) {
 		} else {
 			fmt.Fprintf(w, i18n.G("Persistent Datasets:\n"))
 			for _, n := range m.PersistentDatasets {
-				fmt.Fprintf(w, i18n.G("\t- %s\n"), n)
+				fmt.Fprintf(w, i18n.G(" - %s\n"), n.Name)
 			}
 		}
 	}
