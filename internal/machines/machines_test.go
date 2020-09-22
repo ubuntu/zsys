@@ -31,9 +31,11 @@ func TestNew(t *testing.T) {
 		"One machine with children":           {def: "d_one_machine_with_children.yaml"},
 		"One machine with unordered children": {def: "d_one_machine_with_children_unordered.yaml"},
 
-		"One machine, attach user datasets to machine": {def: "m_with_userdata.yaml"},
-		"One machine, attach boot to machine":          {def: "m_with_separate_boot.yaml"},
-		"One machine, with persistent datasets":        {def: "m_with_persistent.yaml"},
+		"One machine, attach user datasets to machine":          {def: "m_with_userdata.yaml"},
+		"One machine, attach boot to machine":                   {def: "m_with_separate_boot.yaml"},
+		"One machine, with persistent datasets":                 {def: "m_with_persistent.yaml"},
+		"One machine, with persistent datasets on bpool":        {def: "m_with_persistent_on_bpool.yaml"},
+		"One machine, with persistent datasets on another pool": {def: "m_with_persistent_on_another_pool.yaml"},
 
 		"One machine with children, snapshot on subdataset": {def: "d_one_machine_with_children_snapshot_on_subdataset.yaml"},
 
