@@ -21,26 +21,21 @@ msgstr ""
 msgid "\t%v\n"
 msgstr ""
 
-#: internal/machines/machines.go:707
-#, c-format
-msgid "\t- %s\n"
-msgstr ""
-
-#: internal/machines/machines.go:782
+#: internal/machines/machines.go:783
 #, c-format
 msgid "     - %s (%s)\n"
 msgstr ""
 
-#: internal/machines/machines.go:779
+#: internal/machines/machines.go:780
 #, c-format
 msgid "     - %s (%s): %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:744
+#: internal/machines/machines.go:745
 msgid "    History:\t\n"
 msgstr ""
 
-#: internal/machines/machines.go:683 internal/machines/state.go:262
+#: internal/machines/machines.go:684 internal/machines/state.go:262
 #, c-format
 msgid "  - %s\n"
 msgstr ""
@@ -55,9 +50,14 @@ msgstr ""
 msgid "  - %s (%s)%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:741 internal/machines/machines.go:811
+#: internal/machines/machines.go:742 internal/machines/machines.go:812
 #, c-format
 msgid "  - Name:\t%s\n"
+msgstr ""
+
+#: internal/machines/machines.go:708
+#, c-format
+msgid " - %s\n"
 msgstr ""
 
 #: internal/zfs/helpers.go:327
@@ -91,16 +91,16 @@ msgstr ""
 msgid "%q returned an error: "
 msgstr ""
 
-#: internal/machines/machines.go:879
+#: internal/machines/machines.go:880
 msgid "%s\t%t\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:832 internal/machines/machines.go:840
+#: internal/machines/machines.go:833 internal/machines/machines.go:841
 #, c-format
 msgid "%s\t- %s\n"
 msgstr ""
 
-#: internal/machines/machines.go:838
+#: internal/machines/machines.go:839
 #, c-format
 msgid "%s\tUser: %s\n"
 msgstr ""
@@ -142,32 +142,32 @@ msgstr ""
 msgid "%s. %s"
 msgstr ""
 
-#: internal/machines/machines.go:824
+#: internal/machines/machines.go:825
 #, c-format
 msgid "%sCreated on:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:828
+#: internal/machines/machines.go:829
 #, c-format
 msgid "%sLast Booted Kernel:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:822
+#: internal/machines/machines.go:823
 #, c-format
 msgid "%sLast Used:\t%s\n"
 msgstr ""
 
-#: internal/machines/machines.go:829
+#: internal/machines/machines.go:830
 #, c-format
 msgid "%sSystem Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:836
+#: internal/machines/machines.go:837
 #, c-format
 msgid "%sUser Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:853
+#: internal/machines/machines.go:854
 msgid "--\t----\t---------\n"
 msgstr ""
 
@@ -205,7 +205,7 @@ msgstr ""
 msgid "Booting on snapshot: %q cloned to %q\n"
 msgstr ""
 
-#: internal/machines/machines.go:115
+#: internal/machines/machines.go:116
 msgid "Building new machines list"
 msgstr ""
 
@@ -260,7 +260,7 @@ msgstr ""
 msgid "Control() error: %s"
 msgstr ""
 
-#: internal/daemon/daemon.go:85 internal/machines/machines.go:123
+#: internal/daemon/daemon.go:85 internal/machines/machines.go:124
 msgid "Couldn't apply option to server: %v"
 msgstr ""
 
@@ -290,8 +290,8 @@ msgstr ""
 msgid "Couldn't determine start time of client process: %v"
 msgstr ""
 
-#: internal/machines/machines.go:312 internal/machines/machines.go:342
-#: internal/machines/machines.go:368
+#: internal/machines/machines.go:313 internal/machines/machines.go:343
+#: internal/machines/machines.go:369
 #, c-format
 msgid "Couldn't find any association for user dataset %s"
 msgstr ""
@@ -486,11 +486,11 @@ msgstr ""
 msgid "Give more detail informations on each machine."
 msgstr ""
 
-#: internal/machines/machines.go:714
+#: internal/machines/machines.go:715
 msgid "History:\t\n"
 msgstr ""
 
-#: internal/machines/machines.go:852
+#: internal/machines/machines.go:853
 msgid "ID\tZSys\tLast Used\n"
 msgstr ""
 
@@ -556,7 +556,7 @@ msgid ""
 "_suffix (at least .*_<onechar>): %q"
 msgstr ""
 
-#: internal/machines/machines.go:695
+#: internal/machines/machines.go:696
 #, c-format
 msgid "Name:\t%s\n"
 msgstr ""
@@ -590,11 +590,11 @@ msgstr ""
 msgid "Permission denied: %w"
 msgstr ""
 
-#: internal/machines/machines.go:705
+#: internal/machines/machines.go:706
 msgid "Persistent Datasets:\n"
 msgstr ""
 
-#: internal/machines/machines.go:703
+#: internal/machines/machines.go:704
 msgid "Persistent Datasets: None\n"
 msgstr ""
 
@@ -953,7 +953,7 @@ msgstr ""
 msgid "Users states have changes, rerun user GC"
 msgstr ""
 
-#: internal/machines/machines.go:738
+#: internal/machines/machines.go:739
 msgid "Users:\n"
 msgstr ""
 
@@ -1035,7 +1035,7 @@ msgstr ""
 msgid "ZSys is adding automatic system snapshot to GRUB menu"
 msgstr ""
 
-#: internal/machines/machines.go:696
+#: internal/machines/machines.go:697
 msgid "ZSys:\t%t\n"
 msgstr ""
 
@@ -1185,7 +1185,7 @@ msgstr ""
 msgid "couldn't connect to zsys daemon: %v"
 msgstr ""
 
-#: internal/daemon/service.go:50 internal/machines/machines.go:407
+#: internal/daemon/service.go:50 internal/machines/machines.go:408
 msgid "couldn't convert internal state to json: %v"
 msgstr ""
 
@@ -1273,7 +1273,7 @@ msgstr ""
 msgid "couldn't list %s directory content: %v"
 msgstr ""
 
-#: internal/machines/machines.go:134 internal/machines/machines.go:893
+#: internal/machines/machines.go:135 internal/machines/machines.go:894
 msgid "couldn't load zsys configuration"
 msgstr ""
 
@@ -1336,7 +1336,7 @@ msgstr ""
 msgid "couldn't scan %q for clones"
 msgstr ""
 
-#: internal/machines/machines.go:129
+#: internal/machines/machines.go:130
 msgid "couldn't scan zfs filesystem"
 msgstr ""
 
@@ -1373,11 +1373,11 @@ msgstr ""
 msgid "couldn't switch %q canmount property to %q: "
 msgstr ""
 
-#: internal/machines/machines.go:820 internal/machines/machines.go:877
+#: internal/machines/machines.go:821 internal/machines/machines.go:878
 msgid "current"
 msgstr ""
 
-#: internal/machines/machines.go:410
+#: internal/machines/machines.go:411
 #, c-format
 msgid ""
 "current machines scanning layout:\n"
@@ -1426,11 +1426,11 @@ msgstr ""
 msgid "failed to unmarshal yaml: %v"
 msgstr ""
 
-#: internal/machines/machines.go:494 internal/machines/machines.go:519
+#: internal/machines/machines.go:495 internal/machines/machines.go:520
 msgid "ignoring %q as couldn't assert if it's a child: "
 msgstr ""
 
-#: internal/machines/machines.go:451
+#: internal/machines/machines.go:452
 msgid ""
 "ignoring %q: either an orphan clone or not a boot, user or system datasets "
 "and canmount isn't on"
@@ -1473,7 +1473,7 @@ msgstr ""
 msgid "missing RequesterIDKey for incoming request"
 msgstr ""
 
-#: internal/machines/machines.go:685
+#: internal/machines/machines.go:686
 #, c-format
 msgid ""
 "multiple machines match %s:\n"
@@ -1495,7 +1495,7 @@ msgstr ""
 msgid "new incoming request %s() for %q"
 msgstr ""
 
-#: internal/machines/machines.go:649
+#: internal/machines/machines.go:650
 msgid "no ID given and cannot retrieve current machine. Please specify one ID."
 msgstr ""
 
@@ -1507,7 +1507,7 @@ msgstr ""
 msgid "no logger attached to this context"
 msgstr ""
 
-#: internal/machines/machines.go:679
+#: internal/machines/machines.go:680
 #, c-format
 msgid "no machine matches %s"
 msgstr ""
