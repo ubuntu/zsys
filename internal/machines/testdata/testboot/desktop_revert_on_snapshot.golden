@@ -3639,6 +3639,16 @@
    ],
    "UnmanagedDatasets": [
       {
+         "Name": "bpool",
+         "Mountpoint": "/boot",
+         "CanMount": "off"
+      },
+      {
+         "Name": "bpool/BOOT",
+         "Mountpoint": "/boot/BOOT",
+         "CanMount": "off"
+      },
+      {
          "Name": "rpool",
          "Mountpoint": "/",
          "CanMount": "off"
