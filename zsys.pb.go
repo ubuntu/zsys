@@ -177,6 +177,7 @@ func (*VersionResponse) XXX_OneofWrappers() []interface{} {
 type CreateUserDataRequest struct {
 	User                 string   `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
 	Homepath             string   `protobuf:"bytes,2,opt,name=homepath,proto3" json:"homepath,omitempty"`
+	EncryptHome          bool     `protobuf:"varint,3,opt,name=encryptHome,proto3" json:"encryptHome,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -212,6 +213,13 @@ func (m *CreateUserDataRequest) GetUser() string {
 		return m.User
 	}
 	return ""
+}
+
+func (m *CreateUserDataRequest) GetEncryptHome() bool {
+	if m != nil {
+		return m.EncryptHome
+	}
+	return false
 }
 
 func (m *CreateUserDataRequest) GetHomepath() string {

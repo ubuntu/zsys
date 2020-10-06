@@ -19,13 +19,14 @@ func (s *Server) CreateUserData(req *zsys.CreateUserDataRequest, stream zsys.Zsy
 	}
 
 	user := req.GetUser()
+	encryptHome := req.GetEncryptHome()
 	homepath := req.GetHomepath()
 	s.RWRequest.Lock()
 	defer s.RWRequest.Unlock()
 
 	log.Infof(stream.Context(), i18n.G("Create user dataset for %q on %q"), user, homepath)
 
-	if err := s.Machines.CreateUserData(stream.Context(), user, homepath); err != nil {
+	if err := s.Machines.CreateUserData(stream.Context(), user, homepath, encryptHome); err != nil {
 		return fmt.Errorf(i18n.G("couldn't create userdataset for %q: ")+config.ErrorFormat, homepath, err)
 	}
 	return nil

@@ -47,6 +47,7 @@ message VersionResponse {
 message CreateUserDataRequest {
   string user = 1;
   string homepath = 2;
+  bool encryptHome = 3;
 }
 
 message ChangeHomeOnUserDataRequest {

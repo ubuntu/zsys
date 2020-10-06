@@ -163,6 +163,7 @@ func TestCreate(t *testing.T) {
 		path       string
 		mountpoint string
 		canmount   string
+		encryption bool
 
 		wantErr bool
 	}{
@@ -194,7 +195,7 @@ func TestCreate(t *testing.T) {
 			trans, _ := z.NewTransaction(context.Background())
 			defer trans.Done()
 
-			err = trans.Create(tc.path, tc.mountpoint, tc.canmount)
+			err = trans.Create(tc.path, tc.mountpoint, tc.canmount, tc.encryption)
 
 			if err != nil && !tc.wantErr {
 				t.Fatalf("expected no error but got: %v", err)
@@ -976,7 +977,7 @@ func TestTransactionsWithZFS(t *testing.T) {
 					// create a dataset without its parent will make it fail
 					datasetName = "rpool/ROOT/ubuntu_4242/opt"
 				}
-				err := trans.Create(datasetName, "/home/foo", "on")
+				err := trans.Create(datasetName, "/home/foo", "on", false)
 				if !tc.shouldErr && err != nil {
 					t.Fatalf("create %q shouldn't have failed but it did: %v", datasetName, err)
 				} else if tc.shouldErr && err == nil {

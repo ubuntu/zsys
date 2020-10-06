@@ -47,6 +47,12 @@ const (
 	DatasetPropCanmount = golibzfs.DatasetPropCanmount
 	// DatasetPropMountpoint is the mountpoint of the dataset
 	DatasetPropMountpoint = golibzfs.DatasetPropMountpoint
+	// DatasetPropEncryption is the encryption of the dataste
+	DatasetPropEncryption = golibzfs.DatasetPropEncryption
+	// DatasetPropEncryption is the encryption of the dataste
+	DatasetPropKeyLocation = golibzfs.DatasetPropKeyLocation
+	// DatasetPropEncryption is the encryption of the dataste
+	DatasetPropKeyFormat = golibzfs.DatasetPropKeyFormat
 	// DatasetPropOrigin is the origin of the dataset
 	DatasetPropOrigin = golibzfs.DatasetPropOrigin
 	// DatasetPropMounted is the mounted property for the dataset

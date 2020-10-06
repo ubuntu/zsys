@@ -22,7 +22,7 @@ import (
 
 // CreateUserData creates a new dataset for homepath and attach to current system.
 // It creates intermediates user datasets if needed.
-func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string) error {
+func (ms *Machines) CreateUserData(ctx context.Context, user, homepath string, encryptHome bool) error {
 	if !ms.current.isZsys() {
 		return errors.New(i18n.G("Current machine isn't Zsys, nothing to create"))
 	}
@@ -81,14 +81,18 @@ selectUserDataset:
 		userdatasetRoot = filepath.Join(p, zfs.UserdataPrefix)
 
 		// Create parent USERDATA
-		if err := t.Create(userdatasetRoot, "/", "off"); err != nil {
+		if err := t.Create(userdatasetRoot, "/", "off", false); err != nil {
 			cancel()
 			return fmt.Errorf(i18n.G("couldn't create user data embedder dataset: ")+config.ErrorFormat, err)
 		}
 	}
 
 	userdataset := filepath.Join(userdatasetRoot, fmt.Sprintf("%s_%s", user, t.Zfs.GenerateID(6)))
-	if err := t.Create(userdataset, homepath, "on"); err != nil {
+	var canmountProp string = "on"
+	if encryptHome {
+		canmountProp = "noauto"
+	}
+	if err := t.Create(userdataset, homepath, canmountProp, encryptHome); err != nil {
 		cancel()
 		return err
 	}

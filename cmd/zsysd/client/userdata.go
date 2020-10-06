@@ -23,7 +23,7 @@ var (
 		Use:   "create USER HOME_DIRECTORY",
 		Short: i18n.G("Create a new home user dataset via an user dataset (if doesn't exist) creation"),
 		Args:  cobra.ExactArgs(2),
-		Run:   func(cmd *cobra.Command, args []string) { cmdErr = createUserData(args[0], args[1]) },
+		Run:   func(cmd *cobra.Command, args []string) { cmdErr = createUserData(args[0], args[1], encryptHome) },
 	}
 	userdataRenameCmd = &cobra.Command{
 		Use:   "set-home OLD_HOME NEW_HOME",
@@ -40,7 +40,8 @@ var (
 )
 
 var (
-	removeHome bool
+	removeHome  bool
+	encryptHome bool
 )
 
 func init() {
@@ -48,12 +49,13 @@ func init() {
 	userdataCmd.AddCommand(userdataCreateCmd)
 	userdataCmd.AddCommand(userdataRenameCmd)
 	userdataCmd.AddCommand(userdataDissociateCmd)
+	userdataCreateCmd.Flags().BoolVarP(&encryptHome, "encrypt", "e", false, i18n.G("Encrypt home directory in associatation with keyfile"))
 	userdataDissociateCmd.Flags().BoolVarP(&removeHome, "remove", "r", false, i18n.G("Empty home directory content if not associated to any machine state"))
 }
 
 // createUserData creates a new userdata for user and set it to homepath on current zsys system.
 // if the user already exists for a dataset attached to the current system, set its mountpoint to homepath.
-func createUserData(user, homepath string) (err error) {
+func createUserData(user, homepath string, encryptHome bool) (err error) {
 	client, err := newClient()
 	if err != nil {
 		return err
@@ -63,7 +65,7 @@ func createUserData(user, homepath string) (err error) {
 	ctx, cancel, reset := contextWithResettableTimeout(client.Ctx, config.DefaultClientTimeout)
 	defer cancel()
 
-	stream, err := client.CreateUserData(ctx, &zsys.CreateUserDataRequest{User: user, Homepath: homepath})
+	stream, err := client.CreateUserData(ctx, &zsys.CreateUserDataRequest{User: user, Homepath: homepath, EncryptHome: encryptHome})
 	if err = checkConn(err, reset); err != nil {
 		return err
 	}
