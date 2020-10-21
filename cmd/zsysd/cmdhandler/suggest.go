@@ -22,7 +22,7 @@ func SubcommandsRequiredWithSuggestions(cmd *cobra.Command, args []string) error
 			cmd.SuggestionsMinimumDistance = 2
 		}
 		// subcommand suggestions
-		suggestions = append(cmd.SuggestionsFor(args[0]))
+		suggestions = cmd.SuggestionsFor(args[0])
 
 		// subcommand alias suggestions (with distance, not exact)
 		for _, c := range cmd.Commands() {
