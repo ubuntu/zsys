@@ -1,3 +1,12 @@
+zsys (0.5.3) hirsute; urgency=medium
+
+  [ Jean-Baptiste Lallement ]
+  [ Didier Roche ]
+  * Prevent usage of forbidden characters (starting with -, spaces…) for state
+    names (LP: #1903524)
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 17 Nov 2020 10:27:47 +0100
+
 zsys (0.5.2) groovy; urgency=medium
 
   * Fix /boot/subdataset now being considered as persistent datasets
