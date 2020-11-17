@@ -44,6 +44,9 @@ func (ms *Machines) createSnapshot(ctx context.Context, name string, onlyUser st
 	if name == "" {
 		name = automatedSnapshotPrefix + ms.z.GenerateID(6)
 	}
+	if err := validateStateName(name); err != nil {
+		return "", err
+	}
 
 	t, cancel := ms.z.NewTransaction(ctx)
 	defer t.Done()
@@ -93,4 +96,27 @@ Please remove some states manually to free up space.`), ms.conf.General.MinFreeP
 
 	ms.refresh(ctx)
 	return name, nil
+}
+
+func validateStateName(stateName string) error {
+	if strings.HasPrefix(stateName, "-") {
+		return errors.New(i18n.G("state name cannot start with '-'"))
+	}
+
+	// List of valid characters from zcommon->zfs_namecheck->valid_char()
+	// Space is also valid but not supported by grub and init so booting from a snapshot with a space in the name fails
+	var invalidChars []string
+	for _, c := range stateName {
+		if !((c >= 'a' && c <= 'z') ||
+			(c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') ||
+			c == '-' || c == '_' || c == '.' || c == ':') {
+			invalidChars = append(invalidChars, string(c))
+		}
+	}
+	if invalidChars != nil {
+		return fmt.Errorf(i18n.G("the following characters are not supported in state name: '%s'"), strings.Join(invalidChars, "','"))
+	}
+
+	return nil
 }

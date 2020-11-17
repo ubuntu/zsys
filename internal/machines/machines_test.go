@@ -955,6 +955,9 @@ func TestCreateSystemSnapshot(t *testing.T) {
 		"Error on existing snapshot on user root":    {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_root_snapshot", wantErr: true, isNoOp: true},
 		"Error on existing snapshot on user child":   {def: "m_with_userdata_and_multiple_snapshots.yaml", snapshotName: "user_child_snapshot", wantErr: true, isNoOp: true},
 
+		"Error when name starts with dash":            {def: "m_with_userdata.yaml", snapshotName: "-my_snapshot", wantErr: true, isNoOp: true},
+		"Error when name contains invalid characters": {def: "m_with_userdata.yaml", snapshotName: "my snäpshôt,", wantErr: true, isNoOp: true},
+
 		"Non zsys":   {def: "m_with_userdata_no_zsys.yaml", wantErr: true, isNoOp: true},
 		"No machine": {def: "m_with_userdata_no_zsys.yaml", cmdline: generateCmdLine("rpool/ROOT/nomachine"), wantErr: true, isNoOp: true},
 	}
