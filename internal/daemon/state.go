@@ -69,7 +69,6 @@ func (s *Server) SaveSystemState(req *zsys.SaveSystemStateRequest, stream zsys.Z
 // userName is the name of the user to snapshot the datasets from.
 func (s *Server) SaveUserState(req *zsys.SaveUserStateRequest, stream zsys.Zsys_SaveUserStateServer) (err error) {
 	userName := req.GetUserName()
-	fmt.Println(userName)
 
 	if err := s.authorizer.IsAllowedFromContext(context.WithValue(stream.Context(), authorizer.OnUserKey, userName),
 		authorizer.ActionUserWrite); err != nil {
