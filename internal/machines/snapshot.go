@@ -115,7 +115,17 @@ func validateStateName(stateName string) error {
 		}
 	}
 	if invalidChars != nil {
-		return fmt.Errorf(i18n.G("the following characters are not supported in state name: '%s'"), strings.Join(invalidChars, "','"))
+		// Deduplicate list of invalid chars so they appear only once in error message
+		keys := make(map[string]bool)
+		uniqueChars := []string{}
+
+		for _, c := range invalidChars {
+			if _, v := keys[c]; !v {
+				keys[c] = true
+				uniqueChars = append(uniqueChars, c)
+			}
+		}
+		return fmt.Errorf(i18n.G("the following characters are not supported in state name: '%s'"), strings.Join(uniqueChars, "','"))
 	}
 
 	return nil
