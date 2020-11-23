@@ -171,7 +171,7 @@ msgstr ""
 msgid "--\t----\t---------\n"
 msgstr ""
 
-#: internal/machines/snapshot.go:60
+#: internal/machines/snapshot.go:63
 msgid ""
 "A snapshot %q already exists on system and can create an incoherent state"
 msgstr ""
@@ -700,11 +700,11 @@ msgstr ""
 msgid "Requesting service states dump"
 msgstr ""
 
-#: internal/daemon/state.go:116
+#: internal/daemon/state.go:115
 msgid "Requesting to remove system state %q"
 msgstr ""
 
-#: internal/daemon/state.go:163
+#: internal/daemon/state.go:162
 msgid "Requesting to remove user state %q for user %s"
 msgstr ""
 
@@ -716,11 +716,11 @@ msgstr ""
 msgid "Requesting to save current system state %q"
 msgstr ""
 
-#: internal/daemon/state.go:85
+#: internal/daemon/state.go:84
 msgid "Requesting to save state %q for user %q"
 msgstr ""
 
-#: internal/daemon/state.go:87
+#: internal/daemon/state.go:86
 msgid "Requesting to save state for user %q"
 msgstr ""
 
@@ -842,7 +842,7 @@ msgid ""
 "done. Default is CPU profiling with a 30s timeout."
 msgstr ""
 
-#: internal/daemon/state.go:160
+#: internal/daemon/state.go:159
 msgid "State name is required"
 msgstr ""
 
@@ -866,7 +866,7 @@ msgstr ""
 msgid "System have changes, rerun system GC"
 msgstr ""
 
-#: internal/daemon/state.go:113
+#: internal/daemon/state.go:112
 msgid "System state name is required"
 msgstr ""
 
@@ -1314,17 +1314,17 @@ msgstr ""
 msgid "couldn't remove %q to BootfsDatasets property of %q: "
 msgstr ""
 
-#: internal/daemon/state.go:136
+#: internal/daemon/state.go:135
 #, c-format
 msgid "couldn't remove system state %s: "
 msgstr ""
 
-#: internal/daemon/state.go:183
+#: internal/daemon/state.go:182
 #, c-format
 msgid "couldn't remove user state %s: "
 msgstr ""
 
-#: internal/daemon/state.go:91
+#: internal/daemon/state.go:90
 msgid "couldn't save state for user %q: "
 msgstr ""
 
@@ -1565,6 +1565,10 @@ msgstr ""
 msgid "state id is mandatory"
 msgstr ""
 
+#: internal/machines/snapshot.go:103
+msgid "state name cannot start with '-'"
+msgstr ""
+
 #: internal/machines/gc.go:110 internal/machines/gc.go:285
 #, c-format
 msgid "state.LastUsed (%s) before bucket.start (%s). Continuing"
@@ -1576,6 +1580,11 @@ msgstr ""
 
 #: internal/zfs/zfs.go:440
 msgid "stop snapshotting dataset for %q: %v"
+msgstr ""
+
+#: internal/machines/snapshot.go:128
+#, c-format
+msgid "the following characters are not supported in state name: '%s'"
 msgstr ""
 
 #: internal/streamlogger/server.go:47
@@ -1613,7 +1622,7 @@ msgstr ""
 msgid "unknown type of profiling"
 msgstr ""
 
-#: internal/machines/snapshot.go:55
+#: internal/machines/snapshot.go:58
 msgid "user %q doesn't exist"
 msgstr ""
 
