@@ -1,3 +1,13 @@
+zsys (0.5.4) hirsute; urgency=medium
+
+  [ Jean-Baptiste Lallement ]
+  * Deduplicate list of invalid characters in snapshot name
+    If an invalid character appears multiple times in the name of a snapshot
+    it was listed several times in the error message. This is a cosmetic fix
+    to list each only once.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Fri, 27 Nov 2020 10:31:01 +0100
+
 zsys (0.5.3) hirsute; urgency=medium
 
   [ Jean-Baptiste Lallement ]
