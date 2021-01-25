@@ -1,3 +1,10 @@
+zsys (0.5.5) hirsute; urgency=medium
+
+  * debian/patches/01_golibzfs_zfs2.patch:
+    - patch go-libzfs to be compatible with OpenZFS 2.0
+
+ -- Didier Roche <didrocks@ubuntu.com>  Mon, 25 Jan 2021 11:40:19 +0100
+
 zsys (0.5.4) hirsute; urgency=medium
 
   [ Jean-Baptiste Lallement ]
