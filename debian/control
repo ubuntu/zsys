@@ -3,7 +3,6 @@ Section: admin
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 Build-Depends: debhelper (>= 12),
-               quilt,
                dh-apport,
                dh-golang,
                golang-go,
