@@ -1,3 +1,13 @@
+zsys (0.5.7) hirsute; urgency=medium
+
+  * Use replaced version of go-libzfs by our own fork so that the openzfs 2
+    compability patch is directly available in tree for both:
+    - build
+    - autopkgtests
+  * Remove any quilt usage and patch.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 26 Jan 2021 14:41:55 +0100
+
 zsys (0.5.6) hirsute; urgency=medium
 
   * ensure quilt patch is applied for this format 3.0 (native)
