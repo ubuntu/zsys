@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/ubuntu/zsys/internal/i18n"
@@ -12,18 +13,18 @@ func installCompletionCmd(rootCmd *cobra.Command) {
 	prog := rootCmd.Name()
 	var completionCmd = &cobra.Command{
 		Use:   "completion [bash|zsh|powershell]",
-		Short: i18n.G("Generates bash completion scripts"),
-		Long: fmt.Sprintf(i18n.G(`To load completions:
+		Short: i18n.G("Generates completion scripts"),
+		Long: strings.ReplaceAll(i18n.G(`To load completions:
 
 Bash:
 
-  $ source <(yourprogram completion bash)
+  $ source <(#prog# completion bash)
 
   # To load completions for each session, execute once:
   # Linux:
-  $ yourprogram completion bash > /etc/bash_completion.d/yourprogram
+  $ #prog# completion bash > /etc/bash_completion.d/#prog#
   # macOS:
-  $ yourprogram completion bash > /usr/local/etc/bash_completion.d/yourprogram
+  $ #prog# completion bash > /usr/local/etc/bash_completion.d/#prog#
 
 Zsh:
 
@@ -33,29 +34,35 @@ Zsh:
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
   # To load completions for each session, execute once:
-  $ yourprogram completion zsh > "${fpath[1]}/_yourprogram"
+  $ #prog# completion zsh > "${fpath[1]}/_#prog#"
 
   # You will need to start a new shell for this setup to take effect.
 
 PowerShell:
 
-  PS> yourprogram completion powershell | Out-String | Invoke-Expression
+  PS> #prog# completion powershell | Out-String | Invoke-Expression
 
   # To load completions for every new session, run:
-  PS> yourprogram completion powershell > yourprogram.ps1
+  PS> #prog# completion powershell > #prog#.ps1
   # and source this file from your PowerShell profile.
-`), prog, prog),
+`), "#prog#", prog),
 		DisableFlagsInUseLine: true,
-		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
-		Args:                  cobra.ExactValidArgs(1),
+		ValidArgs:             []string{"bash", "zsh", "powershell"},
+		Args:                  cobra.MaximumNArgs(1), //cobra.ExactValidArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			switch args[0] {
+			var arg = "bash"
+			if len(args) > 0 && args[0] != "" {
+				arg = args[0]
+			}
+			switch arg {
 			case "bash":
-				cmd.Root().GenBashCompletion(os.Stdout)
+				genBashCompletion(cmd.Root(), os.Stdout)
 			case "zsh":
 				cmd.Root().GenZshCompletion(os.Stdout)
 			case "powershell":
 				cmd.Root().GenPowerShellCompletion(os.Stdout)
+			default:
+				os.Stdout.WriteString(fmt.Sprintf("Shell preset unkown: %-36s\n", arg))
 			}
 		},
 	}
