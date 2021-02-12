@@ -66,7 +66,7 @@ jobs:
       # Add dependencies
       - name: Install dependencies
         run: |
-          sudo sed -i s/bionic/eoan/g /etc/apt/sources.list
+          sudo sed -i s/bionic/hirsute/g /etc/apt/sources.list
           sudo apt update
           sudo DEBIAN_FRONTEND=noninteractive apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install libzfslinux-dev
       # Try updating README

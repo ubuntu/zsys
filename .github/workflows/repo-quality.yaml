@@ -53,7 +53,7 @@ jobs:
   generators:
     name: Generated files are up to date
     runs-on: ubuntu-latest
-    container: ubuntu:latest
+    container: ubuntu:devel
     steps:
       # Add dependencies
       - name: Install dependencies
@@ -121,12 +121,12 @@ jobs:
       - name: Reset environment without GOROOT
         run: sudo sed -i "/GOROOT/d" /etc/environment
       # Add dependencies
-      - name: Upgrade to focal for matching libzfs
+      - name: Upgrade to hirsute for matching libzfs
         run: |
           sudo apt update
           sudo apt install -y eatmydata
           sudo ACCEPT_EULA=Y DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
-          sudo sed -i s/bionic/focal/g /etc/apt/sources.list
+          sudo sed -i s/bionic/hirsute/g /etc/apt/sources.list
           sudo eatmydata apt update
           sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
       - name: Install dependencies
