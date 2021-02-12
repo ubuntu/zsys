@@ -1397,11 +1397,11 @@ var fileDescriptor_05865bfaed6eea5d = []byte{
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
-var _ grpc.ClientConn
+var _ grpc.ClientConnInterface
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the grpc package it is being compiled against.
-const _ = grpc.SupportPackageIsVersion4
+const _ = grpc.SupportPackageIsVersion6
 
 // ZsysClient is the client API for Zsys service.
 //
@@ -1432,10 +1432,10 @@ type ZsysClient interface {
 }
 
 type zsysClient struct {
-	cc *grpc.ClientConn
+	cc grpc.ClientConnInterface
 }
 
-func NewZsysClient(cc *grpc.ClientConn) ZsysClient {
+func NewZsysClient(cc grpc.ClientConnInterface) ZsysClient {
 	return &zsysClient{cc}
 }
 

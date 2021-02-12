@@ -33,7 +33,7 @@ func newZsysClientWithLogs(ctx context.Context, cc *grpc.ClientConn, level logru
 
 // Close tear downs the connection under the ZsysLogClient.
 func (z *ZsysLogClient) Close() error {
-	return z.ZsysClient.(*zsysClient).cc.Close()
+	return z.ZsysClient.(*zsysClient).cc.(*grpc.ClientConn).Close()
 }
 
 /*

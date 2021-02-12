@@ -34,7 +34,7 @@ func new{{.OrigClient}}WithLogs(ctx context.Context, cc *grpc.ClientConn, level 
 
 // Close tear downs the connection under the {{.LogClient}}.
 func (z *{{.LogClient}}) Close() error {
-	return z.{{.OrigClient}}.(*{{.PrivateClient}}).cc.Close()
+	return z.{{.OrigClient}}.(*{{.PrivateClient}}).cc.(*grpc.ClientConn).Close()
 }
 {{- end}}
 
