@@ -617,10 +617,11 @@ func TestUpdateLastUsed(t *testing.T) {
 func TestCreateUserData(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		def      string
-		user     string
-		homePath string
-		cmdline  string
+		def         string
+		user        string
+		homePath    string
+		encryptHome bool
+		cmdline     string
 
 		setPropertyErr bool
 		createErr      bool
@@ -633,12 +634,13 @@ func TestCreateUserData(t *testing.T) {
 		"One machine add user dataset without userdata": {def: "m_without_userdata.yaml"},
 		"One machine with no user, only userdata":       {def: "m_with_userdata_only.yaml"},
 		"No attached userdata":                          {def: "m_no_attached_userdata_first_pool.yaml"},
+		"One machine add user dataset with encryption":  {def: "m_with_userdata.yaml", encryptHome: true},
 
 		// Second pool cases
 		"User dataset on other pool":                       {def: "m_with_userdata_on_other_pool.yaml"},
 		"User dataset with no user on other pool":          {def: "m_with_userdata_only_on_other_pool.yaml"},
 		"Prefer system pool for userdata":                  {def: "m_without_userdata_prefer_system_pool.yaml"},
-		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.yaml", cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
+		"Prefer system pool (try other pool) for userdata": {def: "m_without_userdata_prefer_system_pool.yaml", encryptHome: false, cmdline: generateCmdLine("rpool2/ROOT/ubuntu_1234")},
 		"No attached userdata on second pool":              {def: "m_no_attached_userdata_second_pool.yaml"},
 
 		// User or home edge cases
@@ -685,7 +687,7 @@ func TestCreateUserData(t *testing.T) {
 			lzfs.ErrOnScan(tc.scanErr)
 			lzfs.ErrOnSetProperty(tc.setPropertyErr)
 
-			err = ms.CreateUserData(context.Background(), getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"))
+			err = ms.CreateUserData(context.Background(), getDefaultValue(tc.user, "userfoo"), getDefaultValue(tc.homePath, "/home/foo"), tc.encryptHome)
 			if err != nil {
 				if !tc.wantErr {
 					t.Fatalf("expected no error but got: %v", err)

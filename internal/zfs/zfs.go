@@ -2,7 +2,10 @@ package zfs
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
@@ -315,15 +318,33 @@ func (t *nestedTransaction) Done(err *error) {
 	t.parent.reverts = append(t.parent.reverts, t.reverts...)
 }
 
+func genRandBytes(keyLength int) []byte {
+	keytext := make([]byte, keyLength)
+	if _, err := io.ReadFull(rand.Reader, keytext); err != nil {
+		panic(err.Error())
+	}
+	return keytext
+}
+
 // Create creates a dataset for that path.
-func (t *Transaction) Create(path, mountpoint, canmount string) error {
+func (t *Transaction) Create(path, mountpoint, canmount string, encryption bool) error {
 	t.checkValid()
 
-	log.Debugf(t.ctx, i18n.G("ZFS: trying to Create %q with mountpoint %q"), path, mountpoint)
+	log.Debugf(t.ctx, i18n.G("ZFS: trying to Create %q with mountpoint %q; encryption=%q"), path, mountpoint, fmt.Sprint(encryption))
 
 	props := make(map[libzfs.Prop]libzfs.Property)
 	if mountpoint != "" {
 		props[libzfs.DatasetPropMountpoint] = libzfs.Property{Value: mountpoint}
+	}
+	if encryption {
+		var keyfilePath string = filepath.Join(filepath.Dir(mountpoint), filepath.Base(mountpoint)+".keyfile")
+		if err := ioutil.WriteFile(keyfilePath, genRandBytes(32), 0400); err != nil {
+			panic(err.Error())
+		}
+
+		props[libzfs.DatasetPropEncryption] = libzfs.Property{Value: "aes-256-gcm"}
+		props[libzfs.DatasetPropKeyLocation] = libzfs.Property{Value: "file://" + keyfilePath}
+		props[libzfs.DatasetPropKeyFormat] = libzfs.Property{Value: "raw"}
 	}
 	props[libzfs.DatasetPropCanmount] = libzfs.Property{Value: canmount}
 
