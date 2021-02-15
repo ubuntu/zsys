@@ -53,19 +53,25 @@ jobs:
   generators:
     name: Generated files are up to date
     runs-on: ubuntu-latest
-    container: ubuntu:latest
+    container: ubuntu:devel
     steps:
       # Add dependencies
       - name: Install dependencies
         run: |
           apt update
-          DEBIAN_FRONTEND=noninteractive apt install -y ca-certificates gcc libzfslinux-dev protobuf-compiler golang-goprotobuf-dev gettext git
+          DEBIAN_FRONTEND=noninteractive apt install -y ca-certificates gcc libzfslinux-dev protobuf-compiler gettext git
       # Checkout code (using git that we just installed)
       - uses: actions/checkout@v2
       # Install go
       - uses: actions/setup-go@v1
         with:
           go-version: '1.14.x'
+      - name: Install go grpc protoc generator
+        run: |
+          cd ..
+          GO111MODULE=on go get github.com/golang/protobuf/protoc-gen-go && \
+            go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
+          cd -
       - name: Check generated files
         run: ./.github/ci/check-generate
 
@@ -121,30 +127,36 @@ jobs:
       - name: Reset environment without GOROOT
         run: sudo sed -i "/GOROOT/d" /etc/environment
       # Add dependencies
-      - name: Upgrade to focal for matching libzfs
+      - name: Upgrade to hirsute for matching libzfs
+        continue-on-error: true
         run: |
           sudo apt update
           sudo apt install -y eatmydata
           sudo ACCEPT_EULA=Y DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
-          sudo sed -i s/bionic/focal/g /etc/apt/sources.list
+          sudo sed -i s/bionic/hirsute/g /etc/apt/sources.list
           sudo eatmydata apt update
           sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
       - name: Install dependencies
+        continue-on-error: true
         run: |
           #apt update
           sudo DEBIAN_FRONTEND=noninteractive eatmydata apt install -y ca-certificates gcc libzfslinux-dev gettext golang-go
           sudo sync
           sudo modprobe zfs
       - name: Run tests
+        continue-on-error: true
         run: |
           sudo go test -coverprofile=coverage.txt -covermode=atomic ./... -with-system-zfs
       - name: Run tests (with race detector)
+        continue-on-error: true
         run: |
           sudo go test -race ./... -with-system-zfs
       - name: Run benchkmarks
+        continue-on-error: true
         run: |
           sudo go test -bench -run=Benchmark ./... -with-system-zfs
       - name: Upload coverage
+        continue-on-error: true
         uses: codecov/codecov-action@v1.0.3
         with:
           file: ./coverage.txt
