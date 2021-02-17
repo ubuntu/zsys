@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -18,13 +18,13 @@ func installCompletionCmd(rootCmd *cobra.Command) {
 
 Bash:
 
-  $ source <(#prog# completion bash)
+  $ source <(%s completion bash)
 
   # To load completions for each session, execute once:
   # Linux:
-  $ #prog# completion bash > /etc/bash_completion.d/#prog#
+  $ %s completion bash > /etc/bash_completion.d/%s
   # macOS:
-  $ #prog# completion bash > /usr/local/etc/bash_completion.d/#prog#
+  $ %s completion bash > /usr/local/etc/bash_completion.d/%s
 
 Zsh:
 
@@ -34,27 +34,32 @@ Zsh:
   $ echo "autoload -U compinit; compinit" >> ~/.zshrc
 
   # To load completions for each session, execute once:
-  $ #prog# completion zsh > "${fpath[1]}/_#prog#"
+  $ %s completion zsh > "${fpath[1]}/_%s"
 
   # You will need to start a new shell for this setup to take effect.
 
 PowerShell:
 
-  PS> #prog# completion powershell | Out-String | Invoke-Expression
+  PS> %s completion powershell | Out-String | Invoke-Expression
 
   # To load completions for every new session, run:
-  PS> #prog# completion powershell > #prog#.ps1
+  PS> %s completion powershell > %s.ps1
   # and source this file from your PowerShell profile.
-`), "#prog#", prog),
-		DisableFlagsInUseLine: true,
-		ValidArgs:             []string{"bash", "zsh", "powershell"},
-		Args:                  cobra.MaximumNArgs(1), //cobra.ExactValidArgs(1),
+`), "%s", prog),
+		ValidArgs: []string{"bash", "zsh", "powershell"},
+		Args:      cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			var arg = "bash"
+			tmpShell := os.Getenv("SHELL")
+			shell := "unknown"
 			if len(args) > 0 && args[0] != "" {
-				arg = args[0]
+				shell = args[0]
+			} else {
+				tmpShell = filepath.Base(tmpShell)
+				if tmpShell != "." {
+					shell = tmpShell
+				}
 			}
-			switch arg {
+			switch shell {
 			case "bash":
 				genBashCompletion(cmd.Root(), os.Stdout)
 			case "zsh":
@@ -62,7 +67,10 @@ PowerShell:
 			case "powershell":
 				cmd.Root().GenPowerShellCompletion(os.Stdout)
 			default:
-				os.Stdout.WriteString(fmt.Sprintf("Shell preset unkown: %-36s\n", arg))
+				cmd.SilenceUsage = false
+				cmd.PrintErrf("Shell preset unkown: %-36s\n", shell)
+				cmd.Usage()
+				os.Exit(1)
 			}
 		},
 	}
