@@ -13,8 +13,9 @@ func installCompletionCmd(rootCmd *cobra.Command) {
 	prog := rootCmd.Name()
 	var completionCmd = &cobra.Command{
 		Use:   "completion [bash|zsh|powershell]",
-		Short: i18n.G("Generates completion scripts"),
+		Short: i18n.G("Generates completion scripts (will attempt to automatically detect shell)"),
 		Long: strings.ReplaceAll(i18n.G(`To load completions:
+NOTE: When shell type isn't defined shell will be automatically identified based on the $SHELL environment vairable
 
 Bash:
 
@@ -49,16 +50,20 @@ PowerShell:
 		ValidArgs: []string{"bash", "zsh", "powershell"},
 		Args:      cobra.MaximumNArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			tmpShell := os.Getenv("SHELL")
-			shell := "unknown"
+			var shell string
+			var suppliedArg string
 			if len(args) > 0 && args[0] != "" {
 				shell = args[0]
+				suppliedArg = shell
 			} else {
-				tmpShell = filepath.Base(tmpShell)
-				if tmpShell != "." {
-					shell = tmpShell
-				}
+				shell = os.Getenv("SHELL")
+				suppliedArg = "Autodetect " + shell
 			}
+
+			if len(shell) > 0 {
+				shell = filepath.Base(shell)
+			}
+
 			switch shell {
 			case "bash":
 				genBashCompletion(cmd.Root(), os.Stdout)
@@ -67,8 +72,7 @@ PowerShell:
 			case "powershell":
 				cmd.Root().GenPowerShellCompletion(os.Stdout)
 			default:
-				cmd.SilenceUsage = false
-				cmd.PrintErrf("Shell preset unkown: %-36s\n", shell)
+				cmd.PrintErrf("Shell preset unkown: %s\n", suppliedArg)
 				cmd.Usage()
 				os.Exit(1)
 			}
