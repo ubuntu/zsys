@@ -16,7 +16,7 @@ jobs:
       - name: Install required dependencies
         run: |
           apt update
-          apt install -y gettext git
+          apt install -y gettext git python3-pip
       # Checkout code
       - uses: actions/checkout@v2
         with:
