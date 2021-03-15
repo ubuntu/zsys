@@ -468,8 +468,9 @@ msgstr ""
 msgid "Force removing, even if dependencies are found"
 msgstr ""
 
-#: cmd/zsysd/completion.go:15
-msgid "Generates bash completion scripts"
+#: cmd/zsysd/completion.go:16
+msgid ""
+"Generates completion scripts (will attempt to automatically detect shell)"
 msgstr ""
 
 #: internal/authorizer/servercreds.go:47
@@ -1037,6 +1038,10 @@ msgstr ""
 
 #: internal/machines/machines.go:697
 msgid "ZSys:\t%t\n"
+msgstr ""
+
+#: cmd/zsysd/completion.go:35
+msgid "autoload -U compinit; compinit"
 msgstr ""
 
 #: internal/machines/gc.go:98 internal/machines/gc.go:273
