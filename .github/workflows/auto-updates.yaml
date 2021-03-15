@@ -7,24 +7,27 @@ on:
       - po/*
       - README.md
 
+env:
+  goversion: '1.14'
+
 jobs:
   update-po:
     name: Update po files
     runs-on: ubuntu-latest
     container: ubuntu:devel
     steps:
-      - name: Install required dependencies
+      - name: Install dependencies, including git for checkout
         run: |
           apt update
-          apt install -y gettext git python3-pip
-      # Checkout code
+          DEBIAN_FRONTEND=noninteractive apt install -y gettext git
+      # Checkout code with git
       - uses: actions/checkout@v2
         with:
           ref: master
       # Install go
-      - uses: actions/setup-go@v1
+      - uses: actions/setup-go@v2
         with:
-          go-version: '1.14.x'
+          go-version: ${{ env.goversion }}
       # Update po if needed
       - name: Check po files
         id: checkpo
@@ -36,10 +39,10 @@ jobs:
           if [ -n "$MODIFIED" ]; then
             hasModif="true"
           fi
-          echo "::set-output name=modified::${hasModif}"
+          echo "modified=${hasModif}" >> $GITHUB_ENV
       - name: Create Pull Request
-        if: steps.checkpo.outputs.modified == 'true'
-        uses: peter-evans/create-pull-request@v2
+        if: ${{ env.modified == 'true' }}
+        uses: peter-evans/create-pull-request@v3
         with:
           commit-message: Auto update po files
           title: Auto update po files
@@ -48,9 +51,10 @@ jobs:
           branch: auto-update-po
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Push branch
-        if: steps.checkpo.outputs.modified == 'true'
+        if: ${{ env.modified == 'true' }}
         run: |
           git push origin auto-update-po:master
+          git push origin --delete auto-update-po
 
   update-readme:
     name: Update readme file
@@ -59,19 +63,18 @@ jobs:
     runs-on: ubuntu-latest
     container: ubuntu:devel
     steps:
-      # Add dependencies
-      - name: Install dependencies
+      - name: Install dependencies, including git for checkout
         run: |
           apt update
           DEBIAN_FRONTEND=noninteractive apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install libzfslinux-dev git gcc
-      # Checkout code
+      # Checkout code with git
       - uses: actions/checkout@v2
         with:
           ref: master
       # Install go
-      - uses: actions/setup-go@v1
+      - uses: actions/setup-go@v2
         with:
-          go-version: '1.14.x'
+          go-version: ${{ env.goversion }}
       # Try updating README
       - name: Check README file
         id: checkreadme
@@ -83,10 +86,10 @@ jobs:
           if [ -n "$MODIFIED" ]; then
             hasModif="true"
           fi
-          echo "::set-output name=modified::${hasModif}"
+          echo "modified=${hasModif}" >> $GITHUB_ENV
       - name: Create Pull Request
-        if: steps.checkreadme.outputs.modified == 'true'
-        uses: peter-evans/create-pull-request@v2
+        if: ${{ env.modified == 'true' }}
+        uses: peter-evans/create-pull-request@v3
         with:
           commit-message: Auto update readme files
           title: Auto update readme files
@@ -95,6 +98,7 @@ jobs:
           branch: auto-update-readme
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Push branch
-        if: steps.checkreadme.outputs.modified == 'true'
+        if: ${{ env.modified == 'true' }}
         run: |
           git push origin auto-update-readme:master
+          git push origin --delete auto-update-readme
