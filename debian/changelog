@@ -1,3 +1,14 @@
+zsys (0.5.8) hirsute; urgency=medium
+
+  * Workaround deadlock with too many datasets
+    Incrementing buffer size in go-libzfs to workaround operation deadlock
+    while checking for datasets clones. #192.
+    Thanks Anna Glasgall.
+  * Add missing dep on zfs-zed on hirsute now that ZFS doesn’t dep on it.
+  * Misc CI fixes, including upgrading to tested protobuf generator version.
+
+ -- Didier Roche <didrocks@ubuntu.com>  Tue, 06 Apr 2021 12:14:30 +0200
+
 zsys (0.5.7) hirsute; urgency=medium
 
   * Use replaced version of go-libzfs by our own fork so that the openzfs 2
