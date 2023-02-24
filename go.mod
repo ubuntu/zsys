@@ -18,9 +18,8 @@ require (
 	github.com/spf13/cobra v0.0.5
 	github.com/spf13/pflag v1.0.3
 	github.com/stretchr/testify v1.2.2
-	golang.org/x/net v0.0.0-20191002035440-2ec189313ef0 // indirect
-	golang.org/x/sys v0.0.0-20191002091554-b397fe3ad8ed
-	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0
 	google.golang.org/genproto v0.0.0-20200309141739-5b75447e413d
 	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.23.0
