@@ -14,6 +14,10 @@ It allows running multiple ZFS systems in parallel on the same machine, get auto
 
 You can find a whole series of blog posts explaining in details the [internals and goals of ZSys](https://didrocks.fr/2020/05/21/zfs-focus-on-ubuntu-20.04-lts-whats-new/).
 
+## Development
+
+Your help would be very much appreciated! Check out the [CONTRIBUTING](https://github.com/ubuntu/GoWSL/blob/main/CONTRIBUTING.md) document to see how you could collaborate.
+
 ## Usage
 
 ### User commands
