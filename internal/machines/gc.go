@@ -728,7 +728,7 @@ func combinations(n, k int) [][]int {
 // The binomial coefficient, C(n,k), is the number of unordered combinations of
 // k elements in a set that is n elements big, and is defined as
 //
-//  C(n,k) = n!/((n-k)!k!)
+//	C(n,k) = n!/((n-k)!k!)
 //
 // n and k must be non-negative with n >= k, otherwise Binomial will panic.
 // No check is made for overflow.

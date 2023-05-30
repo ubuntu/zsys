@@ -23,7 +23,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Code formatting
         run: |
           FMT=`go fmt ./...`
@@ -46,7 +46,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Building
         run: go build ./...
 
@@ -65,7 +65,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Install go grpc protoc generator
         run: |
           cd ..
@@ -90,7 +90,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Report suspicious constructs
         run: go vet ./...
       # TODO: add statichecks and others?
@@ -104,7 +104,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       # Add dependencies
       - name: Install dependencies
         run: |

@@ -216,7 +216,8 @@ func (a Authorizer) isAllowed(ctx context.Context, action Action, pid int32, uid
 // getStartTimeFromReader determines the start time from a process stat file content
 //
 // The implementation is intended to be compatible with polkit:
-//    https://cgit.freedesktop.org/polkit/tree/src/polkit/polkitunixprocess.c
+//
+//	https://cgit.freedesktop.org/polkit/tree/src/polkit/polkitunixprocess.c
 func getStartTimeFromReader(r io.Reader) (uint64, error) {
 	data, err := ioutil.ReadAll(r)
 	if err != nil {
