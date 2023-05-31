@@ -201,7 +201,7 @@ func main() {
 
 						fields := callFunc.Type.(*ast.FuncType).Params.List
 
-						if (len(fields) != 2) {
+						if len(fields) != 2 {
 							continue
 						}
 						reqType := fields[0].Type.(*ast.StarExpr).X.(*ast.Ident).Name
