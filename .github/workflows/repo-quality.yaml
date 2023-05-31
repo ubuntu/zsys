@@ -127,36 +127,21 @@ jobs:
       - name: Reset environment without GOROOT
         run: sudo sed -i "/GOROOT/d" /etc/environment
       # Add dependencies
-      - name: Upgrade to hirsute for matching libzfs
-        continue-on-error: true
-        run: |
-          sudo apt update
-          sudo apt install -y eatmydata
-          sudo ACCEPT_EULA=Y DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
-          sudo sed -i s/bionic/hirsute/g /etc/apt/sources.list
-          sudo eatmydata apt update
-          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
       - name: Install dependencies
-        continue-on-error: true
         run: |
-          #apt update
-          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt install -y ca-certificates gcc libzfslinux-dev gettext golang-go
+          sudo apt install -y ca-certificates gcc libzfslinux-dev gettext golang-go
           sudo sync
           sudo modprobe zfs
       - name: Run tests
-        continue-on-error: true
         run: |
           sudo go test -coverprofile=coverage.txt -covermode=atomic ./... -with-system-zfs
       - name: Run tests (with race detector)
-        continue-on-error: true
         run: |
           sudo go test -race ./... -with-system-zfs
       - name: Run benchkmarks
-        continue-on-error: true
         run: |
           sudo go test -bench -run=Benchmark ./... -with-system-zfs
       - name: Upload coverage
-        continue-on-error: true
         uses: codecov/codecov-action@v3
         with:
           file: ./coverage.txt
