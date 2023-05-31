@@ -89,12 +89,18 @@ func main() {
 
 	src := args[1]
 	dest := fmt.Sprintf("%s.streamlogger.go", strings.TrimSuffix(src, ".pb.go"))
+	srcgrpc := fmt.Sprintf("%s_grpc.pb.go", strings.TrimSuffix(src, ".pb.go"))
 
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, src, nil, parser.ParseComments)
 	if err != nil {
 		log.Fatalf("coudln't parse file: %v", err)
 	}
+	fgrpc, err := parser.ParseFile(fset, srcgrpc, nil, parser.ParseComments)
+	if err != nil {
+		log.Fatalf("coudln't parse file: %v", err)
+	}
+	f.Decls = append(f.Decls, fgrpc.Decls...)
 
 	// Package name
 	data := pbData{
@@ -191,6 +197,10 @@ func main() {
 						function := callFunc.Names[0].Name
 
 						fields := callFunc.Type.(*ast.FuncType).Params.List
+
+						if (len(fields) != 2) {
+							continue
+						}
 						reqType := fields[0].Type.(*ast.StarExpr).X.(*ast.Ident).Name
 						origStream := fields[1].Type.(*ast.Ident).Name
 
