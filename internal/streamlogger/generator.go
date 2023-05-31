@@ -167,6 +167,9 @@ func main() {
 				case *ast.InterfaceType:
 					// Clients
 					name := e.Name.Name
+					if strings.HasPrefix(name, "Unsafe") {
+						continue
+					}
 					if strings.HasSuffix(name, "Client") {
 						// We are not interested in generating call specific call
 						if strings.Contains(name, "_") {

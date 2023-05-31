@@ -59,25 +59,6 @@ func registerZsysServerIdleWithLogs(s *grpc.Server, srv ZsysServerIdleTimeout) {
 	RegisterZsysServer(s, &ZsysLogServer{srv})
 }
 
-// UnsafeZsysLogServer is used to intercept the server and inserting an intermediate log stream.
-// This can't be done in interceptor as the creation of each per-function server struct from a grpc.ServerStream
-// is only done in the handler() call, which is blocking until the whole handler has ran, once the stream
-// has closed.
-// It also wraps an idle timeout server, so that the interceptor can stop the idling timeout and reset it after each call.
-type UnsafeZsysLogServer struct {
-	UnsafeZsysServerIdleTimeout
-}
-
-type UnsafeZsysServerIdleTimeout interface {
-	UnsafeZsysServer
-	TrackRequest() func()
-}
-
-// registerUnsafeZsysServerIdleWithLogs wraps the server to an idle timeout server and logged variant intercepting all grpc calls.
-func registerUnsafeZsysServerIdleWithLogs(s *grpc.Server, srv UnsafeZsysServerIdleTimeout) {
-	RegisterUnsafeZsysServer(s, &UnsafeZsysLogServer{srv})
-}
-
 /*
  * Zsys.Version()
  */
