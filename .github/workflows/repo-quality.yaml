@@ -157,7 +157,7 @@ jobs:
           sudo go test -bench -run=Benchmark ./... -with-system-zfs
       - name: Upload coverage
         continue-on-error: true
-        uses: codecov/codecov-action@v1.0.3
+        uses: codecov/codecov-action@v3
         with:
           file: ./coverage.txt
           token: ${{secrets.CODECOV_TOKEN}}
