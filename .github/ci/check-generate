@@ -16,6 +16,8 @@ on_exit() {
 }
 trap on_exit EXIT INT QUIT ABRT PIPE TERM
 
+go version
+
 go generate ./...
 
 # Handle everything but po and assets files
