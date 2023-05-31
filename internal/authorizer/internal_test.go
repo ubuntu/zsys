@@ -107,11 +107,13 @@ func TestServerPeerCredsHandshake(t *testing.T) {
 		defer wg.Done()
 		unixAddr, err := net.ResolveUnixAddr("unix", socket)
 		if err != nil {
-			t.Fatalf("Couldn't resolve client socket address: %v", err)
+			t.Errorf("Couldn't resolve client socket address: %v", err)
+			return
 		}
 		conn, err := net.DialUnix("unix", nil, unixAddr)
 		if err != nil {
-			t.Fatalf("Couldn't contact unix socket: %v", err)
+			t.Errorf("Couldn't contact unix socket: %v", err)
+			return
 		}
 		defer conn.Close()
 	}()

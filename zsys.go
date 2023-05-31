@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 )
 
-//go:generate sh -c "if go run internal/generators/can_modify_repo.go 2>/dev/null; then PATH=\"$PATH:`go env GOPATH`/bin\" protoc --go_out=plugins=grpc:. zsys.proto; fi"
+//go:generate sh -c "if go run internal/generators/can_modify_repo.go 2>/dev/null; then PATH=\"`go env GOPATH`/bin:$PATH\" protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative,require_unimplemented_servers=false zsys.proto; fi"
 // Takes output of protoc for second streamlogger generation.
 //go:generate go run internal/streamlogger/generator.go -- zsys.pb.go
 

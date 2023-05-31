@@ -23,7 +23,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Code formatting
         run: |
           FMT=`go fmt ./...`
@@ -46,7 +46,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Building
         run: go build ./...
 
@@ -65,15 +65,15 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Install go grpc protoc generator
         run: |
           cd ..
-          GO111MODULE=on go get github.com/golang/protobuf/protoc-gen-go && \
-            go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
+          GOPATH=`pwd` go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+            go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
           cd -
       - name: Check generated files
-        run: ./.github/ci/check-generate
+        run: PATH=../bin:$PATH ./.github/ci/check-generate
 
   extended-quality:
     name: Extended quality checks
@@ -90,7 +90,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       - name: Report suspicious constructs
         run: go vet ./...
       # TODO: add statichecks and others?
@@ -104,7 +104,7 @@ jobs:
       # Install go
       - uses: actions/setup-go@v1
         with:
-          go-version: '1.14.x'
+          go-version: '1.20.x'
       # Add dependencies
       - name: Install dependencies
         run: |
@@ -157,7 +157,7 @@ jobs:
           sudo go test -bench -run=Benchmark ./... -with-system-zfs
       - name: Upload coverage
         continue-on-error: true
-        uses: codecov/codecov-action@v1.0.3
+        uses: codecov/codecov-action@v3
         with:
           file: ./coverage.txt
           token: ${{secrets.CODECOV_TOKEN}}

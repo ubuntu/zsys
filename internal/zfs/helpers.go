@@ -261,6 +261,7 @@ func splitSnapshotName(name string) (string, string) {
 //     . the dataset (and its children) has been created after the snapshot was taken -> OK
 //     . the dataset snapshot (and all its children snapshots) have been removed entirely: no way to detect the difference from above -> consider OK
 //   - If one of its children has a snapshot with the same name: clearly a case where something went wrong during snapshot -> error OUT
+//
 // Said differently:
 // if a dataset has a snapshot with a given name, all its parents should have a snapshot with the same name (up to base snapshotName)
 func (d Dataset) checkSnapshotHierarchyIntegrity(snapshotName string, snapshotOnParent bool) error {

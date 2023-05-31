@@ -1,8 +1,6 @@
 /*
-
 Package log proxy logs to logrus logger and an optional io.Writer.
 Both can have independent logging levels.
-
 */
 package log
 

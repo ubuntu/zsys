@@ -2,6 +2,8 @@
 
 set -eu
 
+git config --global --add safe.directory /__w/zsys/zsys
+
 generatedAssets="internal/config/internalassets*go"
 
 # Ignore mod file changes; README.md and po files
@@ -13,6 +15,8 @@ on_exit() {
     git update-index --no-assume-unchanged go.* po/* README.md  ${generatedAssets}
 }
 trap on_exit EXIT INT QUIT ABRT PIPE TERM
+
+go version
 
 go generate ./...
 

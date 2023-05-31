@@ -199,7 +199,7 @@ func removeState(args []string) (err error) {
 			switch info := d.(type) {
 			case *errdetails.ErrorInfo:
 				// Does the request needs confirmation?
-				if info.Type == config.UserConfirmationNeeded {
+				if info.Reason == config.UserConfirmationNeeded {
 					recoverableMsg = info.Metadata["msg"]
 				}
 			default:

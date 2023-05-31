@@ -1,8 +1,6 @@
 /*
-
 Package streamlogger creates some stream client and server which can proxy logs to client, by adding to the grpc
 call some metadata used to identify and specify log levels.
-
 */
 package streamlogger
 

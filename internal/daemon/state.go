@@ -120,7 +120,7 @@ func (s *Server) RemoveSystemState(req *zsys.RemoveSystemStateRequest, stream zs
 		if errors.As(err, &e) {
 			st := status.New(codes.FailedPrecondition, config.UserConfirmationNeeded)
 			stdetails, err := st.WithDetails(&errdetails.ErrorInfo{
-				Type:   config.UserConfirmationNeeded,
+				Reason: config.UserConfirmationNeeded,
 				Domain: "",
 				Metadata: map[string]string{
 					"msg": e.Error(),
@@ -167,7 +167,7 @@ func (s *Server) RemoveUserState(req *zsys.RemoveUserStateRequest, stream zsys.Z
 		if errors.As(err, &e) {
 			st := status.New(codes.FailedPrecondition, config.UserConfirmationNeeded)
 			stdetails, err := st.WithDetails(&errdetails.ErrorInfo{
-				Type:   config.UserConfirmationNeeded,
+				Reason: config.UserConfirmationNeeded,
 				Domain: "",
 				Metadata: map[string]string{
 					"msg": e.Error(),
