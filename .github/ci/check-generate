@@ -2,6 +2,8 @@
 
 set -eu
 
+git config --global --add safe.directory /__w/zsys/zsys
+
 generatedAssets="internal/config/internalassets*go"
 
 # Ignore mod file changes; README.md and po files
