@@ -69,11 +69,11 @@ jobs:
       - name: Install go grpc protoc generator
         run: |
           cd ..
-          GO111MODULE=on go get google.golang.org/protobuf/cmd/protoc-gen-go && \
-            go get google.golang.org/grpc/cmd/protoc-gen-go-grpc
+          GOPATH=`pwd` go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
+            go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
           cd -
       - name: Check generated files
-        run: ./.github/ci/check-generate
+        run: PATH=../bin:$PATH ./.github/ci/check-generate
 
   extended-quality:
     name: Extended quality checks
