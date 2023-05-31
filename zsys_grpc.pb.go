@@ -755,7 +755,7 @@ func (x *zsysMachineListClient) Recv() (*MachineListResponse, error) {
 }
 
 // ZsysServer is the server API for Zsys service.
-// All implementations must embed UnimplementedZsysServer
+// All implementations should embed UnimplementedZsysServer
 // for forward compatibility
 type ZsysServer interface {
 	Version(*Empty, Zsys_VersionServer) error
@@ -780,10 +780,9 @@ type ZsysServer interface {
 	GC(*GCRequest, Zsys_GCServer) error
 	MachineShow(*MachineShowRequest, Zsys_MachineShowServer) error
 	MachineList(*Empty, Zsys_MachineListServer) error
-	mustEmbedUnimplementedZsysServer()
 }
 
-// UnimplementedZsysServer must be embedded to have forward compatible implementations.
+// UnimplementedZsysServer should be embedded to have forward compatible implementations.
 type UnimplementedZsysServer struct {
 }
 
@@ -853,7 +852,6 @@ func (UnimplementedZsysServer) MachineShow(*MachineShowRequest, Zsys_MachineShow
 func (UnimplementedZsysServer) MachineList(*Empty, Zsys_MachineListServer) error {
 	return status.Errorf(codes.Unimplemented, "method MachineList not implemented")
 }
-func (UnimplementedZsysServer) mustEmbedUnimplementedZsysServer() {}
 
 // UnsafeZsysServer may be embedded to opt out of forward compatibility for this service.
 // Use of this interface is not recommended, as added methods to ZsysServer will
