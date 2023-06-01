@@ -127,11 +127,18 @@ jobs:
       - name: Reset environment without GOROOT
         run: sudo sed -i "/GOROOT/d" /etc/environment
       # Add dependencies
+      - name: Upgrade system
+        continue-on-error: true
+        run: |
+          uname -a
+          sudo apt update
+          sudo DEBIAN_FRONTEND=noninteractive apt full-upgrade
       - name: Install dependencies
         run: |
           sudo apt install -y ca-certificates gcc libzfslinux-dev gettext golang-go
           sudo sync
           sudo modprobe zfs
+          uname -a
       - name: Run tests
         run: |
           sudo go test -coverprofile=coverage.txt -covermode=atomic ./... -with-system-zfs
