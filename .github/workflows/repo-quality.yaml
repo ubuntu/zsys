@@ -39,6 +39,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       # Add dependencies
+      - name: Enable proposed
+        run: |
+          sed 's/updates/proposed/' /etc/apt/sources.list > /etc/apt/sources.list.d/proposed.list
+          cat <<EOF >/etc/apt/preferences.d/proposed.pref
+          Package: *
+          Pin: release a=*-proposed
+          Pin-Priority: 500
+          EOF
       - name: Install dependencies
         run: |
           apt update
@@ -56,6 +64,14 @@ jobs:
     container: ubuntu:devel
     steps:
       # Add dependencies
+      - name: Enable proposed
+        run: |
+          sed 's/updates/proposed/' /etc/apt/sources.list > /etc/apt/sources.list.d/proposed.list
+          cat <<EOF >/etc/apt/preferences.d/proposed.pref
+          Package: *
+          Pin: release a=*-proposed
+          Pin-Priority: 500
+          EOF
       - name: Install dependencies
         run: |
           apt update
@@ -82,6 +98,14 @@ jobs:
     steps:
       # Checkout code
       - uses: actions/checkout@v2
+      - name: Enable proposed
+        run: |
+          sed 's/updates/proposed/' /etc/apt/sources.list > /etc/apt/sources.list.d/proposed.list
+          cat <<EOF >/etc/apt/preferences.d/proposed.pref
+          Package: *
+          Pin: release a=*-proposed
+          Pin-Priority: 500
+          EOF
       # Add dependencies
       - name: Install dependencies
         run: |
@@ -106,6 +130,14 @@ jobs:
         with:
           go-version: '1.20.x'
       # Add dependencies
+      - name: Enable proposed
+        run: |
+          sed 's/updates/proposed/' /etc/apt/sources.list > /etc/apt/sources.list.d/proposed.list
+          cat <<EOF >/etc/apt/preferences.d/proposed.pref
+          Package: *
+          Pin: release a=*-proposed
+          Pin-Priority: 500
+          EOF
       - name: Install dependencies
         run: |
           apt update
@@ -127,20 +159,11 @@ jobs:
       - name: Reset environment without GOROOT
         run: sudo sed -i "/GOROOT/d" /etc/environment
       # Add dependencies
-      - name: Upgrade to hirsute for matching libzfs
-        continue-on-error: true
-        run: |
-          sudo apt update
-          sudo apt install -y eatmydata
-          sudo ACCEPT_EULA=Y DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
-          sudo sed -i s/bionic/hirsute/g /etc/apt/sources.list
-          sudo eatmydata apt update
-          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" full-upgrade
       - name: Install dependencies
         continue-on-error: true
         run: |
-          #apt update
-          sudo DEBIAN_FRONTEND=noninteractive eatmydata apt install -y ca-certificates gcc libzfslinux-dev gettext golang-go
+          sudo add-apt-repository -y ppa:xnox/ubuntu/scratch
+          sudo apt install -y ca-certificates gcc libzfslinux-dev gettext golang-go
           sudo sync
           sudo modprobe zfs
       - name: Run tests
