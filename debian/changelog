@@ -1,3 +1,9 @@
+zsys (0.5.10) mantic; urgency=medium
+
+  * Updates to support zfs 2.1.99 (LP: #2022060)
+
+ -- Dimitri John Ledkov <dimitri.ledkov@canonical.com>  Thu, 01 Jun 2023 12:44:39 +0100
+
 zsys (0.5.9) jammy; urgency=medium
 
   [ Gabriel Nagy ]
