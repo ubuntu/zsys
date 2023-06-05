@@ -15,7 +15,7 @@ XS-Go-Import-Path: github.com/ubuntu/zsys
 Homepage: https://github.com/ubuntu/zsys
 
 Package: zsys
-Architecture: any
+Architecture: amd64 arm64 ppc64el riscv64
 Built-Using: ${misc:Built-Using},
 Depends: ${shlibs:Depends},
          ${misc:Depends},
