@@ -1,3 +1,10 @@
+zsys (0.5.11) mantic; urgency=medium
+
+  * debian/control: limit arches to known working subset
+  * Updates to support zfs 2.2-rc1
+
+ -- Dimitri John Ledkov <dimitri.ledkov@canonical.com>  Wed, 12 Jul 2023 00:53:26 +0100
+
 zsys (0.5.10) mantic; urgency=medium
 
   * Updates to support zfs 2.1.99 (LP: #2022060)
