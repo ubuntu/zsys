@@ -63,8 +63,8 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
-github.com/ubuntu/go-libzfs v0.2.2-0.20230601002226-81eb00df3936 h1:MhjO9Ro72ROP0rSYNHQpgt1XPXoQG4fvhRBI3lgeDic=
-github.com/ubuntu/go-libzfs v0.2.2-0.20230601002226-81eb00df3936/go.mod h1:/ABUjxseIy72AxJV8ROgSfeZ5YA8/ZSp1mMzfDKi0Mw=
+github.com/ubuntu/go-libzfs v0.2.2-0.20230711233110-6b487f8211c2 h1:vVMEebrgWXyd5thb0WmzfeRQ0OmAx55uT4HPQ1ONKP8=
+github.com/ubuntu/go-libzfs v0.2.2-0.20230711233110-6b487f8211c2/go.mod h1:/ABUjxseIy72AxJV8ROgSfeZ5YA8/ZSp1mMzfDKi0Mw=
 github.com/ugorji/go/codec v0.0.0-20181204163529-d75b2dcb6bc8/go.mod h1:VFNgLljTbGfSG7qAOspJ7OScBnGdDN/yBr0sguwnwf0=
 github.com/xordataexchange/crypt v0.0.3-0.20170626215501-b2862e3d0a77/go.mod h1:aYKd//L2LvnjZzWKhF00oedf4jCCReLcmhLdhm1A27Q=
 golang.org/x/crypto v0.0.0-20181203042331-505ab145d0a9/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
