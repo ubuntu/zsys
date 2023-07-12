@@ -21,11 +21,16 @@ jobs:
           apt update
           DEBIAN_FRONTEND=noninteractive apt install -y gettext git
       # Checkout code with git
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: master
+      # As per https://github.com/actions/runner/issues/2033#issuecomment-1204205989
+      - name: Set ownership
+        run: |
+          # this is to fix GIT not liking owner of the checkout dir
+          chown -R $(id -u):$(id -g) $PWD
       # Install go
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ env.goversion }}
       # Update po if needed
@@ -75,11 +80,16 @@ jobs:
           apt update
           DEBIAN_FRONTEND=noninteractive apt -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" install libzfslinux-dev git gcc
       # Checkout code with git
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           ref: master
+      # As per https://github.com/actions/runner/issues/2033#issuecomment-1204205989
+      - name: Set ownership
+        run: |
+          # this is to fix GIT not liking owner of the checkout dir
+          chown -R $(id -u):$(id -g) $PWD
       # Install go
-      - uses: actions/setup-go@v2
+      - uses: actions/setup-go@v4
         with:
           go-version: ${{ env.goversion }}
       # Try updating README
