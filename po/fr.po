@@ -60,7 +60,7 @@ msgstr ""
 msgid " - %s\n"
 msgstr ""
 
-#: internal/zfs/helpers.go:327
+#: internal/zfs/helpers.go:328
 msgid "%q has some clones (%v) when it shouldn't"
 msgstr ""
 
@@ -82,8 +82,8 @@ msgstr ""
 msgid "%q isn't a zsys snapshot with a valid %q property: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:374
-#: internal/zfs/helpers.go:393
+#: internal/zfs/helpers.go:111 internal/zfs/helpers.go:375
+#: internal/zfs/helpers.go:394
 msgid "%q property isn't an int: "
 msgstr ""
 
@@ -178,7 +178,7 @@ msgstr ""
 
 #: cmd/zsysd/cmdhandler/common.go:18
 #, c-format
-msgid "Alias of %s"
+msgid "Alias of %s. %s"
 msgstr ""
 
 #: internal/daemon/daemon.go:167
@@ -468,7 +468,7 @@ msgstr ""
 msgid "Force removing, even if dependencies are found"
 msgstr ""
 
-#: cmd/zsysd/completion.go:16
+#: cmd/zsysd/completion.go:54
 msgid ""
 "Generates completion scripts (will attempt to automatically detect shell)"
 msgstr ""
@@ -503,7 +503,7 @@ msgstr ""
 msgid "Invalid capacity %q on pool %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:314
+#: internal/zfs/helpers.go:315
 msgid "IsUserDataset called on snapshot %q."
 msgstr ""
 
@@ -1040,10 +1040,6 @@ msgstr ""
 msgid "ZSys:\t%t\n"
 msgstr ""
 
-#: cmd/zsysd/completion.go:35
-msgid "autoload -U compinit; compinit"
-msgstr ""
-
 #: internal/machines/gc.go:98 internal/machines/gc.go:273
 msgid "bucket %+v"
 msgstr ""
@@ -1112,7 +1108,7 @@ msgstr ""
 msgid "cannot destroy dataset %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:629
+#: internal/zfs/helpers.go:630
 msgid "cannot find %q as child of parent %q"
 msgstr ""
 
@@ -1121,7 +1117,7 @@ msgstr ""
 msgid "cannot find %q: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:553
+#: internal/zfs/helpers.go:554
 msgid "cannot find base snapshot %q: %v"
 msgstr ""
 
@@ -1134,7 +1130,7 @@ msgstr ""
 msgid "cannot find parent for %s: %v"
 msgstr ""
 
-#: internal/zfs/helpers.go:581
+#: internal/zfs/helpers.go:582
 msgid "cannot remove snapshot %q on old dataset %q: %v"
 msgstr ""
 
@@ -1337,7 +1333,7 @@ msgstr ""
 msgid "couldn't save system state: "
 msgstr ""
 
-#: internal/zfs/helpers.go:324
+#: internal/zfs/helpers.go:325
 msgid "couldn't scan %q for clones"
 msgstr ""
 
@@ -1538,25 +1534,25 @@ msgstr ""
 msgid "one and only one state to delete should be provided"
 msgstr ""
 
-#: internal/zfs/helpers.go:277
+#: internal/zfs/helpers.go:278
 msgid ""
 "parent of %q doesn't have a snapshot named %q. Every of its children "
 "shouldn't have a snapshot. However %q exists"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:249
+#: internal/authorizer/authorizer.go:250
 msgid "parsing error: %v"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:241
+#: internal/authorizer/authorizer.go:242
 msgid "parsing error: ) at the end"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:245
+#: internal/authorizer/authorizer.go:246
 msgid "parsing error: less fields than required"
 msgstr ""
 
-#: internal/authorizer/authorizer.go:237
+#: internal/authorizer/authorizer.go:238
 msgid "parsing error: missing )"
 msgstr ""
 

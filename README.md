@@ -51,34 +51,38 @@ NOTE: When shell type isn't defined shell will be automatically identified based
 
 Bash:
 
-  $ source <(zsysctl completion bash)
+```bash
+source <(zsysctl completion bash)
 
-  # To load completions for each session, execute once:
-  # Linux:
-  $ zsysctl completion bash > /etc/bash_completion.d/zsysctl
-  # macOS:
-  $ zsysctl completion bash > /usr/local/etc/bash_completion.d/zsysctl
+# To load completions for each session, execute once:
+# Linux:
+zsysctl completion bash > /etc/bash_completion.d/zsysctl
+# macOS:
+zsysctl completion bash > /usr/local/etc/bash_completion.d/zsysctl
+```
 
 Zsh:
+```zsh
+# If shell completion is not already enabled in your environment,
+# you will need to enable it.  You can execute the following once:
 
-  # If shell completion is not already enabled in your environment,
-  # you will need to enable it.  You can execute the following once:
+echo "autoload -U compinit; compinit" >> ~/.zshrc
 
-  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
+# To load completions for each session, execute once:
+zsysctl completion zsh > "${fpath[1]}/_zsysctl"
 
-  # To load completions for each session, execute once:
-  $ zsysctl completion zsh > "${fpath[1]}/_zsysctl"
-
-  # You will need to start a new shell for this setup to take effect.
+# You will need to start a new shell for this setup to take effect.
+```
 
 PowerShell:
 
-  PS> zsysctl completion powershell | Out-String | Invoke-Expression
+```powershell
+zsysctl completion powershell | Out-String | Invoke-Expression
 
-  # To load completions for every new session, run:
-  PS> zsysctl completion powershell > zsysctl.ps1
-  # and source this file from your PowerShell profile.
-
+# To load completions for every new session, run:
+zsysctl completion powershell > zsysctl.ps1
+# and source this file from your PowerShell profile.
+```
 
 ```
 zsysctl completion [bash|zsh|powershell] [flags]
@@ -102,7 +106,7 @@ List all the machines and basic information.
 
 ##### Synopsis
 
-Alias of zsysctl machine list
+Alias of zsysctl machine list. List all the machines and basic information.
 
 ```
 zsysctl list [flags]
@@ -121,10 +125,6 @@ zsysctl list [flags]
 ```
 
 #### zsysctl machine
-
-Machine management
-
-##### Synopsis
 
 Machine management
 
@@ -148,10 +148,6 @@ zsysctl machine COMMAND [flags]
 
 List all the machines and basic information.
 
-##### Synopsis
-
-List all the machines and basic information.
-
 ```
 zsysctl machine list [flags]
 ```
@@ -169,10 +165,6 @@ zsysctl machine list [flags]
 ```
 
 #### zsysctl machine show
-
-Shows the status of the machine.
-
-##### Synopsis
 
 Shows the status of the machine.
 
@@ -199,7 +191,7 @@ Saves the current state of the machine. By default it saves only the user state.
 
 ##### Synopsis
 
-Alias of zsysctl state save
+Alias of zsysctl state save. Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided.
 
 ```
 zsysctl save [state id] [flags]
@@ -225,10 +217,6 @@ zsysctl save [state id] [flags]
 
 Service management
 
-##### Synopsis
-
-Service management
-
 ```
 zsysctl service COMMAND [flags]
 ```
@@ -249,10 +237,6 @@ zsysctl service COMMAND [flags]
 
 Dumps the current state of zsys.
 
-##### Synopsis
-
-Dumps the current state of zsys.
-
 ```
 zsysctl service dump [flags]
 ```
@@ -270,10 +254,6 @@ zsysctl service dump [flags]
 ```
 
 #### zsysctl service gc
-
-Run daemon state saves garbage collection.
-
-##### Synopsis
 
 Run daemon state saves garbage collection.
 
@@ -298,10 +278,6 @@ zsysctl service gc [flags]
 
 Sets the logging level of the daemon.
 
-##### Synopsis
-
-Sets the logging level of the daemon.
-
 ```
 zsysctl service loglevel 0|1|2 [flags]
 ```
@@ -319,10 +295,6 @@ zsysctl service loglevel 0|1|2 [flags]
 ```
 
 #### zsysctl service refresh
-
-Refreshes machines states.
-
-##### Synopsis
 
 Refreshes machines states.
 
@@ -346,10 +318,6 @@ zsysctl service refresh [flags]
 
 Reloads daemon configuration.
 
-##### Synopsis
-
-Reloads daemon configuration.
-
 ```
 zsysctl service reload [flags]
 ```
@@ -367,10 +335,6 @@ zsysctl service reload [flags]
 ```
 
 #### zsysctl service status
-
-Shows the status of the daemon.
-
-##### Synopsis
 
 Shows the status of the daemon.
 
@@ -394,10 +358,6 @@ zsysctl service status [flags]
 
 Stops zsys daemon.
 
-##### Synopsis
-
-Stops zsys daemon.
-
 ```
 zsysctl service stop [flags]
 ```
@@ -415,10 +375,6 @@ zsysctl service stop [flags]
 ```
 
 #### zsysctl service trace
-
-Start profiling until you exit this command yourself or when duration is done. Default is CPU profiling with a 30s timeout.
-
-##### Synopsis
 
 Start profiling until you exit this command yourself or when duration is done. Default is CPU profiling with a 30s timeout.
 
@@ -447,7 +403,7 @@ Shows the status of the machine.
 
 ##### Synopsis
 
-Alias of zsysctl machine show
+Alias of zsysctl machine show. Shows the status of the machine.
 
 ```
 zsysctl show [MachineID] [flags]
@@ -470,10 +426,6 @@ zsysctl show [MachineID] [flags]
 
 Machine state management
 
-##### Synopsis
-
-Machine state management
-
 ```
 zsysctl state COMMAND [flags]
 ```
@@ -491,10 +443,6 @@ zsysctl state COMMAND [flags]
 ```
 
 #### zsysctl state remove
-
-Remove the current state of the machine. By default it removes only the user state if not linked to any system state.
-
-##### Synopsis
 
 Remove the current state of the machine. By default it removes only the user state if not linked to any system state.
 
@@ -522,10 +470,6 @@ zsysctl state remove [state id] [flags]
 
 Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided.
 
-##### Synopsis
-
-Saves the current state of the machine. By default it saves only the user state. state_id is generated if not provided.
-
 ```
 zsysctl state save [state id] [flags]
 ```
@@ -547,10 +491,6 @@ zsysctl state save [state id] [flags]
 ```
 
 #### zsysctl version
-
-Returns version of client and server
-
-##### Synopsis
 
 Returns version of client and server
 
@@ -603,34 +543,38 @@ NOTE: When shell type isn't defined shell will be automatically identified based
 
 Bash:
 
-  $ source <(zsysd completion bash)
+```bash
+source <(zsysd completion bash)
 
-  # To load completions for each session, execute once:
-  # Linux:
-  $ zsysd completion bash > /etc/bash_completion.d/zsysd
-  # macOS:
-  $ zsysd completion bash > /usr/local/etc/bash_completion.d/zsysd
+# To load completions for each session, execute once:
+# Linux:
+zsysd completion bash > /etc/bash_completion.d/zsysd
+# macOS:
+zsysd completion bash > /usr/local/etc/bash_completion.d/zsysd
+```
 
 Zsh:
+```zsh
+# If shell completion is not already enabled in your environment,
+# you will need to enable it.  You can execute the following once:
 
-  # If shell completion is not already enabled in your environment,
-  # you will need to enable it.  You can execute the following once:
+echo "autoload -U compinit; compinit" >> ~/.zshrc
 
-  $ echo "autoload -U compinit; compinit" >> ~/.zshrc
+# To load completions for each session, execute once:
+zsysd completion zsh > "${fpath[1]}/_zsysd"
 
-  # To load completions for each session, execute once:
-  $ zsysd completion zsh > "${fpath[1]}/_zsysd"
-
-  # You will need to start a new shell for this setup to take effect.
+# You will need to start a new shell for this setup to take effect.
+```
 
 PowerShell:
 
-  PS> zsysd completion powershell | Out-String | Invoke-Expression
+```powershell
+zsysd completion powershell | Out-String | Invoke-Expression
 
-  # To load completions for every new session, run:
-  PS> zsysd completion powershell > zsysd.ps1
-  # and source this file from your PowerShell profile.
-
+# To load completions for every new session, run:
+zsysd completion powershell > zsysd.ps1
+# and source this file from your PowerShell profile.
+```
 
 ```
 zsysd completion [bash|zsh|powershell] [flags]
@@ -656,10 +600,6 @@ Those commands are hidden from help and should primarily be used by the system i
 
 Ensure that the right datasets are ready to be mounted and committed during early boot
 
-##### Synopsis
-
-Ensure that the right datasets are ready to be mounted and committed during early boot
-
 ```
 zsysctl boot COMMAND [flags]
 ```
@@ -678,10 +618,6 @@ zsysctl boot COMMAND [flags]
 ```
 
 #### zsysctl boot commit
-
-Commit system and user datasets states as a successful boot
-
-##### Synopsis
 
 Commit system and user datasets states as a successful boot
 
@@ -706,10 +642,6 @@ zsysctl boot commit [flags]
 
 Prepare boot by ensuring correct system and user datasets are switched on and off
 
-##### Synopsis
-
-Prepare boot by ensuring correct system and user datasets are switched on and off
-
 ```
 zsysctl boot prepare [flags]
 ```
@@ -731,10 +663,6 @@ zsysctl boot prepare [flags]
 
 Update last used timestamp
 
-##### Synopsis
-
-Update last used timestamp
-
 ```
 zsysctl boot update-lastused [flags]
 ```
@@ -753,10 +681,6 @@ zsysctl boot update-lastused [flags]
 ```
 
 #### zsysctl boot update-menu
-
-Update system boot menu
-
-##### Synopsis
 
 Update system boot menu
 
@@ -782,10 +706,6 @@ zsysctl boot update-menu [flags]
 
 User datasets creation and rename
 
-##### Synopsis
-
-User datasets creation and rename
-
 ```
 zsysctl userdata COMMAND [flags]
 ```
@@ -806,10 +726,6 @@ zsysctl userdata COMMAND [flags]
 
 Create a new home user dataset via an user dataset (if doesn't exist) creation
 
-##### Synopsis
-
-Create a new home user dataset via an user dataset (if doesn't exist) creation
-
 ```
 zsysctl userdata create USER HOME_DIRECTORY [flags]
 ```
@@ -827,10 +743,6 @@ zsysctl userdata create USER HOME_DIRECTORY [flags]
 ```
 
 #### zsysctl userdata dissociate
-
-dissociate current user data from current system but preserve history
-
-##### Synopsis
 
 dissociate current user data from current system but preserve history
 
@@ -855,10 +767,6 @@ zsysctl userdata dissociate USER [flags]
 
 Rename a user's home directory via renaming corresponding user dataset
 
-##### Synopsis
-
-Rename a user's home directory via renaming corresponding user dataset
-
 ```
 zsysctl userdata set-home OLD_HOME NEW_HOME [flags]
 ```
@@ -876,10 +784,6 @@ zsysctl userdata set-home OLD_HOME NEW_HOME [flags]
 ```
 
 #### zsysd boot-prepare
-
-Prepare boot by ensuring correct system and user datasets are switched on and off, synchronously
-
-##### Synopsis
 
 Prepare boot by ensuring correct system and user datasets are switched on and off, synchronously
 
