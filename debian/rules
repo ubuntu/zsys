@@ -23,4 +23,7 @@ override_dh_auto_install:
 	# create zsysctl command
 	ln -s zsysd debian/zsys/sbin/zsysctl
 	# run go generate for only installed generated assets
+	# TODO this sometimes fails on ppc64le
 	go generate $(GOFLAGS) ./...
+	ls -latr debian/zsys/usr/share/locale/de/LC_MESSAGES/
+	ls -latr debian/zsys/usr/share/locale/fr/LC_MESSAGES/

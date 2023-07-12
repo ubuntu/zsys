@@ -2,7 +2,7 @@ Source: zsys
 Section: admin
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-Build-Depends: debhelper (>= 12),
+Build-Depends: debhelper-compat (= 13),
                dh-apport,
                dh-golang,
                golang-go,
@@ -11,6 +11,7 @@ Build-Depends: debhelper (>= 12),
                grub2-common,
                dbus,
 Standards-Version: 4.1.3
+Rules-Requires-Root: no
 XS-Go-Import-Path: github.com/ubuntu/zsys
 Homepage: https://github.com/ubuntu/zsys
 
