@@ -13,7 +13,7 @@ import (
 
 	"github.com/ubuntu/zsys/internal/zfs/libzfs"
 	"github.com/ubuntu/zsys/internal/zfs/libzfs/mock"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 const mB = 1024 * 1024
