@@ -8,8 +8,6 @@ require (
 	github.com/godbus/dbus/v5 v5.1.0
 	github.com/google/go-cmp v0.5.9
 	github.com/k0kubun/pp v3.0.1+incompatible
-	github.com/shurcooL/httpfs v0.0.0-20230704072500-f1e31cf0ba5c
-	github.com/shurcooL/vfsgen v0.0.0-20230704071429-0000e147ea92
 	github.com/sirupsen/logrus v1.9.3
 	github.com/snapcore/go-gettext v0.0.0-20201130093759-38740d1bd3d2
 	github.com/spf13/cobra v1.7.0
