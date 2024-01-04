@@ -3,6 +3,7 @@
 
 export GOCACHE=$(shell mktemp -d /tmp/gocache-XXXX)
 export GOFLAGS=-ldflags=-X=github.com/ubuntu/zsys/internal/config.Version=$(shell dpkg-parsechangelog -S Version) --mod=vendor
+export DH_GOLANG_INSTALL_ALL=1
 
 # Tell go generate to only install on-the-fly assets
 export ZSYS_GENERATE_ONLY_INSTALL_SHARE_PREFIX=$(CURDIR)/debian/zsys/usr/share
