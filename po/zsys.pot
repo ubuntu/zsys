@@ -1262,7 +1262,7 @@ msgstr ""
 msgid "couldn't find dataset %q in cache"
 msgstr ""
 
-#: internal/config/config.go:75
+#: internal/config/config.go:72
 msgid "couldn't find default configuration path, fallback to internal default"
 msgstr ""
 
@@ -1292,10 +1292,6 @@ msgstr ""
 
 #: internal/machines/boot.go:366
 msgid "couldn't promote dataset %q: "
-msgstr ""
-
-#: internal/config/config.go:77
-msgid "couldn't read our internal configuration: %v "
 msgstr ""
 
 #: internal/zfs/zfs.go:695
@@ -1415,15 +1411,11 @@ msgstr ""
 msgid "failed to listen on %q: %w"
 msgstr ""
 
-#: internal/config/config.go:73
-msgid "failed to load configuration file %s: %v "
-msgstr ""
-
-#: internal/config/config.go:84
+#: internal/config/config.go:71
 msgid "failed to read configuration file %s: %v "
 msgstr ""
 
-#: internal/config/config.go:89
+#: internal/config/config.go:78
 msgid "failed to unmarshal yaml: %v"
 msgstr ""
 
