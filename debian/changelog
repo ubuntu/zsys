@@ -1,3 +1,9 @@
+zsys (0.5.11.2build1) mantic; urgency=medium
+
+  * No-change rebuild with Go 1.21.
+
+ -- Michael Hudson-Doyle <michael.hudson@ubuntu.com>  Thu, 24 Aug 2023 15:59:43 +1200
+
 zsys (0.5.11.2) mantic; urgency=medium
 
   * Workaround FTBFS on ppc64el with locales directories not created
