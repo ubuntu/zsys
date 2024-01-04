@@ -1,3 +1,10 @@
+zsys (0.5.11.3) noble; urgency=medium
+
+  * Upgrade vendored dependencies.
+  * Switch to using go embed.
+
+ -- Dimitri John Ledkov <dimitri.ledkov@canonical.com>  Thu, 04 Jan 2024 10:30:39 +0000
+
 zsys (0.5.11.2build1) mantic; urgency=medium
 
   * No-change rebuild with Go 1.21.
